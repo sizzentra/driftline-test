@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="DL Test iPhone">
 <script>
-window.DL_BUILD='ios'; window.DL_PREVIEW=true; window.DL_VERSION='2026.11.18-1445';
+window.DL_BUILD='ios'; window.DL_PREVIEW=true; window.DL_VERSION='2026.11.18-1455';
 window.addEventListener('beforeinstallprompt',function(e){ e.preventDefault(); window.__dlInstallPrompt=e; });
 </script>
 </head>
@@ -11603,7 +11603,8 @@ document.head.insertAdjacentHTML('beforeend',`<style>
 // The game's tip line sits on the water as a small overlay instead of taking a row of its own.
 // Switched on by body.phone-app, decided by the same rule the water's size uses (c_logic resize()).
 // =====================================================================
-const PHONE_APP=()=>window.innerHeight>window.innerWidth*1.15 && window.innerWidth<=700;
+/* any phone-width window that is not a short sideways screen (phone-land) is upright: split-screen and near-square windows used to fall back to an old layout (director, 2026-11-18: build around aspect ratios and safe areas, handle multi-window) */
+const PHONE_APP=()=>window.innerWidth<=700 && !(window.innerWidth>window.innerHeight && window.innerHeight<=560);
 (function(){ const hint=$('hint'), stage=$('stage'), wrap=document.querySelector('.wrap'); if(!hint||!stage||!wrap) return;
   const home=hint.parentElement, next=hint.nextElementSibling; let on=null;
   function apply(){ const v=PHONE_APP(); if(v===on) return; on=v; document.body.classList.toggle('phone-app',v); document.documentElement.classList.toggle('phone-app',v);
@@ -15958,6 +15959,7 @@ html body.phone-app .hud #goalchip > .gl-t{display:block!important;min-width:0!i
 html body.phone-app .hud #goalchip > .gl-k{flex:0 0 auto!important}
 html body.phone-app .hud #goalchip > .gl-bar{position:absolute!important;left:8px!important;right:8px!important;bottom:3px!important;height:3px!important;margin:0!important}
 html body.phone-land .hud > .stat{min-width:max-content!important}
+@media (max-height:560px){html body.phone-app.dl-fish .wrap{gap:${MB_FRAME.up.stageTop-MB_FRAME.up.row2Top-MB_FRAME.up.row2H}px!important}} /* upright in a short window (split screen): the short-screen gap meant for sideways phones must not move the water */
 </style>`); }
 { const U=MB_FRAME.up, L=MB_FRAME.land;
 document.head.insertAdjacentHTML('beforeend',`<style>
@@ -16197,6 +16199,7 @@ PATCHES.unshift({v:'0.4.8.5', name:'Steady Tabs', items:[
   '## Fixes',
   'Menus now fit every iPhone: they stay clear of the Dynamic Island, the rounded corners and the home bar, and match the fishing screen on every model (the bigger Pro Max screens were cut off under the camera).',
   'Menus open faster: the Aquarium no longer stalls when you open it, and the very first tap of a session no longer pauses while the music loads.',
+  'Split View and Slide Over windows now use the normal phone layout instead of an older cramped one.',
   'One look everywhere: every button, tab, badge and label of the same kind now has the same size and style on every page (buttons came in nine different heights, badges in four sizes); the bottom tabs keep their size when a menu opens.',
   'Long button labels ("Unlock · 1,200,000") stay on one line instead of making a taller button.',
   'Upright, a long "Next goal" stays one row tall and no longer pushes the water down.',
@@ -16207,7 +16210,7 @@ PATCHES.unshift({v:'0.4.8.5', name:'Steady Tabs', items:[
 // iPhone test notes (preview builds only; the live game never shows them). Write what the next test build changes here
 // (spoiler-free); it opens once in the iPhone test app. Released notes live in notes_release.js.
 const TEST_NOTES={v:'test', label:'Test build · iPhone', name:'One Look, Easy Aquarium', items:[
-  'NEW in this build: menus fit every iPhone (Pro Max, Pro, Air, Plus and the base models from the 15 on): they stay clear of the Dynamic Island, corners and home bar, the same as the fishing screen. The Aquarium opens faster and the first tap no longer pauses while the music loads.',
+  'NEW in this build: menus fit every iPhone (Pro Max, Pro, Air, Plus and the base models from the 15 on): they stay clear of the Dynamic Island, corners and home bar, the same as the fishing screen. The Aquarium opens faster and the first tap no longer pauses while the music loads. Split screen and small windows now use the normal phone layout.',
   'One look everywhere: every button, tab, badge and label of the same kind has the same size and style on every page; long button labels stay on one line; upright, a long goal no longer pushes the water down; sideways, page-tab badges sit on the corner.',
   'Menu page tabs (Events, Bounties, Feats...) take every tap and no longer jiggle; section bars no longer slide sideways when stuck to the top; on small phones held sideways the tabs show names only, badges on the corner.',
   '## Aquarium and Fish Log',
