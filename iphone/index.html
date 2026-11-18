@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="DL Test iPhone">
 <script>
-window.DL_BUILD='ios'; window.DL_PREVIEW=true; window.DL_VERSION='2026.11.18-0016';
+window.DL_BUILD='ios'; window.DL_PREVIEW=true; window.DL_VERSION='2026.11.18-0028';
 window.addEventListener('beforeinstallprompt',function(e){ e.preventDefault(); window.__dlInstallPrompt=e; });
 </script>
 </head>
@@ -14632,6 +14632,29 @@ document.head.insertAdjacentHTML('beforeend',`<style>
 { const _rj=renderJournal; renderJournal=function(P){ _rj(P); try{ const m=P.querySelector('.fl-mh .meta'); if(m&&/find them all for/.test(m.innerHTML)) m.insertAdjacentHTML('beforeend',' <b class="fl-perk">+ fish from here worth 10% more, forever</b>'); else if(m&&/complete/.test(m.textContent)) m.insertAdjacentHTML('beforeend',' <b class="fl-perk got">· fish from here worth 10% more</b>'); }catch(e){} }; }
 document.head.insertAdjacentHTML('beforeend',`<style>#panel .fl-perk{color:#ffd36a;font-weight:800} #panel .fl-perk.got{color:#7fe3c4}</style>`);
 
+// =====================================================================
+// Test notes (shared helper). Each platform's own notes file (src/pc, src/android, src/ios) calls addTestNotes(...) with
+// its text. In a preview build the notes go on top of the patch notes list and open once per device and notes text; the
+// live game ignores them. They carry no version number (the director picks it at release).
+// =====================================================================
+function addTestNotes(n){ try{ if(!window.DL_PREVIEW||!n||!Array.isArray(n.items)) return; PATCHES.unshift(n);
+    const id='dl-test-notes:'+(window.DL_BUILD||'')+':'+n.name+':'+n.items.length; let seen=''; try{ seen=localStorage.getItem('dl-test-notes')||''; }catch(e){}
+    if(seen===id) return; let tries=0;
+    const go=()=>{ if(G.st!=='idle'||(typeof MENU_OPEN!=='undefined'&&MENU_OPEN)){ if(++tries<20) setTimeout(go,1500); return; }
+      try{ localStorage.setItem('dl-test-notes',id); }catch(e){} try{ showPatchNotes(n); }catch(e){} };
+    setTimeout(go,3500); }catch(e){} }
+// iPhone test notes (preview builds only; the live game never shows them). Only what reaches iPhone is listed.
+const TEST_NOTES={v:'test', label:'Test build · iPhone', name:'Rewards Worth Chasing', items:[
+  '## Rewards and balance',
+  'Paths are rethought: no more downsides, and they open much earlier.',
+  'Bounties pay a bonus on top of their coins: bait for that water, a special lure, Scales or Tide Pass progress. You can see it on each bounty.',
+  'Finishing a whole Feats category gives a permanent boost.',
+  'Completing a water’s Fish Log makes its fish worth more, forever. The Fish Log says so next to each water’s progress.',
+  '## iPhone',
+  'This test version is its own app now, DL Test iPhone, so it never gets mixed up with the real game. It keeps its own progress: bring yours over with Settings › Save & codes › Move progress.',
+  '## Behind the scenes',
+  'PC, Android and iPhone each have their own version of the game now, so a fix for one never disturbs another. Your progress is shared between them as before.']};
+addTestNotes(TEST_NOTES);
 // =====================================================================
 // 0.4 release QA suite (test builds only: ?test, and build.ps1 leaves this file out of the release build).
 // window.__qa(groups?) runs real game code in the real page and returns [{sys, name, ok, detail}].
