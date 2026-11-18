@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="DL Test Android">
 <script>
-window.DL_BUILD='android'; window.DL_PREVIEW=true; window.DL_VERSION='2026.11.18-1507';
+window.DL_BUILD='android'; window.DL_PREVIEW=true; window.DL_VERSION='2026.11.18-1533';
 window.addEventListener('beforeinstallprompt',function(e){ e.preventDefault(); window.__dlInstallPrompt=e; });
 </script>
 </head>
@@ -15932,6 +15932,135 @@ const IS_IPHONE=()=>/iPhone|iPod/.test(navigator.userAgent)||(/[?&]test\b/.test(
       disp.querySelectorAll('[data-fps]').forEach(b=>b.addEventListener('click',e=>{ e.stopPropagation(); S.settings.fpsCap=b.dataset.fps; save(); renderPanel(); })); }
   }catch(e){} }; }
 // =====================================================================
+// Tablets, round 8: proper iPad and Android tablet support (director, 2026-11-18: "proper tablet and iPad support would be awesome").
+// Before, tablets fell back to the desktop layout (small mouse-sized controls, "or Space" hints). Now a tablet shows the same phone
+// layouts the game is built and checked around, scaled to fill the tablet: everything is about 1.3-1.9x bigger, so taps are
+// tablet-sized and every phone standard (MB_FRAME, MB_UI, __spec) applies unchanged.
+//  - How: the page's viewport is set to a phone-shaped width with a fixed zoom (initial = minimum = maximum scale), so layout,
+//    taps, safe areas and media queries all stay exact (no CSS transforms).
+//  - Sideways: the page is 540 tall (the sideways phone layout, rail on the side). Upright: the page is 600 wide (the upright
+//    phone layout). Turning the tablet or resizing a split-screen window measures again.
+//  - A tablet is a touch device whose shorter side is at least 600 pt (phones are at most ~440). Phones are never changed.
+//  - While typing (keyboard open) nothing is re-measured, so the keyboard never resizes the game.
+// Android + iPad (the iPhone build also runs on iPads).
+// =====================================================================
+const TAB_LAND_H=540, TAB_UP_W=600;
+const TAB_VIEW=/[?&]test\b/.test(location.search)&&/[?&]tabletview\b/.test(location.search); /* test builds: show a tablet-sized window as a tablet would */
+function tabletTarget(rw,rh){ const touch=(window.matchMedia&&matchMedia('(pointer:coarse)').matches)||navigator.maxTouchPoints>0||/[?&]tablet\b/.test(location.search);
+  if(!touch||Math.min(rw,rh)<600) return null;
+  const land=rw>rh, s=land?rh/TAB_LAND_H:rw/TAB_UP_W; if(s<=1.05) return null;
+  return {w:Math.round(rw/s), s:+s.toFixed(4), land}; }
+{ const meta=document.querySelector('meta[name="viewport"]'); const BASE=meta?meta.getAttribute('content'):'';
+  let scaled=null, busy=false, real=null, t=0;
+  const typing=()=>{ const a=document.activeElement; return !!(a&&(a.tagName==='INPUT'||a.tagName==='TEXTAREA'||a.isContentEditable)); };
+  const set=c=>{ if(meta&&meta.getAttribute('content')!==c){ busy=true; meta.setAttribute('content',c); setTimeout(()=>{ busy=false; },250); } };
+  const apply=()=>{ real={w:window.innerWidth,h:window.innerHeight}; const tg=tabletTarget(real.w,real.h); scaled=tg;
+    document.documentElement.classList.toggle('dl-tablet',!!tg||TAB_VIEW);
+    if(tg) set(`width=${tg.w},initial-scale=${tg.s},minimum-scale=${tg.s},maximum-scale=${tg.s},user-scalable=no,viewport-fit=cover`); };
+  /* measure at the device's own scale: put the original viewport back, let the browser settle, then decide */
+  const remeasure=()=>{ if(!meta) return; clearTimeout(t); if(meta.getAttribute('content')!==BASE){ set(BASE); t=setTimeout(apply,120); } else apply(); };
+  if(meta) apply();
+  addEventListener('resize',()=>{ if(busy||typing()||!meta) return; if(!scaled){ clearTimeout(t); t=setTimeout(apply,120); return; }
+    /* scaled: only a real change of shape (turning, split screen) measures again */
+    const a=window.innerHeight/window.innerWidth, want=real?real.h/real.w:a; if(Math.abs(a-want)>0.04) remeasure(); });
+  addEventListener('orientationchange',()=>{ if(meta) setTimeout(remeasure,60); });
+  if(/[?&]test\b/.test(location.search)) window.__tablet=(w,h)=>w?tabletTarget(w,h):({scaled, real, meta:meta&&meta.getAttribute('content')}); }
+/* tablets have a status bar on top when sideways (phones do not): the sideways water and menus keep clear of it */
+document.head.insertAdjacentHTML('beforeend',`<style>
+html.dl-tablet body.phone-land.dl-fish{padding-top:max(6px,env(safe-area-inset-top))!important}
+html.dl-tablet body.phone-land #menuov .mo-in{padding-top:max(6px,env(safe-area-inset-top))!important}
+</style>`);
+// =====================================================================
+// Phones, round 8: the Dock (Your home) is organised exactly like the aquarium (director, 2026-11-18: "I want the dock reworked
+// and organized exactly like the aquarium. Make sure it functions, runs well and supports all mobile versions").
+// It uses the aquarium's own layout and styles (the same aq07-* classes and the same MB_UI checks), so the two pages always match:
+//  - The live dock view fills the page. Under it, one strip: Cozy level, Bonus, Decorations placed, and the Options button.
+//  - Options opens a panel with two tabs, Your <home> and Decorations (upright under the view, sideways on the right); closed, the
+//    view takes the whole space. The choice is remembered on this device.
+//  - Your <home>: a heading row, then sub-headings: Wood, Dock style, Light (and Hull paint on boats), Your docks (other waters:
+//    copy a layout or travel). Only what works at this water is shown.
+//  - Decorations: small cards like Decorate. Tap a card to try it (owned cards place / remove); while trying, the Buy / Stop bar
+//    takes the strip's place, exactly like the aquarium.
+//  - The view's canvas is carried through every re-render (no blink) and keeps the dock's zoom whatever the shape of the screen.
+// Android + iPhone (and tablets, which use the phone layouts).
+// =====================================================================
+{ let DK_OPEN=true; try{ DK_OPEN=localStorage.getItem('dl-dk-open')!=='0'; }catch(e){}
+  const saveOpen=()=>{ try{ localStorage.setItem('dl-dk-open',DK_OPEN?'1':'0'); }catch(e){} };
+  const h=(tag,cls,html)=>{ const e=document.createElement(tag); if(cls) e.className=cls; if(html!=null) e.innerHTML=html; return e; };
+  let RO=null; const fit=c=>{ const v=c&&c.parentElement; if(!v) return; const r=v.getBoundingClientRect(); if(r.width<40||r.height<40) return; const H2=Math.max(200,Math.min(1600,Math.round(900*r.height/r.width)));
+    if(c.width!==900||c.height!==H2){ c.width=900; c.height=H2; try{ paintHome(); }catch(e){} } };
+  const _rp=renderPanel; renderPanel=function(){ const r=_rp.apply(this,arguments); try{ const P=$('panel'); const on=MOB()&&S.tab==='home'; if(!on){ P.classList.remove('dk08'); return r; }
+      const cv=P.querySelector('#homecv'), tile=cv&&cv.closest('.tile'), nav=P.querySelector(':scope > .sect-nav'); if(!tile||!nav) return r;
+      const loc=LOCS[locIdx(S.loc)]||LOCS[0], feats=HOME_FEATURES[loc.plat]||['light'], hname=HOME_NAMES[loc.plat]||'home', Hn=hname.charAt(0).toUpperCase()+hname.slice(1);
+      const land=document.body.classList.contains('phone-land'); P.dataset.dkLand=land?'1':'0';
+      P.classList.add('aq07','dk08'); P.classList.toggle('aq07-open',DK_OPEN);
+      const kids=[...P.children].filter(c=>!c.classList.contains('crumb')&&c!==nav&&c!==tile);
+      const head=kids.find(c=>c.classList.contains('dl-head')), pv=kids.find(c=>c.classList.contains('pvbar')), hint=kids.find(c=>c.tagName==='P'&&/Drag/.test(c.textContent));
+      const dockbar=kids.find(c=>c.classList.contains('dockbar')), hm=kids.find(c=>c.classList.contains('hm-phone'));
+      const h5s=kids.filter(c=>c.tagName==='H5'), wood=h5s.find(x=>/^Wood/i.test(x.textContent)), style=h5s.find(x=>/style/i.test(x.textContent)), decoH=h5s.find(x=>/^Decorations/i.test(x.textContent));
+      const tools=kids.find(c=>c.classList.contains('shoptools')), grid=kids.find(c=>c.classList.contains('grid')&&c.querySelector('canvas[data-dock]'));
+      const after=x=>x&&x.nextElementSibling&&x.nextElementSibling.classList.contains('chips')?x.nextElementSibling:null;
+      // the view (the live dock) and the strip under it
+      const stage=h('div','aq07-stage'); tile.before(stage); tile.classList.add('dk08-view'); tile.removeAttribute('style'); stage.appendChild(tile); cv.removeAttribute('style'); homeDragSetup();
+      if(hint){ hint.className='dk08-hint'; hint.textContent='Drag decorations and pets to move them'; stage.appendChild(hint); }
+      const bar=h('div','aq07-bar'); stage.after(bar);
+      const c=cozy(), cb=cozyBonus(), bank=h('div','aq07-bank dk08-bank',`<div><span class="sub">Cozy · ${esc(cozyName())}</span><b>${c} ♥</b></div><div><span class="sub">Bonus</span><b>+${cb}% XP</b></div><div><span class="sub">Placed</span><b>${S.dock.decor.length} / ${DOCK_SLOTS}</b></div>`);
+      bar.appendChild(bank);
+      const tog=h('button','aq07-tog'); tog.type='button'; const paintTog=()=>{ tog.setAttribute('aria-expanded',String(DK_OPEN)); tog.title=DK_OPEN?'Hide the options and see the whole '+hname:'Show Your '+hname+' and Decorations';
+        tog.innerHTML=`<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${land?(DK_OPEN?'M9 6l6 6-6 6':'M15 6l-6 6 6 6'):(DK_OPEN?'M6 9l6 6 6-6':'M6 15l6-6 6 6')}"/></svg><span>${DK_OPEN?'Hide':'Options'}</span>`; };
+      paintTog(); bar.appendChild(tog);
+      tog.addEventListener('click',e=>{ e.preventDefault(); e.stopPropagation(); DK_OPEN=!DK_OPEN; saveOpen(); P.classList.toggle("aq07-open",DK_OPEN); paintTog(); fit($("homecv")); });
+      if(pv){ pv.classList.add('aq07-try'); const nm=pv.querySelector('b'), lbl=pv.querySelector('span'); if(lbl&&nm) lbl.innerHTML='Trying: <b>'+nm.innerHTML+'</b>'; bar.prepend(pv); bar.classList.add('aq07-trying-on'); }
+      // the panel: two tabs over one scrolling body
+      const sheet=h('div','aq07-sheet'), body=h('div','aq07-body'); bar.after(sheet); sheet.appendChild(nav); sheet.appendChild(body);
+      const move=(sec,el)=>{ if(!el) return; el.style.display=''; sec.appendChild(el); };
+      // Your <home>: heading row, then sub-headings (only what works at this water)
+      const secH=h('div','aq07-sec dk08-sec-home'); body.appendChild(secH);
+      secH.appendChild(h('div','row spread aq07-h',`<h2>Your ${esc(hname)}</h2>`));
+      secH.appendChild(h('p','aq07-note','Every water has its own '+esc(hname)+'. The cozier it is, the better you fish here.'));
+      if(feats.includes("wood")){ const wc=after(wood); move(secH,wood); move(secH,wc); } else { if(wood) wood.remove(); const n=after(wood); if(n) n.remove(); }
+      if(feats.includes('style')){ const sc=after(style); move(secH,style); move(secH,sc); } else { const sc=after(style); if(style) style.remove(); if(sc) sc.remove(); }
+      if(hm){ move(secH,hm); }
+      if(dockbar){ const lab=dockbar.querySelector('.dock-h > .meta'); if(lab) lab.remove(); secH.appendChild(h('h5',null,'Your docks')); move(secH,dockbar); }
+      // Decorations: small cards, tap to try / place
+      const secD=h('div','aq07-sec dk08-sec-deco'); body.appendChild(secD);
+      secD.appendChild(h('div','row spread aq07-h','<h2>Decorations</h2>'));
+      if(decoH){ decoH.textContent=S.dock.decor.length+' of '+DOCK_SLOTS+' spots used'; move(secD,decoH); } move(secD,tools); move(secD,grid);
+      if(grid){ grid.classList.add('aq07-dgrid'); grid.removeAttribute('style');
+        grid.querySelectorAll(':scope > .tile').forEach(t=>{ const cvs=t.querySelector('canvas[data-dock]'); if(!cvs) return; const id=cvs.dataset.dock, d=DOCKI[id]||DOCK_DECOR.find(x=>x.id===id)||{}, own=S.dock.owned.includes(id), placed=S.dock.decor.includes(id), hidden=!own&&d.src!=='shop';
+          const pvB=t.querySelector('[data-act="dockpv"]'), useB=t.querySelector('[data-act="dockdecor"]'), trying=DOCK_PV&&DOCK_PV.kind==='decor'&&DOCK_PV.id===id;
+          t.classList.toggle('aq07-trying',!!trying); t.classList.toggle('aq07-placed',placed); t.removeAttribute('style');
+          const st=h('span','aq07-st', own?(placed?'On your '+esc(hname)+' · tap to remove':'Owned · tap to place'):hidden?'A Tide Pass reward':(trying?'Trying · buy below the view':'<span class="coin">'+fmt(d.price||0)+'</span> · tap to try')); t.appendChild(st);
+          t.querySelectorAll(':scope > .row, :scope > .btn').forEach(x=>x.classList.add('aq07-hide')); t.querySelectorAll(':scope > .meta').forEach(m=>{ if(/Tide Pass/.test(m.textContent)) m.classList.add('aq07-hide'); });
+          if((own&&useB)||(!own&&pvB)){ t.setAttribute('role','button'); t.tabIndex=0; t.addEventListener('click',e=>{ if(e.target.closest('button')) return; if(own) useB.click(); else if(!trying) pvB.click(); }); } }); }
+      if(head) head.remove(); [...P.children].forEach(ch=>{ if(ch!==stage&&ch!==bar&&ch!==sheet&&!ch.classList.contains('crumb')) ch.remove(); });
+      // the tabs: Your <home> / Decorations (the page remembers the last one)
+      const b0=nav.querySelector('[data-sect]'); if(b0&&b0.dataset.sect!=='Decorations') b0.textContent='Your '+hname;
+      const showSec=()=>{ const sel=nav.querySelector('[data-sect][aria-selected="true"]'); const isD=!!sel&&sel.dataset.sect==='Decorations'; secH.classList.toggle('aq07-off',isD); secD.classList.toggle('aq07-off',!isD); };
+      nav.addEventListener('click',e=>{ const b=e.target.closest('[data-sect]'); if(!b) return; e.stopImmediatePropagation(); e.preventDefault(); try{ SECT.home=b.dataset.sect; }catch(er){}
+        nav.querySelectorAll('[data-sect]').forEach(x=>x.setAttribute('aria-selected',String(x===b))); showSec(); body.scrollTop=0; },true);
+      showSec();
+      // the view keeps the dock's zoom whatever the shape of the space (no stretching)
+      if(!RO&&window.ResizeObserver) RO=new ResizeObserver(()=>{ const k=$('homecv'); if(k&&MOB()&&S.tab==='home') fit(k); });
+      if(RO){ RO.disconnect(); RO.observe(tile); } fit(cv);
+    }catch(e){ console.error(e); } return r; };
+  /* the live view is carried through every re-render, so it never blinks */
+  const _rp2=renderPanel; renderPanel=function(){ const keep=(MOB()&&S.tab==='home')?$('homecv'):null; const r=_rp2.apply(this,arguments);
+    try{ if(keep){ const fresh=$('homecv'); if(fresh&&fresh!==keep){ fresh.replaceWith(keep); keep.removeAttribute('style'); } } }catch(e){} return r; };
+  /* turning the phone while the Dock is open rebuilds it for the new layout */
+  let rt=0; addEventListener('resize',()=>{ clearTimeout(rt); rt=setTimeout(()=>{ try{ const P=$('panel'); if(!MOB()||S.tab!=='home'||!P.classList.contains('dk08')) return; const l=document.body.classList.contains('phone-land')?'1':'0'; if(P.dataset.dkLand!==l) renderPanel(); }catch(e){} },160); }); }
+
+document.head.insertAdjacentHTML('beforeend',`<style>
+html body.phone-app #menuov #panel.dk08 .aq07-stage > .dk08-view,html body.phone-land #menuov #panel.dk08 .aq07-stage > .dk08-view{flex:1 1 auto;min-height:0;margin:0!important;padding:0!important;border-radius:16px;overflow:hidden;display:block}
+html body.phone-app #menuov #panel.dk08 .dk08-view > canvas,html body.phone-land #menuov #panel.dk08 .dk08-view > canvas{width:100%!important;height:100%!important;display:block;touch-action:pan-y}
+html body.phone-app #menuov #panel.dk08 .dk08-hint,html body.phone-land #menuov #panel.dk08 .dk08-hint{position:absolute;left:50%;bottom:8px;transform:translateX(-50%);margin:0;padding:3px 10px;border-radius:999px;background:#050e14b0;color:#cfe0ee;font:700 10.5px var(--display);white-space:nowrap;pointer-events:none}
+html body.phone-app #menuov #panel.dk08 .dk08-bank,html body.phone-land #menuov #panel.dk08 .dk08-bank{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+html body.phone-app #menuov #panel.dk08 .dk08-bank b,html body.phone-land #menuov #panel.dk08 .dk08-bank b{display:block;font:800 14px var(--display)!important;color:#fff;overflow:hidden;text-overflow:ellipsis}
+html body.phone-app #menuov #panel.dk08 .dockbar,html body.phone-land #menuov #panel.dk08 .dockbar{margin:0!important}
+html body.phone-app #menuov #panel.dk08 .hm-phone > h5:first-child,html body.phone-land #menuov #panel.dk08 .hm-phone > h5:first-child{margin-top:14px!important}
+@media (orientation:landscape) and (max-height:560px) and (max-width:760px){ html body.phone-land #menuov #panel.dk08 .dk08-bank{grid-template-columns:repeat(3,minmax(0,1fr))!important} }
+</style>`);
+// =====================================================================
 // Phones: the SET MEASUREMENTS (director, 2026-11-18: "I want standards and set measurements for each platform going forward,
 // I'm tired of the same mistakes"). The numbers are written down in docs/PLATFORM_DESIGN.md ("Phone frame: set measurements")
 // and checked by window.__spec() in test builds. Rule: the water screen is the master; a menu matches it wherever the same thing
@@ -15957,9 +16086,9 @@ const MB_UI={ up:{btnH:40, btnFs:15, btnSmH:36, btnSmFs:13, tabH:34, tabFs:12, h
 document.head.insertAdjacentHTML('beforeend',`<style>
 /* buttons: two kinds. Regular (.btn) and small (.btn.sm, and the aquarium bar's compact pair). One line, never wrapping into a taller button */
 ${both('app','#menuov #panel button.btn')}{height:${U.btnH}px!important;min-height:${U.btnH}px!important;font-size:${U.btnFs}px!important;padding:0 14px!important;white-space:nowrap!important;box-sizing:border-box!important}
-${both('app','#menuov #panel button.btn.sm, #menuov #panel.aq07 .aq07-bar .aq07-bank button.btn')}{height:${U.btnSmH}px!important;min-height:${U.btnSmH}px!important;font-size:${U.btnSmFs}px!important;padding:0 10px!important}
+${both('app','#menuov #panel button.btn.sm, #menuov #panel.aq07 .aq07-bar button.btn')}{height:${U.btnSmH}px!important;min-height:${U.btnSmH}px!important;font-size:${U.btnSmFs}px!important;padding:0 10px!important}
 ${both('land','#menuov #panel button.btn')}{height:${L.btnH}px!important;min-height:${L.btnH}px!important;font-size:${L.btnFs}px!important;padding:0 14px!important;white-space:nowrap!important;box-sizing:border-box!important}
-${both('land','#menuov #panel button.btn.sm, #menuov #panel.aq07 .aq07-bar .aq07-bank button.btn')}{height:${L.btnSmH}px!important;min-height:${L.btnSmH}px!important;font-size:${L.btnSmFs}px!important;padding:0 10px!important}
+${both('land','#menuov #panel button.btn.sm, #menuov #panel.aq07 .aq07-bar button.btn')}{height:${L.btnSmH}px!important;min-height:${L.btnSmH}px!important;font-size:${L.btnSmFs}px!important;padding:0 10px!important}
 /* section tabs inside pages (Gear / Bait, Waters / Set sail again, Games / Prize counter...): one style */
 ${both('app','#menuov #panel .bwx-nav:not(.wd-nav) > button')}{height:${U.tabH}px!important;min-height:${U.tabH}px!important;font-size:${U.tabFs}px!important}
 ${both('land','#menuov #panel .bwx-nav:not(.wd-nav) > button')}{height:${L.tabH}px!important;min-height:${L.tabH}px!important;font-size:${L.tabFs}px!important}
@@ -16222,6 +16351,8 @@ PATCHES.unshift({v:'0.4.8.4', name:'Lined Up', items:[
   'Your boost timers now sit in the top-left corner, under the time and weather, so the Rest and Bait buttons no longer cover them. A weather note shows just below them.']});
 PATCHES.unshift({v:'0.4.8.5', name:'Steady Tabs', items:[
   '## New',
+  'Your home (the Dock) is laid out like the aquarium: your dock fills the screen, with Options to open Your dock and Decorations. Tap a decoration to try it, tap again to buy or place.',
+  'Tablets now get the full phone layout, scaled up to fill the screen, with bigger buttons.',
   'Your settings now belong to each device: moving your progress to another phone or computer no longer changes this phone’s sound, controls or display settings.',
   'Frame rate setting (Settings, Display): 30 to save battery, 60, or Max for the smoothest picture your screen can show.',
   '## Fixes',
@@ -16239,6 +16370,7 @@ PATCHES.unshift({v:'0.4.8.5', name:'Steady Tabs', items:[
 // Android test notes (preview builds only; the live game never shows them). Write what the next test build changes here
 // (spoiler-free); it opens once in the Android test app. Released notes live in notes_release.js.
 const TEST_NOTES={v:'test', label:'Test build · Android', name:'One Look, Easy Aquarium', items:[
+  'NEW in this build: Your home (the Dock) works like the aquarium (dock view on top, Options with Your dock and Decorations, tap a card to try it). Tablets now use the phone layout scaled up to fill the screen.',
   'NEW in this build: settings now belong to this phone and are no longer changed by moving your progress. New Frame rate choice in Settings, Display (30 saves battery, Max uses your screen’s full speed).',
   'NEW in this build: menus fit every modern phone and stay clear of the camera cutout and corners, the same as the fishing screen. The Aquarium opens faster and the first tap no longer pauses while the music loads. Split screen and small windows now use the normal phone layout.',
   'One look everywhere: every button, tab, badge and label of the same kind has the same size and style on every page; long button labels stay on one line; upright, a long goal no longer pushes the water down; sideways, page-tab badges sit on the corner.',
