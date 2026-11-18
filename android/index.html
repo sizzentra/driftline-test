@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="DL Test Android">
 <script>
-window.DL_BUILD='android'; window.DL_PREVIEW=true; window.DL_VERSION='2026.11.18-1137';
+window.DL_BUILD='android'; window.DL_PREVIEW=true; window.DL_VERSION='2026.11.18-1154';
 window.addEventListener('beforeinstallprompt',function(e){ e.preventDefault(); window.__dlInstallPrompt=e; });
 </script>
 </head>
@@ -15803,11 +15803,36 @@ html body.phone-app #panel .mb-shnote,html body.phone-land #panel .mb-shnote{fon
     setTimeout(()=>{ if(document.hidden||hiddenAt>=t-50){ try{ localStorage.setItem('dl-fs','1'); }catch(e){} } },700); });
   if(/[?&]test\b/.test(location.search)) window.__fsPref=()=>{ try{ return localStorage.getItem('dl-fs'); }catch(e){ return null; } }; }
 // =====================================================================
+// Phones, round 7: your active boosts are never hidden behind the buttons (director, 2026-11-18, screenshots: "the bottom left
+// headers cover the background UI behind it"). The boost timers ("+25% Bite speed  0:26", Settings > Boosts on screen) were drawn
+// in the bottom-left corner of the water, exactly where the phone's Rest and Bait buttons sit, so they peeked out half covered.
+// On phones they now stack in the top-left corner, right under the time and weather chip (a status corner: weather, then boosts),
+// same look as before. The weather note (weather07.js) appears under them. Android + iPhone only.
+// =====================================================================
+var MB_STATUS_B=40; /* the bottom of the top-left status corner (scene chip + boosts), read by weather07.js */
+{ let chipB=32, labB=0, labT=0;
+  // the scene chip's real height (it differs upright / sideways / per weather): read from the box it draws
+  const _sc=drawSceneChip; drawSceneChip=function(){ if(!MOB()) return _sc.apply(this,arguments); const r0=rr; let b=0;
+    rr=function(x,y,w,h){ if(y+h>b) b=y+h; return r0.apply(this,arguments); }; try{ return _sc.apply(this,arguments); } finally{ rr=r0; if(b>0) chipB=b; } };
+  // test builds only: the test label sits under the chip when sideways; start below it (checked once a second, no layout reads per frame)
+  const label=()=>{ const n=performance.now(); if(n-labT<1000) return labB; labT=n; labB=0; const d=document.querySelector('.dlprev'), cv=document.getElementById('cv');
+    if(d&&cv&&document.body.classList.contains('phone-land')){ const a=d.getBoundingClientRect(), c=cv.getBoundingClientRect(); if(a.width&&a.top-c.top<120&&a.left-c.left<200) labB=Math.round(a.bottom-c.top); } return labB; };
+  const _dr=draw; draw=function(){ if(!MOB()) return _dr.apply(this,arguments);
+    const st=S.settings, on=st.boostsOnScreen; st.boostsOnScreen=false; /* the shared bottom-left list is skipped... */
+    try{ _dr.apply(this,arguments); } finally{ st.boostsOnScreen=on; }
+    let y=Math.max(chipB,label())+6; /* ...and drawn here, under the chip */
+    if(on&&typeof G==='object'&&G.st!=='reeling'&&G.st!=='frenzy'&&G.st!=='charging'){ const bs=activeBuffs().slice(0,4);
+      if(bs.length){ g.save(); g.font='700 11px "Bricolage Grotesque", system-ui'; g.textAlign='left'; const now=Date.now();
+        for(const b of bs){ const txt=fmtB(b.k,b.v)+'  '+mmss(Math.max(0,Math.ceil((b.until-now)/1000))); const tw=g.measureText(txt).width;
+          g.fillStyle='rgba(5,14,20,.62)'; rr(10,y,tw+18,20,10); g.fill(); g.fillStyle='#7fc8a9'; g.fillText(txt,19,y+14); y+=24; }
+        g.restore(); y-=4; } }
+    MB_STATUS_B=y; }; }
+// =====================================================================
 // Phones, round 7: weather notices stop covering the screen (director, 2026-11-18: "weather updates on mobile block a lot of UI.
 // It should only be notified outside of full-screen UI, or have its own changes that work better").
 // The two weather notices (the weather changed / a special weather starts in under a minute) used the big centre notice box,
 // which sat over menus, popups and the fight. On phones now:
-//  - they show as a small one-line note under the scene chip (top left of the water), which never takes taps
+//  - they show as a small note under the scene chip and your boosts (top left of the water), which never takes taps
 //  - never while a menu or a popup card (like the news card) is open, or while a cast or a fish is in progress: the note waits and shows when you are back
 //    on the water between catches, and only if it is still true (a warning for weather that already started is dropped)
 // Every other notice is unchanged. Android + iPhone only.
@@ -15816,6 +15841,7 @@ html body.phone-app #panel .mb-shnote,html body.phone-land #panel .mb-shnote{fon
   const blocked=()=>MENU_OPEN||document.hidden||document.body.classList.contains('ev-open')||(()=>{ const ev=document.getElementById('evcard'); return !!(ev&&ev.getClientRects().length); })()||(typeof G==='object'&&BUSY.test(G.st));
   const still=p=>p.kind==='chg'?weather().k===p.k:Math.floor(Date.now()/1000/WX_LEN)===p.cur;
   const show=p=>{ const st=document.getElementById('stage'); if(!st) return; if(!el||!el.isConnected){ el=document.createElement('div'); el.id='mbwx'; el.setAttribute('role','status'); st.appendChild(el); }
+    el.style.top=(typeof MB_STATUS_B==='number'?Math.round(MB_STATUS_B)+2:36)+'px'; /* under the scene chip and your boosts (boosts07.js) */
     el.innerHTML=''; const b=document.createElement('b'); b.textContent=p.head; el.append(b,document.createTextNode(p.rest)); el.dataset.k=p.k;
     el.classList.remove('on'); void el.offsetWidth; el.classList.add('on'); clearTimeout(hideT); hideT=setTimeout(()=>el.classList.remove('on'),5000); };
   const tick=()=>{ if(!pend){ clearInterval(poll); poll=0; return; } if(!still(pend)){ pend=null; return; } if(blocked()) return; const p=pend; pend=null; show(p); };
@@ -15828,7 +15854,6 @@ html body.phone-app #panel .mb-shnote,html body.phone-land #panel .mb-shnote{fon
   if(/[?&]test\b/.test(location.search)) window.__wxNote=()=>({pending:pend&&pend.head, shown:!!(el&&el.classList.contains('on')), text:el&&el.textContent}); }
 document.head.insertAdjacentHTML('beforeend',`<style>
 html body.phone-app #mbwx,html body.phone-land #mbwx{position:absolute;left:10px;top:36px;z-index:6;max-width:min(320px,calc(100% - 20px));box-sizing:border-box;padding:5px 10px;border-radius:10px;background:rgba(8,16,28,.84);border:1px solid #ffffff1c;border-left:3px solid #8fd3ff;color:#c9d8e8;font:700 12px/1.3 var(--display);pointer-events:none;opacity:0;transform:translateY(-4px);transition:opacity .25s,transform .25s;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden}
-html body.phone-land:has(> .dlprev) #mbwx{top:66px} /* test builds only: clear of the test-build label */
 html body.phone-app #mbwx b,html body.phone-land #mbwx b{color:#fff;font-weight:900}
 html body.phone-app #mbwx.on,html body.phone-land #mbwx.on{opacity:1;transform:none}
 html body.phone-app #mbwx[data-k="Storm"],html body.phone-land #mbwx[data-k="Storm"]{border-left-color:#b49cff}
@@ -15880,6 +15905,53 @@ PATCHES.unshift({v:'0.4.8.1', name:'Smoother and Steadier', items:[
   'Prismatic fish keep their colours in the Aquarium list; Market Rush shows a clear money bag.',
   'Your angler’s nearer shoe is drawn in front, the Ocean Sunfish’s fins sit on its body, and the otters swim clear of the rocks.'
 ]});
+PATCHES.unshift({v:'0.4.8.3', name:'One Look, Easy Aquarium', items:[
+  'Full screen stays on: if you left the game in full screen, closing or switching away from the app no longer forgets it; your first tap when you come back puts it back.',
+  '## Aquarium and Fish Log',
+  'The aquarium tank animates smoothly: it no longer skips frames now and then, and it keeps moving (at a steady pace) while you scroll the list.',
+  'The aquarium tank fills the screen. The Options button under it opens a panel with Your tank and Decorate (under the tank when upright, on the right when sideways); Hide closes it and gives the whole space back to the tank. Your phone remembers which you like.',
+  'Your tank and Add fish are one section now, laid out like Decorate: Boosts, On display, and Add from your Cooler, each with its own heading.',
+  'Fish Log: a Normal / Shiny switch under the fish picture shows what a fish you have caught looks like when it is shiny.',
+  'Weather news no longer covers the screen: it shows as a small line under the time and weather on the water, and waits while a menu, a card or a catch is open, so it never sits on top of what you are doing.',
+  '## Smoother frames',
+  'Willow Pond no longer stutters: the willow used to redraw its whole curtain every third frame; its work is now spread evenly over every frame.',
+  'Storms are lighter: the darkening and the soft frame around the picture are drawn in one layer instead of up to four, and storm waves on the open sea draw in a handful of shapes instead of hundreds.',
+  'Held sideways, the side panel stays exactly in place when you open a menu (it used to shift a little); Back sits right above it.',
+  'Dawn and dusk are smoother: the light changes in fewer, softer steps, and never while you are casting or have a fish on the line.',
+  'The picture of the water is drawn as one solid layer, so your phone has a little less to blend on every frame.',
+  'If a water or a storm is too heavy for your phone, the picture gets a touch softer sooner and in smaller steps, and each water remembers what suits your phone, so coming back is smooth straight away.',
+  '## Fairer streaks',
+  'Reeling in early, casting by accident or missing a strike never costs you anything: your streak stays. A streak only ends when a fish you have hooked gets away (a snapped line, a fish that slips off or runs out your line).',
+  'On a Roll, fully learned: a lost fish now only halves your streak instead of ending it.',
+  'Steady Hands challenge: a late hook just does not count; only a hooked fish that gets away resets the count.',
+  '## One look everywhere',
+  'Every button, chip, tab and card now shares one style: the same navy, the same corners, the same lettering, and line icons instead of emoji pictures.',
+  'Everything you can tap in the top bar now looks exactly like the Bait and Rest buttons (filled teal). Coins and level are plain text, so you can tell at a glance. A full Cooler shows its count in gold.',
+  'Upright, the water no longer shows its name twice: the top bar has it, the chip on the water shows the time and weather.',
+  'Held sideways, the side panel is slimmer, so the water and the menus get more room.',
+  'Upright, page tabs (Tackle, Rods, Skills, Paths...) always fit on screen with an icon each: no more sideways scrolling to find a page.',
+  'Upright, the Fishing tab lights up gold while you fish, like the side panel does sideways.',
+  '## A new aquarium',
+  'The tank stays on screen while you scroll: upright it sits at the top, sideways it is on the left. Every new fish, water colour and decoration shows the moment you pick it.',
+  'The tank is bigger and always fully drawn (it used to stop short of the bottom). Earnings, Collect and Feed sit right under it.',
+  'Switching between Your tank, Decorate and Add fish is instant, and the tank keeps swimming while you try, place or buy things (it used to blink and restart).',
+  'New Add fish tab: put fish from your Cooler on display without leaving the aquarium.',
+  'Decorating is simpler: tap any card to try it in your tank, and the Buy / Stop bar stays right under the tank. A decoration you try lands in an open spot instead of on top of another one, and keeps that spot if you buy it.',
+  '## Also fixed',
+  'Tapping a top-bar chip (Fishing at, Cooler, Aquarium, Fish Log) works on the first tap every time.',
+  'The live event line in the top bar fits on small phones.',
+  'The collapsed side panel shows neat icon buttons in menus too (they were cut off at the screen edge).',
+  '## Your angler',
+  'Shoes look like real shoes from the side: a rounded heel, a sole with a heel block, and a toe that slopes down. One foot stands a little ahead of the other.',
+  'Bodies have their real depth: the hips and seat fill out under the jacket, so legs no longer look pinned under a wide body.',
+  'Buttons, zips and seams sit on the front of the clothes (life jacket and spacesuit fixed).',
+  '## Everything comes alive',
+  'The wizard hat glows with a spiral of climbing sparkles, orbiting runes and a pulsing star at its tip.',
+  'Many more items have their own effect: music notes from headphones, petals from the flower crown and kimono, mushroom spores, party confetti, top-hat magic, witch wisps, diving and fishbowl bubbles, lantern moths, angel feathers, butterfly dust, dragon embers, jetpack smoke, guitar notes, glinting medals and lenses, little hearts from heart shades, glowing glow kicks and more.',
+  'The Wardrobe preview is animated now, so you see every effect live while you dress up.',
+  'Smoother: shiny sparkles run at your screen’s full frame rate, and the aquarium tank too.',
+  '## Fixes',
+  'Long water names (Stonebrook River) fit in the header instead of being cut off.']});
 // Android test notes (preview builds only; the live game never shows them). Write what the next test build changes here
 // (spoiler-free); it opens once in the Android test app. Released notes live in notes_release.js.
 const TEST_NOTES={v:'test', label:'Test build · Android', name:'One Look, Easy Aquarium', items:[
@@ -15889,6 +15961,7 @@ const TEST_NOTES={v:'test', label:'Test build · Android', name:'One Look, Easy 
   'The aquarium tank fills the screen. The Options button under it opens a panel with Your tank and Decorate (under the tank when upright, on the right when sideways); Hide closes it and gives the whole space back to the tank. Your phone remembers which you like.',
   'Your tank and Add fish are one section now, laid out like Decorate: Boosts, On display, and Add from your Cooler, each with its own heading.',
   'Fish Log: a Normal / Shiny switch under the fish picture shows what a fish you have caught looks like when it is shiny.',
+  'Weather news no longer covers the screen: it shows as a small line under the time and weather on the water, and waits while a menu, a card or a catch is open, so it never sits on top of what you are doing.',
   '## Smoother frames',
   'Willow Pond no longer stutters: the willow used to redraw its whole curtain every third frame; its work is now spread evenly over every frame.',
   'Storms are lighter: the darkening and the soft frame around the picture are drawn in one layer instead of up to four, and storm waves on the open sea draw in a handful of shapes instead of hundreds.',
