@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="DL Test Android">
 <script>
-window.DL_BUILD='android'; window.DL_PREVIEW=true; window.DL_VERSION='2026.11.18-1114';
+window.DL_BUILD='android'; window.DL_PREVIEW=true; window.DL_VERSION='2026.11.18-1124';
 window.addEventListener('beforeinstallprompt',function(e){ e.preventDefault(); window.__dlInstallPrompt=e; });
 </script>
 </head>
@@ -15560,6 +15560,29 @@ html body.phone-app .hud > .st-aq.ready *,html body.phone-land .hud > .st-aq.rea
 document.head.insertAdjacentHTML('beforeend',`<style>
 html body.phone-app .hud #coolerct[style*="danger"],html body.phone-land .hud #coolerct[style*="danger"]{color:#ffd36a!important;text-shadow:0 0 6px #ffb34766}
 </style>`);
+// ---------- round 7g (director, 2026-11-18, screenshots: "the side panel needs to remain in the same place when entering full screen on
+// mobile, it shifts slightly"). Sideways, opening a menu moved the side panel 26 px left and 8 px up and changed its frame (the menu used
+// a 16 px screen edge, a 136 px column and a 36 px top row; the water uses 8 px, a 124 px frame and starts the panel at the same height
+// as the water). The menu now uses the water's exact geometry: the same frame, padding, gaps and button positions, with Back in the
+// header row directly above the panel. Collapsed (icon-only) panels match too. ----------
+document.head.insertAdjacentHTML('beforeend',`<style>
+@media (orientation:landscape) and (max-height:560px){
+  html body.phone-land #menuov .mo-in{grid-template-columns:auto minmax(0,1fr) 124px!important;grid-template-rows:40px minmax(0,1fr)!important;padding-right:8px!important;row-gap:4px!important}
+  html body.phone-land.dock-mini #menuov .mo-in{grid-template-columns:auto minmax(0,1fr) 56px!important}
+  html body.phone-land #menuov #tabs .secbar,html body.phone-land #menuov .secbar{box-sizing:border-box!important;width:124px!important;margin:0 0 6px!important;padding:5px!important;gap:5px!important;border:1px solid #ffffff17!important;align-self:stretch!important;justify-content:flex-start!important}
+  html body.phone-land.dock-mini #menuov #tabs .secbar,html body.phone-land.dock-mini #menuov .secbar{width:56px!important}
+  html body.phone-land #menuov #tabs .secbar .secb{margin:0!important}
+  html body.phone-land #menuov #tabs .secbar .cdmini{margin:2px 0 0!important} /* the water's collapse button sits 2 px lower too */
+  html body.phone-land #menuov .mo-back{width:112px!important;margin:0 0 0 6px!important;align-self:center!important;min-height:36px!important;height:36px!important}
+  html body.phone-land.dock-mini #menuov .mo-back{width:44px!important;margin:0 0 0 6px!important}
+}
+</style>`);
+document.head.insertAdjacentHTML('beforeend',`<style>
+@media (orientation:landscape) and (max-height:560px){
+  /* collapsed: an older rule made the water's icon buttons 46 px (menus 44), so the collapsed panel moved 2 px; both are 44 now */
+  html body.phone-land.dock-mini.dl-fish .wrap > #catdock .cdb,html body.phone-land.dock-mini .wrap > #catdock .cdb{width:44px!important;min-width:44px!important}
+}
+</style>`);
 // =====================================================================
 // Phones: the aquarium (Android + iPhone; PC keeps its own layout). Round 7e (director, 2026-11-18: "the aquarium itself is too
 // condensed on mobile. Merge Your tank and Add fish into one, thorough, with the headers exactly like Decorate. The aquarium needs a
@@ -15821,6 +15844,7 @@ const TEST_NOTES={v:'test', label:'Test build · Android', name:'One Look, Easy 
   '## Smoother frames',
   'Willow Pond no longer stutters: the willow used to redraw its whole curtain every third frame; its work is now spread evenly over every frame.',
   'Storms are lighter: the darkening and the soft frame around the picture are drawn in one layer instead of up to four, and storm waves on the open sea draw in a handful of shapes instead of hundreds.',
+  'Held sideways, the side panel stays exactly in place when you open a menu (it used to shift a little); Back sits right above it.',
   'Dawn and dusk are smoother: the light changes in fewer, softer steps, and never while you are casting or have a fish on the line.',
   'The picture of the water is drawn as one solid layer, so your phone has a little less to blend on every frame.',
   'If a water or a storm is too heavy for your phone, the picture gets a touch softer sooner and in smaller steps, and each water remembers what suits your phone, so coming back is smooth straight away.',
@@ -15947,7 +15971,7 @@ economy(){ QA.sys='Economy';
 events(){ QA.sys='Events';
   T('calendar: live time and next start agree for every event, every minute of a day',()=>{ const bad=[]; const o0=window.__off; for(let m=0;m<1440;m+=7){ window.__off=m*60000; for(const e of SCHED){ const l=schedLeft(e), n=schedNext(e); if(l<0||l>e.len*MIN||n<=0||n>e.every*MIN) bad.push(e.id+'@'+m); } } window.__off=o0; return bad.length?{ok:false,detail:bad.slice(0,5).join(',')}:true; });
   T('challenges: one at a time, reward once, rest blocks a restart',()=>{ S.chal=null; S.chalCd={}; const id=Object.keys(CHAL)[0]; if(!chalStart(id)) return {ok:false,detail:'could not start'}; if(chalStart(Object.keys(CHAL)[1])) return {ok:false,detail:'second challenge started'}; const m0=S.money; S.chal.prog=S.chal.need||1; S.chal.best=999; chalEnd(true); const paid=S.money-m0; chalEnd(true); chalEnd(true); if(S.money!==m0+paid) return {ok:false,detail:'paid twice'}; if(chalStart(id)) return {ok:false,detail:'restarted during rest'}; return okInv(); });
-  T('Market Rush adds a true 30% to sale prices',()=>{ const e=SCHED.find(x=>x.id==='market'); const o0=window.__off; let found=false; for(let m=0;m<200&&!found;m++){ window.__off=m*60000; if(schedLeft(e)&&!SCHED.some(x=>x!==e&&schedLeft(x))) found=true; } if(!found){ window.__off=o0; return {ok:false,detail:'no Market Rush time found'}; } const f=coolerEntry(rollFish(SP.find(s=>s.id!==demandSp().id),{})); f.value=1e6; const on=salePrice(f); let off=null; for(let m=0;m<400&&off==null;m++){ window.__off=m*60000; if(!SCHED.some(x=>schedLeft(x))) off=salePrice(f); } window.__off=o0; if(off==null) return {ok:false,detail:'no quiet time found'}; const ratio=on/off; return Math.abs(ratio-1.3)<.02?{ok:true,detail:'x'+ratio.toFixed(3)}:{ok:false,detail:'x'+ratio.toFixed(3)}; });
+  T('Market Rush adds a true 30% to sale prices',()=>{ const e=SCHED.find(x=>x.id==='market'); const o0=window.__off; let found=false; for(let m=0;m<200&&!found;m++){ window.__off=m*60000; if(schedLeft(e)&&!SCHED.some(x=>x!==e&&schedLeft(x))) found=true; } const dm0=demandSp().id; if(!found){ window.__off=o0; return {ok:false,detail:'no Market Rush time found'}; } const f=coolerEntry(rollFish(SP.find(s=>s.id!==dm0),{})); f.value=1e6; const on=salePrice(f); let off=null; for(let m=0;m<400&&off==null;m++){ window.__off=m*60000; if(!SCHED.some(x=>schedLeft(x))&&demandSp().id!==f.id) off=salePrice(f); } /* 2026-11-18: the quiet time must not be one where the fishmonger wants this very fish (x2), or the test reads x0.65 */ window.__off=o0; if(off==null) return {ok:false,detail:'no quiet time found'}; const ratio=on/off; return Math.abs(ratio-1.3)<.02?{ok:true,detail:'x'+ratio.toFixed(3)}:{ok:false,detail:'x'+ratio.toFixed(3)}; });
 },
 saves(){ QA.sys='Saves';
   T('save -> load keeps everything (JSON round trip through migrate)',()=>{ dockStore(); const a=JSON.parse(JSON.stringify(S)); const b=migrate(JSON.parse(JSON.stringify(S))); const keys=['money','lvl','xp','scales','pearls','loc','unlocked','gear','bait','journal','cooler','tank','perks','feats','rods','hunts','docks','dock','pass','look','owned']; const diff=keys.filter(k=>JSON.stringify(a[k])!==JSON.stringify(b[k])); return diff.length?{ok:false,detail:'changed: '+diff.join(',')}:true; });
