@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="DL Test Android">
 <script>
-window.DL_BUILD='android'; window.DL_PREVIEW=true; window.DL_VERSION='2026.11.18-1103';
+window.DL_BUILD='android'; window.DL_PREVIEW=true; window.DL_VERSION='2026.11.18-1114';
 window.addEventListener('beforeinstallprompt',function(e){ e.preventDefault(); window.__dlInstallPrompt=e; });
 </script>
 </head>
@@ -1509,6 +1509,11 @@ const sfx = {
 };
 
 // ---------- canvas ----------
+// Phones (round 7f, performance): the fishing scene's canvas is opaque. The scene always paints every pixel (sky to water), so the
+// phone no longer has to blend the whole canvas with the page behind it on every frame (one full-screen layer less for the GPU).
+// It must run before the game first asks the canvas for its 2D context, so it is placed in c_logic.js with an //@layer line.
+try{ const c0=document.getElementById('cv'); if(c0) c0.getContext('2d',{alpha:false}); }catch(e){}
+
 const cv=$('cv'), g=cv.getContext('2d'); let W=800,H=400,DPR=1;
 // the water's height override: none by default; layers and later files replace or wrap it (the phone layer has its own)
 function stageHOverride(W,H){ return 0; }
@@ -15729,6 +15734,14 @@ html body.phone-app #menuov #panel.aq07 .aq07-trying .aq07-st,html body.phone-la
       const wx=weather(), on=S.settings.effects&&typeof WXA==='number'&&WXA>.01, k=on?wx.k:'', a=on?WXA:0;
       const c=build(night||0,k,a); g.save(); g.imageSmoothingEnabled=true; g.drawImage(c,0,0,W,H); g.restore(); }; }
   if(/[?&]test\b/.test(location.search)) window.__ov=()=>OV&&{key:OV.key,w:OV.c.width,h:OV.c.height}; }
+// ---------- the scenery's light (round 7f, director: "make sure performance is completely fixed and solid on both phones"). The still
+// scenery is redrawn whenever the light moves up a step; at Willow Pond that redraw is about 6.5 ms of work (Frostbite, Ember and the
+// river less), so on a phone it can cost a frame. Measured over a whole in-game day: 55 redraws at Willow Pond. On phones now:
+//  - fewer, slightly bigger light steps (55 -> 37 a day at Willow Pond), each fading in a little longer, so the change stays invisible
+//  - never while you charge a cast or have a fish on the line: a light step waits until you are between catches ----------
+{ const _vs=v3steps, _vf=v3fade; v3steps=function(){ return MOB()?[9,6,4]:_vs.apply(this,arguments); }; v3fade=function(){ return MOB()?4.2:_vf.apply(this,arguments); };
+  const BUSY=/^(charging|flying|bite|reeling|landing)$/;
+  const _vl=v3land; v3land=function(L,P,hz){ if(MOB()&&V3CACHE&&!v3land.now&&typeof G==='object'&&BUSY.test(G.st)){ const base=L.id+'|'+W+'|'+H+'|'+DPR; if(V3CACHE.base===base&&V3CACHE.key!==base+'|'+P.key) return V3CACHE; } return _vl.apply(this,arguments); }; }
 // =====================================================================
 // Phones, round 7: the Fish Log's Normal / Shiny switch (director, 2026-11-18: "shiny toggle in mobile fish log missing"). PC has had
 // it since 2026-11-17 (pc/ui_fhd.js); phones get the same switch under the fish picture in the details, in the phone look:
@@ -15808,6 +15821,8 @@ const TEST_NOTES={v:'test', label:'Test build · Android', name:'One Look, Easy 
   '## Smoother frames',
   'Willow Pond no longer stutters: the willow used to redraw its whole curtain every third frame; its work is now spread evenly over every frame.',
   'Storms are lighter: the darkening and the soft frame around the picture are drawn in one layer instead of up to four, and storm waves on the open sea draw in a handful of shapes instead of hundreds.',
+  'Dawn and dusk are smoother: the light changes in fewer, softer steps, and never while you are casting or have a fish on the line.',
+  'The picture of the water is drawn as one solid layer, so your phone has a little less to blend on every frame.',
   'If a water or a storm is too heavy for your phone, the picture gets a touch softer sooner and in smaller steps, and each water remembers what suits your phone, so coming back is smooth straight away.',
   '## Fairer streaks',
   'Reeling in early, casting by accident or missing a strike never costs you anything: your streak stays. A streak only ends when a fish you have hooked gets away (a snapped line, a fish that slips off or runs out your line).',
