@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="DL Test iPhone">
 <script>
-window.DL_BUILD='ios'; window.DL_PREVIEW=true; window.DL_VERSION='2026.11.18-1312';
+window.DL_BUILD='ios'; window.DL_PREVIEW=true; window.DL_VERSION='2026.11.18-1343';
 window.addEventListener('beforeinstallprompt',function(e){ e.preventDefault(); window.__dlInstallPrompt=e; });
 </script>
 </head>
@@ -15899,8 +15899,46 @@ html body.phone-app #mbwx[data-k="Rain"],html body.phone-land #mbwx[data-k="Rain
 // Also here: tapping right after Back works (the old guard blocked the whole screen for 0.45 s; now only where your finger was).
 // Android + iPhone only.
 // =====================================================================
-const MB_FRAME={ up:{edge:8, row1Top:6, row1H:36, row2Top:46, barH:58, barPad:3, barBtnH:50, barBottom:6},
+const MB_FRAME={ up:{edge:8, row1Top:6, row1H:36, row2Top:46, row2H:30, stageTop:84, barH:58, barPad:3, barBtnH:50, barBottom:6},
                  land:{edge:8, row1Top:6, row1H:38, contentTop:49, bottom:6, railW:124, railWMini:56, railGap:6, railBtnH:40, railBtnGap:5} };
+// ONE look per kind of control (director, 2026-11-18: "cross reference everything that's connected, we need this to stop being so
+// inconsistent"). Measured across every page: buttons came in 9 heights, section tabs in 3 styles, badges in 4 sizes, descriptions in
+// 2 sizes and 2 colours, and the bottom tabs changed text size between the water and the menus. Each kind now has one set of numbers
+// (per orientation where the space differs); __spec checks them on every page.
+const MB_UI={ up:{btnH:40, btnFs:15, btnSmH:36, btnSmFs:13, tabH:34, tabFs:12, h2Fs:21, h4Fs:14.5, barFs:10.5},
+              land:{btnH:38, btnFs:15, btnSmH:32, btnSmFs:13, tabH:32, tabFs:13, h2Fs:18, h4Fs:15, barFs:11.5},
+              all:{tabFw:800, tabRad:10, badge:18, badgeFs:10.5, descFs:12.5, descCol:'#97abc2', chipH:32, chipFw:700, chipRad:10} };
+{ const U=MB_UI.up, L=MB_UI.land, A=MB_UI.all, both=(o,s)=>s.split(',').map(x=>'html body.phone-'+o+' '+x.trim()).join(','), P=(s)=>both('app',s)+','+both('land',s);
+document.head.insertAdjacentHTML('beforeend',`<style>
+/* buttons: two kinds. Regular (.btn) and small (.btn.sm, and the aquarium bar's compact pair). One line, never wrapping into a taller button */
+${both('app','#menuov #panel button.btn')}{height:${U.btnH}px!important;min-height:${U.btnH}px!important;font-size:${U.btnFs}px!important;padding:0 14px!important;white-space:nowrap!important;box-sizing:border-box!important}
+${both('app','#menuov #panel button.btn.sm, #menuov #panel.aq07 .aq07-bar .aq07-bank button.btn')}{height:${U.btnSmH}px!important;min-height:${U.btnSmH}px!important;font-size:${U.btnSmFs}px!important;padding:0 10px!important}
+${both('land','#menuov #panel button.btn')}{height:${L.btnH}px!important;min-height:${L.btnH}px!important;font-size:${L.btnFs}px!important;padding:0 14px!important;white-space:nowrap!important;box-sizing:border-box!important}
+${both('land','#menuov #panel button.btn.sm, #menuov #panel.aq07 .aq07-bar .aq07-bank button.btn')}{height:${L.btnSmH}px!important;min-height:${L.btnSmH}px!important;font-size:${L.btnSmFs}px!important;padding:0 10px!important}
+/* section tabs inside pages (Gear / Bait, Waters / Set sail again, Games / Prize counter...): one style */
+${both('app','#menuov #panel .bwx-nav:not(.wd-nav) > button')}{height:${U.tabH}px!important;min-height:${U.tabH}px!important;font-size:${U.tabFs}px!important}
+${both('land','#menuov #panel .bwx-nav:not(.wd-nav) > button')}{height:${L.tabH}px!important;min-height:${L.tabH}px!important;font-size:${L.tabFs}px!important}
+${P('#menuov #panel .bwx-nav > button')}{font-weight:${A.tabFw}!important;border-radius:${A.tabRad}px!important}
+/* badges: one size and style everywhere (bottom tabs, side rail, page tabs, section tabs) */
+${P('#catdock .cdb .cddot, #menuov .secb .secdot, #menuov .subbar .subp .subdot, #menuov #panel .sdot, .cddot, .secdot, .subdot, .sdot')}{min-width:${A.badge}px!important;height:${A.badge}px!important;line-height:${A.badge}px!important;font-size:${A.badgeFs}px!important;font-weight:800!important;padding:0 5px!important;border-radius:999px!important;box-sizing:border-box!important;color:#2a1206!important;text-align:center!important}
+/* bottom tabs (upright) and side rail (sideways): the same label size on the water and in menus */
+${both('app','#catdock .cdb, #menuov .secb')}{font-size:${U.barFs}px!important;border-radius:12px!important}
+${both('land','#catdock .cdb, #menuov .secb')}{font-size:${L.barFs}px!important}
+/* text */
+${P('#menuov #panel p.sub')}{font-size:${A.descFs}px!important;color:${A.descCol}!important}
+${both('app','#menuov #panel h4')}{font-size:${U.h4Fs}px!important}
+${both('land','#menuov #panel h4')}{font-size:${L.h4Fs}px!important}
+${both('app','#menuov #panel h2, #menuov #panel .tp-title, #menuov #panel h3.ev-h')}{font-size:${U.h2Fs}px!important;font-weight:800!important;color:#fff!important}
+${both('land','#menuov #panel h2, #menuov #panel .tp-title, #menuov #panel h3.ev-h')}{font-size:${L.h2Fs}px!important;font-weight:800!important;color:#fff!important}
+/* chips (filters, choices, toggles): one style */
+${P('#menuov #panel .chipb')}{height:${A.chipH}px!important;font-weight:${A.chipFw}!important;border-radius:${A.chipRad}px!important}
+/* upright: the "Next goal" chip stays one row tall like the location chip next to it (a long goal made it 44 px and pushed the
+   water down 14 px): title on the same line as the label, the progress bar as a thin line along its bottom */
+html body.phone-app .hud #goalchip{height:${MB_FRAME.up.row2H}px!important;min-height:0!important;display:flex!important;align-items:center!important;gap:6px!important;overflow:hidden!important;position:relative!important;box-sizing:border-box!important}
+html body.phone-app .hud #goalchip > .gl-t{display:block!important;min-width:0!important;overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important;flex:1 1 auto!important}
+html body.phone-app .hud #goalchip > .gl-k{flex:0 0 auto!important}
+html body.phone-app .hud #goalchip > .gl-bar{position:absolute!important;left:8px!important;right:8px!important;bottom:3px!important;height:3px!important;margin:0!important}
+</style>`); }
 { const U=MB_FRAME.up, L=MB_FRAME.land;
 document.head.insertAdjacentHTML('beforeend',`<style>
 /* ---- upright menus: same top row, same edges and the same bottom card as the water ---- */
@@ -15936,7 +15974,8 @@ html body.phone-land #menuov .subbar > .subp{padding-left:clamp(6px,1.2vw,11px)!
 /* sideways, header-tab badges always sit on the tab's top corner (like the side rail's), at every width: a count never makes a tab wider,
    so the row never changes size when a badge appears */
 html body.phone-land #menuov .subbar > .subp{position:relative!important}
-html body.phone-land #menuov .subbar > .subp > .subdot{position:absolute!important;top:1px!important;right:1px!important;margin:0!important;min-width:15px!important;height:15px!important;font-size:9.5px!important;line-height:15px!important;padding:0 3px!important;box-sizing:border-box!important}
+html body.phone-land #menuov .subbar > .subp > .subdot{position:absolute!important;top:-6px!important;right:-5px!important;margin:0!important;z-index:2!important}
+html body.phone-land #menuov .subbar{overflow:visible!important} /* the row always fits now (tabs squeeze, names only under 760 px), so it never scrolls: badges can poke out of the corner like the side rail's and never cover a label */ /* size and style: the one badge standard (MB_UI) */
 /* in-page section bars (Gear / Bait..., Games / Prize counter...) sit inside the scrolling page, so they keep vertical page swipes; they
    only lose their own few-pixel vertical scroll */
 html body.phone-app #menuov #panel .bwx-nav,html body.phone-land #menuov #panel .bwx-nav{overflow-y:hidden!important}
@@ -15949,6 +15988,16 @@ html body.phone-app #menuov #panel .bwx-nav.stuck:not(.wd-top)::before,html body
 let upX=-1, upY=-1; addEventListener('pointerup',e=>{ if(e.pointerType!=='mouse'){ upX=e.clientX; upY=e.clientY; } },true);
 new MutationObserver(ms=>{ if(!MOB()) return; for(const m of ms) for(const n of m.addedNodes){ if(n.nodeType===1&&n.parentNode===document.body&&n.tagName==='DIV'&&n.style.zIndex==='2147483647'&&n.style.inset&&!n.children.length&&upX>=0){
     const R=36; n.style.inset='auto'; n.style.left=(upX-R)+'px'; n.style.top=(upY-R)+'px'; n.style.width=(2*R)+'px'; n.style.height=(2*R)+'px'; n.style.borderRadius='50%'; } } }).observe(document.body,{childList:true});
+// ---- button labels always fit on one line: a label wider than its button (e.g. "Unlock · 1,200,000" in a narrow card) shrinks in
+// half-pixel steps down to 12 px instead of wrapping into a taller button. Runs at most once a frame, only while a menu is open. ----
+{ let queued=false; const fit=()=>{ queued=false; if(!MOB()||!MENU_OPEN) return; const P=document.querySelector('#menuov #panel'); if(!P) return;
+    for(const b of P.querySelectorAll('button.btn')){ if(!b.getClientRects().length) continue; if(b.dataset.fit){ b.style.removeProperty('font-size'); delete b.dataset.fit; }
+      if(b.scrollWidth<=b.clientWidth+1) continue; let f=parseFloat(getComputedStyle(b).fontSize); while(b.scrollWidth>b.clientWidth+1&&f>12){ f-=.5; b.style.setProperty('font-size',f+'px','important'); } b.dataset.fit='1'; } };
+  /* right after the menu's content changes and before the screen is drawn (so a cut label never shows for even a frame); only
+     changes inside the menu count, and only while one is open */
+  new MutationObserver(ms=>{ if(!MOB()||typeof MENU_OPEN==='undefined'||!MENU_OPEN) return; const mo=document.getElementById('menuov'); if(mo&&ms.some(m=>mo.contains(m.target))) fit(); }).observe(document.body,{childList:true,subtree:true});
+  window.addEventListener('resize',()=>{ if(!queued){ queued=true; requestAnimationFrame(fit); } });
+  if(/[?&]test\b/.test(location.search)) window.__mbFit=fit; }
 // ---- the measurement check (test builds only): returns every place that breaks the set measurements, on the screen now ----
 if(/[?&]test\b/.test(location.search)) window.__spec=()=>{ for(const a of document.getAnimations()){ try{ if(a.effect&&a.effect.getComputedTiming().iterations!==Infinity) a.finish(); }catch(e){} } /* measure where things end up, not mid slide-in */
   const out=[], land=document.body.classList.contains('phone-land'), F=land?L:U, vw=innerWidth, vh=innerHeight, RW=document.body.classList.contains('dock-mini')?L.railWMini:L.railW;
@@ -15971,7 +16020,16 @@ if(/[?&]test\b/.test(location.search)) window.__spec=()=>{ for(const a of docume
     if(/(auto|scroll)/.test(cs.overflowY)&&dy>0&&dy<=12) bad('row scrolls up/down by '+dy+' px "'+(s.className||s.id||s.tagName).toString().split(' ')[0]+'"',dy+' px','0 (fits, or a real scroll area)');
     if(/(auto|scroll)/.test(cs.overflowX)&&dx>0&&dx<=12) bad('row scrolls sideways by '+dx+' px "'+(s.className||s.id||s.tagName).toString().split(' ')[0]+'"',dx+' px','0 (fits, or a real scroll area)'); }
   // no cut labels: a tab or button whose own text is wider than the button
-  for(const b of vis('#menuov .subp, #menuov #panel .bwx-nav > button, .hud > *')){ if(b.scrollWidth>b.clientWidth+1) bad('label cut "'+b.innerText.trim().replace(/\s+/g,' ').slice(0,20)+'"',b.scrollWidth+' px of text in '+b.clientWidth,'fits'); }
+  for(const b of vis('#menuov .subp, #menuov #panel .bwx-nav > button, #menuov #panel button.btn, #menuov #panel .chipb, #catdock .cdb, #menuov .secb, .hud > .stat, .hud > .hud-link')){ /* corner badges poke out on purpose: measure the label without them */ const abs=[...b.querySelectorAll('*')].filter(k=>getComputedStyle(k).position==='absolute'); const keep=abs.map(k=>k.style.display); abs.forEach(k=>k.style.display='none'); const cut=b.scrollWidth>b.clientWidth+1, sw=b.scrollWidth; abs.forEach((k,i)=>k.style.display=keep[i]); if(cut) bad('label cut "'+b.innerText.trim().replace(/\s+/g,' ').slice(0,20)+'"',sw+' px of text in '+b.clientWidth,'fits'); }
+  // one look per kind of control (MB_UI): every button, section tab, badge, bar label and description matches its standard
+  { const UI=land?MB_UI.land:MB_UI.up, AL=MB_UI.all, px=e=>Math.round(e.getBoundingClientRect().height), fs=e=>parseFloat(getComputedStyle(e).fontSize), tag=e=>'"'+(e.innerText||'').trim().replace(/\s+/g,' ').slice(0,18)+'"';
+    for(const b of vis('#menuov #panel button.btn')){ const sm=b.matches('.sm, .aq07-bar .btn'), H=sm?UI.btnSmH:UI.btnH, F=sm?UI.btnSmFs:UI.btnFs; const fsOk=b.dataset.fit?(fs(b)>=12&&fs(b)<=F+.3):Math.abs(fs(b)-F)<=.3; /* a fitted label may be smaller, never under 12 px */ if(Math.abs(px(b)-H)>1||!fsOk) bad((sm?'small':'regular')+' button '+tag(b),px(b)+'px / '+fs(b)+'px text',H+'px / '+F+'px'); }
+    for(const b of vis('#menuov #panel .bwx-nav:not(.wd-nav) > button')){ if(Math.abs(px(b)-UI.tabH)>1||Math.abs(fs(b)-UI.tabFs)>.3||getComputedStyle(b).fontWeight!==String(AL.tabFw)) bad('section tab '+tag(b),px(b)+'px / '+fs(b)+'px / '+getComputedStyle(b).fontWeight,UI.tabH+'px / '+UI.tabFs+'px / '+AL.tabFw); }
+    for(const d of vis('.cddot, .secdot, .subdot, .sdot')){ if(d.hidden) continue; if(Math.abs(px(d)-AL.badge)>1||Math.abs(fs(d)-AL.badgeFs)>.3) bad('badge '+tag(d),px(d)+'px / '+fs(d)+'px',AL.badge+'px / '+AL.badgeFs+'px');
+      /* a badge never covers its button's label */ const host=d.parentElement, br=d.getBoundingClientRect(); for(const n of host.childNodes){ if(n===d||(n.nodeType===1&&(n.classList.contains('subi')||getComputedStyle(n).position==='absolute'))) continue; const rg=document.createRange(); rg.selectNodeContents(n); const tf=parseFloat(getComputedStyle(n.nodeType===1?n:host).fontSize); for(const r0 of rg.getClientRects()){ const lead=Math.max(0,(r0.height-tf)/2), r={left:r0.left,right:r0.right,top:r0.top+lead,bottom:r0.bottom-lead}; /* the letters, not the empty line spacing above and below them */ const ox=Math.min(r.right,br.right)-Math.max(r.left,br.left), oy=Math.min(r.bottom,br.bottom)-Math.max(r.top,br.top); if(ox>1&&oy>1&&(n.textContent||'').trim()) bad('badge covers the label '+tag(host),Math.round(ox)+'x'+Math.round(oy)+' px','no overlap'); } } }
+    for(const b of vis('#catdock .cdb, #menuov .secb')){ if(Math.abs(fs(b)-UI.barFs)>.3) bad('category button text '+tag(b),fs(b)+'px',UI.barFs+'px'); }
+    for(const p of vis('#menuov #panel p.sub')){ if(Math.abs(fs(p)-AL.descFs)>.3) bad('description text',fs(p)+'px',AL.descFs+'px'); }
+    if(!land&&!menu){ const g=document.getElementById('goalchip'), st=document.getElementById('stage'); if(g&&g.getClientRects().length&&Math.abs(px(g)-MB_FRAME.up.row2H)>1) bad('goal chip height',px(g),MB_FRAME.up.row2H); if(st&&Math.abs(Math.round(st.getBoundingClientRect().top)-MB_FRAME.up.stageTop)>1) bad('water top (upright)',Math.round(st.getBoundingClientRect().top),MB_FRAME.up.stageTop); } }
   // every button you can see must take the tap (nothing on top of its middle)
   const card=document.getElementById('evcard'), cardOn=!!(card&&card.getClientRects().length); /* a popup card is on top by design: only its own buttons count then */
   const sticky=t=>{ for(let e=t;e&&e!==document.body;e=e.parentElement){ const p=getComputedStyle(e).position; if(p==='sticky') return true; } return false; }; /* scrolled under a sticky bar: scroll back to reach it */
@@ -16090,12 +16148,17 @@ PATCHES.unshift({v:'0.4.8.4', name:'Lined Up', items:[
   'Your boost timers now sit in the top-left corner, under the time and weather, so the Rest and Bait buttons no longer cover them. A weather note shows just below them.']});
 PATCHES.unshift({v:'0.4.8.5', name:'Steady Tabs', items:[
   '## Fixes',
+  'One look everywhere: every button, tab, badge and label of the same kind now has the same size and style on every page (buttons came in nine different heights, badges in four sizes); the bottom tabs keep their size when a menu opens.',
+  'Long button labels ("Unlock · 1,200,000") stay on one line instead of making a taller button.',
+  'Upright, a long "Next goal" stays one row tall and no longer pushes the water down.',
+  'Held sideways, badges on the page tabs sit on the tab corner and never cover the name.',
   'Page tabs at the top of a menu (Events, Bounties, Feats, Tide Pass, Boardwalk and the others) take every tap: the row could shift a few pixels under your finger, which made taps feel unresponsive and the tabs jiggle.',
   'Section bars inside pages (Gear / Bait, Waters / Set sail again...) no longer slide sideways when they stick to the top.',
   'On smaller phones held sideways, the page tabs show their names only so they always fit, and badges sit on the tab corner.']});
 // iPhone test notes (preview builds only; the live game never shows them). Write what the next test build changes here
 // (spoiler-free); it opens once in the iPhone test app. Released notes live in notes_release.js.
 const TEST_NOTES={v:'test', label:'Test build · iPhone', name:'One Look, Easy Aquarium', items:[
+  'One look everywhere: every button, tab, badge and label of the same kind has the same size and style on every page; long button labels stay on one line; upright, a long goal no longer pushes the water down; sideways, page-tab badges sit on the corner.',
   'Menu page tabs (Events, Bounties, Feats...) take every tap and no longer jiggle; section bars no longer slide sideways when stuck to the top; on small phones held sideways the tabs show names only, badges on the corner.',
   '## Aquarium and Fish Log',
   'The aquarium tank animates smoothly: it no longer skips frames now and then, and it keeps moving (at a steady pace) while you scroll the list.',
