@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="DL Test Android">
 <script>
-window.DL_BUILD='android'; window.DL_PREVIEW=true; window.DL_VERSION='2026.11.18-0314';
+window.DL_BUILD='android'; window.DL_PREVIEW=true; window.DL_VERSION='2026.11.18-0339';
 window.addEventListener('beforeinstallprompt',function(e){ e.preventDefault(); window.__dlInstallPrompt=e; });
 </script>
 </head>
@@ -7290,7 +7290,8 @@ v3Fore=function(L,t,night){ const r=_v3Fore_036(L,t,night); if(r&&!window.__noVi
 let A3BELLY=0;
 function a3TorsoPath(c,f){ c.beginPath(); const bb=A3BELLY*2.6;
   if(f){ c.moveTo(-7.2,-45.6); c.quadraticCurveTo(-7.9,-38.5,-6.3,-33.5); c.quadraticCurveTo(-8.4,-28.5,-7.7,-23.6); c.lineTo(7.7,-23.6); c.quadraticCurveTo(8.4+bb*1.6,-28.5,6.5+bb*.4,-33.5); c.quadraticCurveTo(8.8,-39,7.5,-45.6); c.quadraticCurveTo(0,-48,-7.2,-45.6); }
-  else { c.moveTo(-7.7,-45.6); c.quadraticCurveTo(-8.9,-35,-7.5,-23.6); c.lineTo(7.6,-23.6); c.quadraticCurveTo(9.3+bb*2.2,-33,7.9,-45.6); c.quadraticCurveTo(0,-48.4,-7.7,-45.6); }
+  else { // round 6: a real side-on torso: chest forward, a rounded upper back, a gentle inward curve at the lower back
+    c.moveTo(-7.3,-45.8); c.bezierCurveTo(-9.1,-43.4,-8.9,-37.6,-7.6,-33.6); c.bezierCurveTo(-6.9,-30.6,-7.5,-26.2,-7.7,-23.6); c.lineTo(7.4,-23.6); c.bezierCurveTo(8.1+bb*2.2,-26.4,8.3+bb*1.8,-30.2,7.7+bb*.6,-33.2); c.bezierCurveTo(9,-35.8,9.3,-41.8,7.7,-45.8); c.quadraticCurveTo(0,-48.6,-7.3,-45.8); }
   c.closePath(); }
 // a longer coat silhouette reaching hemY, flaring slightly
 function a3CoatPath(c,f,hemY){ c.beginPath(); c.moveTo(f?-7.4:-7.9,-45.8); c.quadraticCurveTo(f?-8.2:-9.1,-36,-8.8,-26); c.lineTo(-9.8,hemY); c.quadraticCurveTo(0,hemY+1.6,9.8,hemY); c.lineTo(9+A3BELLY*1.6,-26); c.quadraticCurveTo((f?9:9.5)+A3BELLY*2.4,-34,f?7.7:8.1,-45.8); c.quadraticCurveTo(0,-48.6,f?-7.4:-7.9,-45.8); c.closePath(); }
@@ -7421,18 +7422,19 @@ function a3Body(c,x,y,s,lk,o,live){ A3FXP={};
     c.fillStyle=D('#c9a070'); c.beginPath(); c.arc(bx-.2,-4.3,.38,0,7); c.arc(bx+1.3,-3.9,.38,0,7); c.fill();
     c.fillStyle='rgba(255,236,210,'+(dark?.1:.24)+')'; c.beginPath(); c.ellipse(bx+3.6,-3.3,1.6,.6,-.35,0,7); c.fill(); };
   // side view (director: "pants/legs still don't look side view"): both hips sit under the side-on body, one leg in front of the other
-  const aB=-2.3-stance, aF=2.1+stance*.8, shoe=lk.shoes||'boots';
-  c.save(); c.translate(0,lift); c.translate(0,-24); c.rotate(lean); c.translate(0,24); c.scale(SIDE_K,1); a3Back(c,lk.back,D,lk.accCol,t,B.w,lean,st); c.restore();
+  const aB=-1.6-stance, aF=3.4+stance*.8, shoe=lk.shoes||'boots';
+  c.save(); c.translate(0,lift); c.translate(0,-24); c.rotate(lean); c.translate(0,24); c.scale(SIDE_K,1); A3FXP.back=c.getTransform(); A3FXP.bw=B.w; a3Back(c,lk.back,D,lk.accCol,t,B.w,lean,st); c.restore();
   /* the left leg is the near one from this angle (director, 2026-11-18): the right leg is drawn first and darker, the left one last, in front */
-  if(!o.sit){ leg(1.1*B.w,aF,legD,true); a3Shoe(c,shoe,aF-.2,true,D,sk,t);
+  if(!o.sit){ A3FXP.feet={M:c.getTransform(),f:aF-.2,b:aB-.2}; leg(1.1*B.w,aF,legD,true); a3Shoe(c,shoe,aF-.2,true,D,sk,t);
     // the seat: a soft curve at the back of the hips, which is what makes a figure read as side-on
-    { const sx=-1.6*B.w+Math.sin(lean)*1.2; c.fillStyle=legC; c.beginPath(); c.ellipse(sx,hipY+2.2,2.7*B.lw,3.1,-.15,0,7); c.fill(); c.fillStyle='rgba(0,0,0,.14)'; c.beginPath(); c.ellipse(sx-.6,hipY+3.6,2.2*B.lw,1.6,-.2,0,Math.PI); c.fill(); }
+    { // the seat starts at the back of the torso (its real depth, ak_side.js sideTorsoPath) and rounds into the back of the thigh
+      const ox=Math.sin(lean)*1.2, bx0=-5.6*B.w+ox; c.fillStyle=legC; c.beginPath(); c.moveTo(bx0+.3,hipY-1.6); c.bezierCurveTo(bx0-.7*B.lw,hipY+1.2,bx0-.3*B.lw,hipY+5.4,bx0+3.2,hipY+8.8); c.lineTo(.6*B.w+ox,hipY+8.8); c.lineTo(.6*B.w+ox,hipY-1.6); c.closePath(); c.fill();
+      const sg=c.createLinearGradient(bx0-1,0,bx0+3.4,0); sg.addColorStop(0,'rgba(0,0,0,.18)'); sg.addColorStop(1,'rgba(0,0,0,0)'); c.fillStyle=sg; c.beginPath(); c.moveTo(bx0+.3,hipY-1.6); c.bezierCurveTo(bx0-.7*B.lw,hipY+1.2,bx0-.3*B.lw,hipY+5.4,bx0+3.2,hipY+8.8); c.lineTo(bx0+5,hipY+8.8); c.lineTo(bx0+4,hipY-1.6); c.closePath(); c.fill(); }
     const an=leg(-.7*B.w,aB,legC,false); a3Shoe(c,shoe,aB-.2,false,D,sk,t);
-    // a side seam down the near leg
-    if(lk.outfit!=='spacesuit'){ c.strokeStyle='rgba(255,255,255,.10)'; c.lineWidth=.45; c.beginPath(); c.moveTo(-.7*B.w+Math.sin(lean)*1.2+.3,hipY+1.5); c.lineTo(an.x+.4,-6.5); c.stroke(); } }
+  }
   else { // sitting: thighs forward from the hips, shins hanging over the dock edge (kicking gently) or down to the floor in front of the chair
     const hy0=-o.sit.seat, L1=9.4*B.l, L2=9.6*B.l;
-    for(const [hx0,col,back,ph] of [[1.8*B.w,legD,true,0],[-2.4*B.w,legC,false,1.3]]){ const hp={x:hx0,y:hy0-1.2}, kn={x:hx0+L1,y:hy0-1.5+(back?.4:0)};
+    for(const [hx0,col,back,ph] of [[.9*B.w,legD,true,0],[-.7*B.w,legC,false,1.3]]){ /* side-on: the hips sit together under the body (round 6) */ const hp={x:hx0,y:hy0-1.2}, kn={x:hx0+L1,y:hy0-1.5+(back?.4:0)};
       const an=o.sit.hang?{x:kn.x+2+Math.sin(t*1.25+ph)*1.6,y:kn.y+L2}:{x:kn.x+1.2,y:-5};
       a3Limb(c,hp,kn,6.4*B.lw,5.4*B.lw,col,back?.5:1); a3Limb(c,kn,an,5.2*B.lw,4.4*B.lw,col,back?.5:1);
       c.save(); c.translate(an.x,an.y+5); c.rotate(o.sit.hang?.28+Math.sin(t*1.25+ph)*.08:0); a3Shoe(c,shoe,-.2,back,D,sk,t); c.restore(); } }
@@ -7557,32 +7559,32 @@ function drawOutfit3(c,lk,D,f,t){ const o=lk.outfit||'none'; if(o==='none') retu
   const pocket=(x,y,w,h,cl,fl)=>{ R(x,y,w,h,cl); R(x-.2,y-.2,w+.4,1.2,fl); c.fillStyle=D('#d8c090'); c.beginPath(); c.arc(x+w/2,y+.5,.32,0,7); c.fill(); };
   switch(o){
     case 'vest': { const col=D(base||'#6a7a4a'), d2=dk('#6a7a4a'); clipT(()=>{ c.fillStyle=col; c.beginPath(); c.moveTo(-10,-50); c.lineTo(-1.4,-50); c.lineTo(-2,-22); c.lineTo(-10,-22); c.closePath(); c.moveTo(10,-50); c.lineTo(2.6,-50); c.lineTo(2.2,-22); c.lineTo(10,-22); c.closePath(); c.fill();
-        pocket(-7.2,-38.5,4,4,d2,D(mix(base||'#6a7a4a','#000000',.35))); pocket(3.4,-38.5,4,4,d2,D(mix(base||'#6a7a4a','#000000',.35))); pocket(-7.2,-31,4,3.6,d2,D(mix(base||'#6a7a4a','#000000',.35))); pocket(3.4,-31,4,3.6,d2,D(mix(base||'#6a7a4a','#000000',.35)));
-        c.strokeStyle=D('#e8d8a0'); c.lineWidth=.35; c.setLineDash([.8,.7]); c.beginPath(); c.moveTo(-1.8,-45); c.lineTo(-2.2,-23); c.moveTo(2.8,-45); c.lineTo(2.4,-23); c.stroke(); c.setLineDash([]); c.fillStyle=D('#c8c8d0'); c.beginPath(); c.arc(5.4,-41.2,.9,0,7); c.fill(); }); break; }
+        pocket(-2.6,-38.5,4,4,d2,D(mix(base||'#6a7a4a','#000000',.35))); pocket(3.4,-38.5,4,4,d2,D(mix(base||'#6a7a4a','#000000',.35))); pocket(-2.6,-31,4,3.6,d2,D(mix(base||'#6a7a4a','#000000',.35))); pocket(3.4,-31,4,3.6,d2,D(mix(base||'#6a7a4a','#000000',.35)));
+        c.strokeStyle=D('#e8d8a0'); c.lineWidth=.35; c.setLineDash([.8,.7]); c.beginPath(); c.moveTo(5,-45); c.lineTo(4.8,-23); c.moveTo(6.6,-45); c.lineTo(6.4,-23); c.stroke(); c.setLineDash([]); c.fillStyle=D('#c8c8d0'); c.beginPath(); c.arc(5.4,-41.2,.9,0,7); c.fill(); }); break; }
     case 'lifejacket': { const col=D(base||'#ff7a2a'); clipT(()=>{ c.fillStyle=col; c.beginPath(); c.moveTo(-10,-50); c.lineTo(-1.2,-50); c.quadraticCurveTo(-2.6,-36,-1.4,-23); c.lineTo(-10,-23); c.closePath(); c.moveTo(10,-50); c.lineTo(2.2,-50); c.quadraticCurveTo(3.6,-36,2.4,-23); c.lineTo(10,-23); c.closePath(); c.fill();
         c.strokeStyle=D(mix(base||'#ff7a2a','#000000',.25)); c.lineWidth=.5; for(const yy of [-41,-35,-29]){ c.beginPath(); c.moveTo(-9,yy); c.quadraticCurveTo(-5,yy+1,-1.8,yy); c.moveTo(2.8,yy); c.quadraticCurveTo(6,yy+1,9,yy); c.stroke(); }
         R(-10,-34.4,20,1.8,D('#262630')); R(-10,-28.6,20,1.8,D('#262630')); R(-.6,-35,2.4,3,D('#c8c8d0')); R(-.6,-29.2,2.4,3,D('#c8c8d0')); c.fillStyle='rgba(255,255,255,.75)'; R(5.6,-44,2.6,.9,c.fillStyle); }); break; }
     case 'hoodie': { const col=oc; clipT(()=>{ R(-10,-50,20,28,col); R(-4.4,-33,9,6,dk('#d8a020')); c.strokeStyle=dk('#d8a020'); c.lineWidth=.4; c.beginPath(); c.moveTo(-4.4,-27.2); c.lineTo(4.6,-27.2); c.stroke(); R(-10,-24.8,20,1.4,dk('#d8a020')); });
       c.fillStyle=col; c.beginPath(); c.ellipse(-4.6,-47.4,4.6,2.8,-.25,0,7); c.fill(); c.fillStyle=dk('#d8a020'); c.beginPath(); c.ellipse(-4,-47.2,3,1.6,-.25,0,7); c.fill();
-      c.strokeStyle=D('#f4f0e8'); c.lineWidth=.5; c.beginPath(); c.moveTo(1.4,-46); c.lineTo(1.8,-39.6); c.moveTo(3.4,-46); c.lineTo(3.8,-40.4); c.stroke(); c.fillStyle=D('#f4f0e8'); c.beginPath(); c.arc(1.8,-39.4,.4,0,7); c.arc(3.8,-40.2,.4,0,7); c.fill(); break; }
-    case 'raincoat': { const col=D(base||'#f2c230'); c.fillStyle=col; a3CoatPath(c,f,-16); c.fill(); c.strokeStyle=dk('#f2c230'); c.lineWidth=.55; c.beginPath(); c.moveTo(.4,-45); c.lineTo(.6,-16.4); c.stroke();
-      for(let i=0;i<4;i++){ c.fillStyle=D('#3a3a44'); c.beginPath(); c.arc(1.9,-41.5+i*6.2,.6,0,7); c.fill(); }
+      c.strokeStyle=D('#f4f0e8'); c.lineWidth=.5; c.beginPath(); c.moveTo(5.2,-46); c.lineTo(5.5,-39.6); c.moveTo(6.6,-46); c.lineTo(6.9,-40.4); c.stroke(); c.fillStyle=D('#f4f0e8'); c.beginPath(); c.arc(5.5,-39.4,.4,0,7); c.arc(6.9,-40.2,.4,0,7); c.fill(); break; }
+    case 'raincoat': { const col=D(base||'#f2c230'); c.fillStyle=col; a3CoatPath(c,f,-16); c.fill(); c.strokeStyle=dk('#f2c230'); c.lineWidth=.55; c.beginPath(); c.moveTo(6.8,-45); c.lineTo(7.2,-16.4); c.stroke();
+      for(let i=0;i<4;i++){ c.fillStyle=D('#3a3a44'); c.beginPath(); c.arc(6.1,-41.5+i*6.2,.6,0,7); c.fill(); }
       pocket(-7.6,-28,4.2,4.4,dk('#f2c230'),D(mix(base||'#f2c230','#000000',.32))); pocket(3.8,-28,4.2,4.4,dk('#f2c230'),D(mix(base||'#f2c230','#000000',.32)));
       c.fillStyle=col; c.beginPath(); c.moveTo(-6.4,-47.2); c.lineTo(.2,-42.6); c.lineTo(6.6,-47.2); c.lineTo(5.4,-49.4); c.lineTo(-5.2,-49.4); c.closePath(); c.fill(); c.strokeStyle=dk('#f2c230'); c.beginPath(); c.moveTo(-6.4,-47.2); c.lineTo(.2,-42.6); c.lineTo(6.6,-47.2); c.stroke(); break; }
-    case 'overalls': { const den=D(base||'#3a6f9a'), d2=dk('#3a6f9a'); clipT(()=>{ R(-10,-26,20,4,den); c.fillStyle=den; c.beginPath(); c.moveTo(-5.2,-38); c.lineTo(5.4,-38); c.lineTo(6,-23); c.lineTo(-5.8,-23); c.closePath(); c.fill(); R(-2.2,-34.6,4.6,3.6,d2);
+    case 'overalls': { const den=D(base||'#3a6f9a'), d2=dk('#3a6f9a'); clipT(()=>{ R(-10,-26,20,4,den); c.fillStyle=den; c.beginPath(); c.moveTo(-5.2,-38); c.lineTo(5.4,-38); c.lineTo(6,-23); c.lineTo(-5.8,-23); c.closePath(); c.fill(); R(1.8,-34.6,4.4,3.6,d2);
         c.strokeStyle=D('#e8c060'); c.lineWidth=.32; c.setLineDash([.7,.6]); c.strokeRect(-2.2,-34.6,4.6,3.6); c.setLineDash([]); });
       c.strokeStyle=den; c.lineWidth=1.8; c.beginPath(); c.moveTo(-4.6,-38); c.lineTo(-5.6,-46.2); c.moveTo(4.8,-38); c.lineTo(5.2,-46.4); c.stroke(); c.fillStyle=D('#f2cf5a'); c.beginPath(); c.arc(-4.5,-38.4,.8,0,7); c.arc(4.7,-38.4,.8,0,7); c.fill(); break; }
     case 'puffer': { const col=oc, d2=dk('#d8a020'); c.fillStyle=col; c.beginPath(); c.moveTo(-9.6,-46.2); c.quadraticCurveTo(-10.6,-34,-9.6,-21.6); c.quadraticCurveTo(0,-20.4,9.8,-21.6); c.quadraticCurveTo(10.8,-34,9.8,-46.2); c.quadraticCurveTo(0,-49,-9.6,-46.2); c.fill();
-      c.strokeStyle=d2; c.lineWidth=.6; for(let yy=-41.5;yy<-22;yy+=4.6){ c.beginPath(); c.moveTo(-10,yy); c.quadraticCurveTo(0,yy+1.4,10.2,yy); c.stroke(); } R(.1,-46.6,.8,25,D('#e8e8ee')); c.fillStyle=col; c.beginPath(); c.ellipse(.4,-46.8,7.4,2.2,0,0,7); c.fill(); c.strokeStyle=d2; c.beginPath(); c.ellipse(.4,-46.8,7.4,2.2,0,0,Math.PI); c.stroke(); break; }
-    case 'wetsuit': { const w=D('#1c1c26'); clipT(()=>{ R(-10,-50,20,28,w); R(-10,-41,20,1.8,oc); R(-10,-25.8,20,1.4,oc); }); c.fillStyle=oc; c.fillRect(-6.1,-12.6,5,1.4); c.fillRect(.6,-12.6,5,1.4); R(.5,-47,.8,9,D('#8a8a9a')); break; }
-    case 'captain': { const n=D(base||'#1a2a4a'); c.fillStyle=n; a3CoatPath(c,f,-14.5); c.fill(); c.strokeStyle=D(mix(base||'#1a2a4a','#ffffff',.15)); c.lineWidth=.5; c.beginPath(); c.moveTo(-.4,-44); c.lineTo(-.6,-15); c.stroke();
-      for(let i=0;i<4;i++){ c.fillStyle=D('#f2c84a'); c.beginPath(); c.arc(-2.4,-41+i*5.8,.65,0,7); c.arc(2.4,-41+i*5.8,.65,0,7); c.fill(); }
-      c.fillStyle=D('#f2c84a'); c.fillRect(4.6,-46.6,4.4,1.6); for(let k=0;k<4;k++) c.fillRect(5+k*1.05,-45,.5,1.8); c.fillStyle=n; c.beginPath(); c.moveTo(-6,-47.4); c.lineTo(0,-42.4); c.lineTo(6.2,-47.4); c.lineTo(5,-49.2); c.lineTo(-4.8,-49.2); c.closePath(); c.fill(); c.fillStyle=D('#f4f4f2'); c.beginPath(); c.moveTo(-2,-47.6); c.lineTo(0,-44); c.lineTo(2.2,-47.6); c.closePath(); c.fill(); break; }
+      c.strokeStyle=d2; c.lineWidth=.6; for(let yy=-41.5;yy<-22;yy+=4.6){ c.beginPath(); c.moveTo(-10,yy); c.quadraticCurveTo(0,yy+1.4,10.2,yy); c.stroke(); } R(6.3,-46.6,.8,25,D('#e8e8ee')); c.fillStyle=col; c.beginPath(); c.ellipse(.4,-46.8,7.4,2.2,0,0,7); c.fill(); c.strokeStyle=d2; c.beginPath(); c.ellipse(.4,-46.8,7.4,2.2,0,0,Math.PI); c.stroke(); break; }
+    case 'wetsuit': { const w=D('#1c1c26'); clipT(()=>{ R(-10,-50,20,28,w); R(-10,-41,20,1.8,oc); R(-10,-25.8,20,1.4,oc); }); c.fillStyle=oc; c.fillRect(-4.2,-12.6,8.8,1.4); /* one band across both shins: the legs overlap side-on */ R(6.2,-47,.8,9,D('#8a8a9a')); break; }
+    case 'captain': { const n=D(base||'#1a2a4a'); c.fillStyle=n; a3CoatPath(c,f,-14.5); c.fill(); c.strokeStyle=D(mix(base||'#1a2a4a','#ffffff',.15)); c.lineWidth=.5; c.beginPath(); c.moveTo(5.5,-44); c.lineTo(5.6,-15); c.stroke();
+      for(let i=0;i<4;i++){ c.fillStyle=D('#f2c84a'); c.beginPath(); c.arc(4.4,-41+i*5.8,.65,0,7); c.arc(6.6,-41+i*5.8,.65,0,7); c.fill(); }
+      c.fillStyle=D('#f2c84a'); c.fillRect(4.6,-46.6,4.4,1.6); for(let k=0;k<4;k++) c.fillRect(5+k*1.05,-45,.5,1.8); c.fillStyle=n; c.beginPath(); c.moveTo(-6,-47.4); c.lineTo(4.6,-42.6); c.lineTo(7.4,-47.4); c.lineTo(5,-49.2); c.lineTo(-4.8,-49.2); c.closePath(); c.fill(); c.fillStyle=D('#f4f4f2'); c.beginPath(); c.moveTo(-2,-47.6); c.lineTo(0,-44); c.lineTo(2.2,-47.6); c.closePath(); c.fill(); break; }
     case 'spacesuit': { const s2=D('#e8ecf0'); clipT(()=>{ R(-10,-50,20,28,s2); R(-10,-27,20,1.8,D('#d8603a')); }); R(-4.2,-40.4,8.4,6,D('#5a6a7a')); R(-3.4,-39.4,2.2,2,D(Math.sin(t*3.2)>0?'#ff5a4a':'#7a2a24')); R(.4,-39.4,2.2,2,D(Math.sin(t*3.2)>0?'#2a6a44':'#5aff9a')); /* the chest lights blink (round 6) */ R(-3.4,-36.6,6,.8,D('#9ad8ff'));
-      c.strokeStyle=D('#b8c0c8'); c.lineWidth=.4; c.beginPath(); c.moveTo(-7,-14); c.lineTo(-1.4,-14); c.moveTo(.6,-14); c.lineTo(6.2,-14); c.stroke(); c.fillStyle=D('#c8d0d8'); c.beginPath(); c.ellipse(0,-46.6,7,1.8,0,0,7); c.fill(); break; }
+      c.strokeStyle=D('#b8c0c8'); c.lineWidth=.4; c.beginPath(); c.moveTo(-4.4,-14); c.lineTo(4.8,-14); c.stroke(); c.fillStyle=D('#c8d0d8'); c.beginPath(); c.ellipse(0,-46.6,7,1.8,0,0,7); c.fill(); break; }
     case 'cardigan': { const col=oc; clipT(()=>{ c.fillStyle=col; c.beginPath(); c.moveTo(-10,-50); c.lineTo(-1.6,-50); c.lineTo(-.6,-22); c.lineTo(-10,-22); c.closePath(); c.moveTo(10,-50); c.lineTo(3.2,-50); c.lineTo(1.6,-22); c.lineTo(10,-22); c.closePath(); c.fill(); R(-10,-24.6,20,2.2,dk('#d8a020'));
         c.strokeStyle=dk('#d8a020'); c.lineWidth=.3; for(let xx=-9;xx<10;xx+=1.2){ c.beginPath(); c.moveTo(xx,-24.6); c.lineTo(xx,-22.4); c.stroke(); } });
-      for(let i=0;i<4;i++){ c.fillStyle=D('#f4ecd8'); c.beginPath(); c.arc(-.2+i*.25,-41+i*4.8,.55,0,7); c.fill(); } pocket(3.6,-31,3.8,3.4,dk('#d8a020'),dk('#d8a020')); break; }
+      for(let i=0;i<4;i++){ c.fillStyle=D('#f4ecd8'); c.beginPath(); c.arc(6.2+i*.08,-41+i*4.8,.55,0,7); c.fill(); } pocket(3.6,-31,3.8,3.4,dk('#d8a020'),dk('#d8a020')); break; }
     case 'sweater': { const col=oc, l3=lt2('#d8a020'); clipT(()=>{ R(-10,-50,20,28,col); c.fillStyle=l3; c.beginPath(); for(let xx=-9;xx<10;xx+=3){ c.moveTo(xx,-38.4); c.lineTo(xx+1.5,-36.6); c.lineTo(xx+3,-38.4); c.lineTo(xx+1.5,-40.2); } c.fill();
         c.fillStyle=dk('#d8a020'); c.fillRect(-10,-24.9,20,2.6); c.strokeStyle=D(mix(base||'#d8a020','#000000',.32)); c.lineWidth=.3; for(let xx=-9;xx<10;xx+=1.1){ c.beginPath(); c.moveTo(xx,-24.9); c.lineTo(xx,-22.4); c.stroke(); }
         c.strokeStyle='rgba(0,0,0,.08)'; c.lineWidth=.35; for(let xx=-9;xx<10;xx+=1.6){ c.beginPath(); c.moveTo(xx,-48); c.lineTo(xx,-41); c.moveTo(xx,-35); c.lineTo(xx,-25); c.stroke(); } });
@@ -7590,17 +7592,17 @@ function drawOutfit3(c,lk,D,f,t){ const o=lk.outfit||'none'; if(o==='none') retu
     case 'apron': { const col=D(base||'#e8e0d0'); c.fillStyle=col; c.beginPath(); c.moveTo(-5,-41); c.lineTo(5.6,-41); c.lineTo(6.6,-18); c.quadraticCurveTo(.6,-17,-5.6,-18); c.closePath(); c.fill();
       c.strokeStyle=col; c.lineWidth=.9; c.beginPath(); c.moveTo(-4.4,-41); c.lineTo(-2.2,-47.4); c.moveTo(5,-41); c.lineTo(3,-47.6); c.stroke(); pocket(-2.2,-33.6,5,3.8,dk('#e8e0d0'),dk('#e8e0d0')); c.strokeStyle=dk('#e8e0d0'); c.lineWidth=.5; c.beginPath(); c.moveTo(-7.6,-26.4); c.lineTo(-5.4,-26.4); c.moveTo(6.4,-26.4); c.lineTo(8.2,-26.4); c.stroke(); break; }
     case 'tidecoat': { const n=D('#1a3a5a'); c.fillStyle=n; a3CoatPath(c,f,-16); c.fill(); const glow=D('#5ad8e8'); c.strokeStyle=glow; c.lineWidth=1.1; c.beginPath(); for(let xx=-9.6;xx<=9.6;xx+=.6) c.lineTo(xx,-21.4+Math.sin(xx*.9+t*2)*1.1); c.stroke();
-      c.lineWidth=.7; c.beginPath(); c.moveTo(.2,-45.6); c.lineTo(.4,-22.6); c.stroke(); c.save(); c.globalAlpha*=.35; c.lineWidth=2.4; c.beginPath(); for(let xx=-9.6;xx<=9.6;xx+=.6) c.lineTo(xx,-21.4+Math.sin(xx*.9+t*2)*1.1); c.stroke(); c.restore();
-      c.fillStyle=n; c.beginPath(); c.moveTo(-6.2,-47.2); c.lineTo(.2,-42.8); c.lineTo(6.4,-47.2); c.lineTo(5.2,-49.4); c.lineTo(-5,-49.4); c.closePath(); c.fill(); break; }
+      c.lineWidth=.7; c.beginPath(); c.moveTo(6.6,-45.6); c.lineTo(6.9,-22.6); c.stroke(); c.save(); c.globalAlpha*=.35; c.lineWidth=2.4; c.beginPath(); for(let xx=-9.6;xx<=9.6;xx+=.6) c.lineTo(xx,-21.4+Math.sin(xx*.9+t*2)*1.1); c.stroke(); c.restore();
+      c.fillStyle=n; c.beginPath(); c.moveTo(-6.2,-47.2); c.lineTo(4.6,-43); c.lineTo(7.4,-47.2); c.lineTo(5.2,-49.4); c.lineTo(-5,-49.4); c.closePath(); c.fill(); break; }
     case 'bathrobe': { const col=D(base||'#f0e6f4'), d2=dk('#f0e6f4'); c.fillStyle=col; a3CoatPath(c,f,-12); c.fill();
       c.fillStyle=d2; c.beginPath(); c.moveTo(-5.4,-47); c.quadraticCurveTo(-1,-40,1.4,-33); c.lineTo(3,-33); c.quadraticCurveTo(1.6,-41,6.4,-47); c.lineTo(3.8,-47.6); c.quadraticCurveTo(1.6,-42,1.6,-37); c.quadraticCurveTo(-1.6,-42,-2.6,-47.6); c.closePath(); c.fill();
       R(-9,-29.4,18.6,2.2,d2); c.strokeStyle=d2; c.lineWidth=1; c.beginPath(); c.moveTo(4.4,-28.4); c.lineTo(5.6,-23); c.moveTo(5,-28.4); c.lineTo(7,-24); c.stroke();
       c.fillStyle='rgba(255,255,255,.25)'; for(let i=0;i<14;i++){ c.beginPath(); c.arc(-8+((i*7)%17),-44+((i*11)%30),.5,0,7); c.fill(); } break; }
     case 'pajamas': { const col=D(base||'#7a9ad8'), l3=D('#f4f0f8'); clipT(()=>{ R(-10,-50,20,28,col); c.fillStyle=l3; for(let xx=-9;xx<10;xx+=2.4) c.fillRect(xx,-50,.9,28); });
-      for(let i=0;i<4;i++){ c.fillStyle=l3; c.beginPath(); c.arc(1.2,-42+i*5,.5,0,7); c.fill(); } c.fillStyle=col; c.beginPath(); c.moveTo(-5.6,-47.2); c.lineTo(.6,-43.2); c.lineTo(6,-47.2); c.lineTo(5,-48.8); c.lineTo(-4.8,-48.8); c.closePath(); c.fill(); break; }
+      for(let i=0;i<4;i++){ c.fillStyle=l3; c.beginPath(); c.arc(6.1,-42+i*5,.5,0,7); c.fill(); } c.fillStyle=col; c.beginPath(); c.moveTo(-5.6,-47.2); c.lineTo(4.6,-43.4); c.lineTo(7.2,-47.2); c.lineTo(5,-48.8); c.lineTo(-4.8,-48.8); c.closePath(); c.fill(); break; }
     case 'lumberjack': { const col=D(base||'#b8342a'), d2=D('#1c1416'); clipT(()=>{ R(-10,-50,20,28,col); c.fillStyle=d2; c.globalAlpha*=.75; for(let xx=-10;xx<10;xx+=4.4) c.fillRect(xx,-50,2,28); for(let yy=-50;yy<-22;yy+=4.4) c.fillRect(-10,yy,20,2); c.globalAlpha/=.75;
         c.fillStyle=d2; for(let xx=-10;xx<10;xx+=4.4) for(let yy=-50;yy<-22;yy+=4.4) c.fillRect(xx,yy,2,2); });
-      pocket(-7,-40,4,3.6,col,d2); pocket(3.4,-40,4,3.6,col,d2); c.strokeStyle=d2; c.lineWidth=.5; c.beginPath(); c.moveTo(.6,-45.6); c.lineTo(.8,-23.4); c.stroke(); c.fillStyle=col; c.beginPath(); c.moveTo(-6,-47.2); c.lineTo(.6,-43.6); c.lineTo(6.6,-47.2); c.lineTo(5.4,-49); c.lineTo(-4.8,-49); c.closePath(); c.fill(); break; }
+      pocket(-2.6,-40,4,3.6,col,d2); pocket(3.4,-40,4,3.6,col,d2); c.strokeStyle=d2; c.lineWidth=.5; c.beginPath(); c.moveTo(6.3,-45.6); c.lineTo(6.6,-23.4); c.stroke(); c.fillStyle=col; c.beginPath(); c.moveTo(-6,-47.2); c.lineTo(4.6,-43.8); c.lineTo(7.6,-47.2); c.lineTo(5.4,-49); c.lineTo(-4.8,-49); c.closePath(); c.fill(); break; }
   }
 }
 
@@ -7688,9 +7690,12 @@ if(/[?&]test\b/.test(location.search)) window.__lookSheet=(looks,opts={})=>{ con
 // =====================================================================
 function a3Grad(c,y0,y1,col,lit,shade){ const gr=c.createLinearGradient(0,y0,0,y1); gr.addColorStop(0,mix(col,'#fff4e2',lit==null?.16:lit)); gr.addColorStop(.6,col); gr.addColorStop(1,mix(col,'#000000',shade==null?.3:shade)); return gr; }
 // a generic shoe profile: ankle top at -h, toe reaching bx+toe, rounded; returns nothing, fills with a lit gradient
-function a3ShoeBody(c,bx,h,toe,col,round){ c.fillStyle=a3Grad(c,-h-.6,0,col); c.beginPath(); c.moveTo(bx-3,-h); c.quadraticCurveTo(bx+.4,-h-.5,bx+1.8,-Math.min(h,5.2)+.1);
-  c.quadraticCurveTo(bx+toe+.4,-4*round,bx+toe,-1.1); c.quadraticCurveTo(bx+toe-.2,-.2,bx+toe-1,-.2); c.lineTo(bx-3.2,-.2); c.quadraticCurveTo(bx-3.8,-h*.5,bx-3,-h); c.fill(); }
-function a3Sole(c,bx,toe,col,th){ c.fillStyle=col; c.beginPath(); c.moveTo(bx-3.5,-th); c.lineTo(bx+toe-.1,-th); c.quadraticCurveTo(bx+toe+.3,0,bx+toe-.8,.25); c.lineTo(bx-3.4,.25); c.closePath(); c.fill(); }
+function a3ShoeBody(c,bx,h,toe,col,round){ // round 6: a truer side-on shoe: rounded heel counter, collar, instep sloping to a low toe with a little toe spring
+  const ih=-Math.min(h,5.2)+.1, tt=-1.05-.25*round; c.fillStyle=a3Grad(c,-h-.6,0,col); c.beginPath(); c.moveTo(bx-2.9,-h); c.quadraticCurveTo(bx+.2,-h-.55,bx+1.7,ih);
+  c.bezierCurveTo(bx+toe*.55,ih+.6,bx+toe-.2,-2.6*round,bx+toe+.15,tt); c.quadraticCurveTo(bx+toe+.25,-.35,bx+toe-.7,-.25); c.lineTo(bx-2.6,-.2); c.bezierCurveTo(bx-3.9,-.4,bx-4,-h*.62,bx-2.9,-h); c.fill();
+  c.strokeStyle='rgba(0,0,0,.18)'; c.lineWidth=.3; c.beginPath(); c.moveTo(bx-3,-h+.35); c.quadraticCurveTo(bx-.6,-h-.05,bx+1.5,ih+.35); c.stroke(); }
+function a3Sole(c,bx,toe,col,th){ c.fillStyle=col; c.beginPath(); c.moveTo(bx-3.6,-th-.25); c.lineTo(bx-1,-th-.25); c.lineTo(bx-.6,-th); c.lineTo(bx+toe-.2,-th); c.quadraticCurveTo(bx+toe+.35,-th*.4,bx+toe-.1,-.2); c.quadraticCurveTo(bx+toe-1,.3,bx+toe-2.4,.25); c.lineTo(bx-3.5,.25); c.quadraticCurveTo(bx-3.9,.1,bx-3.6,-th-.25); c.closePath(); c.fill();
+  c.fillStyle='rgba(255,255,255,.08)'; c.fillRect(bx-3.4,-th-.25,toe+2.8,.25); }
 function a3Foot(c,bx,sk){ c.fillStyle=a3Grad(c,-4.6,0,sk,.12,.22); c.beginPath(); c.moveTo(bx-2.6,-4.8); c.lineTo(bx+1.2,-4.6); c.quadraticCurveTo(bx+5.6,-2.4,bx+5.2,-.6); c.lineTo(bx-2.8,-.6); c.closePath(); c.fill(); }
 function a3Shoe(c,id,bx,dark,D,sk,t){ const k=dark?.82:1, S2=(cl)=>D(dark?mix(cl,'#000000',.25):cl), dot=(x,y,r,cl)=>{ c.fillStyle=cl; c.beginPath(); c.arc(x,y,r,0,7); c.fill(); };
   const shine=(x,y,rx)=>{ c.fillStyle='rgba(255,240,220,'+(dark?.1:.26)+')'; c.beginPath(); c.ellipse(x,y,rx,rx*.4,-.35,0,7); c.fill(); };
@@ -7734,7 +7739,7 @@ function a3Shoe(c,id,bx,dark,D,sk,t){ const k=dark?.82:1, S2=(cl)=>D(dark?mix(cl
       dot(bx+.6,-5.2,.8,S2('#ffd84a')); shine(bx+6.4,-3.6,2.2); break; }
     default: { // work boots
       const bc=S2('#33241a'); c.fillStyle=a3Grad(c,-6,0,bc,.14,.35);
-      c.beginPath(); c.moveTo(bx-3,-5.4); c.quadraticCurveTo(bx+.4,-6,bx+1.8,-5.1); c.quadraticCurveTo(bx+6.4,-4,bx+6,-1.1); c.quadraticCurveTo(bx+5.8,-.2,bx+5,-.2); c.lineTo(bx-3.2,-.2); c.quadraticCurveTo(bx-3.8,-2.8,bx-3,-5.4); c.fill();
+      c.beginPath(); c.moveTo(bx-3,-5.6); c.quadraticCurveTo(bx+.3,-6.2,bx+1.8,-5.2); c.bezierCurveTo(bx+3.6,-4.6,bx+6.1,-3.2,bx+6.2,-1.4); c.quadraticCurveTo(bx+6.3,-.3,bx+5.3,-.2); c.lineTo(bx-2.6,-.2); c.bezierCurveTo(bx-3.9,-.4,bx-4,-3.6,bx-3,-5.6); c.fill(); c.fillStyle=mix(bc,'#000000',.25); c.beginPath(); c.ellipse(bx-.6,-5.6,2.6,.6,-.05,0,7); c.fill();
       a3Sole(c,bx,6,D('#140d08'),1); dot(bx-.2,-4.3,.38,D('#c9a070')); dot(bx+1.3,-3.9,.38,D('#c9a070')); shine(bx+3.6,-3.3,1.6); }
   } }
 
@@ -9197,7 +9202,7 @@ const MEME_OUT = {
     for(let i=0;i<3;i++){ c.beginPath(); c.arc(.5,-39+i*4,.5,0,7); c.fill(); } c.restore(); },
   clownsuit(c,lk,D,f,t){ const col=D(lk.outCol&&lk.outCol!=='#d8a020'?lk.outCol:'#e8483a'); c.fillStyle=col; a3CoatPath(c,f,-14); c.fill(); c.save(); a3CoatPath(c,f,-14); c.clip();
     const cs=['#ffd84a','#5ad8ff','#7aff8a','#ffffff']; for(let i=0;i<24;i++){ c.fillStyle=D(cs[i%4]); c.beginPath(); c.arc(-9+((i*7)%19),-46+((i*11)%30),1.2,0,7); c.fill(); } c.restore();
-    for(let i=0;i<3;i++){ c.fillStyle=D(['#ffffff','#ffd84a','#5ad8ff'][i]); c.beginPath(); c.arc(1,-40+i*6,1.4,0,7); c.fill(); }
+    for(let i=0;i<3;i++){ c.fillStyle=D(['#ffffff','#ffd84a','#5ad8ff'][i]); c.beginPath(); c.arc(6.4,-40+i*6,1.4,0,7) /* pom-poms on the front edge (side view) */; c.fill(); }
     c.fillStyle=D('#f4f4f2'); for(let i=0;i<7;i++){ c.beginPath(); c.ellipse(-6+i*2,-46.4,1.6,1.1,0,0,7); c.fill(); } } };
 const _drawOutfit3_0 = drawOutfit3;
 drawOutfit3 = function(c,lk,D,f,t){ const m=MEME_OUT[lk.outfit]; if(m) return m(c,lk,D,f,t); return _drawOutfit3_0(c,lk,D,f,t); };
@@ -9521,7 +9526,7 @@ const SIDE_OUT=(()=>{
         pocket(c,.6,-39,3.6,3.8,d2,d3,D('#d8c090')); pocket(c,-.4,-31.4,4.2,3.6,d2,d3,D('#d8c090'));
         frontSeam(c,f,1.5,-45,-23,D('#e8d8a0'),.32,[.8,.7]); dot(c,-3.6,-41,.9,D('#c8c8d0')); dot(c,-3.6,-41,.45,D('#8a8a96')); }); },
     lifejacket(c,lk,D,f){ const col=D(H(lk,'#ff7a2a')), d2=D(sh(H(lk,'#ff7a2a'),.25)), k=D('#262630');
-      clipT(c,f,()=>{ c.fillStyle=col; c.fillRect(-9,-50,19,28); c.fillStyle=d2; c.fillRect(-1.4,-46,2.4,24);
+      clipT(c,f,()=>{ c.fillStyle=col; c.fillRect(-9,-50,19,28); c.fillStyle=d2; { const pz=[]; for(let y=-46;y<=-22;y+=1) pz.push([sideFront(y,f)-1.6,y]); c.lineWidth=2.2; c.strokeStyle=d2; c.beginPath(); pz.forEach(([x,y],i)=>i?c.lineTo(x,y):c.moveTo(x,y)); c.stroke(); }
         for(const y of [-41,-35.4,-29.4]){ line(c,[[-7,y],[-4,y+.8],[-1.6,y]],d2,.45); line(c,[[1.2,y],[4,y+.8],[7.2,y]],d2,.45); }
         c.fillStyle=k; c.fillRect(-9,-34.6,19,1.8); c.fillRect(-9,-28.8,19,1.8);
         for(const y of [-35.2,-29.4]){ const x=sideFront(y+.9,f)-2.6; c.fillStyle=D('#c8c8d0'); c.fillRect(x,y,2,3); c.fillStyle=k; c.fillRect(x+.5,y+.8,1,1.4); }
@@ -9560,11 +9565,11 @@ const SIDE_OUT=(()=>{
       clipC(c,f,-14.5,()=>{ const p=[]; for(let y=-44;y<=-14.5;y+=1) p.push([Math.min(7.4,sideFront(Math.min(y,-24),f))-1.1,y]); line(c,p,l2,.5); buttons(c,f,2.2,[-41,-35.4,-29.6],gold,.6); dot(c,5.4,-24,.6,gold);
         c.fillStyle=gold; c.fillRect(-8,-18.6,16,.7); c.fillRect(-8,-20,16,.4); });
       c.fillStyle=D('#f4f4f2'); c.beginPath(); c.moveTo(2.4,-47.2); c.lineTo(4.4,-46.8); c.lineTo(4.6,-44.2); c.closePath(); c.fill(); collar(c,n,gold,4); },
-    spacesuit(c,lk,D,f){ const s2=D('#e8ecf0'), s3=D('#c8d0d8');
-      clipT(c,f,()=>{ c.fillStyle=s2; c.fillRect(-9,-50,19,28); c.fillStyle=D('#d8603a'); c.fillRect(-9,-27,19,1.8); line(c,[[-1.4,-46],[-1.8,-36],[-1.4,-27]],s3,.4); line(c,[[-6,-44],[-5.6,-30]],s3,.35); });
+    spacesuit(c,lk,D,f,t){ const s2=D('#e8ecf0'), s3=D('#c8d0d8'), on=Math.sin((t||0)*3.2)>0;
+      clipT(c,f,()=>{ c.fillStyle=s2; c.fillRect(-9,-50,19,28); c.fillStyle=D('#d8603a'); c.fillRect(-9,-27,19,1.8); frontSeam(c,f,1.3,-46,-27,s3,.45); line(c,[[-6,-44],[-5.6,-30]],s3,.35); });
       // the chest control box stands out in front of the suit
       const bx=sideFront(-38,f)-1.6; c.fillStyle=D('#5a6a7a'); c.beginPath(); c.roundRect?c.roundRect(bx,-41.4,4.2,6.2,.8):c.rect(bx,-41.4,4.2,6.2); c.fill(); c.fillStyle=D('#3a4652'); c.fillRect(bx+3.4,-41,.8,5.4);
-      dot(c,bx+1.2,-39.6,.55,D('#ff5a4a')); dot(c,bx+2.6,-39.6,.55,D('#5aff9a')); c.fillStyle=D('#9ad8ff'); c.fillRect(bx+.6,-37.6,2.6,.7);
+      dot(c,bx+1.2,-39.6,.55,D(on?'#ff5a4a':'#6a2622')); dot(c,bx+2.6,-39.6,.55,D(on?'#2a6a44':'#5aff9a')); /* the lights blink (round 6) */ c.fillStyle=D('#9ad8ff'); c.fillRect(bx+.6,-37.6,2.6,.7);
       c.fillStyle=s3; c.beginPath(); c.moveTo(-5.2,-46.4); c.quadraticCurveTo(-4.8,-49.6,-2.4,-49.8); c.quadraticCurveTo(2,-49.4,4.2,-46.6); c.quadraticCurveTo(-.4,-47.4,-5.2,-46.4); c.fill(); },
     cardigan(c,lk,D,f){ const col=D(H(lk,'#d8a020')), d2=D(sh(H(lk,'#d8a020'),.22));
       clipT(c,f,()=>{ c.fillStyle=col; c.beginPath(); c.moveTo(-9,-50); c.lineTo(2.2,-50); for(let y=-46.4;y<=-22;y+=1.2) c.lineTo(sideFront(y,f)-.9-(y<-40?(y+40)*-.12:0),y); c.lineTo(-9,-22); c.closePath(); c.fill(); c.fillStyle=d2; c.fillRect(-9,-24.8,19,2.4);
@@ -14864,41 +14869,111 @@ function spkDraw(cnv,o,t){ const c=cnv.getContext('2d'), w=o.w, h=o.h; c.save();
       x.fillStyle=g; x.fillRect(bx-w*.14,0,w*.28,h); x.globalAlpha=1; x.globalCompositeOperation='destination-in'; x.drawImage(o.mask,0,0); x.globalCompositeOperation='source-over';
       c.globalAlpha=.7; c.drawImage(T,0,0,w,h,0,0,w,h); c.globalAlpha=1; }});
   c.restore(); }
-setInterval(()=>{ if(document.hidden||!SPK.size) return; const t=performance.now()/1000; for(const [cnv,o] of SPK){ if(!cnv.isConnected){ spkDrop(cnv); continue; } if(o.vis) spkDraw(cnv,o,t); } },33);
+// every display frame (director: "use more frames, push the limits without breaking"); runs only while a shiny picture exists
+{ let raf=0; const tick=()=>{ raf=0; if(!SPK.size) return; if(!document.hidden){ const t=performance.now()/1000; for(const [cnv,o] of SPK){ if(!cnv.isConnected){ spkDrop(cnv); continue; } if(o.vis) spkDraw(cnv,o,t); } } if(SPK.size) raf=requestAnimationFrame(tick); };
+  setInterval(()=>{ if(!raf&&SPK.size) raf=requestAnimationFrame(tick); },250); }
 // =====================================================================
 // Living cosmetics (director, round 6: "a lot of customization items don't look cool... make them actually awesome, with new FX
-// when it fits the theme"). Shared for every platform. The angler code (g_angler.js) records where the hat, chest and neck are
-// each frame (A3FXP); after the angler is drawn, these effects are drawn on top in the same places, so they follow every pose,
-// lean and scale: in the scene, the Wardrobe preview, the Boardwalk, the Tide Pass and the boards.
-// Only drawn while the angler is animated (o.t given): still thumbnails stay cached and cheap.
-//   hats:    crown and tiara gems glint; wizard and witch hats trail twinkling stars; the astronaut visor catches a moving
-//            glare; the diving helmet lets out bubbles; the halo shimmers
-//   outfits: the spacesuit's chest lights blink; the Tide coat's hem glows like a wave and sheds glints; the captain's gold
-//            buttons catch the light; the fish suit's scales shimmer
-//   necks:   the big gold chain and the pearls catch the light
+// when it fits the theme"; then: "some hats don't feel magical, no wizard FX is crazy. We want everything to feel alive. Don't just
+// end with hats, or just one option. Everywhere it makes sense"). Shared for every platform.
+// The angler code (g_angler.js) records where the hat, chest, neck, back and feet are each frame (A3FXP). After the angler is
+// drawn, these effects are drawn on top in the same places, so they follow every pose, lean and scale: in the scene, the Wardrobe
+// preview, the Boardwalk, the Tide Pass and the boards. Only while the angler is animated (o.t given); still thumbnails stay cheap.
+// Everything is drawn as light ("lighter"), except things that are not light (smoke, petals, notes, bubbles, confetti).
+//   hats:    wizard (arcane glow, a spiral of sparkles climbing to the tip, a pulsing tip star, orbiting runes), witch (green and
+//            violet wisps off the tip), crown and tiara gems, halo, astronaut glare, diving-helmet bubbles, fishbowl bubbles, top hat
+//            and carnival hat magic bursts, headphones music notes, mushroom spores, flower-crown petals, party confetti, lantern
+//            hat flicker, Tide cap droplets, knight / viking / pirate / graduation / captain / sailor glints
+//   outfits: Tide coat glow and glints, captain buttons, fish-suit scales, clown confetti sparkles, kimono petals, hot-dog steam,
+//            raincoat drips, life-jacket reflective strip, spacesuit lights (inside the suit drawing)
+//   backs:   angel feathers and holy motes, butterfly wing dust, dragon embers, bat shadows, jetpack smoke, lantern moths,
+//            Tide cape and wings droplets, guitar notes
+//   necks:   gold chain, pearls, medal glints, lei petals, Tide scarf droplets
+//   shoes:   glow kicks pulse and sparkle, Tide treads droplets, moon boots stars, roller wheel glints, fish feet bubbles
+//   glasses: lens glints (sunglasses, heart, goggles, monocle, pixel, frames), pixel sparkles, little floating hearts
+// A3FXP (anchors) is declared in g_angler.js, which fills it while drawing.
 // =====================================================================
-// A3FXP (anchors) is declared in g_angler.js, which fills it while drawing
-function wearFxDraw(c,lk,t,toC,k){ try{ const A=A3FXP; if(!A||(!A.hat&&!A.torso&&!A.neck)) return;
-    const P=(M,x,y)=>{ const p=M.transformPoint({x,y}); return toC(p); }, S0=M=>Math.hypot(M.a,M.b)*k;
+function wearFxDraw(c,lk,t,toC,k){ try{ const A=A3FXP; if(!A||(!A.hat&&!A.torso&&!A.neck&&!A.back&&!A.feet)) return;
+    const P=(M,x,y)=>toC(M.transformPoint({x,y})), S0=M=>Math.hypot(M.a,M.b)*k, gold=SFX_PAL.shiny, starry=SFX_PAL.starry, spec=SFX_PAL.spectral, myth=SFX_PAL.mythic;
+    const flare=(M,x,y,sz,pal,i,a,long,rot)=>{ if(a<=.02) return; const p=P(M,x,y); sfxFlare(c,p.x,p.y,sz*S0(M),pal,i,t,a,rot!=null?rot:((i*.7+t*.3)%1-.5),long); };
+    const life=(per,off)=>{ const k2=(t+off)/per, n=Math.floor(k2), u=k2-n; return {n,u,a:u<.1?u/.1:Math.max(0,1-(u-.1)/.6)**1.5}; };
+    const glow=(M,x,y,r,rgb,a)=>{ if(a<=.01) return; const p=P(M,x,y), R=Math.max(1,r*S0(M)); const g=c.createRadialGradient(p.x,p.y,0,p.x,p.y,R); g.addColorStop(0,'rgba('+rgb+','+a.toFixed(3)+')'); g.addColorStop(1,'rgba('+rgb+',0)'); c.fillStyle=g; c.beginPath(); c.arc(p.x,p.y,R,0,7); c.fill(); };
+    const dot=(M,x,y,r,col)=>{ const p=P(M,x,y), R=Math.max(.5,r*S0(M)); c.fillStyle=col; c.beginPath(); c.arc(p.x,p.y,R,0,7); c.fill(); };
+    const ink=f=>{ c.save(); c.globalCompositeOperation='source-over'; f(); c.restore(); };
+    const note=(M,x,y,sz,a,col)=>{ if(a<=.02) return; const p=P(M,x,y); ink(()=>{ c.globalAlpha=a; c.fillStyle=col; c.font='700 '+Math.max(6,sz*S0(M)).toFixed(1)+'px system-ui,sans-serif'; c.textAlign='center'; c.fillText('♪',p.x,p.y); }); };
+    const petal=(M,x,y,sz,rot,col,a)=>{ if(a<=.02) return; const p=P(M,x,y), s=Math.max(.8,sz*S0(M)); ink(()=>{ c.globalAlpha=a; c.translate(p.x,p.y); c.rotate(rot); c.fillStyle=col; c.beginPath(); c.ellipse(0,0,s,s*.55,0,0,7); c.fill(); }); };
+    const bubble=(M,x,y,r,a)=>{ if(a<=.02) return; const p=P(M,x,y), R=Math.max(.6,r*S0(M)); ink(()=>{ c.strokeStyle='rgba(210,240,255,'+(.75*a).toFixed(2)+')'; c.lineWidth=Math.max(.5,R*.28); c.beginPath(); c.arc(p.x,p.y,R,0,7); c.stroke(); c.fillStyle='rgba(255,255,255,'+(.6*a).toFixed(2)+')'; c.beginPath(); c.arc(p.x-R*.35,p.y-R*.35,R*.25,0,7); c.fill(); }); };
+    const puff=(M,x,y,r,rgba)=>{ const p=P(M,x,y), R=Math.max(.8,r*S0(M)); ink(()=>{ c.fillStyle=rgba; c.beginPath(); c.arc(p.x,p.y,R,0,7); c.fill(); }); };
+    const H=A.hat, T=A.torso, N=A.neck, Bk=A.back, F=A.feet;
     c.save(); c.globalCompositeOperation='lighter';
-    const flare=(M,x,y,sz,pal,i,a,long)=>{ const p=P(M,x,y); sfxFlare(c,p.x,p.y,sz*S0(M),pal,i,t,a,(i*.7+t*.3)%1-.5,long); };
-    const life=(per,off)=>{ const k2=(t+off)/per, n=Math.floor(k2), u=k2-n; return {n,a:u<.1?u/.1:Math.max(0,1-(u-.1)/.6)**1.5}; };
-    const H=A.hat, T=A.torso, N=A.neck, gold=SFX_PAL.shiny;
+    // ---------------- hats (origin = head centre) ----------------
     if(H){ const h=lk.hat;
+      if(h==='wizard'){ // arcane glow, a climbing spiral of sparkles, a tip star that pulses, runes orbiting the brim
+        glow(H,-1.5,-12,13,'150,120,255',.3+.12*Math.sin(t*2.1)); glow(H,-4.6,-20,6,'200,180,255',.5+.35*Math.max(0,Math.sin(t*3.3)));
+        for(let i=0;i<14;i++){ const u=((t*.32+i/14)%1), ang=u*Math.PI*4.5+i*.7, rr=7.6*(1-u*.85), x=-4.6*u+Math.cos(ang)*rr, y=-5.5-14.5*u+Math.sin(ang)*1.7*(1-u); const front=Math.sin(ang)>-.25?1:.35, a=Math.sin(u*Math.PI)*front; for(let tr=1;tr<4;tr++){ const u2=u-tr*.025; if(u2<0) break; const a2=ang-tr*.35; glow(H,-4.6*u2+Math.cos(a2)*7.6*(1-u2*.85),-5.5-14.5*u2+Math.sin(a2)*1.7*(1-u2),.7,'190,170,255',a*.35/tr); }
+          flare(H,x,y,.5+.8*(1-u),i%3?starry:spec,i,a,i%2===0,ang); }
+        const L=life(1.6,0); flare(H,-4.6,-20.4,1.3,starry,0,.4+.6*L.a,true,t*.4);
+        for(let i=0;i<4;i++){ const ang=t*.8+i*Math.PI/2, x=Math.cos(ang)*10.5, y=-6+Math.sin(ang)*2.2; if(Math.sin(ang)<-.15) continue; glow(H,x,y,1.4,'170,150,255',.55); dot(H,x,y,.28,'rgba(240,235,255,.9)'); } }
+      if(h==='witch'){ glow(H,-3,-11,10,'120,255,160',.1+.05*Math.sin(t*1.7)); for(let i=0;i<6;i++){ const q=((t*.4+i/6)%1), x=-4.6+Math.sin(q*7+i)*2.2*q, y=-21-q*10; glow(H,x,y,1.2+q*1.8,i%2?'150,255,170':'190,140,255',.42*(1-q)); }
+        for(let i=0;i<2;i++){ const L=life(1.3+i*.4,i*.6); flare(H,-6+sfxHash(L.n,i)*10,-6-sfxHash(L.n,i+5)*12,.55,i?spec:myth,i,L.a,false); } }
       if(h==='crown'||h==='tiara'){ const pts=h==='crown'?[[-3.6,-14.2],[0,-15.8],[3.6,-14.2]]:[[0,-12.6],[-2.6,-11.8],[2.6,-11.8]]; pts.forEach(([x,y],i)=>{ const L=life(1.4+i*.35,i*.5); flare(H,x,y,.9,gold,i,L.a,true); }); }
-      if(h==='wizard'||h==='witch'){ for(let i=0;i<5;i++){ const ang=t*1.1+i*1.26, x=Math.cos(ang)*8.5, y=-12+Math.sin(ang)*2.6-((t*.6+i*.2)%1)*5, a=.55+.45*Math.sin(t*4+i); if(Math.sin(ang)<-.2) continue; flare(H,x,y,.45,h==='witch'?SFX_PAL.spectral:SFX_PAL.starry,i,a*.8,false); } }
+      if(h==='halo'){ glow(H,0,-17,8,'255,240,190',.18+.06*Math.sin(t*2)); for(let i=0;i<3;i++){ const L=life(1.2+i*.3,i*.4), ang=i*2.1+L.n*1.7; flare(H,Math.cos(ang)*6,-17+Math.sin(ang)*1.4,.6,gold,i,L.a*.9,false); } }
       if(h==='astro'){ const p0=P(H,-.4,.2), R=10.6*S0(H), kx=((t*.4)%1.8)-.4; c.save(); c.beginPath(); c.arc(p0.x,p0.y,R*.92,0,7); c.clip(); const g=c.createLinearGradient(p0.x-R+kx*2*R,p0.y-R,p0.x-R*.4+kx*2*R,p0.y+R); g.addColorStop(0,'rgba(255,255,255,0)'); g.addColorStop(.5,'rgba(220,240,255,.35)'); g.addColorStop(1,'rgba(255,255,255,0)'); c.fillStyle=g; c.fillRect(p0.x-R,p0.y-R,R*2,R*2); c.restore(); }
-      if(h==='diver'){ for(let i=0;i<4;i++){ const q=((t*.5+i*.25)%1), p=P(H,-5+Math.sin(q*9+i)*1.2,-11-q*16), r=(.6+q*.9)*S0(H); c.strokeStyle='rgba(200,235,255,'+(.7*(1-q)).toFixed(2)+')'; c.lineWidth=Math.max(.6,.25*S0(H)); c.beginPath(); c.arc(p.x,p.y,r,0,7); c.stroke(); } }
-      if(h==='halo'){ for(let i=0;i<3;i++){ const L=life(1.2+i*.3,i*.4), ang=i*2.1+L.n*1.7; flare(H,Math.cos(ang)*6,-17+Math.sin(ang)*1.4,.6,gold,i,L.a*.9,false); } } }
+      if(h==='diver'){ for(let i=0;i<5;i++){ const q=((t*.5+i*.2)%1); bubble(H,-5+Math.sin(q*9+i)*1.2,-11-q*16,.6+q*.9,1-q); } }
+      if(h==='fishbowl'){ for(let i=0;i<4;i++){ const q=((t*.35+i*.25)%1); bubble(H,-3+i*2+Math.sin(q*8+i)*.8,6-q*16,.35+q*.35,Math.sin(q*Math.PI)); } }
+      if(h==='tophat'||h==='carnival'){ const per=4.4, k2=(t%per)/per; if(k2<.32){ const e=k2/.32; for(let j=0;j<5;j++){ const ang=j*1.26+Math.floor(t/per), a=Math.sin(e*Math.PI); flare(H,Math.cos(ang)*(6+e*5),-14+Math.sin(ang)*2.2-e*4,.55,h==='carnival'?myth:gold,j,a*.9,true); } } const L=life(2.1,.3); flare(H,4,-15,.6,gold,7,L.a*.7,false); }
+      if(h==='headphones'){ for(let i=0;i<3;i++){ const q=((t*.33+i/3)%1), side=i%2?1:-1; note(H,side*9+side*q*3,-4-q*14,4.2,Math.sin(q*Math.PI)*.9,i%2?'#bfe6ff':'#ffd6f4'); } }
+      if(h==='mushroom'){ for(let i=0;i<6;i++){ const q=((t*.25+i/6)%1), x=-9+((i*37)%18)+Math.sin(q*6+i)*1.5, y=-3-q*12; glow(H,x,y,.9,'200,255,190',.6*Math.sin(q*Math.PI)); } }
+      if(h==='flower'){ for(let i=0;i<2;i++){ const q=((t*.18+i*.5)%1); petal(H,-6+i*8+Math.sin(q*8)*3,-6+q*34,1,q*9+i,i?'#ffb8d8':'#fff0a8',Math.sin(q*Math.PI)*.9); } }
+      if(h==='party'){ const per=2.6, k2=(t%per)/per; if(k2<.45){ const e=k2/.45; ink(()=>{ for(let j=0;j<7;j++){ const ang=-Math.PI/2+(j-3)*.42, d=e*9, p=P(H,Math.cos(ang)*d,-19+Math.sin(ang)*d+e*e*7), s=Math.max(.6,.5*S0(H)); c.fillStyle=['#ff5a7a','#ffd84a','#5ad8ff','#7aff9a','#c08aff'][j%5]; c.globalAlpha=1-e; c.fillRect(p.x-s,p.y-s*.5,s*2,s); } }); } }
+      if(h==='lanternhat'){ glow(H,0,-18,7,'255,200,110',.32+.08*Math.sin(t*3)+.05*Math.sin(t*11.3)); }
+      if(h==='tidecap'){ for(let i=0;i<2;i++){ const L=life(1.5+i*.4,i*.7); flare(H,-5+sfxHash(L.n,i)*10,-9-sfxHash(L.n,i+3)*5,.5,starry,i,L.a,false); } }
+      if(['knight','viking','pirate','grad','captain','sailor'].includes(h)){ const L=life(2.6,(hashStr(h)%3)*.4), pt={knight:[4,-6],viking:[-7,-12],pirate:[1.5,-10],grad:[5,-11],captain:[3,-9],sailor:[2,-8]}[h]; flare(H,pt[0],pt[1],.7,gold,0,L.a*.85,true); } }
+    // glasses (also on the head): lens glints, pixel sparkles, floating hearts
+    if(H&&lk.glasses&&lk.glasses!=='none'){ const gl=lk.glasses;
+      if(['sunglasses','heart','goggles','monocle','pixel','nerd','round'].includes(gl)){ const L=life(gl==='monocle'?2.4:3.2,.9); flare(H,7.2,-1.6,gl==='nerd'||gl==='round'?.45:.65,gold,3,L.a*.85,true); }
+      if(gl==='pixel'){ ink(()=>{ for(let i=0;i<3;i++){ const q=((t*.6+i/3)%1), p=P(H,9+q*3,-2+((i*5)%4)-1), s=Math.max(.6,.45*S0(H)); c.globalAlpha=Math.sin(q*Math.PI)*.8; c.fillStyle=['#5ae8ff','#ff5ac8','#ffe85a'][i]; c.fillRect(p.x,p.y,s,s); } }); }
+      if(gl==='heart'){ const per=3.6, q=(t%per)/per; if(q<.6){ const e=q/.6, p=P(H,9+e*2,-3-e*9), s=Math.max(4,2.6*S0(H)); ink(()=>{ c.globalAlpha=Math.sin(e*Math.PI)*.85; c.fillStyle='#ff6a9a'; c.font='700 '+s.toFixed(1)+'px system-ui'; c.textAlign='center'; c.fillText('♥',p.x,p.y); }); } } }
+    // ---------------- outfits (torso coordinates) ----------------
     if(T){ const o=lk.outfit;
-      /* spacesuit: its chest lights blink inside the suit drawing (g_angler.js), so the arm still covers them */
-      if(o==='tidecoat'){ for(let i=0;i<6;i++){ const xx=-9+i*3.6, p=P(T,xx,-21.4+Math.sin(xx*.9+t*2)*1.1), sz=2.4*S0(T), a=.25+.2*Math.sin(t*2.4+i); const g=c.createRadialGradient(p.x,p.y,0,p.x,p.y,sz); g.addColorStop(0,'rgba(90,216,232,'+a.toFixed(2)+')'); g.addColorStop(1,'rgba(90,216,232,0)'); c.fillStyle=g; c.beginPath(); c.arc(p.x,p.y,sz,0,7); c.fill(); }
-        for(let i=0;i<2;i++){ const L=life(1.6+i*.5,i*.8); flare(T,-7+sfxHash(L.n,i)*14,-40+sfxHash(L.n,i+9)*18,.55,SFX_PAL.starry,i,L.a,false); } }
-      if(o==='captain'){ const L=life(2.2,0); flare(T,1.4,-42+(L.n%4)*6,.6,gold,0,L.a,true); }
-      if(o==='fishsuit'){ for(let i=0;i<3;i++){ const L=life(1.3+i*.3,i*.45); flare(T,-7+sfxHash(L.n,i*3)*14,-47+sfxHash(L.n,i*3+1)*22,.45,SFX_PAL.mythic,i,L.a*.9,false); } } }
+      if(o==='tidecoat'){ for(let i=0;i<6;i++){ const xx=-9+i*3.6; glow(T,xx,-21.4+Math.sin(xx*.9+t*2)*1.1,2.4,'90,216,232',.25+.2*Math.sin(t*2.4+i)); } for(let i=0;i<2;i++){ const L=life(1.6+i*.5,i*.8); flare(T,-7+sfxHash(L.n,i)*14,-40+sfxHash(L.n,i+9)*18,.55,starry,i,L.a,false); } }
+      if(o==='captain'){ const L=life(2.2,0); flare(T,6.6,-41+(L.n%4)*5.8,.6,gold,0,L.a,true); }
+      if(o==='fishsuit'){ for(let i=0;i<3;i++){ const L=life(1.3+i*.3,i*.45); flare(T,-7+sfxHash(L.n,i*3)*14,-47+sfxHash(L.n,i*3+1)*22,.45,myth,i,L.a*.9,false); } }
+      if(o==='clownsuit'){ for(let i=0;i<3;i++){ const L=life(1.1+i*.25,i*.37); flare(T,-7+sfxHash(L.n,i*5)*14,-46+sfxHash(L.n,i*5+1)*24,.45,SFX_PAL.rainbow,i+L.n,L.a,false); } }
+      if(o==='kimono'){ for(let i=0;i<2;i++){ const q=((t*.16+i*.5)%1); petal(T,-6+i*7+Math.sin(q*7+i)*3,-44+q*40,.9,q*8+i,'#ffc0d8',Math.sin(q*Math.PI)*.85); } }
+      if(o==='hotdog'){ for(let i=0;i<3;i++){ const q=((t*.3+i/3)%1); puff(T,-2+i*2.4+Math.sin(q*5+i)*1.4,-52-q*12,1+q*2.4,'rgba(240,240,248,'+(.22*(1-q)).toFixed(3)+')'); } }
+      if(o==='raincoat'){ for(let i=0;i<2;i++){ const q=((t*.7+i*.5)%1); puff(T,-6+i*9,-16+q*7,.35,'rgba(190,225,255,'+(.8*(1-q)).toFixed(2)+')'); } }
+      if(o==='lifejacket'){ const L=life(3,.5); flare(T,-4+(L.n%3)*4,-31,.5,gold,1,L.a*.7,true,0); } }
+    // ---------------- backs (back-item coordinates) ----------------
+    if(Bk){ const b=lk.back, w=A.bw||1;
+      if(b==='angelwings'){ glow(Bk,-10*w,-45,9,'255,245,210',.12+.05*Math.sin(t*1.8)); for(let i=0;i<4;i++){ const q=((t*.22+i/4)%1); glow(Bk,-12*w-q*5+Math.sin(q*7+i)*2,-46+q*20,.9,'255,240,200',.6*Math.sin(q*Math.PI)); }
+        const q=((t*.12)%1); petal(Bk,-14*w-q*6+Math.sin(q*9)*2,-44+q*30,1.1,q*6,'rgba(250,250,255,.95)',Math.sin(q*Math.PI)*.8); }
+      if(b==='butterfly'){ for(let i=0;i<5;i++){ const q=((t*.3+i/5)%1); glow(Bk,-11*w+Math.sin(q*6+i)*3,-48+q*18,.7,i%2?'200,255,255':'255,220,250',.65*Math.sin(q*Math.PI)); } }
+      if(b==='dragonwings'){ for(let i=0;i<5;i++){ const q=((t*.45+i/5)%1); glow(Bk,-12*w+Math.sin(q*5+i)*3,-42-q*14,.7,'255,140,60',.75*(1-q)); } }
+      if(b==='batwings'){ for(let i=0;i<3;i++){ const q=((t*.25+i/3)%1); puff(Bk,-12*w-q*4,-50+Math.sin(q*6+i)*3,1.2+q*1.6,'rgba(60,30,80,'+(.25*(1-q)).toFixed(3)+')'); } }
+      if(b==='jetpack'){ for(let i=0;i<4;i++){ const q=((t*.8+i/4)%1); puff(Bk,-7.4*w-2+Math.sin(q*4+i)*1.4,-24+q*14,.8+q*2.6,'rgba(200,200,210,'+(.22*(1-q)).toFixed(3)+')'); } }
+      if(b==='lanternpole'){ const lx=-13*w, ly=-60.6; glow(Bk,lx,ly,9,'255,210,130',.18+.06*Math.sin(t*7.3)); ink(()=>{ for(let i=0;i<2;i++){ const ang=t*(3.2+i)+i*2, p=P(Bk,lx+Math.cos(ang)*3.4,ly+Math.sin(ang*1.3)*2.4), s=Math.max(.5,.35*S0(Bk)); c.fillStyle='rgba(60,50,40,.85)'; c.beginPath(); c.ellipse(p.x,p.y,s*1.4,s*.7,ang,0,7); c.fill(); } }); }
+      if(b==='tidecape'||b==='tidewings'){ for(let i=0;i<3;i++){ const L=life(1.4+i*.35,i*.5); flare(Bk,-13*w+sfxHash(L.n,i)*8*w,-44+sfxHash(L.n,i+4)*24,.5,starry,i,L.a,false); } }
+      if(b==='guitar'){ const q=((t*.3)%1); note(Bk,-9*w-q*4,-40-q*14,4.4,Math.sin(q*Math.PI)*.8,'#ffe6a8'); } }
+    // ---------------- necks ----------------
     if(N){ const n=lk.neck;
-      if(n==='goldchain'||n==='pearls'){ for(let i=0;i<2;i++){ const L=life(1.5+i*.4,i*.7), a0=.3+sfxHash(L.n,i)*2.5, rx=5*(A.nw||1), ry=n==='goldchain'?5.4:4.2; flare(N,.4+Math.cos(a0)*rx,-45.4+Math.sin(a0)*ry,n==='goldchain'?.6:.45,n==='goldchain'?gold:SFX_PAL.starry,i,L.a,false); } } }
+      if(n==='goldchain'||n==='pearls'){ for(let i=0;i<2;i++){ const L=life(1.5+i*.4,i*.7), a0=.3+sfxHash(L.n,i)*2.5, rx=5*(A.nw||1), ry=n==='goldchain'?5.4:4.2; flare(N,.4+Math.cos(a0)*rx,-45.4+Math.sin(a0)*ry,n==='goldchain'?.6:.45,n==='goldchain'?gold:starry,i,L.a,false); } }
+      if(n==='medal'){ const L=life(2,.2); flare(N,1.2,-38,.7,gold,0,L.a,true); }
+      if(n==='lei'){ const q=((t*.15)%1); petal(N,2+Math.sin(q*7)*2,-42+q*28,.8,q*7,'#ff9ac0',Math.sin(q*Math.PI)*.8); }
+      if(n==='tidescarf'){ const L=life(1.7,.3); flare(N,-3+sfxHash(L.n,1)*6,-44+sfxHash(L.n,2)*5,.5,starry,0,L.a,false); } }
+    // ---------------- shoes (feet, at ground level) ----------------
+    if(F){ const s=lk.shoes||'boots';
+      if(s==='glowkicks'){ for(const fx of [F.f,F.b]) glow(F.M,fx+1.4,-.6,5,'110,240,255',.22+.12*Math.sin(t*3)); for(let i=0;i<2;i++){ const L=life(1.1+i*.3,i*.5); flare(F.M,(i?F.f:F.b)+sfxHash(L.n,i)*5-1,-1.5-sfxHash(L.n,i+2)*2,.5,starry,i,L.a,false); } }
+      if(s==='tidetreads'){ const L=life(1.6,.4); flare(F.M,F.b+sfxHash(L.n,3)*5,-2.2,.5,starry,0,L.a,false); }
+      if(s==='moonboots'){ for(let i=0;i<2;i++){ const L=life(1.8+i*.4,i*.9); flare(F.M,(i?F.f:F.b)+sfxHash(L.n,i)*4,-3-sfxHash(L.n,i+1)*2,.45,starry,i,L.a,false); } }
+      if(s==='rollers'){ const L=life(1.2,0); flare(F.M,F.b+(L.n%3)*1.6,.6,.45,gold,0,L.a,false); }
+      if(s==='fishfeet'){ for(let i=0;i<2;i++){ const q=((t*.4+i*.5)%1); bubble(F.M,F.b+3+i*2,-1-q*9,.4+q*.4,Math.sin(q*Math.PI)); } } }
     c.restore(); }catch(e){} }
+
+// ---------- the Wardrobe preview is alive: while it is on screen it is drawn every display frame, so the angler breathes and every
+// cosmetic effect above plays there too (it used to be drawn once, a still picture). Stops by itself when the page closes ----------
+{ let raf=0; const loop=()=>{ raf=0; const c=document.getElementById('lookcv'); if(!c||!c.isConnected) return; if(!document.hidden){ const r=c.getBoundingClientRect(); if(r.width>0&&r.bottom>0&&r.top<innerHeight) drawLookPreview(); } raf=requestAnimationFrame(loop); };
+  const _rp=renderPanel; renderPanel=function(){ const x=_rp.apply(this,arguments); try{ if(!raf&&document.getElementById('lookcv')) raf=requestAnimationFrame(loop); }catch(e){} return x; }; }
 // =====================================================================
 // Stonebrook River rework (director, round 6: "rework the environment and the water; remove the grass behind each pillar;
 // maybe a dam and/or a village in the background; the boat should be closer to or tied to the dock; the waterwheel could
@@ -15005,7 +15080,7 @@ const MOB=()=>{ const b=document.body.classList; return b.contains('phone-app')|
 // 2) the aquarium tank: 30 frames a second on phones, and it holds still while you scroll the page (scrolling stays smooth)
 { let lastT=0, scrollUntil=0; const P=$('panel'); if(P) P.addEventListener('scroll',()=>{ scrollUntil=performance.now()+180; },{passive:true});
   addEventListener('touchmove',()=>{ if(S.tab==='aquarium') scrollUntil=performance.now()+180; },{passive:true});
-  const _dt=drawTank; drawTank=function(now){ if(MOB()){ const t=performance.now(); if(t<scrollUntil) return; if(t-lastT<32) return; lastT=t; } return _dt.apply(this,arguments); }; }
+  const _dt=drawTank; drawTank=function(now){ if(MOB()){ const t=performance.now(); if(t<scrollUntil) return; if(t-lastT<15) return; lastT=t; /* full rate (round 6, director: more frames); still pauses while scrolling */ } return _dt.apply(this,arguments); }; }
 
 // 3) steady frame rate: the water's resolution follows how the phone keeps up. If frames drop for a few seconds (a storm, a
 //    big fight), the water is drawn a little less sharp until the phone keeps up again; never more than two steps.
@@ -15152,6 +15227,11 @@ document.head.insertAdjacentHTML('beforeend',`<style>
   body.phone-land #catdock .cdb.live::before,body.phone-land #menuov .secbar .secb.live::before{top:5px!important;left:5px!important}
 }
 </style>`);
+
+// ---------- the water's name in the header always shows in full: long names (Stonebrook River, Saltmarsh Coast) step the
+// font down a little until they fit, instead of being cut with "…" ----------
+{ const fit=()=>{ const b=document.getElementById('locname'); if(!b||!MOB()) return; b.style.removeProperty('font-size'); let fs=parseFloat(getComputedStyle(b).fontSize)||12.5, n=0; while(b.scrollWidth>b.clientWidth+1&&fs>9.5&&n++<8){ fs-=.5; b.style.setProperty('font-size',fs+'px','important'); } }; /* the phone style sets the size with !important */
+  const b0=document.getElementById('locname'); if(b0) new MutationObserver(fit).observe(b0,{childList:true,characterData:true,subtree:true}); addEventListener('resize',()=>setTimeout(fit,60)); setTimeout(fit,300); setTimeout(fit,1500); }
 // =====================================================================
 // Phones, round 6 critique: "Your home" on phones too (round 5 built it for PC only). Every water has a home (dock, pier,
 // boat, trawler, raft, ice camp, beach, stone ledge, crystal shelf); the page offers only what works there: wood where the
@@ -15268,37 +15348,18 @@ PATCHES.unshift({v:'0.4.8.1', name:'Smoother and Steadier', items:[
 ]});
 // Android test notes (preview builds only; the live game never shows them). Write what the next test build changes here
 // (spoiler-free); it opens once in the Android test app. Released notes live in notes_release.js.
-const TEST_NOTES={v:'test', label:'Test build · Android', name:'Smoother and Steadier', items:[
-  '## Shiny fish come alive',
-  'Shiny fish sparkle for real: flashes of light that pop on new spots of the fish, flare and fade, with glitter and sweeping shine. It shows everywhere: in the water, the aquarium tank, the catch card and every list.',
-  'Every shiny fish has its own style of sparkle, and each prismatic kind has its own signature: Rainbow shifts colour, Starry twinkles with shooting stars, Spectral sheds ghostly wisps, Ancient drifts gold dust.',
-  '## A cleaner look',
-  'Teal means you can tap it, gold means it is open or chosen (your current water, your favourite pet, the page you are on).',
-  'Held sideways, the side panel is a tidy card with even buttons, the same open and closed; hide and show sits at the bottom.',
-  'Aquarium: one compact header with your earnings, Collect and Feed together; “How the aquarium works” opens when you want it.',
-  'Cooler: a “Keep, To aquarium, Sell” line explains the buttons when you tap it.',
-  'Cards side by side line up: their buttons and rewards sit at the same height (Skills, Tackle, Waters, Feats).',
-  'Bigger fish pictures in the Cooler and Aquarium lists; the bait list has Everyday bait and Water baits headings.',
-  'Your home: every water has one now (dock, pier, boat, ice camp and more). Pick its light, and on boats its hull paint, at Customize.',
+const TEST_NOTES={v:'test', label:'Test build · Android', name:'Alive and Well Dressed', items:[
   '## Your angler',
-  'Legs now stand side-on like the rest of the body, one in front of the other.',
-  'Special cosmetics come alive: crowns and tiaras glint, wizard and witch hats trail stars, the astronaut visor catches the light, the diving helmet bubbles, the Tide coat glows, the spacesuit lights blink, gold chains shine.',
-  'Angel wings and Butterfly wings are redrawn as real wings; the jetpack burns hotter, the Starry cape twinkles and the lantern flickers.',
-  '## Smoother',
-  'The Aquarium scrolls smoothly, and reeling in during storms no longer drops the frame rate.',
-  'Live event countdowns no longer move the game frame.',
-  '## Quality of life',
-  'Rows that scroll sideways show a small arrow at the edge that has more.',
-  'A Bait button beside Rest shows your bait and opens the bait list.',
-  'Travel here closes the menu and takes you straight to the new water.',
-  'The catch card shows what makes a hybrid special: its usual weight and value boost.',
-  'Rods: “Your rods” keeps three presets, each a rod with its attachments.',
-  'Bait: baits that are best at one water now cost in line with that water, and are grouped in the order the waters unlock.',
-  '## Waters and fixes',
-  'Stonebrook River has been reworked: a village on the hill, the river running on through the bridge arches, a rowboat tied at the mill jetty and a new waterwheel.',
-  'The Saltmarsh seal is a real seal now. Aquarium fish and decorations are a little smaller, so every piece can be seen.',
-  'Prismatic fish keep their colours in the Aquarium list; Market Rush shows a clear money bag.',
-  'Your angler’s nearer shoe is drawn in front, the Ocean Sunfish’s fins sit on its body, and the otters swim clear of the rocks.']};
+  'Shoes look like real shoes from the side: a rounded heel, a sole with a heel block, and a toe that slopes down. One foot stands a little ahead of the other.',
+  'Bodies have their real depth: the hips and seat fill out under the jacket, so legs no longer look pinned under a wide body.',
+  'Buttons, zips and seams sit on the front of the clothes (life jacket and spacesuit fixed).',
+  '## Everything comes alive',
+  'The wizard hat glows with a spiral of climbing sparkles, orbiting runes and a pulsing star at its tip.',
+  'Many more items have their own effect: music notes from headphones, petals from the flower crown and kimono, mushroom spores, party confetti, top-hat magic, witch wisps, diving and fishbowl bubbles, lantern moths, angel feathers, butterfly dust, dragon embers, jetpack smoke, guitar notes, glinting medals and lenses, little hearts from heart shades, glowing glow kicks and more.',
+  'The Wardrobe preview is animated now, so you see every effect live while you dress up.',
+  'Smoother: shiny sparkles run at your screen’s full frame rate, and the aquarium tank too.',
+  '## Fixes',
+  'Long water names (Stonebrook River) fit in the header instead of being cut off.']};
 addTestNotes(TEST_NOTES);
 // =====================================================================
 // 0.4 release QA suite (test builds only: ?test, and build.ps1 leaves this file out of the release build).
@@ -15609,6 +15670,10 @@ window.__outfitGrid=(kind='out',cols=6,sc=3.2)=>{ const old=document.getElementB
   const c=cv.getContext('2d'); list.forEach((o,i)=>{ const id=o[0]||o.id, lk=Object.assign({},S.look,kind==='shoes'?{shoes:id}:kind==='hats'?{hat:id}:kind==='backs'?{back:id}:kind==='necks'?{neck:id}:kind==='glasses'?{glasses:id}:{outfit:id,hat:'none'}); c.save(); drawAngler(c,(i%cols)*cw+cw/2,Math.floor(i/cols)*ch+ch-14,sc,lk,{t:1.3}); c.restore(); c.fillStyle='#9fb2c8'; c.font='10px system-ui'; c.fillText(id,(i%cols)*cw+4,Math.floor(i/cols)*ch+12); }); return n; };
 // review: magnify part of the water scene (fractions of the canvas) into an overlay, to judge art and motion up close
 window.__mag=(fx,fy,fw,fh,k=3,t)=>{ const cv=document.getElementById('cv'); if(t!=null) __drawCost&&0; const o0=document.getElementById('magov'); if(o0) o0.remove(); const sw=cv.width*fw, sh=cv.height*fh, o=document.createElement('canvas'); o.id='magov'; o.width=Math.round(sw*k); o.height=Math.round(sh*k); o.style.cssText='position:fixed;left:0;top:0;z-index:99999;border:2px solid #7fe3c4;width:'+o.width+'px;height:'+o.height+'px'; document.body.appendChild(o); const x=o.getContext('2d'); x.imageSmoothingEnabled=true; x.drawImage(cv,cv.width*fx,cv.height*fy,sw,sh,0,0,o.width,o.height); return [o.width,o.height]; };
+// review: ms per frame of the Wardrobe preview with a given look (restores the look afterwards)
+window.__lookCost=(lk={},n=60)=>{ const keep=JSON.stringify(S.look); Object.assign(S.look,lk); const t0=performance.now(); for(let i=0;i<n;i++) drawLookPreview(); const ms=(performance.now()-t0)/n; S.look=JSON.parse(keep); return +ms.toFixed(2); };
+// review: water scene ms per frame while wearing a given look (restores the look afterwards)
+window.__sceneCostWith=(lk={},n=60)=>{ const keep=JSON.stringify(S.look); Object.assign(S.look,lk); __drawCost(3); const ms=__drawCost(n); S.look=JSON.parse(keep); return ms; };
 
 // ---------- loop ----------
 let last=performance.now();
