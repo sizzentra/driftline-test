@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="DL Test Android">
 <script>
-window.DL_BUILD='android'; window.DL_PREVIEW=true; window.DL_VERSION='2026.11.18-0858';
+window.DL_BUILD='android'; window.DL_PREVIEW=true; window.DL_VERSION='2026.11.18-0901';
 window.addEventListener('beforeinstallprompt',function(e){ e.preventDefault(); window.__dlInstallPrompt=e; });
 </script>
 </head>
@@ -16040,8 +16040,8 @@ window.__mag=(fx,fy,fw,fh,k=3,t)=>{ const cv=document.getElementById('cv'); if(t
 window.__lookCost=(lk={},n=60)=>{ const keep=JSON.stringify(S.look); Object.assign(S.look,lk); const t0=performance.now(); for(let i=0;i<n;i++) drawLookPreview(); const ms=(performance.now()-t0)/n; S.look=JSON.parse(keep); return +ms.toFixed(2); };
 // review: water scene ms per frame while wearing a given look (restores the look afterwards)
 window.__sceneCostWith=(lk={},n=60)=>{ const keep=JSON.stringify(S.look); Object.assign(S.look,lk); __drawCost(3); const ms=__drawCost(n); S.look=JSON.parse(keep); return ms; };
-// time named functions while fn runs (preview only): __prof(['renderPanel','paintFish'], ()=>__open('aquarium'), 10)
-if(/[?&]test\b/.test(location.search)) window.__prof=(names,fn,n=1)=>{ const T={}, orig={}; for(const k of names){ try{ orig[k]=eval(k); if(typeof orig[k]!=='function') continue; T[k]=0; eval(k+'=function(){ const t0=performance.now(); try{ return orig["'+k+'"].apply(this,arguments); } finally{ T["'+k+'"]+=performance.now()-t0; } }'); }catch(e){} }
+// time named functions while fn runs (preview only): __fnTime(['renderPanel','paintFish'], ()=>__open('aquarium'), 10)
+if(/[?&]test\b/.test(location.search)) window.__fnTime=(names,fn,n=1)=>{ const T={}, orig={}; for(const k of names){ try{ orig[k]=eval(k); if(typeof orig[k]!=='function') continue; T[k]=0; eval(k+'=function(){ const t0=performance.now(); try{ return orig["'+k+'"].apply(this,arguments); } finally{ T["'+k+'"]+=performance.now()-t0; } }'); }catch(e){} }
   const t0=performance.now(); try{ for(let i=0;i<n;i++) fn(); } finally{ for(const k in orig){ try{ eval(k+'=orig["'+k+'"]'); }catch(e){} } } const tot=(performance.now()-t0)/n; const out={total:+tot.toFixed(2)}; for(const k in T) out[k]=+(T[k]/n).toFixed(2); return out; };
 
 // ---------- loop ----------
