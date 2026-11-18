@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="DL Test iPhone">
 <script>
-window.DL_BUILD='ios'; window.DL_PREVIEW=true; window.DL_VERSION='2026.11.18-1212';
+window.DL_BUILD='ios'; window.DL_PREVIEW=true; window.DL_VERSION='2026.11.18-1237';
 window.addEventListener('beforeinstallprompt',function(e){ e.preventDefault(); window.__dlInstallPrompt=e; });
 </script>
 </head>
@@ -14230,7 +14230,9 @@ if(matchMedia('(hover: none)').matches){ const strip=list=>{ for(let i=list.cssR
   document.addEventListener('pointerdown',e=>{ if(e.pointerType==='mouse') return; lastTouch=performance.now(); const el=e.target.closest&&e.target.closest(NAV); if(el&&!el.disabled) downs.set(e.pointerId,{el,x:e.clientX,y:e.clientY}); else downs.delete(e.pointerId); },true);
   const unacted=el=>{ const now=performance.now(); spare=spare.filter(s=>now-s.t<900); spare.push({el,t:now}); };
   document.addEventListener('pointercancel',e=>{ const d=downs.get(e.pointerId); downs.delete(e.pointerId); if(d) unacted(d.el); },true);
-  document.addEventListener('pointerup',e=>{ if(e.pointerType==='mouse') return; lastTouch=performance.now(); const d=downs.get(e.pointerId); // a mouse never counts as touch (it used to, and swallowed every menu click on PC) downs.delete(e.pointerId); if(!d) return; if(Math.hypot(e.clientX-d.x,e.clientY-d.y)>18||!d.el.isConnected){ unacted(d.el); return; }
+  document.addEventListener('pointerup',e=>{ if(e.pointerType==='mouse') return; lastTouch=performance.now(); const d=downs.get(e.pointerId); /* a mouse never counts as touch (it used to, and swallowed every menu click on PC). This note was a // comment mid-line until 2026-11-18, which silently disabled everything after it on this line: the finger was never forgotten, untracked lifts threw an error, and a slid or redrawn tap was neither skipped nor handed to the phone's own click (taps "did nothing at times") */ downs.delete(e.pointerId); if(!d) return; if(Math.hypot(e.clientX-d.x,e.clientY-d.y)>18){ unacted(d.el); return; }
+    // the button was redrawn while the finger was down (live countdowns, a page refresh): tap the button that is under the finger now
+    if(!d.el.isConnected){ const n=document.elementFromPoint(e.clientX,e.clientY), el2=n&&n.closest&&n.closest(NAV); if(!el2||el2.disabled){ unacted(d.el); return; } d.el=el2; }
     // Back / Overview close the menu: what lay under the finger (a bait picker, a button on the water) must not get the phone's follow-up tap
     if(d.el.matches('.mo-back,.mo-home')){ const sh=document.createElement('div'); sh.style.cssText='position:fixed;inset:0;z-index:2147483647;background:transparent;touch-action:none'; const eat=ev=>{ ev.preventDefault(); ev.stopPropagation(); };
       ['pointerdown','pointerup','mousedown','mouseup','click','touchstart','touchend','contextmenu'].forEach(k=>sh.addEventListener(k,eat,{passive:false})); document.body.appendChild(sh); setTimeout(()=>sh.remove(),450); }
@@ -15862,7 +15864,7 @@ var MB_STATUS_B=40; /* the bottom of the top-left status corner (scene chip + bo
 //    on the water between catches, and only if it is still true (a warning for weather that already started is dropped)
 // Every other notice is unchanged. Android + iPhone only.
 // =====================================================================
-{ let pend=null, el=null, hideT=0, poll=0; const BUSY=/^(charging|flying|bite|reeling|landing|event)$/; /* event = a popup card is open (news, a choice, a reward) */
+{ let pend=null, el=null, hideT=0, poll=0; const BUSY=/^(charging|flying|bite|reeling|landing|result|event)$/; /* result = the catch card is open; event = a popup card is open (news, a choice, a reward) */
   const blocked=()=>MENU_OPEN||document.hidden||document.body.classList.contains('ev-open')||(()=>{ const ev=document.getElementById('evcard'); return !!(ev&&ev.getClientRects().length); })()||(typeof G==='object'&&BUSY.test(G.st));
   const still=p=>p.kind==='chg'?weather().k===p.k:Math.floor(Date.now()/1000/WX_LEN)===p.cur;
   const show=p=>{ const st=document.getElementById('stage'); if(!st) return; if(!el||!el.isConnected){ el=document.createElement('div'); el.id='mbwx'; el.setAttribute('role','status'); st.appendChild(el); }
@@ -15898,7 +15900,7 @@ html body.phone-app #mbwx[data-k="Rain"],html body.phone-land #mbwx[data-k="Rain
 // Android + iPhone only.
 // =====================================================================
 const MB_FRAME={ up:{edge:8, row1Top:6, row1H:36, row2Top:46, barH:58, barPad:3, barBtnH:50, barBottom:6},
-                 land:{edge:8, row1Top:6, row1H:38, contentTop:49, bottom:6, railW:124, railGap:6, railBtnH:40, railBtnGap:5} };
+                 land:{edge:8, row1Top:6, row1H:38, contentTop:49, bottom:6, railW:124, railWMini:56, railGap:6, railBtnH:40, railBtnGap:5} };
 { const U=MB_FRAME.up, L=MB_FRAME.land;
 document.head.insertAdjacentHTML('beforeend',`<style>
 /* ---- upright menus: same top row, same edges and the same bottom card as the water ---- */
@@ -15915,6 +15917,9 @@ html body.phone-land #menuov .mo-back{height:${L.row1H}px!important;min-height:$
 html body.phone-land #menuov .mo-tools{align-self:start!important;height:${L.row1H}px!important}
 html body.phone-land #menuov .mo-tools > *{height:${L.row1H}px!important;min-height:${L.row1H}px!important;box-sizing:border-box!important}
 html body.phone-land #menuov .mo-tools > .mo-tb{width:${L.row1H}px!important;min-width:${L.row1H}px!important}
+html body.phone-land #menuov #tabs .secbar{margin-bottom:0!important;max-height:none!important} /* the frame's bottom gap is the 6 px now; the old extra margin made the menu rail 6 px shorter than the water's */
+html body.phone-land #menuov > #toast{left:calc((100% - ${L.railW+L.railGap}px) / 2)!important} /* notices centred over the page, not the whole screen (the rail sits on the right) */
+html body.phone-land.dock-mini #menuov > #toast{left:calc((100% - ${L.railWMini+L.railGap}px) / 2)!important}
 html body.phone-land #menuov #panel:not(.aq07){padding-top:8px!important} /* breathing room under the top row (the page box itself still starts at 49) */
 html body.phone-land #menuov .subbar{align-self:start!important;height:${L.row1H}px!important;padding-top:0!important;padding-bottom:0!important}
 html body.phone-land #menuov .subbar > .subp{height:${L.row1H}px!important;min-height:${L.row1H}px!important;box-sizing:border-box!important}
@@ -15926,27 +15931,34 @@ new MutationObserver(ms=>{ if(!MOB()) return; for(const m of ms) for(const n of 
     const R=36; n.style.inset='auto'; n.style.left=(upX-R)+'px'; n.style.top=(upY-R)+'px'; n.style.width=(2*R)+'px'; n.style.height=(2*R)+'px'; n.style.borderRadius='50%'; } } }).observe(document.body,{childList:true});
 // ---- the measurement check (test builds only): returns every place that breaks the set measurements, on the screen now ----
 if(/[?&]test\b/.test(location.search)) window.__spec=()=>{ for(const a of document.getAnimations()){ try{ if(a.effect&&a.effect.getComputedTiming().iterations!==Infinity) a.finish(); }catch(e){} } /* measure where things end up, not mid slide-in */
-  const out=[], land=document.body.classList.contains('phone-land'), F=land?L:U, vw=innerWidth, vh=innerHeight;
+  const out=[], land=document.body.classList.contains('phone-land'), F=land?L:U, vw=innerWidth, vh=innerHeight, RW=document.body.classList.contains('dock-mini')?L.railWMini:L.railW;
   const R=e=>{ const r=e.getBoundingClientRect(); return {x:Math.round(r.x),y:Math.round(r.y),w:Math.round(r.width),h:Math.round(r.height),r:Math.round(r.right),b:Math.round(r.bottom)}; };
   const vis=s=>[...document.querySelectorAll(s)].filter(e=>e.getBoundingClientRect().width>0&&getComputedStyle(e).visibility!=='hidden');
   const near=(a,b,t=1)=>Math.abs(a-b)<=t; const bad=(what,got,want)=>out.push(what+': '+got+' (should be '+want+')');
   const menu=typeof MENU_OPEN!=='undefined'?MENU_OPEN:document.body.classList.contains('menu-open');
   if(!menu){ for(const e of vis('.hud > *')){ const r=R(e); if(r.y<F.row1Top+10){ if(!near(r.y,F.row1Top)||!near(r.h,F.row1H)) bad('top row '+(e.id||e.className.split(' ').pop()),r.y+'/'+r.h,F.row1Top+'/'+F.row1H); } else if(!land&&!near(r.y,U.row2Top)) bad('second row '+(e.id||e.className.split(' ').pop()),'top '+r.y,'top '+U.row2Top); }
     const st=document.getElementById('stage'); if(st){ const r=R(st); if(!near(r.x,F.edge)) bad('water left edge',r.x,F.edge); if(land){ if(!near(r.y,L.contentTop)) bad('water top',r.y,L.contentTop); if(!near(r.b,vh-L.bottom)) bad('water bottom',r.b,vh-L.bottom); } else if(!near(r.r,vw-U.edge)) bad('water right edge',r.r,vw-U.edge); }
-    const cd=document.getElementById('catdock'); if(cd){ const r=R(cd); if(land){ if(!near(r.w,L.railW)||!near(r.r,vw-L.edge)||!near(r.y,L.contentTop)) bad('side rail',r.x+','+r.y+' '+r.w+'w',(vw-L.edge-L.railW)+','+L.contentTop+' '+L.railW+'w'); } else if(!near(r.x,U.edge)||!near(r.b,vh-U.barBottom)||!near(r.h,U.barH)) bad('bottom tabs',r.x+','+r.b+' '+r.h+'h',U.edge+','+(vh-U.barBottom)+' '+U.barH+'h'); }
+    const cd=document.getElementById('catdock'); if(cd){ const r=R(cd); if(land){ if(!near(r.w,RW)||!near(r.r,vw-L.edge)||!near(r.y,L.contentTop)||!near(r.b,vh-L.bottom)) bad('side rail',r.x+','+r.y+' '+r.w+'w',(vw-L.edge-RW)+','+L.contentTop+' '+RW+'w'); } else if(!near(r.x,U.edge)||!near(r.b,vh-U.barBottom)||!near(r.h,U.barH)) bad('bottom tabs',r.x+','+r.b+' '+r.h+'h',U.edge+','+(vh-U.barBottom)+' '+U.barH+'h'); }
     // nothing drawn on the water may sit under the Rest / Bait buttons (the boost list lives in the top-left status corner)
     const rt=document.getElementById('resttog'), stg=document.getElementById('stage'); if(rt&&stg&&typeof MB_STATUS_B==='number'&&MB_STATUS_B>R(rt).y-R(stg).y) bad('status corner reaches the Rest button',MB_STATUS_B,'< '+(R(rt).y-R(stg).y)); }
   else { const mo=document.getElementById('menuov'); for(const e of [...mo.querySelectorAll('.mo-back,.mo-tools > *'+(land?',.subbar > .subp':''))].filter(e=>e.getBoundingClientRect().width>0)){ const r=R(e); if(!near(r.y,F.row1Top)||!near(r.h,F.row1H)) bad('menu top row '+e.className.split(' ')[0],r.y+'/'+r.h,F.row1Top+'/'+F.row1H); }
     if(!land) for(const e of vis('#menuov .subbar > .subp')){ const r=R(e); if(r.y<U.row2Top-1) bad('page tabs',r.y,'>= '+U.row2Top); }
-    const body=mo.querySelector('.mo-body'); if(body){ const r=R(body); if(!near(r.x,F.edge)) bad('menu left edge',r.x,F.edge); if(land){ if(!near(r.y,L.contentTop)) bad('menu content top',r.y,L.contentTop); if(!near(r.r,vw-L.edge-L.railW-L.railGap)) bad('menu content right',r.r,vw-L.edge-L.railW-L.railGap); if(!near(r.b,vh-L.bottom)) bad('menu content bottom',r.b,vh-L.bottom); } }
-    const sb=mo.querySelector('.secbar'); if(sb){ const r=R(sb); if(land){ if(!near(r.w,L.railW)||!near(r.r,vw-L.edge)||!near(r.y,L.contentTop)) bad('menu side rail',r.x+','+r.y+' '+r.w+'w',(vw-L.edge-L.railW)+','+L.contentTop+' '+L.railW+'w'); } else if(!near(r.x,U.edge)||!near(r.b,vh-U.barBottom)||!near(r.h,U.barH)) bad('menu bottom tabs',r.x+','+r.b+' '+r.h+'h',U.edge+','+(vh-U.barBottom)+' '+U.barH+'h'); } }
+    const body=mo.querySelector('.mo-body'); if(body){ const r=R(body); if(!near(r.x,F.edge)) bad('menu left edge',r.x,F.edge); if(land){ if(!near(r.y,L.contentTop)) bad('menu content top',r.y,L.contentTop); if(!near(r.r,vw-L.edge-RW-L.railGap)) bad('menu content right',r.r,vw-L.edge-RW-L.railGap); if(!near(r.b,vh-L.bottom)) bad('menu content bottom',r.b,vh-L.bottom); } }
+    const sb=mo.querySelector('.secbar'); if(sb){ const r=R(sb); if(land){ if(!near(r.w,RW)||!near(r.r,vw-L.edge)||!near(r.y,L.contentTop)||!near(r.b,vh-L.bottom)) bad('menu side rail',r.x+','+r.y+' '+r.w+'w '+r.h+'h',(vw-L.edge-RW)+','+L.contentTop+' '+RW+'w'); } else if(!near(r.x,U.edge)||!near(r.b,vh-U.barBottom)||!near(r.h,U.barH)) bad('menu bottom tabs',r.x+','+r.b+' '+r.h+'h',U.edge+','+(vh-U.barBottom)+' '+U.barH+'h'); } }
   // every button you can see must take the tap (nothing on top of its middle)
   const card=document.getElementById('evcard'), cardOn=!!(card&&card.getClientRects().length); /* a popup card is on top by design: only its own buttons count then */
   const sticky=t=>{ for(let e=t;e&&e!==document.body;e=e.parentElement){ const p=getComputedStyle(e).position; if(p==='sticky') return true; } return false; }; /* scrolled under a sticky bar: scroll back to reach it */
-  const root=menu?document.getElementById('menuov'):cardOn?card:document; /* a menu sits above any card on the water */ for(const el of root.querySelectorAll('button,[data-act],[data-sec],[role=button],select,input')){ const r=el.getBoundingClientRect(); if(r.width<4||r.height<4||el.disabled) continue; const cs=getComputedStyle(el); if(cs.visibility==='hidden'||cs.pointerEvents==='none') continue;
+  /* the top layer is the one that takes taps: Search (z 60) > a menu (45) > the catch card / a popup card (40) > the water */
+  const on=id=>{ const e=document.getElementById(id); return e&&!e.hidden&&e.getClientRects().length&&getComputedStyle(e).display!=='none'?e:null; };
+  const root=on('searchov')||(menu?document.getElementById('menuov'):null)||on('card')||(cardOn?card:null)||document; for(const el of root.querySelectorAll('button,[data-act],[data-sec],[role=button],select,input')){ const r=el.getBoundingClientRect(); if(r.width<4||r.height<4||el.disabled) continue; const cs=getComputedStyle(el); if(cs.visibility==='hidden'||cs.pointerEvents==='none') continue;
     if(!menu&&el.closest('#menuov')) continue; const cx=r.x+r.width/2, cy=r.y+r.height/2; if(cx<0||cy<0||cx>vw||cy>vh) continue; let p=el.parentElement, clip=false; while(p&&p!==document.body){ const ps=getComputedStyle(p); if(/(auto|scroll|hidden)/.test(ps.overflowY+ps.overflowX)){ const q=p.getBoundingClientRect(); if(cy<q.top+2||cy>q.bottom-2||cx<q.left+2||cx>q.right-2){ clip=true; break; } } p=p.parentElement; } if(clip) continue;
     const t=document.elementFromPoint(cx,cy); if(t&&!(t===el||el.contains(t))&&!(sticky(t)&&!sticky(el))) bad('covered button "'+(el.innerText||el.getAttribute('aria-label')||'').trim().replace(/\s+/g,' ').slice(0,20)+'"','under '+(t.id||t.className||t.tagName).toString().split(' ')[0],'nothing on top'); }
   return out; }; }
+// ---- phone wording (found in the full QC pass, 2026-11-18): the bite hint and the catch card spoke about clicks and the Space key,
+// which a phone has neither of ----
+{ const MB_TOUCH=!!(window.matchMedia&&matchMedia('(pointer:coarse)').matches); /* our own check: the core's TOUCH is declared later in the build */
+  const _sh=setHint; setHint=function(){ _sh.apply(this,arguments); if(!MB_TOUCH) return; try{ if(G.st==='bite'&&S.settings.hints){ const h=document.getElementById('hint'), t='<b>Now!</b> Tap the water to set the hook.'; if(h&&h.innerHTML!==t) h.innerHTML=t; } }catch(e){} };
+  const tap=document.querySelector('#card .tap'); if(tap&&MB_TOUCH) tap.textContent='Tap to keep fishing'; }
 // iPhone release notes (shown once to returning iPhone players). Kept exactly as shipped once published.
 PATCHES.unshift({v:'0.4.8', name:'Rewards Worth Chasing', items:[
   '## Rewards and balance',
@@ -16044,6 +16056,10 @@ PATCHES.unshift({v:'0.4.8.4', name:'Lined Up', items:[
   '## Fixes',
   'Menus line up with the water screen: the top row (Back, coins, search, settings and the page tabs) is one even row at the same height as on the water, page edges match, and upright the bottom tabs are the same card in menus as on the water, so nothing jumps when you open or close a menu.',
   'Taps right after Back always work (a quick tap used to be ignored for a split second).',
+  'Taps on menu buttons always register: a tap could do nothing if the button refreshed (a live countdown, a page update) while your finger was on it, and a swipe that started on a tab could open that tab by mistake.',
+  'Phone wording: a bite now says "Tap the water to set the hook" and the catch card says "Tap to keep fishing" (they spoke about clicking and the Space key).',
+  'Held sideways, the side panel in menus is the same height as on the water, and notices are centred over the page.',
+  'Weather news also waits while the catch card is open.',
   'Your boost timers now sit in the top-left corner, under the time and weather, so the Rest and Bait buttons no longer cover them. A weather note shows just below them.']});
 // iPhone test notes (preview builds only; the live game never shows them). Write what the next test build changes here
 // (spoiler-free); it opens once in the iPhone test app. Released notes live in notes_release.js.
@@ -16055,6 +16071,10 @@ const TEST_NOTES={v:'test', label:'Test build · iPhone', name:'One Look, Easy A
   'Fish Log: a Normal / Shiny switch under the fish picture shows what a fish you have caught looks like when it is shiny.',
   'Menus line up with the water screen: one even top row at the same height as on the water, matching edges, and the same bottom tabs, so nothing jumps when you open or close a menu.',
   'Taps right after Back always work (a quick tap used to be ignored for a split second).',
+  'Taps on menu buttons always register, even when the button refreshes under your finger; a swipe that starts on a tab no longer opens it.',
+  'A bite says "Tap the water to set the hook" and the catch card says "Tap to keep fishing".',
+  'Held sideways, the side panel in menus is the same height as on the water, and notices are centred over the page.',
+  'Weather news also waits while the catch card is open.',
   'Your boost timers sit in the top-left corner under the time and weather, so the Rest and Bait buttons no longer cover them.',
   'Weather news no longer covers the screen: it shows as a small line under the time and weather on the water, and waits while a menu, a card or a catch is open, so it never sits on top of what you are doing.',
   '## Smoother frames',
