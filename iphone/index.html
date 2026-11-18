@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="DL Test iPhone">
 <script>
-window.DL_BUILD='ios'; window.DL_PREVIEW=true; window.DL_VERSION='2026.11.18-0941';
+window.DL_BUILD='ios'; window.DL_PREVIEW=true; window.DL_VERSION='2026.11.18-1028';
 window.addEventListener('beforeinstallprompt',function(e){ e.preventDefault(); window.__dlInstallPrompt=e; });
 </script>
 </head>
@@ -6255,39 +6255,49 @@ function v3reeds(c,x0,x1,base,h,col,seed,o={}){ const r=v3rng(seed); c.strokeSty
 function v3flowers(c,x0,x1,y0,y1,cols,seed,n){ const r=v3rng(seed); for(let i=0;i<n;i++){ const x=x0+r()*(x1-x0), y=y0+r()*(y1-y0), s=.9+r()*1.1; c.fillStyle=cols[i%cols.length]; c.beginPath(); c.arc(x,y,s,0,7); c.fill(); c.fillStyle='rgba(255,250,220,.8)'; c.fillRect(x-.4,y-.4,.8,.8); } }
 
 // ---------- the weeping willow (pond): a forked trunk, arching limbs, long leafy curtains that sway ----------
-const V3WIL={c:null,t:-9,k:''};
-function v3willow(P,t,hz){ const DP=Math.min(DPR||1,2), x0=Math.min(W*.76,W*.905-H*.2), y0=hz-H*.32, w=Math.ceil((W-x0+H*.05)*DP), h=Math.ceil(H*.42*DP), key=W+'|'+H+'|'+P.key;
-  if(!V3WIL.c) V3WIL.c=document.createElement('canvas'); const C=V3WIL.c; if(C.width!==w||C.height!==h){ C.width=w; C.height=h; V3WIL.k=''; }
-  if(V3WIL.k!==key||Math.abs(t-V3WIL.t)>.05){ const c=C.getContext('2d'); c.setTransform(1,0,0,1,0,0); c.clearRect(0,0,w,h); c.setTransform(DP,0,0,DP,-x0*DP,-y0*DP); v3willowDraw(c,P,t,hz); V3WIL.t=t; V3WIL.k=key; }
-  g.drawImage(C,x0,y0,w/DP,h/DP); }
-function v3willowDraw(c,P,t,hz){
+const V3WIL={c:[],t:[-9,-9,-9],k:'',turn:0}; const V3WIL_N=3; /* three equal slices of the drawing, in drawing order (tree + first dark strands; ... ; last mid + light strands) */
+// 2026-11-18 (director: "Willow Pond still stuttering"): the willow used to be redrawn whole (about 2,500 leaf strokes) every 0.05 s,
+// so every third frame was a heavy one: an uneven rhythm phones show as a regular stutter. It is now three cached layers, three equal slices
+// of the drawing in its own order, and exactly one is refreshed per frame (each every third frame, the old rhythm), so every frame
+// carries the same third of the work. The leaf colours are solid, so slicing changes nothing in the picture.
+function v3willow(P,t,hz){ const DP=Math.min(DPR||1,2), bxw=W*.905, x0=bxw-H*.17, y0=hz-H*.25, w=Math.ceil((Math.min(W,bxw+H*.15)-x0)*DP), h=Math.ceil(H*.35*DP), key=W+'|'+H+'|'+P.key; /* the layers cover only where the tree is (measured: .157H left, .135H right, .236H up, .089H down) */
+  for(let i=0;i<V3WIL_N;i++){ if(!V3WIL.c[i]) V3WIL.c[i]=document.createElement('canvas'); const C=V3WIL.c[i]; if(C.width!==w||C.height!==h){ C.width=w; C.height=h; V3WIL.k=''; } }
+  const paint=i=>{ const c=V3WIL.c[i].getContext('2d'); c.setTransform(1,0,0,1,0,0); c.clearRect(0,0,w,h); c.setTransform(DP,0,0,DP,-x0*DP,-y0*DP); v3willowDraw(c,P,t,hz,i); V3WIL.t[i]=t; };
+  if(V3WIL.k!==key){ const fresh=V3WIL.k===""; V3WIL.k=key; if(fresh){ for(let i=0;i<V3WIL_N;i++) paint(i); } else V3WIL.t=V3WIL.t.map(()=>-9); } /* first time or a new size: all at once; a new light level: each slice catches up on its turn (3 frames) */
+  else { const i=V3WIL.turn; V3WIL.turn=(i+1)%V3WIL_N; if(Math.abs(t-V3WIL.t[i])>.03) paint(i); }
+  for(let i=0;i<V3WIL_N;i++) g.drawImage(V3WIL.c[i],x0,y0,w/DP,h/DP); }
+function v3willowDraw(c,P,t,hz,part){ /* part: undefined = the whole tree; 0, 1, 2 = a third of it in drawing order (0 includes the trunk, limbs and crown) */
+  const ALL=part===undefined, BASE=ALL||part===0;
   const bx=W*.905, by=hz+H*.012, th=H*.1, wood=mix(P.cabin,'#000000',.25), woodL=mix(P.cabin,P.rim,.25), u=H/500;
   const leafD=mix(P.leaf,'#000000',.45), leafM=mix(P.leaf,'#000000',.12), leafL=mix(P.leaf,P.leafHi,.3+P.d*.15);
   const wind=Math.sin(t*.6)*H*.006+Math.sin(t*1.3)*H*.002;
   // reflection first (under everything)
-  c.save(); c.globalAlpha=.14; c.fillStyle=leafM; c.beginPath(); c.ellipse(bx-H*.005,hz+H*.05,H*.12,H*.04,0,0,7); c.fill(); c.restore();
+  if(BASE){ c.save(); c.globalAlpha=.14; c.fillStyle=leafM; c.beginPath(); c.ellipse(bx-H*.005,hz+H*.05,H*.12,H*.04,0,0,7); c.fill(); c.restore();
   // trunk: wide flared base, slight lean, bark lines, lit edge
   c.fillStyle=wood; c.beginPath(); c.moveTo(bx-H*.026,by); c.bezierCurveTo(bx-H*.012,by-H*.012,bx-H*.016,by-th*.55,bx-H*.012,by-th); c.lineTo(bx+H*.01,by-th); c.bezierCurveTo(bx+H*.012,by-th*.55,bx+H*.01,by-H*.014,bx+H*.028,by); c.closePath(); c.fill();
   c.strokeStyle=mix(wood,'#000000',.3); c.lineWidth=Math.max(.7,u*.8); c.beginPath(); for(const dx of [-.006,.002]){ c.moveTo(bx+H*dx,by-H*.01); c.quadraticCurveTo(bx+H*(dx-.003),by-th*.5,bx+H*dx,by-th*.95); } c.stroke();
   c.strokeStyle=v3rgba(P.rim,.25+P.d*.45); c.lineWidth=1; c.beginPath(); c.moveTo(bx+H*.026,by); c.bezierCurveTo(bx+H*.01,by-H*.014,bx+H*.011,by-th*.55,bx+H*.009,by-th); c.stroke();
+  }
   // limbs arching out from the fork
   const limbs=[[-.11,-.07],[-.06,-.11],[.0,-.125],[.06,-.105],[.1,-.06]], fork={x:bx,y:by-th}, tips=[];
   c.strokeStyle=wood; c.lineCap='round';
-  limbs.forEach(([dx,dy],i)=>{ const tx=bx+H*dx+wind*.4, ty=by-th+H*dy, mx=bx+H*dx*.35, my=by-th+H*dy*1.05; c.lineWidth=Math.max(1.2,H*(.009-Math.abs(dx)*.03)); c.beginPath(); c.moveTo(fork.x,fork.y); c.quadraticCurveTo(mx,my,tx,ty); c.stroke(); tips.push([fork.x,fork.y,mx,my,tx,ty]); });
+  limbs.forEach(([dx,dy],i)=>{ const tx=bx+H*dx+wind*.4, ty=by-th+H*dy, mx=bx+H*dx*.35, my=by-th+H*dy*1.05; if(BASE){ c.lineWidth=Math.max(1.2,H*(.009-Math.abs(dx)*.03)); c.beginPath(); c.moveTo(fork.x,fork.y); c.quadraticCurveTo(mx,my,tx,ty); c.stroke(); } tips.push([fork.x,fork.y,mx,my,tx,ty]); });
   // crown tufts along the limbs (irregular top, not a dome)
   const r=v3rng(53), tuft=(col,k,lift)=>{ c.fillStyle=col; c.beginPath(); for(const [x0,y0,mx,my,x1,y1] of tips){ for(let s=.25;s<=1;s+=.15){ const m=1-s, px=m*m*x0+2*m*s*mx+s*s*x1, py=m*m*y0+2*m*s*my+s*s*y1, rr=H*(.014+r()*.012)*k; c.moveTo(px+rr*.8,py-lift); c.ellipse(px+(r()-.5)*H*.01,py-lift+rr*.4,rr*.8,rr*1.25,0,0,7); } } c.fill(); };
-  tuft(leafD,.75,0); tuft(leafM,.6,H*.004); tuft(leafL,.38,H*.008);
+  if(BASE){ tuft(leafD,.75,0); tuft(leafM,.6,H*.004); tuft(leafL,.38,H*.008); }
   // curtains: strands hanging from points along every limb, falling almost to the water, leaves as short slanted dabs
   const fr=v3rng(61), strands=[];
   tips.forEach(([x0,y0,mx,my,x1,y1],li)=>{ for(let s=.12;s<=1.04;s+=.032){ const m=1-s, px=m*m*x0+2*m*s*mx+s*s*x1, py=m*m*y0+2*m*s*my+s*s*y1, outer=Math.abs(px-bx)/(H*.12);
       const len=(by+H*.008-py)*(.7+outer*.22+fr()*.12), ph=fr()*6.28, dir=limbs[li][0]<0?-1:limbs[li][0]>0?1:(((s*100)|0)%2?1:-1); strands.push({px,py,len,ph,dir,out:.4+outer*.8,layer:fr()<.4?0:fr()<.66?1:2,sw:(.5+outer)}); } });
-  const leafPass=(layer,col,lw)=>{ c.strokeStyle=col; c.lineWidth=lw; c.beginPath();
-    for(const S2 of strands){ if(S2.layer!==layer) continue; const sw=(wind+Math.sin(t*1.1+S2.ph)*H*.003)*S2.sw;
+  // strands in drawing order (all dark, then mid, then light), cut into three equal slices; slice 0 starts a little later because it also has the tree
+  const nL=[0,0,0]; for(const S2 of strands) nL[S2.layer]++; const off=[0,nL[0],nL[0]+nL[1]], NS=strands.length, cut=[0,Math.round(NS*.3),Math.round(NS*.65),NS];
+  const leafPass=(layer,col,lw)=>{ c.strokeStyle=col; c.lineWidth=lw; c.beginPath(); let si=-1; const lo=ALL?0:cut[part], hi=ALL?NS:cut[part+1]; if(off[layer]+nL[layer]<=lo||off[layer]>=hi) return;
+    for(const S2 of strands){ if(S2.layer!==layer) continue; si++; const gi=off[layer]+si; if(gi<lo||gi>=hi) continue; const sw=(wind+Math.sin(t*1.1+S2.ph)*H*.003)*S2.sw;
       for(let k=0;k<=1;k+=.06){ const arc=Math.sin(Math.min(1,k*2.6)*Math.PI/2), y=S2.py-Math.sin(Math.min(1,k*3)*Math.PI)*H*.008+S2.len*Math.pow(k,1.25), x=S2.px+S2.dir*S2.out*arc*H*.02+sw*k*k+Math.sin(k*3+S2.ph)*H*.0022, ll=u*(3.8-k*1.5), side=((k*100|0)%2)?1:-1; c.moveTo(x,y); c.lineTo(x+side*ll*.45,y+ll); } }
     c.stroke(); };
   c.lineCap='round'; leafPass(0,leafD,Math.max(1.3,u*2.1)); leafPass(1,leafM,Math.max(1.2,u*1.9)); leafPass(2,leafL,Math.max(1,u*1.6)); c.lineCap='butt';
   // rim light on the sunward tufts at dusk
-  if(P.d>.05){ c.fillStyle=v3rgba(P.rim,.25*P.d); c.beginPath(); for(const [,, ,,x1,y1] of tips){ if(x1<bx) continue; c.moveTo(x1+H*.012,y1-H*.01); c.arc(x1,y1-H*.01,H*.012,0,7); } c.fill(); }
+  if(BASE&&P.d>.05){ c.fillStyle=v3rgba(P.rim,.25*P.d); c.beginPath(); for(const [,, ,,x1,y1] of tips){ if(x1<bx) continue; c.moveTo(x1+H*.012,y1-H*.01); c.arc(x1,y1-H*.01,H*.012,0,7); } c.fill(); }
 }
 // =====================================================================
 // 0.3.3 map love: every water gets a signature of its own and no empty corners.
@@ -7177,10 +7187,17 @@ function m34ghost(P,t,hz){ const per=105, k=(t%per)/per, cyc=Math.floor(t/per), 
 
 // ---------- storms at sea: steep short chop, foam streaks, and squalls that smear the view ----------
 function m34chop(P,t,hz,mult){ const st=seaStormK()*mult; if(st<.02) return; const FX=S.settings.effects, foam=mix(P.wTop||'#a8cfdf','#ffffff',.7), N=Math.round((FX?70:30)*Math.min(1.6,st)*gfxK());
+  // 2026-11-18 (director: storms drop frames, most on the open sea): every wave used to be two separate fills and a stroke, each
+  // with its own colour string (about 360 fills a frame). The waves now go into a few shared shapes: one fill for all the shadow
+  // sides, one for all the lit faces, and the foam crests in three strengths and three widths. Same picture, a handful of draws.
+  const st1=Math.min(1,st), cShade=v3rgba(P.wBot,.3*st1), cLit=v3rgba(mix(P.wTop,P.wMid,.3),.5*st1);
+  const shade=new Path2D(), lit=new Path2D(), foamP=[0,1,2].map(()=>[0,1,2].map(()=>new Path2D())), foamN=[[0,0,0],[0,0,0],[0,0,0]];
   for(let i=0;i<N;i++){ const r1=((Math.sin(i*12.9898)*43758.5453)%1+1)%1, r2=((Math.sin(i*78.233+4.1)*24634.6345)%1+1)%1, y=hz+H*.015+Math.pow(r2,1.5)*(H-hz)*.95, u=(y-hz)/(H-hz), l=W*(.006+u*.03), x=((r1*W+t*W*(.04+u*.09))%(W*1.12))-W*.06, hb=Math.sin(t*(2.6+(i%5)*.4)+i*1.7), h=l*(.12+.1*hb)*Math.min(1.4,st);
-    if(h<=0) continue; g.fillStyle=v3rgba(P.wBot,.3*Math.min(1,st)); g.beginPath(); g.moveTo(x-l*.6,y+h*.4); g.quadraticCurveTo(x,y+h*1.3,x+l*.6,y+h*.4); g.closePath(); g.fill();
-    g.fillStyle=v3rgba(mix(P.wTop,P.wMid,.3),.5*Math.min(1,st)); g.beginPath(); g.moveTo(x-l*.6,y+h*.4); g.quadraticCurveTo(x-l*.1,y-h,x+l*.5,y+h*.3); g.closePath(); g.fill();
-    if(hb>.35){ g.strokeStyle=v3rgba(foam,(hb-.35)*.9*Math.min(1,st)); g.lineWidth=Math.max(1,u*2.2); g.beginPath(); g.moveTo(x-l*.3,y-h*.45); g.quadraticCurveTo(x-l*.05,y-h*.9,x+l*.3,y-h*.2); g.stroke(); } }
+    if(h<=0) continue; shade.moveTo(x-l*.6,y+h*.4); shade.quadraticCurveTo(x,y+h*1.3,x+l*.6,y+h*.4); shade.closePath();
+    lit.moveTo(x-l*.6,y+h*.4); lit.quadraticCurveTo(x-l*.1,y-h,x+l*.5,y+h*.3); lit.closePath();
+    if(hb>.35){ const a=Math.min(2,Math.floor((hb-.35)/.65*3)), wq=Math.min(2,Math.floor(u*3)); const fp=foamP[a][wq]; foamN[a][wq]++; fp.moveTo(x-l*.3,y-h*.45); fp.quadraticCurveTo(x-l*.05,y-h*.9,x+l*.3,y-h*.2); } }
+  g.fillStyle=cShade; g.fill(shade); g.fillStyle=cLit; g.fill(lit);
+  for(let a=0;a<3;a++) for(let wq=0;wq<3;wq++){ if(!foamN[a][wq]) continue; g.strokeStyle=v3rgba(foam,((a+.5)/3*.65)*.9*st1); g.lineWidth=Math.max(1,((wq+.5)/3)*2.2); g.stroke(foamP[a][wq]); }
   if(!FX) return;
   // rain squalls: grey curtains sweeping across, hiding the horizon as they pass
   const SQ=mult>1.2?4:3; for(let i=0;i<SQ;i++){ const sp=.012+i*.004, cx=(((i*.37+t*sp)%1.5)-.25)*W, cw=W*(.14+i*.05), A=.16*Math.min(1.2,st)*(.7+.3*Math.sin(t*.4+i));
@@ -7336,9 +7353,9 @@ function a3Vol(c,pathFn,x0,x1,y0,y1,k){ k=k==null?1:k; c.save(); pathFn(); c.cli
     c.strokeStyle='rgba(255,246,230,'+(.1*k)+')'; c.lineWidth=Math.max(.3,W*.035); c.beginPath(); c.moveTo(x0+W*.64,y0+H*.22); c.quadraticCurveTo(x0+W*.72,y0+H*.42,x0+W*.68,y0+H*.62); c.stroke(); }
   c.restore(); }
 // a woven texture (twill) for clothes, sized to the screen's pixels so it stays fine at any zoom
-let A3WEAVE=null;
+let A3WEAVE=null; const A3WEAVE_P=new WeakMap(), A3WEAVE_M=new DOMMatrix();
 function a3Weave(c,x0,y0,x1,y1,a){ if(!A3WEAVE){ const n=6, cv=document.createElement('canvas'); cv.width=cv.height=n; const x=cv.getContext('2d'); for(let i=0;i<n;i++){ x.fillStyle='rgba(0,0,0,.55)'; x.fillRect(i,(i*2)%n,1,1); x.fillStyle='rgba(255,255,255,.4)'; x.fillRect(i,(i*2+3)%n,1,1); } A3WEAVE=cv; }
-  const m=c.getTransform(), p=c.createPattern(A3WEAVE,'repeat'); if(p.setTransform&&m.a) p.setTransform(new DOMMatrix().scale(1/Math.hypot(m.a,m.b)));
+  const m=c.getTransform(); let p=A3WEAVE_P.get(c); if(!p){ p=c.createPattern(A3WEAVE,"repeat"); A3WEAVE_P.set(c,p); } /* 2026-11-18: one pattern per canvas, reused (a new one about 10 times a frame caused regular hitches) */ if(p.setTransform&&m.a){ const k=1/Math.hypot(m.a,m.b); A3WEAVE_M.a=k; A3WEAVE_M.b=0; A3WEAVE_M.c=0; A3WEAVE_M.d=k; A3WEAVE_M.e=0; A3WEAVE_M.f=0; p.setTransform(A3WEAVE_M); }
   c.save(); c.globalAlpha*=a; c.fillStyle=p; c.fillRect(x0-2,y0-2,x1-x0+4,y1-y0+4); c.restore(); }
 
 // the figure is painted into a small canvas of its own, then a rim light from the sky is laid along its back edge, then it is placed in the scene
@@ -15111,18 +15128,25 @@ const MOB=()=>{ const b=document.body.classList; return b.contains('phone-app')|
   const _dt=drawTank; drawTank=function(now){ if(MOB()){ const t=performance.now(); if(t<scrollUntil) return; if(t-lastT<15) return; lastT=t; /* full rate (round 6, director: more frames); still pauses while scrolling */ } return _dt.apply(this,arguments); }; }
 
 // 3) steady frame rate: the water's resolution follows how the phone keeps up. If frames drop for a few seconds (a storm, a
-//    big fight), the water is drawn a little less sharp until the phone keeps up again; never more than two steps.
+//    big fight), the water is drawn a little less sharp until the phone keeps up again (round 7: five steps, see below).
 let MOB_DPR_CAP=2;
 { const _rd=renderDPR; renderDPR=function(w,h){ const d=_rd(w,h); return MOBDPR_ON()?Math.min(d,MOB_DPR_CAP):d; };
   function MOBDPR_ON(){ return MOB(); }
-  const steps=[2,1.6,1.3]; let i=0, acc=0, n=0, slow=0, fast=0, last=0;
-  const tick=t=>{ requestAnimationFrame(tick); if(!MOB()||document.hidden||MENU_OPEN){ last=0; return; } if(last){ const dt=t-last; if(dt<200){ acc+=dt; n++; } } last=t;
-    if(n>=60){ const avg=acc/n; acc=0; n=0;
-      if(avg>21){ slow++; fast=0; if(slow>=2&&i<steps.length-1){ i++; slow=0; MOB_DPR_CAP=steps[i]; try{ resize(); }catch(e){} } }
-      else if(avg<15){ fast++; slow=0; if(fast>=8&&i>0){ i--; fast=0; MOB_DPR_CAP=steps[i]; try{ resize(); }catch(e){} } }
+  // round 7 (director, Pixel 10: ~50 fps on the first waters, 20-30 on others, under 20 in storms): finer steps, it reacts below
+  // ~54 fps (was 48, so a phone holding 50 never got help), each water remembers the sharpness it settled on (switching back starts
+  // there instead of slow again), and the first second after a water change is not counted (one-off loading work).
+  const steps=[2,1.75,1.5,1.3,1.15]; let i=0, acc=0, n=0, slow=0, fast=0, last=0, loc='', skipUntil=0; const byLoc={};
+  const setStep=k=>{ k=Math.max(0,Math.min(steps.length-1,k)); if(k===i) return; i=k; MOB_DPR_CAP=steps[i]; try{ resize(); }catch(e){} };
+  const tick=t=>{ requestAnimationFrame(tick); if(!MOB()||document.hidden||MENU_OPEN){ last=0; return; }
+    if(S.loc!==loc){ if(loc) byLoc[loc]=i; loc=S.loc; acc=0; n=0; slow=0; fast=0; skipUntil=t+1000; if(byLoc[loc]!=null) setStep(byLoc[loc]); }
+    if(t<skipUntil){ last=t; return; }
+    if(last){ const dt=t-last; if(dt<200){ acc+=dt; n++; } } last=t;
+    if(n>=45){ const avg=acc/n; acc=0; n=0;
+      if(avg>18.5){ slow++; fast=0; if(slow>=2){ slow=0; setStep(i+(avg>30?2:1)); byLoc[loc]=i; } }
+      else if(avg<14){ fast++; slow=0; if(fast>=6){ fast=0; setStep(i-1); byLoc[loc]=i; } }
       else { slow=0; fast=0; } } };
   requestAnimationFrame(tick);
-  if(/[?&]test\b/.test(location.search)) window.__mobperf=()=>({cap:MOB_DPR_CAP, step:i}); }
+  if(/[?&]test\b/.test(location.search)) window.__mobperf=()=>({cap:MOB_DPR_CAP, step:i, byLoc:Object.assign({},byLoc)}); }
 
 // 4) live events never move the game frame (director: "some live events on Android move the game frame as the counter moves
 //    down while in portrait mode, seen with Market Rush"): the goal / live chip keeps to one line, digits keep the same width,
@@ -15713,6 +15737,37 @@ html body.phone-app #menuov #panel.aq07 .aq07-pin > .aq07-bank,html body.phone-l
   html body.phone-land #menuov #panel.aq07 .aq07-pin > .tank{height:calc(100dvh - 150px - env(safe-area-inset-top) - env(safe-area-inset-bottom))!important}
 }
 </style>`);
+// =====================================================================
+// Phones, round 7 performance (director, 2026-11-18, Pixel 10: "storms can still majorly drop frames on Android, even more so on
+// open seas; the first three waters hold about 50 fps, the others drop to 20-30 when you switch to them, storms to 20 or below").
+// On a phone the cost that grows with weather and water is painting: every full-screen layer is millions of pixels on a dense
+// screen. This file trims the layers drawn over the whole screen each frame:
+//  - the two vignettes (the soft dark frame) and the storm / rain darkening are pre-drawn into ONE small cached picture and
+//    drawn once, instead of up to four full-screen layers in a storm (two in clear weather)
+// Android + iPhone only. (The open-sea storm chop and the willow are fixed in the shared code, for every platform.)
+// =====================================================================
+{ let OV=null;
+  const q=(v,n)=>Math.round(v*n)/n;
+  const build=(night,k,a)=>{ const key=W+'x'+H+'|'+q(night,10)+'|'+k+'|'+q(a,10); if(OV&&OV.key===key) return OV.c;
+    const c=(OV&&OV.c)||document.createElement('canvas'), s=Math.min(1,600/Math.max(W,H)), w=Math.max(8,Math.round(W*s)), h=Math.max(8,Math.round(H*s)); if(c.width!==w||c.height!==h){ c.width=w; c.height=h; }
+    const x=c.getContext('2d'); x.setTransform(1,0,0,1,0,0); x.clearRect(0,0,w,h);
+    try{ x.drawImage(finVignette(),0,0,w,h); }catch(e){}
+    // the scene's own vignette (d7_v20 drawVignette), in the small picture's scale
+    const sc=w/W; { const gr=x.createRadialGradient(w/2,h*.55,Math.min(W,H)*.35*sc,w/2,h*.55,Math.max(W,H)*.75*sc); gr.addColorStop(0,'rgba(0,0,0,0)'); gr.addColorStop(1,'rgba(4,10,16,'+(.22+night*.2)+')'); x.fillStyle=gr; x.fillRect(0,0,w,h); }
+    // the weather's darkening (as_depth033), faded in with the weather
+    if(a>.01&&k==='Storm'){ x.globalAlpha=a; x.fillStyle='rgba(8,12,20,.2)'; x.fillRect(0,0,w,h); const vg=x.createRadialGradient(w/2,h*.5,H*.3*sc,w/2,h*.5,W*.8*sc); vg.addColorStop(0,'rgba(0,0,0,0)'); vg.addColorStop(1,'rgba(0,0,6,.35)'); x.fillStyle=vg; x.fillRect(0,0,w,h); x.globalAlpha=1; }
+    if(a>.01&&k==='Rain'){ x.globalAlpha=a; x.fillStyle='rgba(30,40,54,.12)'; x.fillRect(0,0,w,h); x.globalAlpha=1; }
+    OV={key,c}; return c; };
+  // the cached vignette in v3Fore is skipped on phones (it is part of the combined picture)
+  { const _dr=draw; draw=function(){ window.__noVig=MOB(); return _dr.apply(this,arguments); }; }
+  // the storm / rain full-screen darkening inside the weather layer is skipped on phones (also part of the combined picture)
+  { const _wx=drawWeatherX0; drawWeatherX0=function(t,wx,hz){ if(!MOB()||(wx.k!=='Storm'&&wx.k!=='Rain')) return _wx.apply(this,arguments);
+      const fr=g.fillRect; g.fillRect=function(x,y,w,h){ if(x<=0&&y<=0&&w>=W-1&&h>=H-1) return; return fr.apply(this,arguments); };
+      try{ return _wx.apply(this,arguments); } finally{ g.fillRect=fr; delete g.fillRect; } }; }
+  { const _dv=drawVignette; drawVignette=function(night){ if(!MOB()) return _dv.apply(this,arguments);
+      const wx=weather(), on=S.settings.effects&&typeof WXA==='number'&&WXA>.01, k=on?wx.k:'', a=on?WXA:0;
+      const c=build(night||0,k,a); g.save(); g.imageSmoothingEnabled=true; g.drawImage(c,0,0,W,H); g.restore(); }; }
+  if(/[?&]test\b/.test(location.search)) window.__ov=()=>OV&&{key:OV.key,w:OV.c.width,h:OV.c.height}; }
 // iPhone release notes (shown once to returning iPhone players). Kept exactly as shipped once published.
 PATCHES.unshift({v:'0.4.8', name:'Rewards Worth Chasing', items:[
   '## Rewards and balance',
@@ -15762,6 +15817,10 @@ PATCHES.unshift({v:'0.4.8.1', name:'Smoother and Steadier', items:[
 // iPhone test notes (preview builds only; the live game never shows them). Write what the next test build changes here
 // (spoiler-free); it opens once in the iPhone test app. Released notes live in notes_release.js.
 const TEST_NOTES={v:'test', label:'Test build · iPhone', name:'One Look, Easy Aquarium', items:[
+  '## Smoother frames',
+  'Willow Pond no longer stutters: the willow used to redraw its whole curtain every third frame; its work is now spread evenly over every frame.',
+  'Storms are lighter: the darkening and the soft frame around the picture are drawn in one layer instead of up to four, and storm waves on the open sea draw in a handful of shapes instead of hundreds.',
+  'If a water or a storm is too heavy for your phone, the picture gets a touch softer sooner and in smaller steps, and each water remembers what suits your phone, so coming back is smooth straight away.',
   '## Fairer streaks',
   'Reeling in early, casting by accident or missing a strike never costs you anything: your streak stays. A streak only ends when a fish you have hooked gets away (a snapped line, a fish that slips off or runs out your line).',
   'On a Roll, fully learned: a lost fish now only halves your streak instead of ending it.',
