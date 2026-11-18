@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="DL Test Android">
 <script>
-window.DL_BUILD='android'; window.DL_PREVIEW=true; window.DL_VERSION='2026.11.18-0901';
+window.DL_BUILD='android'; window.DL_PREVIEW=true; window.DL_VERSION='2026.11.18-0907';
 window.addEventListener('beforeinstallprompt',function(e){ e.preventDefault(); window.__dlInstallPrompt=e; });
 </script>
 </head>
@@ -1584,11 +1584,12 @@ function hookIt(){ const perfect = (G.waitT - (G.biteEnd - hookWin())) < .3*hook
   if(G.fish.kind==='fish' && G.fish.shiny===2) setTimeout(()=>toast('It shimmers like nothing you have seen. It will fight every way a fish can.'),400);
   if(G.fish.kind==='fish' && G.fish.hy) setTimeout(()=>toast(G.fish.kg>(G.fish.sp.min+G.fish.sp.max)/2?'This feels far too heavy for what it looks like...':'Strangely light on the line...'),600);
   if(perfect){ G.sta=.65; G.ten=0; G.runT=rnd(1,1.6); S.stats.perfect++; if(maxed('reflex')){ G.d*=.5; toast('Lightning hook! Halfway in already.'); } else toast('Perfect hook! The fish starts tired.'); tone(990,.1,'triangle',.07,0,.05); } }
-function breakStreak(){ const n=S.streak; if(n>=3) setTimeout(()=>toast('Streak of '+n+' ended'),1200); S.streak=0; if(n>0) save(); } /* 0.3.6: saved at once, so a refresh can't bring a broken streak back */
+function breakStreak(){ const n=S.streak; if(!n) return; const keep=maxed("streaker")?Math.floor(n/2):0; /* director 2026-11-18: a streak ends only when a fish that bit gets away; On a Roll maxed keeps half */ S.streak=keep; if(n>=3) setTimeout(()=>toast(keep?"Fish lost: streak "+n+" halved to "+keep:"Streak of "+n+" ended"),1200); save(); } /* 0.3.6: saved at once, so a refresh can't bring a broken streak back */
 function endFight(kind){
   if(kind==='caught'){ G.st='landing'; G.land={t:0, dur:.85, x0:G.bob.x, y0:G.bob.y}; splash(G.bob.x,G.bob.y,24); sfx.pull(); return; }
   G.st='idle'; G.fish=null; G.inHot=false; breakStreak();
   if(kind==='snap'){ S.stats.snapped++; sfx.snap(); toast((G.temper>1.6 ? 'Snap! It lost its temper. Let go now and then. ' : 'Snap! Ease off when it runs. ')+quip('snap')); checkFeats(); save(); }
+  else if(kind==='nohook'){ sfx.lost(); toast('Too slow: it bit and swam off. Strike on the big splash.'); } /* a missed strike said "slipped off the hook" before */
   else { sfx.lost(); toast((kind==='spool' ? 'It ran out all your line. ' : 'It slipped off the hook. ')+quip('lost')); }
 }
 function finishCatch(){ const f=G.fish; G.land=null; if(!f){ G.st='idle'; return; } if(V3ON) vib([30,40,70]);
@@ -1754,7 +1755,7 @@ function down(e){
     case 'frenzy': frenzyHit(e); break;
     case 'rest': toast('You are resting. Press the Rest button (bottom left of the water) to fish yourself.'); break;
     case 'idle': if(V3ON && aimCast(e)) break; startCharge(); break;
-    case 'waiting': G.st='idle'; G.inHot=false; if(!maxed('streaker')) breakStreak(); toast('Reeled in early. Wait for the big splash.'); break;
+    case 'waiting': G.st='idle'; G.inHot=false; toast(S.streak>=2?'Reeled in early: no harm done, your streak of '+S.streak+' is safe. Wait for the big splash.':'Reeled in early. Wait for the big splash.'); break; /* director 2026-11-18: an early reel or an accidental cast is never punished */
     case 'bite': hookIt(); break;
     case 'reeling': G.hold=true; break;
     case 'result': hideCard(); break;
@@ -3717,7 +3718,7 @@ const MASTERY_FX = {
   haggler:'The fishmonger’s wanted fish pays ×3 instead of ×2.',
   keeper:'The aquarium keeps earning for 16 hours while you’re away, not 8.',
   petpal:'Petting sometimes earns a little gift from your pet (once an hour).',
-  streaker:'Reeling in early no longer breaks your streak.',
+  streaker:'A lost fish only halves your streak instead of ending it.',
   nightowl:'Night fish also bite at dawn.',
 };
 const offlineCap = () => maxed('keeper') ? 16*60 : OFFLINE_CAP_MIN;
@@ -12629,8 +12630,8 @@ const CHAL={
     onCatch:(c,f)=>{ if(!c.seen.includes(f.sp.id)){ c.seen.push(f.sp.id); c.prog=c.seen.length; return true; } } },
   long:  {name:'Long Cast', icon:'🎯', mins:6, m:.25, rule:c=>'Land '+c.need+' fish from far casts', hint:()=>'Charge your cast past the far mark on the power bar. Far casts also bring better fish. Long Caster lowers the mark.',
     setup:()=>({need:5}), onCatch:(c,f,perfect,far)=>{ if(far){ c.prog++; return true; } } },
-  steady:{name:'Steady Hands', icon:'✋', mins:6, m:.25, rule:c=>'Land '+c.need+' perfect-hook fish in a row', hint:()=>'Strike the instant it bites. A fish hooked late resets the count. A longer hook window (Hook upgrades, Quick Reflexes) helps.',
-    setup:()=>({need:4}), onCatch:(c,f,perfect)=>{ if(perfect){ c.prog++; return true; } if(c.prog){ c.prog=0; toast('Late hook: Steady Hands count back to 0.'); } } },
+  steady:{name:'Steady Hands', icon:'✋', mins:6, m:.25, rule:c=>'Land '+c.need+' perfect-hook fish without losing one', hint:()=>'Strike the instant it bites. A late hook just does not count; only a fish that gets away resets the count. A longer hook window (Hook upgrades, Quick Reflexes) helps.',
+    setup:()=>({need:4}), onCatch:(c,f,perfect)=>{ if(perfect){ c.prog++; return true; } }, onLost:(c)=>{ if(c.prog){ c.prog=0; toast('Fish lost: Steady Hands count back to 0.'); return true; } } }, /* director 2026-11-18: counters reset only on a failed catch, never on a late hook that still lands the fish */
   treasure:{name:'Treasure Dive', icon:'🧭', mins:6, m:.3, rule:c=>'Fish up '+c.need+' piece'+(c.need>1?'s':'')+' of junk or treasure', hint:()=>'Your chance of junk or treasure per bite here: '+fmtOdds(junkChance())+'. Magnet Lures, the Magnet Tip and Scavenger raise it.',
     setup:()=>({need:Math.max(1,Math.min(5,Math.round(6*CATCHES_PER_MIN*junkChance()*.85)))}), onJunk:(c)=>{ c.prog++; return true; } },
   weigh: {name:'Trophy Weigh-in', icon:'⚖️', mins:5, m:.35, rule:()=>'Weigh in your heaviest fish', hint:()=>'Only your heaviest fish counts. Spinners, Trophy Hunter and Feather Flies bring bigger fish.', ranked:true, slow:true,
@@ -12727,6 +12728,8 @@ document.head.insertAdjacentHTML('beforeend',`<style>
 // the goal chip says "Live" for events
 setInterval(()=>{ const el=$('goalchip'); if(!el) return; const live=!!(S.chal||liveScheds().length); el.classList.toggle('live',live); const k=el.querySelector('.gl-k'); if(k&&live&&k.textContent!=='Live') k.textContent='Live'; },700);
 if(/[?&]test\b/.test(location.search)) window.__ev={chalStart, chalEnd, CHAL, SCHED, schedLeft, schedNext, shoalLeft, shoalNext, bonus:k=>bonus(k), junk:()=>junkChance(), rare:()=>rareScore(distanceMods(),false,false,phase())};
+// a fish that bit and got away (missed strike, snap, slipped off, ran out the line) is the only thing that resets a challenge count
+{ const _ef=endFight; endFight=function(kind){ try{ if(kind!=='caught'&&S.chal){ const C=CHAL[S.chal.id]; if(C&&C.onLost&&C.onLost(S.chal)){ save(); if(S.tab==='events') renderPanel(); } } }catch(e){ console.error(e); } return _ef.apply(this,arguments); }; }
 // =====================================================================
 // 0.4 Hunts (Fish Log). Pick up to HUNT_MAX fish per water to hunt: each hunted fish's catch weight is multiplied by
 // HUNT_MULT inside catchW, the one weight function the catch roll and every on-screen odds number share, so the bonus
@@ -15698,6 +15701,10 @@ PATCHES.unshift({v:'0.4.8.1', name:'Smoother and Steadier', items:[
 // Android test notes (preview builds only; the live game never shows them). Write what the next test build changes here
 // (spoiler-free); it opens once in the Android test app. Released notes live in notes_release.js.
 const TEST_NOTES={v:'test', label:'Test build · Android', name:'One Look, Easy Aquarium', items:[
+  '## Fairer streaks',
+  'Reeling in early or casting by accident never costs you anything: your streak stays. A streak only ends when a fish that bit gets away (a missed strike, a snapped line, a fish that slips off or runs out your line).',
+  'On a Roll, fully learned: a lost fish now only halves your streak instead of ending it.',
+  'Steady Hands challenge: a late hook just does not count; only a fish that gets away resets the count.',
   '## One look everywhere',
   'Every button, chip, tab and card now shares one style: the same navy, the same corners, the same lettering, and line icons instead of emoji pictures.',
   'Everything you can tap in the top bar looks like a button now (teal outline, and a small arrow when held sideways). Coins and level are plain text, so you can tell at a glance.',
@@ -16043,6 +16050,8 @@ window.__sceneCostWith=(lk={},n=60)=>{ const keep=JSON.stringify(S.look); Object
 // time named functions while fn runs (preview only): __fnTime(['renderPanel','paintFish'], ()=>__open('aquarium'), 10)
 if(/[?&]test\b/.test(location.search)) window.__fnTime=(names,fn,n=1)=>{ const T={}, orig={}; for(const k of names){ try{ orig[k]=eval(k); if(typeof orig[k]!=='function') continue; T[k]=0; eval(k+'=function(){ const t0=performance.now(); try{ return orig["'+k+'"].apply(this,arguments); } finally{ T["'+k+'"]+=performance.now()-t0; } }'); }catch(e){} }
   const t0=performance.now(); try{ for(let i=0;i<n;i++) fn(); } finally{ for(const k in orig){ try{ eval(k+'=orig["'+k+'"]'); }catch(e){} } } const tot=(performance.now()-t0)/n; const out={total:+tot.toFixed(2)}; for(const k in T) out[k]=+(T[k]/n).toFixed(2); return out; };
+// run a snippet inside the game's own scope (preview + ?test only), for scenario tests: __inGame("endFight('snap'); return S.streak")
+if(/[?&]test\b/.test(location.search)) window.__inGame=(code)=>eval('(()=>{'+code+'})()');
 
 // ---------- loop ----------
 let last=performance.now();
