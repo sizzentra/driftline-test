@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="DL Test Android">
 <script>
-window.DL_BUILD='android'; window.DL_PREVIEW=true; window.DL_VERSION='2026.11.18-1653';
+window.DL_BUILD='android'; window.DL_PREVIEW=true; window.DL_VERSION='2026.11.18-1726';
 window.addEventListener('beforeinstallprompt',function(e){ e.preventDefault(); window.__dlInstallPrompt=e; });
 </script>
 </head>
@@ -16374,6 +16374,17 @@ const touchText=s=>{ if(!s||!/Space|Click|Release/.test(s)) return s; let t=s; f
         :`<h4>Play it like an app</h4><p class="meta">${ip?'In Safari, tap <b>Share</b>, then <b>Add to Home Screen</b>.':'Open the browser menu <b>⋮</b> and tap <b>Install app</b> (or <b>Add to Home screen</b>).'} Driftline then opens full screen from its own icon and keeps your progress.</p>`;
       tile.insertAdjacentHTML('beforeend','<p class="meta" style="margin-top:8px">Playing on a computer too? There is a Windows app; bring your progress with <b>Move progress</b>.</p>');
     }catch(e){ console.error(e); } return r; }; }
+/* badges never cut off or covering a neighbour (director, 2026-11-18, screenshot: the side rail's "2" on Fishing was cut off at the
+   top, the "1" for Upgrades sat over the button above). In menus the rail is a scrolling box, and its badges poked 12 px above each
+   button: the first one was clipped, the others covered the button above. Rail badges now sit inside their button, as a count at
+   the right end of the row (centred); collapsed, in the button's top-right corner. */
+document.head.insertAdjacentHTML('beforeend',`<style>
+html body.phone-land #menuov .secbar .secb,html body.phone-app #menuov .secbar .secb{position:relative!important}
+html body.phone-land #menuov #tabs .secbar .secb .secdot,html body.phone-app #menuov #tabs .secbar .secb .secdot{top:50%!important;bottom:auto!important;right:4px!important;left:auto!important;transform:translateY(-50%)!important;margin:0!important}
+</style>`);
+document.head.insertAdjacentHTML('beforeend',`<style>
+html body.phone-land.dock-mini #menuov #tabs .secbar .secb .secdot{top:3px!important;right:1px!important;bottom:auto!important;left:auto!important;transform:none!important} html body.phone-land.dock-mini #menuov #tabs .secbar .secb:has(.secdot){justify-content:flex-start!important;padding-left:2px!important} /* collapsed rail: the badge in the top-right corner, the icon moves left to make room (only on buttons with a badge) */
+</style>`);
 // =====================================================================
 // Phones and tablets, round 8: the top bar's goal (director, 2026-11-18: "The 'next goal' function on mobile upper header is too big
 // and doesn't even work right now with proper goals and quick opens associating with the correct next goal. After it's condensed
@@ -16691,6 +16702,14 @@ if(/[?&]test\b/.test(location.search)) window.__spec=()=>{ for(const a of docume
       const v={l:r.left,r:r.right,t:r.top,b:r.bottom}; for(let p=e.parentElement;p&&p!==document.body;p=p.parentElement){ const ps=getComputedStyle(p); if(/(auto|scroll|hidden|clip)/.test(ps.overflowY+ps.overflowX)){ const q=p.getBoundingClientRect(); if(/(auto|scroll|hidden|clip)/.test(ps.overflowX)){ v.l=Math.max(v.l,q.left); v.r=Math.min(v.r,q.right); } if(/(auto|scroll|hidden|clip)/.test(ps.overflowY)){ v.t=Math.max(v.t,q.top); v.b=Math.min(v.b,q.bottom); } } }
       if(v.r-v.l<2||v.b-v.t<2) continue;
       if(v.l<SA.l-.5||v.r>vw-SA.r+.5||v.t<SA.t-.5||v.b>vh-SA.b+.5) bad('under the camera / corner / home bar "'+(e.innerText||e.getAttribute('aria-label')||e.tagName).trim().replace(/\s+/g,' ').slice(0,18)+'"',Math.round(v.l)+'–'+Math.round(v.r)+' x '+Math.round(v.t)+'–'+Math.round(v.b),'inside '+SA.l+'–'+(vw-SA.r)+' x '+SA.t+'–'+(vh-SA.b)); } }
+  /* round 8 (director's screenshot: a rail badge cut off at the top, another over the button above): every count badge is fully
+     visible (no scrolling box cuts it) and never sits over a different button */
+  { const tops=[...document.querySelectorAll(menu?'#menuov button, #menuov .secb':'#catdock .cdb, .hud > *')].filter(b=>b.getClientRects().length);
+    for(const d of vis(menu?'#menuov .secdot, #menuov .subdot, #menuov .sdot, #menuov .cddot':'#catdock .cddot, .hud .subdot')){ const t=(d.textContent||'').trim(); if(!/^\d+\+?$/.test(t)) continue; const r=d.getBoundingClientRect(); const own=d.closest('button,.secb,.cdb,.subp')||d.parentElement;
+      for(let a=d.parentElement; a&&a!==document.body; a=a.parentElement){ const cs=getComputedStyle(a); if(cs.overflowX!=='visible'||cs.overflowY!=='visible'){ const q=a.getBoundingClientRect(); if(r.top<q.top-.5||r.bottom>q.bottom+.5||r.left<q.left-.5||r.right>q.right+.5){ bad('badge "'+t+'" cut off on "'+(own.textContent||'').trim().replace(/\s+/g,' ').slice(0,14)+'"','by its box','fully visible'); break; } } }
+      for(const b of tops){ if(b===own||b.contains(d)||own.contains(b)) continue; const q0=b.getBoundingClientRect(); const q={left:q0.left,right:q0.right,top:q0.top,bottom:q0.bottom}; /* only the part of the button you can see (scrolled-away parts don't count) */
+        for(let a=b.parentElement; a&&a!==document.body; a=a.parentElement){ const cs=getComputedStyle(a); if(cs.overflowX!=='visible'||cs.overflowY!=='visible'){ const ar=a.getBoundingClientRect(); q.left=Math.max(q.left,ar.left); q.right=Math.min(q.right,ar.right); q.top=Math.max(q.top,ar.top); q.bottom=Math.min(q.bottom,ar.bottom); } }
+        if(q.right<=q.left||q.bottom<=q.top) continue; const ox=Math.min(r.right,q.right)-Math.max(r.left,q.left), oy=Math.min(r.bottom,q.bottom)-Math.max(r.top,q.top); if(ox>1&&oy>1){ bad('badge "'+t+'" over "'+(b.textContent||'').trim().replace(/\s+/g,' ').slice(0,14)+'"',Math.round(ox)+'x'+Math.round(oy)+' px','no overlap'); break; } } } }
   return out; };
   // test builds only: make the test browser behave like a phone with safe areas (e.g. iPhone Pro Max sideways: 59 left, 59 right,
   // 21 bottom), by writing those numbers into every style that uses the phone's safe areas. Reload the page to undo.
