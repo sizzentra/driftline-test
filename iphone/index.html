@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="DL Test iPhone">
 <script>
-window.DL_BUILD='ios'; window.DL_PREVIEW=true; window.DL_VERSION='2026.11.18-0339';
+window.DL_BUILD='ios'; window.DL_PREVIEW=true; window.DL_VERSION='2026.11.18-0748';
 window.addEventListener('beforeinstallprompt',function(e){ e.preventDefault(); window.__dlInstallPrompt=e; });
 </script>
 </head>
@@ -14197,7 +14197,7 @@ if(matchMedia('(hover: none)').matches){ const strip=list=>{ for(let i=list.cssR
   new MutationObserver(ms=>{ if(ms.some(m=>[...m.addedNodes].some(n=>n.tagName==='STYLE'||n.tagName==='LINK'))) all(); }).observe(document.head,{childList:true}); }
 // Menu navigation on touch screens acts when the finger lifts (if it stayed put), instead of waiting for the phone to decide
 // the touch was a click; that decision sometimes failed on iPhone and needed a second tap. The phone's own click that follows is ignored.
-{ const NAV='#menuov [data-sec],#menuov [data-sub],#menuov .sect-nav button,#menuov .mo-back,#menuov .mo-home';
+{ const NAV='#menuov [data-sec],#menuov [data-sub],#menuov .sect-nav button,#menuov .mo-back,#menuov .mo-home,.hud > .hud-link,.hud > .hudx,.hud #goalchip,.hud .hudbtns > button'; // top-bar chips too (director 2026-11-18: tapping Fishing at sometimes did nothing on iPhone)
   // Every finger is tracked on its own (fast taps with two thumbs overlap). While touch is in use, menu buttons are driven only by
   // finger lifts: the phone's own clicks on them are ignored, so a late click can never undo a newer tap. The one exception is a
   // touch that didn't act (the phone cancelled it, or the finger slid): its click is honoured, since nothing else acted for it.
