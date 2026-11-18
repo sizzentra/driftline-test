@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="DL Test Android">
 <script>
-window.DL_BUILD='android'; window.DL_PREVIEW=true; window.DL_VERSION='2026.11.18-0829';
+window.DL_BUILD='android'; window.DL_PREVIEW=true; window.DL_VERSION='2026.11.18-0837';
 window.addEventListener('beforeinstallprompt',function(e){ e.preventDefault(); window.__dlInstallPrompt=e; });
 </script>
 </head>
@@ -15545,6 +15545,54 @@ document.head.insertAdjacentHTML('beforeend',`<style>
 html body.phone-app #menuov #panel.aq07 .sect-nav,html body.phone-land #menuov #panel.aq07 .sect-nav{grid-template-columns:repeat(3,minmax(0,1fr))!important;grid-auto-flow:row!important}
 html body.phone-app #menuov #panel.aq07 .sect-nav > button,html body.phone-land #menuov #panel.aq07 .sect-nav > button{min-width:0!important;width:auto!important;overflow:hidden;text-overflow:ellipsis}
 </style>`);
+// ---------- Decorate on phones (director, 2026-11-18: "customizing the aquarium is hard and clunky, and when you choose preview it
+// starts bad"). What was wrong: the "Previewing... Buy / Stop" bar sat at the top of the Decorate list, already scrolled away, so after
+// tapping Preview you could not see what you were trying or how to buy it; the game also scrolled the tank into view, which made the
+// page jump; and a previewed decoration was dropped at the far end, often on top of one you already own. Now:
+//  - tap any card to try it in the tank (owned cards place / remove); the try-on bar is pinned under the tank with Buy and Stop
+//  - a decoration you try lands in the most open spot of the sand (and keeps that spot if you buy it)
+//  - cards are smaller (three per row) with the price or state on the card, so the whole collection is a short scroll
+{ const bestGap=()=>{ const placed=S.aq.decor.filter(id=>!(AQ_PV&&AQ_PV.id===id)); const ps=aqPositions(placed); const xs=Object.values(ps).sort((a,b)=>a-b); const pts=[.03,...xs,.97]; let best=.5, gap=-1; for(let i=0;i<pts.length-1;i++){ const g=pts[i+1]-pts[i]; if(g>gap){ gap=g; best=(pts[i]+pts[i+1])/2; } } return Math.min(.95,Math.max(.05,best)); };
+  const _rp=renderPanel; renderPanel=function(){
+    try{ if(MOB()&&S.tab==='aquarium'&&AQ_PV&&AQ_PV.kind==='decor'&&!S.aq.owned.includes(AQ_PV.id)){ S.aq.pos=S.aq.pos||{}; if(S.aq.pos[AQ_PV.id]==null){ const now=aqPositions(S.aq.decor); S.aq.decor.forEach(id=>{ if(S.aq.pos[id]==null) S.aq.pos[id]=now[id]; }); S.aq.pos[AQ_PV.id]=bestGap(); } /* placed decorations keep their spots while one is tried */ } }catch(e){}
+    const r=_rp.apply(this,arguments); try{ const P=$('panel'); if(!MOB()||S.tab!=='aquarium'||!P.classList.contains('aq07')) return r;
+      const cv=$('tankcv'); if(cv) cv.scrollIntoView=function(){}; /* the tank is always on screen here: no jump */
+      const pin=P.querySelector('.aq07-pin'), bar=P.querySelector('.pvbar'), bank=pin&&pin.querySelector('.aq07-bank');
+      if(pin&&bar){ bar.classList.add('aq07-try'); const nm=bar.querySelector('b'); const lbl=bar.querySelector('span'); if(lbl&&nm) lbl.innerHTML='Trying: <b>'+nm.innerHTML+'</b>'; if(bank) bank.after(bar); else pin.querySelector('.tank').after(bar); if(bank) bank.classList.add('aq07-hide'); }
+      const grid=[...P.querySelectorAll('.jsec .grid')].find(g=>g.querySelector('canvas[data-decor]')); if(grid){ grid.classList.add('aq07-dgrid');
+        grid.querySelectorAll(':scope > .tile').forEach(t=>{ const c=t.querySelector('canvas[data-decor]'); if(!c) return; const id=c.dataset.decor, own=S.aq.owned.includes(id), placed=S.aq.decor.includes(id), d=DECORI[id];
+          const pvB=t.querySelector('[data-act="aqpv"]'), useB=t.querySelector('[data-act="decor"]'); const trying=AQ_PV&&AQ_PV.kind==='decor'&&AQ_PV.id===id;
+          t.classList.toggle('aq07-trying',!!trying); t.classList.toggle('aq07-placed',placed);
+          const st=document.createElement('span'); st.className='aq07-st'; st.innerHTML= own?(placed?'In your tank · tap to remove':'Owned · tap to place'):(d&&d.price?(trying?'Trying · buy below':'<span class="coin">'+fmt(d.price)+'</span> · tap to try'):'Crates and prizes only'); t.appendChild(st);
+          t.querySelectorAll(':scope > .row, :scope > .btn').forEach(x=>x.classList.add('aq07-hide'));
+          if(own&&useB||(!own&&pvB)){ t.setAttribute('role','button'); t.tabIndex=0; t.addEventListener('click',e=>{ if(e.target.closest('button')) return; (own?useB:(trying?null:pvB))&&(own?useB:pvB).click(); }); } }); }
+      /* water and floor swatches: the one being tried is marked too, and owned ones say so */
+    }catch(e){ console.error(e); } return r; }; }
+document.head.insertAdjacentHTML('beforeend',`<style>
+html body.phone-app #menuov #panel.aq07 .aq07-hide,html body.phone-land #menuov #panel.aq07 .aq07-hide{display:none!important}
+html body.phone-app #menuov #panel.aq07 .aq07-try,html body.phone-land #menuov #panel.aq07 .aq07-try{display:flex!important;align-items:center;justify-content:space-between;gap:8px;margin:0!important;padding:7px 9px!important;border-radius:12px!important;background:linear-gradient(180deg,#2a2410,#1b1708)!important;border:1px solid #ffd36a88!important;color:#fff3cf;font:700 12.5px var(--display)!important;position:static!important}
+html body.phone-app #menuov #panel.aq07 .aq07-try > span:first-child,html body.phone-land #menuov #panel.aq07 .aq07-try > span:first-child{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+html body.phone-app #menuov #panel.aq07 .aq07-try .row,html body.phone-land #menuov #panel.aq07 .aq07-try .row{display:flex;gap:6px;flex:0 0 auto;margin:0}
+html body.phone-app #menuov #panel.aq07 .aq07-try .btn,html body.phone-land #menuov #panel.aq07 .aq07-try .btn{min-height:34px!important;padding:0 10px!important;font-size:12.5px!important;white-space:nowrap}
+html body.phone-app #menuov #panel.aq07 .aq07-try .btn:not(.alt):not(:disabled),html body.phone-land #menuov #panel.aq07 .aq07-try .btn:not(.alt):not(:disabled){background:linear-gradient(180deg,#ffe08a,#f3b94e)!important;border-color:#ffe6a3!important;color:#2a1c05!important}
+html body.phone-app #menuov #panel.aq07 .aq07-dgrid,html body.phone-land #menuov #panel.aq07 .aq07-dgrid{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:6px!important}
+html body.phone-app #menuov #panel.aq07 .aq07-dgrid > .tile,html body.phone-land #menuov #panel.aq07 .aq07-dgrid > .tile{padding:6px 4px 7px!important;gap:2px!important;cursor:pointer;min-width:0}
+html body.phone-app #menuov #panel.aq07 .aq07-dgrid > .tile canvas,html body.phone-land #menuov #panel.aq07 .aq07-dgrid > .tile canvas{width:60px!important;height:45px!important}
+html body.phone-app #menuov #panel.aq07 .aq07-dgrid > .tile > b,html body.phone-land #menuov #panel.aq07 .aq07-dgrid > .tile > b{font-size:12px!important;line-height:1.15;max-width:100%;white-space:normal;overflow-wrap:anywhere}
+html body.phone-app #menuov #panel.aq07 .aq07-dgrid > .tile .meta,html body.phone-land #menuov #panel.aq07 .aq07-dgrid > .tile .meta{font-size:10.5px!important;line-height:1.2}
+html body.phone-app #menuov #panel.aq07 .aq07-st,html body.phone-land #menuov #panel.aq07 .aq07-st{font:700 10.5px var(--display);color:#7fe3c4;line-height:1.2}
+html body.phone-app #menuov #panel.aq07 .aq07-placed,html body.phone-land #menuov #panel.aq07 .aq07-placed{border-color:#7fe3c488!important}
+html body.phone-app #menuov #panel.aq07 .aq07-trying,html body.phone-land #menuov #panel.aq07 .aq07-trying{border-color:#ffd36a!important;box-shadow:0 0 0 1px #ffd36a inset!important}
+html body.phone-app #menuov #panel.aq07 .aq07-trying .aq07-st,html body.phone-land #menuov #panel.aq07 .aq07-trying .aq07-st{color:#ffd36a}
+@media (orientation:landscape) and (max-height:560px){ html body.phone-land #menuov #panel.aq07 .aq07-dgrid{grid-template-columns:repeat(2,minmax(0,1fr))!important} }
+</style>`);
+// the shared "stuck section bar" band (bm_ui04: a 24 px block above the bar) covered the try-on bar; inside the pinned block the tabs
+// are already pinned, so they get no band of their own
+document.head.insertAdjacentHTML('beforeend',`<style>
+html body.phone-app #menuov #panel.aq07 .aq07-pin > .sect-nav,html body.phone-land #menuov #panel.aq07 .aq07-pin > .sect-nav{position:static!important;box-shadow:none!important}
+html body.phone-app #menuov #panel.aq07 .sect-nav.stuck::before,html body.phone-land #menuov #panel.aq07 .sect-nav.stuck::before{display:none!important}
+html body.phone-land #menuov #panel.aq07 .aq07-side > .sect-nav.stuck{box-shadow:0 0 0 6px #0b1626,0 10px 10px -6px #000c!important}
+</style>`);
 // Android release notes (shown once to returning Android players). Kept exactly as shipped once published.
 PATCHES.unshift({v:'0.4.8', name:'Rewards Worth Chasing', items:[
   '## Rewards and balance',
@@ -15604,6 +15652,7 @@ const TEST_NOTES={v:'test', label:'Test build · Android', name:'One Look, Easy 
   'The tank stays on screen while you scroll: upright it sits at the top, sideways it is on the left. Every new fish, water colour and decoration shows the moment you pick it.',
   'Earnings, Collect and Feed sit in one strip under the tank.',
   'New Add fish tab: put fish from your Cooler on display without leaving the aquarium.',
+  'Decorating is simpler: tap any card to try it in your tank, and the Buy / Stop bar stays right under the tank. A decoration you try lands in an open spot instead of on top of another one, and keeps that spot if you buy it.',
   '## Also fixed',
   'Tapping a top-bar chip (Fishing at, Cooler, Aquarium, Fish Log) works on the first tap every time.',
   'The live event line in the top bar fits on small phones.',
