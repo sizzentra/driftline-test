@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="DL Test Android">
 <script>
-window.DL_BUILD='android'; window.DL_PREVIEW=true; window.DL_VERSION='2026.11.18-0837';
+window.DL_BUILD='android'; window.DL_PREVIEW=true; window.DL_VERSION='2026.11.18-0858';
 window.addEventListener('beforeinstallprompt',function(e){ e.preventDefault(); window.__dlInstallPrompt=e; });
 </script>
 </head>
@@ -15468,6 +15468,37 @@ document.head.insertAdjacentHTML('beforeend',`<style>
   html body.phone-land.dock-mini #menuov .mo-back span:not(.mo-bi),html body.phone-land.dock-mini #menuov #tabs .cdmini .cdml,html body.phone-land.dock-mini #catdock .cdmini .cdml{display:none!important}
 }
 </style>`);
+// ---------- round 7b (director: "it's hard to tell what's clickable; clicking bait is obvious, the whole top panel doesn't look
+// clickable"; "the main scene UI appears in multiple places"):
+//  - every top-bar chip that opens something now looks like a button: teal outline, a lighter raised surface, a small arrow after its
+//    label and a pressed state. Plain information (coins, level) is flat text with no box, so the difference is obvious at a glance.
+//  - upright, the chip drawn on the water no longer repeats the water's name (the top bar shows it); it keeps time and weather. ----------
+{ const B=(s)=>s.split(',').map(x=>'html body.phone-app '+x.trim()+',html body.phone-land '+x.trim()).join(',');
+document.head.insertAdjacentHTML('beforeend',`<style>
+${B('.hud > .hud-link,.hud > button.stat,.hud > #goalchip,.hud > .hudbtns > button')}{background:linear-gradient(180deg,#1b3550,#13263b)!important;border:1px solid #7fe3c48c!important;box-shadow:inset 0 1px 0 #ffffff1f,0 2px 0 #06101c!important}
+${B('.hud > .hud-link:active,.hud > button.stat:active,.hud > #goalchip:active,.hud > .hudbtns > button:active')}{transform:translateY(1px);box-shadow:inset 0 1px 0 #ffffff14!important;border-color:#7fe3c4!important}
+${B('.hud > .hud-link .lbl,.hud > button.stat .lbl,.hud > #goalchip .gl-k')}{color:#7fe3c4!important}
+${B('.hud > .hud-link .lbl::after,.hud > button.stat .lbl::after,.hud > #goalchip .gl-k::after')}{content:" ›";font-weight:900;letter-spacing:0}
+${B('.hud > .st-aq.ready')}{border-color:#ffe6a3!important}
+${B('.hud > .st-aq.ready .lbl')}{color:#5a3a08!important}
+${B('.hud > .st-coins,.hud > .st-lvl')}{background:transparent!important;border-color:transparent!important;box-shadow:none!important}
+</style>`); }
+{ const _dsc=drawSceneChip; drawSceneChip=function(p,wx){ if(!document.body.classList.contains('phone-app')) return _dsc.apply(this,arguments);
+    const tag=WX_TAG[wx.k]; const txt=tod(p)+' · '+wxName(wx.k)+(tag?' ('+tag+')':'')+' · '+mmss(wxLeft()); const col=wx.k==='Gilded'?'#ffc94d':tag?'#bfe8ff':'#e6efe8';
+    g.textAlign='left'; g.font='700 11px "Bricolage Grotesque", system-ui'; const tw=g.measureText(txt).width; g.fillStyle='rgba(5,14,20,.62)'; rr(10,10,tw+18,22,11); g.fill(); g.fillStyle=col; g.fillText(txt,19,25); }; }
+// upright the top-bar chips are narrow: the teal outline alone marks them (the arrow only shows sideways, where there is room)
+document.head.insertAdjacentHTML('beforeend',`<style>
+html body.phone-app .hud > .hud-link .lbl::after,html body.phone-app .hud > button.stat .lbl::after,html body.phone-app .hud > #goalchip .gl-k::after{content:none!important}
+</style>`);
+document.head.insertAdjacentHTML('beforeend',`<style>
+html body.phone-app .hud > .stat .lbl,html body.phone-app .hud > #goalchip .gl-k{letter-spacing:.15px!important}
+</style>`);
+document.head.insertAdjacentHTML('beforeend',`<style>
+@media (orientation:landscape) and (max-height:560px) and (max-width:760px){
+  html body.phone-land .hud > .hud-link .lbl::after,html body.phone-land .hud > button.stat .lbl::after,html body.phone-land .hud > #goalchip .gl-k::after{content:none!important}
+  html body.phone-land .hud > .stat .lbl,html body.phone-land .hud > #goalchip .gl-k{letter-spacing:.15px!important}
+}
+</style>`);
 // =====================================================================
 // Phones, round 7: the aquarium, built for phones (director, 2026-11-18: "think of a custom version for aquarium; it feels hard to
 // use and navigate; it feels hard to actually see what you're doing and multitask"). Layout A from the mockup canvas ("pinned tank").
@@ -15485,19 +15516,27 @@ document.head.insertAdjacentHTML('beforeend',`<style>
       return `<div class="fishrow"><canvas width="128" height="64" data-fish="${f.id}" data-sh="${f.sh||0}" data-pv="${f.pv||''}"></canvas><div class="nm"><span style="color:${RAR[sp.r].c}">${esc(sp.name)}</span><small>${RAR[sp.r].k} · ${kgStr(f.kg)} · ${fmt(fishRate(f)*60)} / hour · ${esc(aqTxt(f))}</small></div><div class="acts"><button class="btn sm" data-act="totank" data-i="${i}" ${full?'disabled':''}>To aquarium</button></div></div>`; }).join('')+`</div></div>`; };
   const _rp=renderPanel; renderPanel=function(){ const r=_rp.apply(this,arguments); try{ const P=$('panel'); const on=MOB()&&S.tab==='aquarium'; P.classList.toggle('aq07',on); if(!on){ AQ_ADD=false; return r; }
       const tank=P.querySelector(':scope > .tank'), nav=P.querySelector(':scope > .sect-nav'), bank=P.querySelector('.bank'); if(!tank||!nav) return r;
-      const pin=document.createElement('div'); pin.className='aq07-pin'; tank.before(pin); pin.appendChild(tank); if(bank){ bank.classList.add('aq07-bank'); pin.appendChild(bank); } pin.appendChild(nav);
-      const head=P.querySelector(':scope > .mb-aqh, :scope > .dl-head'); if(head&&MOB()&&!document.body.classList.contains('phone-land')) pin.after(head); /* upright: the tank comes first, the explanation under it */
+      /* round 7b (director: "the aquarium should be bigger without ruining the menu sizes"): only the tank (and upright the tabs) is
+         pinned; the earnings strip heads the scrolling column, which gives its height to the tank */
+      const pin=document.createElement('div'); pin.className='aq07-pin'; tank.before(pin); pin.appendChild(tank); pin.appendChild(nav);
+      const head=P.querySelector(':scope > .mb-aqh, :scope > .dl-head'); if(head&&!document.body.classList.contains('phone-land')) pin.after(head); /* upright: the tank comes first, the explanation under it */
       const addB=document.createElement('button'); addB.type='button'; addB.className='aq07-addtab'; addB.setAttribute('role','tab'); addB.setAttribute('aria-selected',AQ_ADD?'true':'false'); addB.innerHTML='Add fish'+(S.cooler.length?' <span class="aq07-n">'+S.cooler.length+'</span>':''); nav.appendChild(addB);
-      addB.addEventListener('click',e=>{ e.preventDefault(); e.stopPropagation(); if(AQ_ADD) return; AQ_ADD=true; renderPanel(); try{ $('panel').scrollTop=0; }catch(er){} });
-      nav.querySelectorAll('[data-sect]').forEach(b=>b.addEventListener('click',()=>{ if(!AQ_ADD) return; AQ_ADD=false; setTimeout(()=>{ try{ renderPanel(); }catch(er){} },0); },true)); /* the section switch only toggles visibility, so leaving Add fish rebuilds the page */
-      if(AQ_ADD){ nav.querySelectorAll('[data-sect]').forEach(b=>b.setAttribute('aria-selected','false')); [...P.children].forEach(c=>{ if(c!==pin&&!c.classList.contains('crumb')) c.style.display='none'; }); pin.insertAdjacentHTML('afterend',addHTML()); paintFish(P); }
       /* everything after the pinned block goes into one column (sideways it is the right-hand column next to the pinned tank) */
       const side=document.createElement('div'); side.className='aq07-side'; [...P.children].filter(c=>c!==pin&&!c.classList.contains('crumb')).forEach(c=>side.appendChild(c)); pin.after(side);
-      /* sideways the left column is only the tank and the earnings strip (so it always fits the height); the tabs head the right column */
-      if(document.body.classList.contains('phone-land')) side.prepend(nav);
+      if(bank){ bank.classList.add('aq07-bank'); side.prepend(bank); }
+      if(document.body.classList.contains('phone-land')) side.prepend(nav); /* sideways the tabs head the right column */
+      /* Add fish is built hidden with the page and switched by visibility like the other two tabs (it used to rebuild the whole page,
+         about 40 ms, and restart the tank) */
+      const tmp=document.createElement('div'); tmp.innerHTML=addHTML(); const add=tmp.firstElementChild; if(bank) bank.after(add); else if(nav.parentNode===side) nav.after(add); else side.prepend(add); let painted=false;
+      const show=on=>{ AQ_ADD=on; addB.setAttribute('aria-selected',on?'true':'false'); add.classList.toggle('aq07-off',!on); [...side.children].forEach(c=>{ if(c!==add&&c!==nav&&c!==bank) c.classList.toggle('aq07-off',on); }); if(on){ nav.querySelectorAll('[data-sect]').forEach(b=>b.setAttribute('aria-selected','false')); if(!painted){ painted=true; paintFish(add); } } };
+      addB.addEventListener('click',e=>{ e.preventDefault(); e.stopPropagation(); if(!AQ_ADD){ show(true); try{ P.scrollTop=0; }catch(er){} } });
+      nav.querySelectorAll('[data-sect]').forEach(b=>b.addEventListener('click',()=>{ if(AQ_ADD) show(false); },true));
+      show(AQ_ADD);
+      P.dataset.aqLand=document.body.classList.contains('phone-land')?'1':'0'; /* which layout this page was built for */
     }catch(e){ console.error(e); } return r; };
-  /* turning the phone while the aquarium is open rebuilds it for the new layout */
-  let wasLand=null; addEventListener('resize',()=>{ const l=document.body.classList.contains('phone-land'); if(wasLand!==null&&l!==wasLand&&MOB()&&S.tab==='aquarium'){ setTimeout(()=>{ try{ renderPanel(); }catch(e){} },120); } wasLand=l; }); }
+  /* turning the phone while the aquarium is open rebuilds it for the new layout (checked after the resize settles, against the layout
+     the page was built for, so the very first turn counts too) */
+  let rt=0; addEventListener('resize',()=>{ clearTimeout(rt); rt=setTimeout(()=>{ try{ const P=$('panel'); if(!MOB()||S.tab!=='aquarium'||!P.classList.contains('aq07')) return; const l=document.body.classList.contains('phone-land')?'1':'0'; if(P.dataset.aqLand!==l) renderPanel(); }catch(e){} },160); }); }
 document.head.insertAdjacentHTML('beforeend',`<style>
 /* the pinned block: tank, earnings strip, tabs */
 html body.phone-app #menuov #panel.aq07 > .aq07-pin,html body.phone-land #menuov #panel.aq07 > .aq07-pin{position:sticky;top:0;z-index:6;display:flex;flex-direction:column;gap:8px;background:#0b1626;padding:0 0 8px;box-shadow:0 10px 12px -10px #000c}
@@ -15593,6 +15632,23 @@ html body.phone-app #menuov #panel.aq07 .aq07-pin > .sect-nav,html body.phone-la
 html body.phone-app #menuov #panel.aq07 .sect-nav.stuck::before,html body.phone-land #menuov #panel.aq07 .sect-nav.stuck::before{display:none!important}
 html body.phone-land #menuov #panel.aq07 .aq07-side > .sect-nav.stuck{box-shadow:0 0 0 6px #0b1626,0 10px 10px -6px #000c!important}
 </style>`);
+// ---------- the tank keeps running through every re-render (director: "each sub menu in aquarium lags the preview"): trying, placing,
+// buying or adding a fish rebuilds the page, which used to throw the tank's canvas away (it came back blank at a default size and
+// redrew from scratch). The live canvas is now carried into the new page, so the tank never blinks or restarts. ----------
+{ const _rp=renderPanel; renderPanel=function(){ const keep=(MOB()&&S.tab==='aquarium')?$('tankcv'):null; const r=_rp.apply(this,arguments);
+    try{ if(keep){ const fresh=$('tankcv'); if(fresh&&fresh!==keep){ fresh.replaceWith(keep); keep.scrollIntoView=function(){}; } } }catch(e){} return r; }; }
+document.head.insertAdjacentHTML('beforeend',`<style>
+html body.phone-app #menuov #panel.aq07 .aq07-off,html body.phone-land #menuov #panel.aq07 .aq07-off{display:none!important}
+html body.phone-app #menuov #panel.aq07 .aq07-side > .aq07-bank,html body.phone-land #menuov #panel.aq07 .aq07-side > .aq07-bank{margin:0 0 10px!important}
+/* bigger tank: upright it takes the room the earnings strip had (about 36% of the screen height); sideways it fills the whole left column */
+html body.phone-app #menuov #panel.aq07 .aq07-pin > .tank{height:clamp(220px,37dvh,340px)!important;max-height:none!important}
+html body.phone-app #menuov #panel.aq07 .aq07-pin > .tank > canvas,html body.phone-land #menuov #panel.aq07 .aq07-pin > .tank > canvas{width:100%!important;height:100%!important;display:block}
+@media (orientation:landscape) and (max-height:560px){
+  html body.phone-land #menuov #panel.aq07 .aq07-pin{gap:6px}
+  html body.phone-land #menuov #panel.aq07 .aq07-pin > .tank{height:calc(100dvh - 66px - env(safe-area-inset-top) - env(safe-area-inset-bottom))!important;max-height:none!important}
+  html body.phone-land #menuov #panel.aq07 .aq07-pin:has(> .aq07-try) > .tank{height:calc(100dvh - 124px - env(safe-area-inset-top) - env(safe-area-inset-bottom))!important}
+}
+</style>`);
 // Android release notes (shown once to returning Android players). Kept exactly as shipped once published.
 PATCHES.unshift({v:'0.4.8', name:'Rewards Worth Chasing', items:[
   '## Rewards and balance',
@@ -15644,13 +15700,15 @@ PATCHES.unshift({v:'0.4.8.1', name:'Smoother and Steadier', items:[
 const TEST_NOTES={v:'test', label:'Test build · Android', name:'One Look, Easy Aquarium', items:[
   '## One look everywhere',
   'Every button, chip, tab and card now shares one style: the same navy, the same corners, the same lettering, and line icons instead of emoji pictures.',
-  'Chips you can tap to open a page have teal labels. Gold shows where you are and what is chosen.',
+  'Everything you can tap in the top bar looks like a button now (teal outline, and a small arrow when held sideways). Coins and level are plain text, so you can tell at a glance.',
+  'Upright, the water no longer shows its name twice: the top bar has it, the chip on the water shows the time and weather.',
   'Held sideways, the side panel is slimmer, so the water and the menus get more room.',
   'Upright, page tabs (Tackle, Rods, Skills, Paths...) always fit on screen with an icon each: no more sideways scrolling to find a page.',
   'Upright, the Fishing tab lights up gold while you fish, like the side panel does sideways.',
   '## A new aquarium',
   'The tank stays on screen while you scroll: upright it sits at the top, sideways it is on the left. Every new fish, water colour and decoration shows the moment you pick it.',
-  'Earnings, Collect and Feed sit in one strip under the tank.',
+  'The tank is bigger: upright it is about a third taller, sideways it fills the whole left side. Earnings, Collect and Feed head the list next to it.',
+  'Switching between Your tank, Decorate and Add fish is instant, and the tank keeps swimming while you try, place or buy things (it used to blink and restart).',
   'New Add fish tab: put fish from your Cooler on display without leaving the aquarium.',
   'Decorating is simpler: tap any card to try it in your tank, and the Buy / Stop bar stays right under the tank. A decoration you try lands in an open spot instead of on top of another one, and keeps that spot if you buy it.',
   '## Also fixed',
@@ -15982,6 +16040,9 @@ window.__mag=(fx,fy,fw,fh,k=3,t)=>{ const cv=document.getElementById('cv'); if(t
 window.__lookCost=(lk={},n=60)=>{ const keep=JSON.stringify(S.look); Object.assign(S.look,lk); const t0=performance.now(); for(let i=0;i<n;i++) drawLookPreview(); const ms=(performance.now()-t0)/n; S.look=JSON.parse(keep); return +ms.toFixed(2); };
 // review: water scene ms per frame while wearing a given look (restores the look afterwards)
 window.__sceneCostWith=(lk={},n=60)=>{ const keep=JSON.stringify(S.look); Object.assign(S.look,lk); __drawCost(3); const ms=__drawCost(n); S.look=JSON.parse(keep); return ms; };
+// time named functions while fn runs (preview only): __prof(['renderPanel','paintFish'], ()=>__open('aquarium'), 10)
+if(/[?&]test\b/.test(location.search)) window.__prof=(names,fn,n=1)=>{ const T={}, orig={}; for(const k of names){ try{ orig[k]=eval(k); if(typeof orig[k]!=='function') continue; T[k]=0; eval(k+'=function(){ const t0=performance.now(); try{ return orig["'+k+'"].apply(this,arguments); } finally{ T["'+k+'"]+=performance.now()-t0; } }'); }catch(e){} }
+  const t0=performance.now(); try{ for(let i=0;i<n;i++) fn(); } finally{ for(const k in orig){ try{ eval(k+'=orig["'+k+'"]'); }catch(e){} } } const tot=(performance.now()-t0)/n; const out={total:+tot.toFixed(2)}; for(const k in T) out[k]=+(T[k]/n).toFixed(2); return out; };
 
 // ---------- loop ----------
 let last=performance.now();
