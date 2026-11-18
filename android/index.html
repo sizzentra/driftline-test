@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="DL Test Android">
 <script>
-window.DL_BUILD='android'; window.DL_PREVIEW=true; window.DL_VERSION='2026.11.18-0923';
+window.DL_BUILD='android'; window.DL_PREVIEW=true; window.DL_VERSION='2026.11.18-0941';
 window.addEventListener('beforeinstallprompt',function(e){ e.preventDefault(); window.__dlInstallPrompt=e; });
 </script>
 </head>
@@ -15502,6 +15502,27 @@ document.head.insertAdjacentHTML('beforeend',`<style>
   html body.phone-land .hud > .stat .lbl,html body.phone-land .hud > #goalchip .gl-k{letter-spacing:.15px!important}
 }
 </style>`);
+// ---------- round 7c (director: "the top panel still has buttons that don't look clickable; not sure why they don't match the way
+// Bait looks"): every top-bar chip you can tap now uses exactly the Bait button's look (the same teal fill, mint edge, white text and
+// shadow), so "teal button = tap me" means the same thing on the water and in the top bar. Coins and level stay plain text; the
+// Aquarium chip turns gold when coins are ready to collect. ----------
+document.head.insertAdjacentHTML('beforeend',`<style>
+html body.phone-app .hud > .hud-link,html body.phone-app .hud > button.stat,html body.phone-app .hud > #goalchip,html body.phone-app .hud > .hudbtns > button,
+html body.phone-land .hud > .hud-link,html body.phone-land .hud > button.stat,html body.phone-land .hud > #goalchip,html body.phone-land .hud > .hudbtns > button{background:linear-gradient(180deg,#1f8a86,#14666a)!important;border:1px solid #7fe3c4!important;box-shadow:0 3px 10px #0007!important;color:#fff!important}
+html body.phone-app .hud > .hud-link .lbl,html body.phone-app .hud > button.stat .lbl,html body.phone-app .hud > #goalchip .gl-k,
+html body.phone-land .hud > .hud-link .lbl,html body.phone-land .hud > button.stat .lbl,html body.phone-land .hud > #goalchip .gl-k{color:#c8fff0!important}
+html body.phone-app .hud > .hud-link b,html body.phone-app .hud > button.stat b,html body.phone-app .hud > #goalchip .gl-t,
+html body.phone-land .hud > .hud-link b,html body.phone-land .hud > button.stat b,html body.phone-land .hud > #goalchip .gl-t{color:#fff!important}
+html body.phone-app .hud > .hudbtns > button,html body.phone-land .hud > .hudbtns > button{color:#fff!important}
+html body.phone-app .hud > .hud-link:active,html body.phone-app .hud > button.stat:active,html body.phone-app .hud > #goalchip:active,html body.phone-app .hud > .hudbtns > button:active,
+html body.phone-land .hud > .hud-link:active,html body.phone-land .hud > button.stat:active,html body.phone-land .hud > #goalchip:active,html body.phone-land .hud > .hudbtns > button:active{filter:brightness(1.12);transform:translateY(1px)}
+html body.phone-app .hud > .st-aq.ready,html body.phone-land .hud > .st-aq.ready{background:linear-gradient(180deg,#ffe08a,#f3b94e)!important;border-color:#ffe6a3!important}
+html body.phone-app .hud > .st-aq.ready *,html body.phone-land .hud > .st-aq.ready *{color:#2a1c05!important}
+</style>`);
+// a full cooler still warns: its count (set to the danger colour inline by e_ui.js) shows in warm gold, readable on the teal button
+document.head.insertAdjacentHTML('beforeend',`<style>
+html body.phone-app .hud #coolerct[style*="danger"],html body.phone-land .hud #coolerct[style*="danger"]{color:#ffd36a!important;text-shadow:0 0 6px #ffb34766}
+</style>`);
 // =====================================================================
 // Phones, round 7: the aquarium, built for phones (director, 2026-11-18: "think of a custom version for aquarium; it feels hard to
 // use and navigate; it feels hard to actually see what you're doing and multitask"). Layout A from the mockup canvas ("pinned tank").
@@ -15521,16 +15542,15 @@ document.head.insertAdjacentHTML('beforeend',`<style>
       const tank=P.querySelector(':scope > .tank'), nav=P.querySelector(':scope > .sect-nav'), bank=P.querySelector('.bank'); if(!tank||!nav) return r;
       /* round 7b (director: "the aquarium should be bigger without ruining the menu sizes"): only the tank (and upright the tabs) is
          pinned; the earnings strip heads the scrolling column, which gives its height to the tank */
-      const pin=document.createElement('div'); pin.className='aq07-pin'; tank.before(pin); pin.appendChild(tank); pin.appendChild(nav);
+      const pin=document.createElement("div"); pin.className="aq07-pin"; tank.before(pin); pin.appendChild(tank); if(bank){ bank.classList.add("aq07-bank"); pin.appendChild(bank); } pin.appendChild(nav); /* round 7c (director): Feed and Collect sit right under the tank again */
       const head=P.querySelector(':scope > .mb-aqh, :scope > .dl-head'); if(head&&!document.body.classList.contains('phone-land')) pin.after(head); /* upright: the tank comes first, the explanation under it */
       const addB=document.createElement('button'); addB.type='button'; addB.className='aq07-addtab'; addB.setAttribute('role','tab'); addB.setAttribute('aria-selected',AQ_ADD?'true':'false'); addB.innerHTML='Add fish'+(S.cooler.length?' <span class="aq07-n">'+S.cooler.length+'</span>':''); nav.appendChild(addB);
       /* everything after the pinned block goes into one column (sideways it is the right-hand column next to the pinned tank) */
       const side=document.createElement('div'); side.className='aq07-side'; [...P.children].filter(c=>c!==pin&&!c.classList.contains('crumb')).forEach(c=>side.appendChild(c)); pin.after(side);
-      if(bank){ bank.classList.add('aq07-bank'); side.prepend(bank); }
       if(document.body.classList.contains('phone-land')) side.prepend(nav); /* sideways the tabs head the right column */
       /* Add fish is built hidden with the page and switched by visibility like the other two tabs (it used to rebuild the whole page,
          about 40 ms, and restart the tank) */
-      const tmp=document.createElement('div'); tmp.innerHTML=addHTML(); const add=tmp.firstElementChild; if(bank) bank.after(add); else if(nav.parentNode===side) nav.after(add); else side.prepend(add); let painted=false;
+      const tmp=document.createElement('div'); tmp.innerHTML=addHTML(); const add=tmp.firstElementChild; if(nav.parentNode===side) nav.after(add); else side.prepend(add); let painted=false;
       const show=on=>{ AQ_ADD=on; addB.setAttribute('aria-selected',on?'true':'false'); add.classList.toggle('aq07-off',!on); [...side.children].forEach(c=>{ if(c!==add&&c!==nav&&c!==bank) c.classList.toggle('aq07-off',on); }); if(on){ nav.querySelectorAll('[data-sect]').forEach(b=>b.setAttribute('aria-selected','false')); if(!painted){ painted=true; paintFish(add); } } };
       addB.addEventListener('click',e=>{ e.preventDefault(); e.stopPropagation(); if(!AQ_ADD){ show(true); try{ P.scrollTop=0; }catch(er){} } });
       nav.querySelectorAll('[data-sect]').forEach(b=>b.addEventListener('click',()=>{ if(AQ_ADD) show(false); },true));
@@ -15652,6 +15672,22 @@ html body.phone-app #menuov #panel.aq07 .aq07-pin > .tank > canvas,html body.pho
   html body.phone-land #menuov #panel.aq07 .aq07-pin:has(> .aq07-try) > .tank{height:calc(100dvh - 124px - env(safe-area-inset-top) - env(safe-area-inset-bottom))!important}
 }
 </style>`);
+// ---------- round 7c (director, screenshot 2026-11-18): "move Feed under the aquarium preview and make sure the preview fits properly".
+// The drawing stopped ~80 px short of the tank's bottom on phones: an older rule (".tank canvas") caps the canvas at 62% of the screen
+// height with a 16:9 shape, so inside the taller box it could not grow. Here the canvas always fills the tank exactly, and the tank is
+// sized to the space left above the earnings strip. ----------
+document.head.insertAdjacentHTML('beforeend',`<style>
+html body.phone-app #menuov #panel.aq07 .aq07-pin > .tank > canvas,html body.phone-land #menuov #panel.aq07 .aq07-pin > .tank > canvas{max-height:none!important;aspect-ratio:auto!important;min-height:0!important}
+html body.phone-app #menuov #panel.aq07 .aq07-pin > .tank{height:clamp(200px,31dvh,300px)!important}
+html body.phone-app #menuov #panel.aq07 .aq07-pin > .aq07-bank,html body.phone-land #menuov #panel.aq07 .aq07-pin > .aq07-bank{margin:0!important}
+@media (orientation:landscape) and (max-height:560px){
+  html body.phone-land #menuov #panel.aq07 .aq07-pin > .tank{height:calc(100dvh - 120px - env(safe-area-inset-top) - env(safe-area-inset-bottom))!important}
+  html body.phone-land #menuov #panel.aq07 .aq07-pin:has(> .aq07-try) > .tank{height:calc(100dvh - 124px - env(safe-area-inset-top) - env(safe-area-inset-bottom))!important}
+}
+@media (orientation:landscape) and (max-height:560px) and (max-width:760px){
+  html body.phone-land #menuov #panel.aq07 .aq07-pin > .tank{height:calc(100dvh - 150px - env(safe-area-inset-top) - env(safe-area-inset-bottom))!important}
+}
+</style>`);
 // Android release notes (shown once to returning Android players). Kept exactly as shipped once published.
 PATCHES.unshift({v:'0.4.8', name:'Rewards Worth Chasing', items:[
   '## Rewards and balance',
@@ -15707,14 +15743,14 @@ const TEST_NOTES={v:'test', label:'Test build · Android', name:'One Look, Easy 
   'Steady Hands challenge: a late hook just does not count; only a hooked fish that gets away resets the count.',
   '## One look everywhere',
   'Every button, chip, tab and card now shares one style: the same navy, the same corners, the same lettering, and line icons instead of emoji pictures.',
-  'Everything you can tap in the top bar looks like a button now (teal outline, and a small arrow when held sideways). Coins and level are plain text, so you can tell at a glance.',
+  'Everything you can tap in the top bar now looks exactly like the Bait and Rest buttons (filled teal). Coins and level are plain text, so you can tell at a glance. A full Cooler shows its count in gold.',
   'Upright, the water no longer shows its name twice: the top bar has it, the chip on the water shows the time and weather.',
   'Held sideways, the side panel is slimmer, so the water and the menus get more room.',
   'Upright, page tabs (Tackle, Rods, Skills, Paths...) always fit on screen with an icon each: no more sideways scrolling to find a page.',
   'Upright, the Fishing tab lights up gold while you fish, like the side panel does sideways.',
   '## A new aquarium',
   'The tank stays on screen while you scroll: upright it sits at the top, sideways it is on the left. Every new fish, water colour and decoration shows the moment you pick it.',
-  'The tank is bigger: upright it is about a third taller, sideways it fills the whole left side. Earnings, Collect and Feed head the list next to it.',
+  'The tank is bigger and always fully drawn (it used to stop short of the bottom). Earnings, Collect and Feed sit right under it.',
   'Switching between Your tank, Decorate and Add fish is instant, and the tank keeps swimming while you try, place or buy things (it used to blink and restart).',
   'New Add fish tab: put fish from your Cooler on display without leaving the aquarium.',
   'Decorating is simpler: tap any card to try it in your tank, and the Buy / Stop bar stays right under the tank. A decoration you try lands in an open spot instead of on top of another one, and keeps that spot if you buy it.',
