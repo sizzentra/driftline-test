@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="DL Test Android">
 <script>
-window.DL_BUILD='android'; window.DL_PREVIEW=true; window.DL_VERSION='2026.11.18-1734';
+window.DL_BUILD='android'; window.DL_PREVIEW=true; window.DL_VERSION='2026.11.18-1755';
 window.addEventListener('beforeinstallprompt',function(e){ e.preventDefault(); window.__dlInstallPrompt=e; });
 </script>
 </head>
@@ -2791,7 +2791,7 @@ document.addEventListener('keydown',()=>startAudio(),{once:true});
 // Update 1.5: rods & attachments, pet dress-up / petting / bond,
 // daily tasks & gift, patch notes, safe reset, Boardwalk 2.0, quips
 // =====================================================================
-const GAME_VERSION = '0.4.8.5.1';
+const GAME_VERSION = '0.4.8.6';
 const PATCHES = [
 {v:'0.4.7', name:'Full Screen Fix', items:['## PC','The PC layout now shows in full screen too: the one-row header, the clear water with its strip above, the new Fish Log, Feats, Settings and every other PC page. Full screen used to bring back the old layout with the bar at the bottom.']},
 {v:'0.4.6', name:'Hotfix', items:['## PC','Patch notes are a proper reader: the updates you missed are listed on the left, the one you pick on the right with its sections side by side, and Let’s fish! always at the top.','The header stays at the top in narrower windows and with browser zoom (it went back to the bottom under 900 pixels wide). In small windows it turns compact: icon tabs, short counters.','## Everywhere','The tip line no longer shows as an empty bubble, and it hides while a card is open over the water.']},
@@ -16185,12 +16185,13 @@ function DK_SCENE_OK(now){ if(S.tab!=='home'||!MOB()) return false; const c=$('h
     journal:{ cells:(P,hd,sub)=>{ const t=txt(sub); return [['Species found',(num(t,/(\d+) of (\d+) species/)||'0')+' / '+(num(t,/(\d+) of (\d+) species/,2)||'?')],['Mastery stars',num(txt(P.querySelector('.jrank b')),/(\d+)/)||'0']]; } },
     pets:{ cells:(P,hd,sub)=>{ const t=txt(sub); let fav=''; try{ fav=S.pet&&PETI[S.pet]?PETI[S.pet].name:''; }catch(e){} return [['Favourite',fav||'None yet'],['Pets found',(num(t,/(\d+) of (\d+) found/)||'0')+' / '+(num(t,/(\d+) of (\d+) found/,2)||'?')]]; } },
     settings:{ cells:()=>[['Settings for',(typeof IS_IPHONE==='function'&&IS_IPHONE())?'This iPhone':'This device'],['Saved','Automatically']] },
-    stats:{ cells:P=>[['Time played',txt(P.querySelector('.st-play b'))||'—'],['Level',String(S.lvl)]] },
+    stats:{ cells:P=>{ const t=P.textContent||'', b=t.match(/Bite speed[^×]{0,80}(×\s?[\d.]+)/), s=t.match(/Sale price[^×]{0,80}(×\s?[\d.]+)/); /* not Time played: the first card already shows it */
+      return [['Level',String(S.lvl)], b?['Bite speed',b[1].replace(/\s/g,'')]:null, s?['Sale price',s[1].replace(/\s/g,'')]:null]; } },
     games:{ unwrap:'.bwx', note:P=>txt(P.querySelector('.bwx-ht p')), side:P=>P.querySelector('.bwx-hero'), drop:'.bwx-wallet',
       cells:P=>{ const wl=P.querySelector('.bwx-wallet'); if(!wl) return []; const sp=[...wl.children].map(txt); const f=re=>sp.find(s=>re.test(s));
-        return [['Coins',(f(/^[\d.,]+[KMBT]?$/)||txt(wl.querySelector('.coin'))||'—')],['Tickets',(num(f(/tickets/)||'',/([\d,]+)/)||'0')],['Scales',(num(f(/Scales/)||'',/([\d,]+)/)||'0')],f(/free spin/)?['Free spins',num(f(/free spin/),/(\d+)/)||'0']:null]; } },
+        return [/* coins: already in the menu's top row */ ['Tickets',(num(f(/tickets/)||'',/([\d,]+)/)||'0')],['Scales',(num(f(/Scales/)||'',/([\d,]+)/)||'0')],f(/free spin/)?['Free spins',num(f(/free spin/),/(\d+)/)||'0']:null]; } },
     trophy:{ note:P=>txt(P.querySelector('.tp-sub')), drop:'.tp-head',
-      cells:P=>{ const c=P.querySelector('.tp-count'); return [['Mounted',txt(c&&c.querySelector('b'))||'0'],['Species',(txt(c&&c.querySelector('span'))||'').replace(/\s*species$/,'')||'—']]; } },
+      cells:P=>{ const c=P.querySelector('.tp-count'); return [['Mounted',txt(c&&c.querySelector('b'))||'0'],['Species',(txt(c&&c.querySelector('span'))||'').replace(/\s*species$/,'').replace(' of ',' / ')||'—']]; } },
     save:{ cells:(P,hd,sub)=>{ const v=[...P.querySelectorAll(':scope > p.sub')].map(txt).find(t=>/^Version/.test(t)); let ago='just now'; try{ const s=Math.round((Date.now()-(S.savedAt||Date.now()))/1000); ago=s<60?'just now':s<3600?Math.round(s/60)+' min ago':Math.round(s/3600)+' h ago'; }catch(e){} return [['Last saved',ago],['Version',v?v.replace(/^Version\s*/,''):'—']]; } }
   };
   let prev=null; /* only a refresh of the page you are on keeps its place; opening a page starts at the top */
@@ -16211,7 +16212,11 @@ function DK_SCENE_OK(now){ if(S.tab!=='home'||!MOB()) return false; const c=$('h
       bank.style.gridTemplateColumns=`repeat(${Math.max(1,cells.length)},minmax(0,1fr))`+(acts.length?` repeat(${acts.length},auto)`:'');
       // the sheet: tabs + one scrolling body
       const sheet=h('div','aq07-sheet pg08-sheet'), body=h('div','aq07-body pg08-body'+(bodyCls?' '+bodyCls:''));
-      const note=cfg.note?cfg.note(P):sub?txt(sub):''; if(cfg.side){ const sd=cfg.side(P); if(sd){ sd.classList.add('pg08-sidev'); bar.appendChild(sd); } }
+      let note=cfg.note?cfg.note(P):sub?txt(sub):'';
+      /* the intro never repeats what the summary already shows ("1 of 8 slots" next to "1 / 8", "+34%" next to "+34%") */
+      if(note&&cells.length){ const pats=[]; for(const [,v] of cells){ const s=String(v), m=s.match(/^([\d,]+)\s*\/\s*([\d,]+)$/); if(m) pats.push(new RegExp('\\b'+m[1]+' of '+m[2]+'\\b')); else if(/\d/.test(s)) pats.push(new RegExp(s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'))); }
+        if(pats.length){ const parts=note.replace(/([.!?])\s+/g,'$1\u0001').split(/\u0001|\s+·\s+/); /* no look-behind: older iPhones can't parse it */ const keep=parts.filter(p=>!pats.some(re=>re.test(p))); note=keep.join(/\s·\s/.test(note)&&!/[.!?]\s/.test(note)?' · ':' ').trim(); } }
+      if(cfg.side){ const sd=cfg.side(P); if(sd){ sd.classList.add('pg08-sidev'); bar.appendChild(sd); } }
       if(cfg.drop) P.querySelectorAll(cfg.drop).forEach(x=>x.remove()); const extra=hd?[...hd.children].filter(c=>!c.contains(sub)&&!c.querySelector('h2')&&!c.querySelector('.pts')&&!(c.classList.contains('tile')&&tab==='pass')&&!c.querySelector('[data-act="respec"]')):[];
       if(note&&tab!=='save'&&tab!=='settings'){ body.appendChild(h('p','aq07-note pg08-note',esc(note))); bar.appendChild(h('p','pg08-side',esc(note))); } /* upright the intro opens the body; sideways it sits under the summary */
       extra.forEach(x=>body.appendChild(x));
@@ -16527,6 +16532,41 @@ html body.phone-app .hud > #mbgoal > .lbl,html body.phone-land .hud > #mbgoal > 
     const lim=clamp(G.d/G.maxOut,0,1); g.fillStyle='#0a161d'; rr(kx+9,ky+36,cw-18,4,2); g.fill(); g.fillStyle=lim>.8?'#ff5468':'#5aa9ff'; rr(kx+9,ky+36,Math.max(2,(cw-18)*lim),4,2); g.fill();
     g.font='700 10px system-ui'; g.fillStyle='#8aa5a2'; g.fillText((BEH[G.fish.beh]?BEH[G.fish.beh].n:'').slice(0,10),kx+9,ky+30);
     g.restore(); }; }
+// =====================================================================
+// Phones and tablets, round 8 polish (director, 2026-11-18: "ensure things that appear in multiple locations for mobile don't occur
+// in multiple places" (tabs, headers), "find easier access for the stats tab, it's a useful feature, make sure people have easy access").
+//  - One place for each thing: Settings no longer has a "Save & codes" section repeating the Save tab right next to it. Its gift
+//    code and its erase / backup tools move into Save > Save codes, with the save codes they belong with.
+//  - Stats is one tap from the side rail: it moves into Collection (Aquarium, Trophy Room, Fish Log, Stats) instead of hiding
+//    behind the settings gear; the gear keeps Settings and Save. Your Level in the top bar also opens Stats (teal: tap me).
+// Android + iPhone + tablets.
+// =====================================================================
+{ const coll=MENU_SECS.find(s=>s.id==='coll'); if(coll&&!coll.tabs.includes('stats')) coll.tabs.push('stats');
+  const i=MENU_MORE.tabs.indexOf('stats'); if(i>=0) MENU_MORE.tabs.splice(i,1);
+  try{ if(typeof SECT==='object'&&SECT.settings==='Save & codes') delete SECT.settings; }catch(e){} }
+
+/* the Level chip opens Stats */
+{ const hook=()=>{ const lv=document.querySelector('.hud > .st-lvl'); if(!lv||lv.dataset.mbtap) return; lv.dataset.mbtap='1'; lv.setAttribute('role','button'); lv.tabIndex=0; lv.title='Your level and all your stats. Tap to open Stats.';
+    lv.addEventListener('pointerdown',e=>{ if(MOB()) e.stopPropagation(); });
+    lv.addEventListener('click',e=>{ if(!MOB()) return; e.stopPropagation(); e.preventDefault(); try{ startAudio(); }catch(er){} openMenu('stats'); }); };
+  setTimeout(hook,0); setTimeout(hook,1500); }
+
+/* Settings: no "Save & codes" section; Save > Save codes gets the gift code and the erase / backup tools */
+{ const _rp=renderPanel; renderPanel=function(){ const r=_rp.apply(this,arguments); try{ if(!MOB()) return r; const P=$('panel'); if(!P) return r;
+    if(S.tab==='settings'){ const nav=P.querySelector('.aq07-sheet > .bwx-nav, .bwx-nav.sect-nav'); const b=nav&&nav.querySelector('[data-sect="Save & codes"]');
+      if(b){ const was=b.getAttribute('aria-selected')==='true'; b.remove(); const n=nav.querySelectorAll(':scope > button').length; nav.style.setProperty('grid-template-columns',`repeat(${n<=4?n:n<=6?3:4},minmax(0,1fr))`,'important');
+        P.querySelectorAll('.pg08-body > .tile, .pg08-body > details').forEach(t=>{ if(/Move progress|Gift code|Danger zone/.test(t.textContent)&&!t.closest('.grid')) t.remove(); });
+        if(was){ const f=nav.querySelector('[data-sect]'); if(f) f.click(); } } }
+    if(S.tab==='save'&&!P.querySelector('#giftin')){ const host=[...P.querySelectorAll('.pg08-body > .grid, .pg08-body > *')].find(x=>/Your save code/.test(x.textContent));
+      if(host){ host.insertAdjacentHTML('beforeend',`<div class="tile mb-gift"><b>🎁 Gift code</b><div class="meta">Got a gift code from a friend? Type it here.</div><div class="row" style="gap:8px;margin-top:8px;flex-wrap:nowrap"><input id="giftin" maxlength="24" placeholder="Gift code" autocapitalize="characters" style="flex:1;min-width:0;background:#0a161d;color:var(--ink);border:1px solid var(--line);border-radius:9px;padding:8px;text-transform:uppercase"><button class="btn sm" data-act="redeem">Redeem</button></div></div>`);
+        try{ host.insertAdjacentHTML('beforeend',dangerHTML()); }catch(e){} } }
+  }catch(e){ console.error(e); } return r; }; }
+
+document.head.insertAdjacentHTML('beforeend',`<style>
+html body.phone-land .hud > .st-lvl[data-mbtap],html body.phone-app .hud > .st-lvl[data-mbtap]{background:linear-gradient(180deg,#1f8a86,#14666a)!important;border:1px solid #7fe3c4!important;box-shadow:0 3px 10px #0007!important;color:#fff!important;cursor:pointer}
+html body.phone-land .hud > .st-lvl[data-mbtap] .lbl,html body.phone-app .hud > .st-lvl[data-mbtap] .lbl{color:#c8fff0!important}
+html body.phone-land .hud > .st-lvl[data-mbtap]:active,html body.phone-app .hud > .st-lvl[data-mbtap]:active{transform:translateY(1px)}
+</style>`);
 // =====================================================================
 // Phones: the SET MEASUREMENTS (director, 2026-11-18: "I want standards and set measurements for each platform going forward,
 // I'm tired of the same mistakes"). The numbers are written down in docs/PLATFORM_DESIGN.md ("Phone frame: set measurements")
@@ -16850,9 +16890,15 @@ PATCHES.unshift({v:'0.4.8.5', name:'Easy Finds', items:[
   'Page tabs at the top of a menu (Events, Bounties, Feats, Tide Pass, Boardwalk and the others) take every tap: the row could shift a few pixels under your finger, which made taps feel unresponsive and the tabs jiggle.',
   'Section bars inside pages (Gear / Bait, Waters / Set sail again...) no longer slide sideways when they stick to the top.',
   'On smaller phones held sideways, the page tabs show their names only so they always fit, and badges sit on the tab corner.']});
+PATCHES.unshift({v:'0.4.8.6', name:'Tidy Up', items:[
+  'Stats is easy to reach: it sits in Collection now (side menu), and tapping your Level in the top bar opens it.',
+  'Every tab lives in one place: Settings no longer repeats Save. The gift code and the backup and erase tools are in Save, Save codes.',
+  'Page summaries and intros no longer repeat the same numbers, and the side menu’s badges are never cut off or covering the button above.']});
+
 // Android test notes (preview builds only; the live game never shows them). Write what the next test build changes here
 // (spoiler-free); it opens once in the Android test app. Released notes live in notes_release.js.
 const TEST_NOTES={v:'test', label:'Test build · Android', name:'One Look, Easy Aquarium', items:[
+  'NEW in this build (0.4.8.6): Stats in Collection and on the Level chip; Settings no longer repeats Save (gift code and backup tools are in Save); summaries no longer repeat numbers.',
   'NEW in this build: fish fight shows a tension ring at the fish with the instruction above it; hints are touch only; homes are never called docks; the layout always switches when you turn the phone; smoother storms at Starfall.',
   'NEW in this build: Android phones are landscape only (upright pauses the game). Compact Goal chip (opens the right page) and a separate Live chip, plus Tasks and Tide Pass in the top bar. Your home shows the real home of every water. Colour choices are round swatches.',
   'NEW in this build: every menu page works like the aquarium (key numbers and main button first, sections as tabs, one scrolling list, badges where rewards wait). The Wardrobe shows your angler big with the categories in Options. Pages keep your place when they refresh.',
