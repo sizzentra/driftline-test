@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="DL Test Android">
 <script>
-window.DL_BUILD='android'; window.DL_PREVIEW=true; window.DL_VERSION='2026.11.18-0137';
+window.DL_BUILD='android'; window.DL_PREVIEW=true; window.DL_VERSION='2026.11.18-0238';
 window.addEventListener('beforeinstallprompt',function(e){ e.preventDefault(); window.__dlInstallPrompt=e; });
 </script>
 </head>
@@ -1336,7 +1336,7 @@ const baitZero = () => Object.fromEntries(Object.keys(BAIT).filter(k=>k!=='worm'
 const fresh = () => ({v:3, money:0, xp:0, lvl:1, gear:{rod:0,reel:0,line:0,hook:0,cooler:0,finder:0}, bait:baitZero(), baitSel:'worm',
   unlocked:['pond'], loc:'pond', cooler:[], journal:{}, bounties:[], setDone:{},
   perks:{}, bonusPts:0, tank:[], tankSlots:3, tankT:0, tankBank:0, feats:{}, pearls:0, tides:0, streak:0,
-  buffs:[], look:{g:'m',skin:1,hair:1,shirt:'#3a6f9a',pat:'none',pants:'#2f3b4a',hat:'cap',hatCol:'#c8553a',hairStyle:'auto',beard:'none',glasses:'none',outfit:'none',outCol:'#d8a020',build:'average',eye:0,shoes:'boots',neck:'none',back:'none',accCol:'#c8553a'},
+  buffs:[], look:{g:'m',skin:1,hair:1,shirt:'#3a6f9a',pat:'none',pants:'#2f3b4a',hat:'cap',hatCol:'#c8553a',hairStyle:'auto',beard:'none',glasses:'none',outfit:'none',outCol:'#d8a020',build:'average',eye:0,shoes:'boots',neck:'none',back:'none',accCol:'#c8553a',nose:'button',brows:'soft',mouth:'smile',blush:'on'},
   owned:{hats:['none','cap','bucket'],cols:[],pats:['none'],pets:['dog'],outfits:['none','vest'],glasses:['none','round'],shoes:['boots','sneakers','barefoot'],necks:['none'],backs:['none']}, pet:'dog', junk:{}, tickets:0, freeSpins:1,
   settings:{master:.8, music:.55, sfx:.7, amb:.5, musicOn:true, ambient:true, style:'auto', castMode:'meter', vibrate:true, minigames:true, rest:false, effects:true, boostsOnScreen:true, hints:true, protectRare:true},
   aq:{theme:'lagoon', sand:'gold', decor:[], owned:['lagoon','gold']}, fedT:0, wheelT:0, rankClaimed:0, tokens:{small:0,big:0,legend:0},
@@ -2428,7 +2428,7 @@ function drawTank(now){ const cnv=$('tankcv'); if(!cnv) return; const r=cnv.getB
   if(cnv.width!==Math.round(w*DPR)||cnv.height!==Math.round(h*DPR)){ cnv.width=Math.round(w*DPR); cnv.height=Math.round(h*DPR); } /* 0.3.5.1: also when only the height changes (turning the phone) */
   const c=cnv.getContext('2d'); c.setTransform(DPR,0,0,DPR,0,0); const t=now/1000;
   drawTankBack(c,w,h,t);
-  S.tank.forEach((f,i)=>{ const sp=SPI[f.id]; const rel=clamp((f.kg-sp.min)/(sp.max-sp.min),0,1); const L=Math.max(14,Math.min(h*.3,w*.22,(22+11*Math.log10(1+(+f.kg||.1)*4))*(.9+.25*rel)*clamp(h/240,.8,1.9))); /* 0.3.2: real weight sets the size (a heavier fish is a bigger fish), a log scale so whales still fit */ const M=tankMove(f,sp,i,t,w,h,L);
+  S.tank.forEach((f,i)=>{ const sp=SPI[f.id]; const rel=clamp((f.kg-sp.min)/(sp.max-sp.min),0,1); const L=.82*Math.max(14,Math.min(h*.3,w*.22,(22+11*Math.log10(1+(+f.kg||.1)*4))*(.9+.25*rel)*clamp(h/240,.8,1.9))); /* 0.3.2: real weight sets the size (a heavier fish is a bigger fish), a log scale so whales still fit */ const M=tankMove(f,sp,i,t,w,h,L);
     drawCreature(c,sp,M.x,M.y,L,{shiny:!!f.sh,wag:t*M.wag+i,flip:!M.dir}); });
   c.fillStyle='rgba(220,245,255,.35)'; for(let i=0;i<12;i++){ const x=(i*73)%w+Math.sin(t+i)*4, y=h-((t*30+i*40)%h); c.beginPath(); c.arc(x,y,1.5+(i%3),0,7); c.fill(); }
   drawTankFront(c,w,h,t);
@@ -2785,7 +2785,7 @@ document.addEventListener('keydown',()=>startAudio(),{once:true});
 // Update 1.5: rods & attachments, pet dress-up / petting / bond,
 // daily tasks & gift, patch notes, safe reset, Boardwalk 2.0, quips
 // =====================================================================
-const GAME_VERSION = '0.4.8';
+const GAME_VERSION = '0.4.9';
 const PATCHES = [
 {v:'0.4.7', name:'Full Screen Fix', items:['## PC','The PC layout now shows in full screen too: the one-row header, the clear water with its strip above, the new Fish Log, Feats, Settings and every other PC page. Full screen used to bring back the old layout with the bar at the bottom.']},
 {v:'0.4.6', name:'Hotfix', items:['## PC','Patch notes are a proper reader: the updates you missed are listed on the left, the one you pick on the right with its sections side by side, and Let’s fish! always at the top.','The header stays at the top in narrower windows and with browser zoom (it went back to the bottom under 900 pixels wide). In small windows it turns compact: icon tabs, short counters.','## Everywhere','The tip line no longer shows as an empty bubble, and it hides while a card is open over the water.']},
@@ -5232,6 +5232,7 @@ V3SCENES.river = {
     // distant rolling hills, layered with haze
     v3hillBand(x,hz+1,[[0,.1*H],[.18,.15*H],[.36,.11*H],[.55,.16*H],[.74,.12*H],[.92,.15*H],[1,.13*H]],mix(P.far,P.farHaze,.25));
     const hg=x.createLinearGradient(0,hz-.16*H,0,hz); hg.addColorStop(0,v3rgba(P.farHaze,0)); hg.addColorStop(1,v3rgba(P.farHaze,.45)); x.fillStyle=hg; x.fillRect(0,hz-.16*H,W,.16*H);
+    riverVillage(x,P,hz);
     v3hillBand(x,hz+1,[[0,.07*H],[.2,.05*H],[.4,.075*H],[.6,.045*H],[.8,.07*H],[1,.06*H]],P.hill);
     // groves of round trees on both banks (back row smaller and hazier)
     const r=v3rng(29);
@@ -5244,8 +5245,16 @@ V3SCENES.river = {
     v3reeds(x,-W*.01,W*.3,hz+4,H*.03,mix(P.leaf,P.front,.45),75,{heads:mix(P.cabin,"#5a3a1a",.4)}); v3reeds(x,W*.8,W*1.01,hz+4,H*.028,mix(P.leaf,P.front,.45),77);
     v3flowers(x,W*.0,W*.34,hz+H*.004,hz+H*.016,["#f4e06a","#ffffff","#f49ac0"],79,30);
     // the stone arch bridge across the river (arches cut out so the far hills show through; reflections come from the mirror pass)
-    { const x0=W*.42, x1=W*.76, top=hz-H*.085, dh=H*.018, n=3, span=(x1-x0)/n, ar=Math.min(span*.42,(hz-top-dh*.6)/1.15), cyA=hz+1-ar*.15;
+    { const x0=W*.42, x1=W*.76, top=hz-rvH()*.085, dh=rvH()*.018, n=3, span=(x1-x0)/n, ar=Math.min(span*.42,(hz-top-dh*.6)/1.15), cyA=hz+1-ar*.15;
       const arches=(p)=>{ for(let i=0;i<n;i++){ const ax=x0+span*(i+.5); p.moveTo(ax+ar,hz+1); p.arc(ax,cyA,ar,0,Math.PI,true); p.closePath(); } };
+      // round 6 (director: "remove the grass behind each pillar"): through each arch you see the river running on upstream,
+      // a far bank and hazy sky, instead of a wall of green hill
+      x.save(); x.beginPath(); arches(x); x.clip();
+      { const sky=x.createLinearGradient(0,top,0,hz); sky.addColorStop(0,mix(P.mid,P.farHaze,.5)); sky.addColorStop(1,mix(P.bot,P.farHaze,.4)); x.fillStyle=sky; x.fillRect(x0,top,x1-x0,hz-top+2);
+        const bankY=hz-ar*.42; x.fillStyle=mix(P.back,P.farHaze,.55); x.beginPath(); x.moveTo(x0,bankY); for(let xx=x0;xx<=x1;xx+=W*.008) x.lineTo(xx,bankY-H*.006*(1+Math.sin(xx*.21)+Math.sin(xx*.07))); x.lineTo(x1,hz); x.lineTo(x0,hz); x.closePath(); x.fill();
+        const wy=hz-ar*.3, wg=x.createLinearGradient(0,wy,0,hz+1); wg.addColorStop(0,mix(P.wTop,P.farHaze,.45)); wg.addColorStop(1,P.wTop); x.fillStyle=wg; x.fillRect(x0,wy,x1-x0,hz-wy+2);
+        x.strokeStyle=v3rgba(P.rim,.35+P.d*.2); x.lineWidth=.8; x.beginPath(); for(let k=0;k<5;k++){ const yy=wy+(hz-wy)*(.2+k*.18); for(let xx=x0+((k*37)%23);xx<x1;xx+=W*.03){ x.moveTo(xx,yy); x.lineTo(xx+W*(.006+k*.002),yy); } } x.stroke(); }
+      x.restore();
       x.save(); x.beginPath(); x.rect(x0,top,x1-x0,hz-top+1); arches(x); x.fillStyle=P.stone; x.fill('evenodd'); x.clip('evenodd');
       x.strokeStyle=v3rgba(P.stoneD,.55); x.lineWidth=.8; const rowH=H*.011;
       for(let yy=top+rowH,row=0;yy<hz;yy+=rowH,row++){ x.beginPath(); x.moveTo(x0,yy); x.lineTo(x1,yy); for(let xx=x0+(row%2)*W*.011;xx<x1;xx+=W*.022){ x.moveTo(xx,yy); x.lineTo(xx,yy+rowH); } x.stroke(); }
@@ -5266,7 +5275,7 @@ V3SCENES.river = {
       x.fillStyle=P.stoneD; x.fillRect(x0-W*.006,top-dh,(x1-x0)+W*.012,dh); x.fillStyle=v3rgba(P.rim,.4+P.d*.3); x.fillRect(x0-W*.006,top-dh,(x1-x0)+W*.012,1.2);
       x.fillStyle=P.stoneD; for(let i=0;i<=8;i++) x.fillRect(x0+i*(x1-x0)/8-1,top-dh*2,2.2,dh); x.fillRect(x0-W*.006,top-dh*2.2,(x1-x0)+W*.012,1.4); }
     // the mill on the right bank: stone base, timber upper floor, roof
-    { const mx=W*.88, mb=hz-H*.005, mw=H*.13, mh=H*.08;
+    { const mx=W*.88, mb=hz-H*.005, mw=rvH()*.13, mh=rvH()*.08;
       x.fillStyle=P.stone; x.fillRect(mx-mw/2,mb-mh*.45,mw,mh*.45); x.fillStyle=v3rgba(P.stoneD,.6); for(let i=0;i<4;i++) x.fillRect(mx-mw/2,mb-mh*.45+i*mh*.11,mw,1);
       x.fillStyle=P.cabin; x.fillRect(mx-mw/2,mb-mh,mw,mh*.55); x.fillStyle=mix(P.cabin,'#000000',.3); for(let i=1;i<4;i++) x.fillRect(mx-mw/2+i*mw/4,mb-mh,1.4,mh*.55);
       x.fillStyle=P.roof; x.beginPath(); x.moveTo(mx-mw*.62,mb-mh+1); x.lineTo(mx,mb-mh*1.55); x.lineTo(mx+mw*.62,mb-mh+1); x.closePath(); x.fill();
@@ -5274,15 +5283,14 @@ V3SCENES.river = {
       x.fillStyle=mix(P.cabin,'#000000',.5); x.fillRect(mx+mw*.12,mb-mh*.85,mw*.14,mh*.22); x.fillRect(mx-mw*.3,mb-mh*.85,mw*.14,mh*.22);
       x.fillStyle=mix(P.leaf,'#000000',.1); for(let i=0;i<6;i++){ x.beginPath(); x.arc(mx-mw/2+i*mw*.2,mb-mh*.45,H*.006,0,7); x.fill(); } }
     v3water(x,P,hz,cnv);
+    riverJetty(x,P,hz);
   },
   live(P,t,hz,sun){ const FX=S.settings.effects, d=P.d, night=P.night;
     // the mill window glows after dusk
-    const lit=clamp(night*1.2+d*.8,0,1), mx=W*.88, mb=hz-H*.005, mw=H*.13, mh=H*.08;
+    const lit=clamp(night*1.2+d*.8,0,1), mx=W*.88, mb=hz-H*.005, mw=rvH()*.13, mh=rvH()*.08;
     if(lit>.05){ for(const wx of [mx+mw*.12,mx-mw*.3]){ v3glow(g,wx+mw*.07,mb-mh*.74,mh*.6,'rgba(255,200,110,.9)',lit*.45); g.fillStyle=v3rgba('#ffcf7a',.3+lit*.7); g.fillRect(wx,mb-mh*.85,mw*.14,mh*.22); } }
-    // the waterwheel turns, dripping
-    { const wx=mx-mw*.62, wy=mb-mh*.18, R=mh*.55, a=t*.9; g.save(); g.translate(wx,wy); g.strokeStyle=P.wood; g.lineWidth=Math.max(1.4,H*.005); g.beginPath(); g.arc(0,0,R,0,7); g.stroke(); g.beginPath(); g.arc(0,0,R*.25,0,7); g.stroke();
-      for(let i=0;i<8;i++){ const aa=a+i*Math.PI/4; g.beginPath(); g.moveTo(Math.cos(aa)*R*.25,Math.sin(aa)*R*.25); g.lineTo(Math.cos(aa)*R,Math.sin(aa)*R); g.stroke(); g.fillStyle=mix(P.wood,'#000000',.2); g.save(); g.translate(Math.cos(aa)*R,Math.sin(aa)*R); g.rotate(aa); g.fillRect(-R*.04,-R*.14,R*.22,R*.28); g.restore(); }
-      g.restore(); if(FX){ g.fillStyle=v3rgba(mix(P.wTop,'#ffffff',.6),.6); for(let i=0;i<5;i++){ const k=((t*1.4+i/5)%1); g.fillRect(wx-R*.6+i*R*.3,wy+R*.2+k*R*.9,1.2,2.2); } for(let i=0;i<8;i++){ const u=i/7, a=.3+.3*Math.sin(t*4+i*2.1); g.fillStyle=v3rgba(mix(P.wTop,"#ffffff",.75),a); g.beginPath(); g.ellipse(wx-R*.9+u*R*1.8,mb+1.5+Math.sin(u*Math.PI)*R*.08,R*.13,R*.05,0,0,7); g.fill(); } } }
+    // the waterwheel (reworked in round 6, see cc_river06.js)
+    riverWheel(P,t,hz,mx,mb,mw,mh,FX);
     v3glitter(P,t,hz,sun);
     v3mist(P,t,hz,.12*(1-night)*(1-d)+.16*d+.08*night);
     // fast current lines flowing right to left at many depths
@@ -6463,16 +6471,10 @@ m33wrap('ember','fore',function(P,t){ const b=H, c=mix(P.rock,P.wBot,.2);
 });
 
 // ---------------------------------------------------------------------
-// STONEBROOK RIVER: a rowboat moored by the mill, and a pair of otters that pop up and play
+// STONEBROOK RIVER: a pair of otters that pop up and play (the moored rowboat now sits at the mill jetty, cc_river06.js)
 // ---------------------------------------------------------------------
-m33wrap('river','land',function(x,P,hz){ const bx=W*.77, by=hz+H*.03, s=H*.0045, hc=mix(P.wood,P.wMid,.15);
-  x.fillStyle=hc; x.beginPath(); x.moveTo(bx-s*10,by-s*1.6); x.lineTo(bx+s*10,by-s*1.6); x.quadraticCurveTo(bx+s*8,by+s*1.6,bx+s*5,by+s*1.8); x.lineTo(bx-s*6,by+s*1.8); x.quadraticCurveTo(bx-s*9,by+s*1.4,bx-s*10,by-s*1.6); x.fill();
-  x.fillStyle=mix(hc,'#000000',.3); x.fillRect(bx-s*8,by-s*1.6,s*16,s*.6); x.fillStyle=v3rgba(P.rim,.3); x.fillRect(bx-s*9,by-s*1.9,s*18,s*.4);
-  x.strokeStyle=mix(hc,'#000000',.4); x.lineWidth=1; x.beginPath(); x.moveTo(bx+s*10,by-s*1.4); x.quadraticCurveTo(bx+s*14,by+s*1,bx+s*17,by-s*1.6); x.stroke();
-  x.strokeStyle=mix(P.wood,'#000000',.2); x.lineWidth=1.4; x.beginPath(); x.moveTo(bx-s*3,by-s*1.4); x.lineTo(bx+s*4,by-s*5); x.stroke();
-  x.save(); x.globalAlpha=.2; x.fillStyle=hc; x.beginPath(); x.ellipse(bx,by+s*3,s*10,s*1.4,0,0,7); x.fill(); x.restore(); });
 m33wrap('river','live',function(P,t,hz){ const night=P.night, FX=S.settings.effects;
-  for(let i=0;i<2;i++){ const per=19, k=((t+i*2.5)%per)/per; if(k>.32) continue; const e=k/.32, up=Math.sin(e*Math.PI), x=W*(.36+i*.035)+e*W*.04, y=hz+H*(.17+i*.012), s=H*.005, oc=mix('#5a3a24',P.wMid,.2+night*.5);
+  for(let i=0;i<2;i++){ const per=19, k=((t+i*2.5)%per)/per; if(k>.32) continue; const e=k/.32, up=Math.sin(e*Math.PI), x=W*(.25+i*.035)+e*W*.035, y=hz+H*(.17+i*.012) /* clear water between the dock and the first rock (they swam through it at .36-.44) */, s=H*.005, oc=mix('#5a3a24',P.wMid,.2+night*.5);
     g.save(); g.beginPath(); g.rect(0,0,W,y); g.clip(); g.fillStyle=oc; g.beginPath(); g.ellipse(x,y+s*2*(1-up),s*1.6,s*2.6*up+.1,.2,0,7); g.fill(); g.beginPath(); g.ellipse(x+s*.6,y-s*2.4*up+s*2*(1-up),s*1.5,s*1.2*up+.1,0,0,7); g.fill(); g.fillStyle=mix('#c8a880',P.wMid,.2+night*.5); g.beginPath(); g.ellipse(x+s*1.2,y-s*2*up+s*2*(1-up),s*.8,s*.6*up+.05,0,0,7); g.fill(); m33dot(g,x+s*1.1,y-s*2.9*up+s*2*(1-up),s*.28*up,'#14100c'); g.restore();
     if(FX){ g.strokeStyle=v3rgba(mix(P.wTop,'#ffffff',.6),.5*up); g.lineWidth=1; g.beginPath(); g.ellipse(x,y+1,s*(2.6+e*4),s*(.6+e*.8),0,0,7); g.stroke(); } }
 });
@@ -7409,10 +7411,11 @@ function a3Body(c,x,y,s,lk,o,live){
     c.fillStyle='rgba(255,236,210,'+(dark?.1:.24)+')'; c.beginPath(); c.ellipse(bx+3.6,-3.3,1.6,.6,-.35,0,7); c.fill(); };
   const aB=-3.6-stance, aF=3.2+stance*.8, shoe=lk.shoes||'boots';
   c.save(); c.translate(0,lift); c.translate(0,-24); c.rotate(lean); c.translate(0,24); c.scale(SIDE_K,1); a3Back(c,lk.back,D,lk.accCol,t,B.w,lean,st); c.restore();
-  if(!o.sit){ leg(-3*B.w,aB,legD,true); a3Shoe(c,shoe,aB-.2,true,D,sk,t); leg(2.6*B.w,aF,legC,false); a3Shoe(c,shoe,aF-.2,false,D,sk,t); }
+  /* the left leg is the near one from this angle (director, 2026-11-18): the right leg is drawn first and darker, the left one last, in front */
+  if(!o.sit){ leg(2.6*B.w,aF,legD,true); a3Shoe(c,shoe,aF-.2,true,D,sk,t); leg(-3*B.w,aB,legC,false); a3Shoe(c,shoe,aB-.2,false,D,sk,t); }
   else { // sitting: thighs forward from the hips, shins hanging over the dock edge (kicking gently) or down to the floor in front of the chair
     const hy0=-o.sit.seat, L1=9.4*B.l, L2=9.6*B.l;
-    for(const [hx0,col,back,ph] of [[-2.4*B.w,legD,true,1.3],[1.8*B.w,legC,false,0]]){ const hp={x:hx0,y:hy0-1.2}, kn={x:hx0+L1,y:hy0-1.5+(back?.4:0)};
+    for(const [hx0,col,back,ph] of [[1.8*B.w,legD,true,0],[-2.4*B.w,legC,false,1.3]]){ const hp={x:hx0,y:hy0-1.2}, kn={x:hx0+L1,y:hy0-1.5+(back?.4:0)};
       const an=o.sit.hang?{x:kn.x+2+Math.sin(t*1.25+ph)*1.6,y:kn.y+L2}:{x:kn.x+1.2,y:-5};
       a3Limb(c,hp,kn,6.4*B.lw,5.4*B.lw,col,back?.5:1); a3Limb(c,kn,an,5.2*B.lw,4.4*B.lw,col,back?.5:1);
       c.save(); c.translate(an.x,an.y+5); c.rotate(o.sit.hang?.28+Math.sin(t*1.25+ph)*.08:0); a3Shoe(c,shoe,-.2,back,D,sk,t); c.restore(); } }
@@ -8778,8 +8781,8 @@ function f3Horse(c,sp,d,L,col,belly,o,wag){ const s=L*.5, fin=o.sil||mix(col,bel
   f3Eye(c,s*.2,-s*.85,Math.max(1.2,s*.06),o,d); c.restore(); }
 
 function f3Mola(c,sp,d,L,col,belly,o,wag){ const r=L*.36, fin=o.sil||mix(col,'#000000',.15), fl=Math.sin(wag*.5)*.2;
-  c.fillStyle=fin; c.save(); c.translate(-r*.1,-r*.8); c.rotate(-.3+fl); c.beginPath(); c.moveTo(-r*.15,0); c.quadraticCurveTo(-r*.25,-r*.9,-r*.05,-r*1.0); c.quadraticCurveTo(r*.1,-r*.5,r*.15,0); c.fill(); c.restore();
-  c.save(); c.translate(-r*.1,r*.8); c.rotate(.3-fl); c.beginPath(); c.moveTo(-r*.15,0); c.quadraticCurveTo(-r*.25,r*.9,-r*.05,r*1.0); c.quadraticCurveTo(r*.1,r*.5,r*.15,0); c.fill(); c.restore();
+  c.fillStyle=fin; c.save(); c.translate(-r*.1,-r*.55); c.rotate(-.3+fl); c.beginPath(); c.moveTo(-r*.2,r*.1); c.quadraticCurveTo(-r*.3,-r*1.1,-r*.05,-r*1.25); c.quadraticCurveTo(r*.12,-r*.7,r*.2,r*.1); c.fill(); c.restore(); /* rooted inside the body (it was drawn at the body's edge and lifted off when tilted) */
+  c.save(); c.translate(-r*.1,r*.55); c.rotate(.3-fl); c.beginPath(); c.moveTo(-r*.2,-r*.1); c.quadraticCurveTo(-r*.3,r*1.1,-r*.05,r*1.25); c.quadraticCurveTo(r*.12,r*.7,r*.2,-r*.1); c.fill(); c.restore();
   const body=()=>{ c.beginPath(); c.moveTo(r*.95,0); c.bezierCurveTo(r*.95,-r*.85,-r*.4,-r*.95,-r*.7,-r*.55); c.quadraticCurveTo(-r*.85,0,-r*.7,r*.55); c.bezierCurveTo(-r*.4,r*.95,r*.95,r*.85,r*.95,0); c.closePath(); };
   c.fillStyle=o.sil||f3Grad(c,mix(col,'#000000',.15),belly,-r,r); body(); c.fill();
   if(!o.sil){ c.save(); body(); c.clip(); c.fillStyle=v3rgba(mix(col,'#000000',.3),.4); for(let k=0;k<8;k++){ c.beginPath(); c.ellipse(-r*.75,-r*.6+k*r*.17,r*.12,r*.05,0,0,7); c.fill(); } c.fillStyle='rgba(255,255,255,.15)'; c.beginPath(); c.ellipse(r*.1,-r*.5,r*.5,r*.15,0,0,7); c.fill(); c.restore(); }
@@ -10827,12 +10830,12 @@ drawCreature3 = function(c,sp,x,y,L,o={}){ if(!o.shiny||o.sil||o._sh) return _dr
   const ox=C.getContext('2d'); ox.setTransform(1,0,0,1,0,0); ox.clearRect(0,0,px,px); ox.setTransform(sc,0,0,sc,px/2,px/2);
   const r=_drawCreature3_sh(ox,sp,0,0,L,Object.assign({},o,{_sh:1}));
   // the glint: a soft diagonal band of light crossing the fish every couple of seconds
-  const k=((t*.42+ph)%1.5)/1.5, bx=-R*1.3+k*R*2.6;
+  const k=SHINY3.still?-1:((t*.42+ph)%1.5)/1.5, bx=-R*1.3+k*R*2.6; // still pictures (fish cards, lists) get no frozen glint or stars: they twinkle on their own (ca_shiny06.js)
   ox.save(); ox.globalCompositeOperation='source-atop'; const gr=ox.createLinearGradient(bx-R*.28,-R*.2,bx+R*.28,R*.2); gr.addColorStop(0,'rgba(255,255,255,0)'); gr.addColorStop(.5,'rgba(255,250,225,.72)'); gr.addColorStop(1,'rgba(255,255,255,0)'); ox.fillStyle=gr; ox.fillRect(-R,-R,R*2,R*2);
   ox.fillStyle='rgba(255,226,140,.12)'; ox.fillRect(-R,-R,R*2,R*2); ox.restore();
   c.drawImage(C,0,0,px,px,x-R,y-R,R*2,R*2);
   // sparkles: little four-point stars that pop in and out around the body
-  c.save(); for(let i=0;i<4;i++){ const q=((t*.7+i*.27+ph)%1), a=(i*1.9+ph*6), d=L*(.32+.14*((i*7)%3)), sx=x+Math.cos(a)*d, sy=y+Math.sin(a)*d*.55, s=Math.sin(q*Math.PI)*Math.max(1.4,L*.07);
+  c.save(); for(let i=0;i<(SHINY3.still?0:4);i++){ const q=((t*.7+i*.27+ph)%1), a=(i*1.9+ph*6), d=L*(.32+.14*((i*7)%3)), sx=x+Math.cos(a)*d, sy=y+Math.sin(a)*d*.55, s=Math.sin(q*Math.PI)*Math.max(1.4,L*.07);
     if(s<.2) continue; c.fillStyle='rgba(255,246,200,'+(.9*Math.sin(q*Math.PI))+')'; c.beginPath(); c.moveTo(sx,sy-s*1.6); c.quadraticCurveTo(sx,sy,sx+s*1.6,sy); c.quadraticCurveTo(sx,sy,sx,sy+s*1.6); c.quadraticCurveTo(sx,sy,sx-s*1.6,sy); c.quadraticCurveTo(sx,sy,sx,sy-s*1.6); c.fill(); }
   c.restore(); return r; };
 
@@ -11425,7 +11428,7 @@ document.head.insertAdjacentHTML('beforeend',`<style>
 
 // ---------- the aquarium on phones: a wide tank like on PC, decorations sized to fit it ----------
 // (decorations used to scale with the tank's height only, so a tall, narrow phone tank crammed them together)
-function tankK(w,h){ return Math.min(h/230, w/520); }
+function tankK(w,h){ return .82*Math.min(h/230, w/520); } // round 6: fish and decorations a little smaller so every piece can be seen (director)
 document.head.insertAdjacentHTML('beforeend',`<style>
 @media (max-width:560px){ .tank canvas{height:auto!important;aspect-ratio:16/10;max-height:46vh} }
 @media (orientation:landscape) and (max-height:560px){ .tank canvas{height:auto!important;aspect-ratio:16/9;max-height:62vh} }
@@ -14634,6 +14637,218 @@ function homeLight(def){ const k=S&&S.dock&&S.dock.light, L=k&&HOME_LIGHTS.find(
 function homeHull(def){ const k=S&&S.dock&&S.dock.hull, h=k&&HOME_HULLS.find(x=>x[0]===k); return h&&h[2]?h[2]:def; }
 function homeHullDark(def,defDark){ const k=S&&S.dock&&S.dock.hull, h=k&&HOME_HULLS.find(x=>x[0]===k); return h&&h[2]?mix(h[2],'#000000',.22):defDark; }
 // =====================================================================
+// Catch popup, hybrids (director, 2026-11-18: "make sure hybrid fish stat changes are shown in the initial fish catch pop
+// up"). Shared by every platform: a hybrid's card says how much heavier than usual it is, how much its value rose for being
+// a hybrid, and both aquarium boosts it carries (with the hybrid's ×1.5 already counted in).
+// =====================================================================
+{ const _sc=showCard; showCard=function(o){ const ce=G.lastEntry; _sc(o); try{ if(!ce||!ce.hy) return; const sp=SPI[ce.id], other=SPI[ce.hy]; if(!sp) return; const b=$('cardbadges'); if(!b||b.querySelector('.hy-stats')) return;
+      const avg=(sp.min+sp.max)/2, R=ce.kg/avg, bonus=clamp(Math.pow(R,.85)*(1+.6*Math.abs(Math.log(R))),.3,25)/Math.max(.0001,Math.pow(R,.85));
+      const boosts=aqBuffsOf(ce).map(x=>fmtB(x.k,x.v)).join(' and ');
+      b.insertAdjacentHTML('beforeend',`<span class="badge g hy-stats">${R>=1?'×'+(Math.round(R*10)/10)+' the usual weight':'×'+(Math.round(R*100)/100)+' the usual weight'}</span><span class="badge g hy-stats">Hybrid value ×${(Math.round(bonus*10)/10).toFixed(1)}</span>${boosts?`<span class="badge g hy-stats">Aquarium: ${esc(boosts)}</span>`:''}`); }catch(e){} }; }
+// =====================================================================
+// Water baits (director, 2026-11-18: "make bait listed that are associated with areas they're best at scale proportionally
+// in price to the economy of the area while keeping them fair, also ensure they're grouped together in the menu, sequential
+// respective to the unlock order of the Waters"). Shared game data (every platform):
+//  - a water bait's pack price = 3 average catches at its water (waterEV), rounded to a tidy number, so it always matches
+//    that water's economy (before: Wild Berries 3.1, Ice Flies 2.3, Live Shrimp 3.4, Lava Worms 2.9, Stardust 2.9)
+//  - the bait list order: everyday baits first, then every water bait together in the order the waters unlock, then lures
+// =====================================================================
+const BAIT_WATER_K=3;
+const niceNum=n=>{ if(n<100) return Math.round(n/5)*5; const p=Math.pow(10,Math.floor(Math.log10(n))-1); return Math.round(n/p)*p; };
+try{ for(const k in BAIT){ const b=BAIT[k]; if(b.loc&&!b.junk&&!b.scales&&LOCS.some(L=>L.id===b.loc)) b.price=niceNum(waterEV(b.loc)*BAIT_WATER_K); } }catch(e){}
+try{ const keys=Object.keys(BAIT), water=keys.filter(k=>BAIT[k].loc&&!BAIT[k].junk).sort((a,b)=>locIdx(BAIT[a].loc)-locIdx(BAIT[b].loc)), junk=keys.filter(k=>BAIT[k].junk), rest=keys.filter(k=>!water.includes(k)&&!junk.includes(k));
+  const all=[...rest,...water,...junk], copy={}; for(const k of keys){ copy[k]=BAIT[k]; delete BAIT[k]; } for(const k of all) BAIT[k]=copy[k]; }catch(e){}
+// the bait counts in your save follow the new order too (a save made before keeps every count, only the order changes)
+try{ S.bait=Object.assign(baitZero(),S.bait||{}); }catch(e){}
+// =====================================================================
+// Round 6 quality of life that works the same on every platform (director, 2026-11-18: "use those QoL's across all
+// platforms and make them function properly on each build").
+// =====================================================================
+
+// ---------- after "Travel here" the menu closes and you are fishing at the new water at once ----------
+// (director: "when moving to a new zone through Waters, jump back to the game screen once Travel here is clicked")
+document.addEventListener('click',e=>{ const b=e.target.closest&&e.target.closest('[data-act="goto"]'); if(!b||!MENU_OPEN) return; const from=S.loc;
+  setTimeout(()=>{ try{ if(S.loc!==from&&MENU_OPEN){ closeMenu(); } }catch(er){} },60); },true);
+
+// ---------- rows that scroll sideways show a small arrow at the edge that has more (director: "whenever a bar can be scrolled
+// left or right, add a slight indicator at the corner so players don't miss a function or menu") ----------
+{ const SEL='#menuov .subbar, #menuov .chips, #menuov .bwx-nav, #menuov .wd-nav, #menuov .fl-show, #menuov .shoptools, #menuov .hunt-chips, .hud, #catdock';
+  const mark=el=>{ const can=el.scrollWidth>el.clientWidth+4, l=can&&el.scrollLeft>4, r=can&&el.scrollLeft+el.clientWidth<el.scrollWidth-4;
+    if(el.classList.contains('sc-l')!==l) el.classList.toggle('sc-l',l); if(el.classList.contains('sc-r')!==r) el.classList.toggle('sc-r',r);
+    const host=el.parentElement; if(host){ if(getComputedStyle(host).position==='static') host.classList.add('sc-host'); let a=el._scA; if(!a&&(l||r)){ a=el._scA=[document.createElement('i'),document.createElement('i')]; a[0].className='sc-arrow sc-al'; a[1].className='sc-arrow sc-ar'; a[0].textContent='‹'; a[1].textContent='›'; el.after(a[0],a[1]); }
+      if(a){ const r1=el.getBoundingClientRect(), hr=host.getBoundingClientRect(); for(const [i,on] of [[0,l],[1,r]]){ a[i].hidden=!on; if(on){ a[i].style.top=(r1.top-hr.top+r1.height/2)+'px'; a[i].style.left=(i?r1.right-hr.left-18:r1.left-hr.left)+'px'; } } } } };
+  let q=0; const scan=()=>{ q=0; document.querySelectorAll(SEL).forEach(el=>{ const ox=getComputedStyle(el).overflowX; if(ox==='auto'||ox==='scroll') mark(el); else if(el._scA){ el._scA.forEach(x=>x.hidden=true); } }); };
+  const soon=()=>{ if(!q) q=setTimeout(scan,120); };
+  document.addEventListener('scroll',e=>{ const el=e.target; if(el&&el.matches&&el.matches(SEL)) mark(el); },true);
+  new MutationObserver(soon).observe(document.body,{childList:true,subtree:true}); addEventListener('resize',soon); setTimeout(scan,800); }
+document.head.insertAdjacentHTML('beforeend',`<style>
+.sc-host{position:relative}
+.sc-arrow{position:absolute;z-index:6;width:18px;height:26px;margin-top:-13px;display:flex;align-items:center;justify-content:center;border-radius:9px;background:linear-gradient(180deg,#1f8a86,#14666a);border:1px solid #7fe3c4;color:#fff;font:900 16px/1 system-ui;font-style:normal;pointer-events:none;box-shadow:0 2px 8px #0009;opacity:.92}
+.sc-arrow[hidden]{display:none}
+</style>`);
+// =====================================================================
+// Rod presets, "Your rods" (director, 2026-11-18: "you can have 3 presets here to choose from of rods from your Rod Rack that
+// maintain their attachments. Attachments can be equipped to more than one Rod Preset at a time"). Shared data and rules:
+//  S.rodPresets = 3 slots, each {rod, att:[...]} or null; S.rodPreset = the one in use (-1 = none).
+//  Using a preset equips its rod with its attachments. While a preset is in use, changing the rod or its attachments
+//  updates that preset, so it always keeps what you set. Attachments are a collection you own once, so the same attachment
+//  can sit on several presets.
+// Each platform shows the presets with rodPresetsHTML() in its own layout.
+// =====================================================================
+function rpClean(st){ const src=Array.isArray(st.rodPresets)?st.rodPresets:[];
+  const out=[0,1,2].map(i=>{ const p=src[i]; if(!p||typeof p!=='object'||!ROD_I[p.rod]) return null; const n=ROD_I[p.rod].slots; return {rod:p.rod, att:(Array.isArray(p.att)?p.att:[]).map(x=>typeof x==='string'&&ATT_I[x]?x:'').slice(0,n)}; });
+  st.rodPresets=out; st.rodPreset=(Number.isInteger(st.rodPreset)&&st.rodPreset>=0&&st.rodPreset<3&&out[st.rodPreset])?st.rodPreset:-1; return st; }
+function rpInit(){ rpClean(S); if(!S.rodPresets.some(Boolean)&&S.rods&&ROD_I[S.rods.eq]){ S.rodPresets[0]={rod:S.rods.eq, att:(S.rods.att[S.rods.eq]||[]).slice(0,rod().slots)}; S.rodPreset=0; } }
+rpInit();
+{ const _mig=migrate; migrate=function(o){ const m=_mig(o); try{ rpClean(m); }catch(e){ m.rodPresets=[null,null,null]; m.rodPreset=-1; } return m; }; }
+// keep the preset in use matching what you hold
+function rpSync(){ try{ const i=S.rodPreset; if(i<0||!S.rodPresets[i]||!S.rods.owned.includes(S.rods.eq)) return; S.rodPresets[i]={rod:S.rods.eq, att:(S.rods.att[S.rods.eq]||[]).slice(0,rod().slots)}; }catch(e){} }
+function rpUse(i){ const p=S.rodPresets[i]; if(!p||!S.rods.owned.includes(p.rod)) return false; S.rods.eq=p.rod; S.rods.att[p.rod]=p.att.filter(a=>!a||S.atts[a]).slice(0,ROD_I[p.rod].slots); S.rodPreset=i; save(); return true; }
+function rpSave(i){ if(!S.rods.owned.includes(S.rods.eq)) return false; S.rodPresets[i]={rod:S.rods.eq, att:(S.rods.att[S.rods.eq]||[]).slice(0,rod().slots)}; S.rodPreset=i; save(); return true; }
+function rpClear(i){ S.rodPresets[i]=null; if(S.rodPreset===i) S.rodPreset=-1; save(); }
+{ const _sv=save; save=function(){ rpSync(); return _sv.apply(this,arguments); }; }
+{ const _rp=renderPanel; renderPanel=function(){ if(S.tab==='rods') rpSync(); return _rp.apply(this,arguments); }; }
+function rodPresetsHTML(){ return `<div class="rp-box"><div class="rp-head"><b>Your rods</b><span>Three presets: a rod and its attachments. The one in use updates as you change it.</span></div><div class="rp-list">${[0,1,2].map(i=>{ const p=S.rodPresets[i], on=S.rodPreset===i, R=p&&ROD_I[p.rod];
+    if(!R) return `<div class="rp-card empty"><span class="rp-n">Preset ${i+1}</span><em>Empty</em><button type="button" class="btn alt sm" data-rp="save:${i}">Save the rod in your hands here</button></div>`;
+    const atts=p.att.filter(a=>a&&ATT_I[a]).map(a=>`<span class="rp-att">${esc(ATT_I[a].name)}</span>`).join('')||'<span class="rp-att none">No attachments</span>';
+    return `<div class="rp-card${on?' on':''}"><span class="rp-n">Preset ${i+1}${on?' · in use':''}</span><b>${esc(R.name)}</b><span class="rp-lv">Level ${(S.rods.lvl&&S.rods.lvl[p.rod])||0} / 10 · ${R.slots} slot${R.slots>1?'s':''}</span><div class="rp-atts">${atts}</div><div class="rp-acts">${on?'<span class="badge g">In use</span>':`<button type="button" class="btn sm" data-rp="use:${i}">Use</button>`}<button type="button" class="btn alt sm" data-rp="save:${i}">${on?'Saved':'Replace with current'}</button><button type="button" class="btn alt sm" data-rp="clear:${i}">Clear</button></div></div>`; }).join('')}</div></div>`; }
+document.addEventListener('click',e=>{ const b=e.target.closest&&e.target.closest('[data-rp]'); if(!b) return; e.stopPropagation(); const [a,n]=b.dataset.rp.split(':'), i=+n; if(!(i>=0&&i<3)) return;
+  if(a==='use'){ if(rpUse(i)){ toast('Rod preset '+(i+1)+': '+rod().name+'.'); } } else if(a==='save'){ if(S.rodPreset===i) return; rpSave(i); toast('Saved to preset '+(i+1)+'.'); } else if(a==='clear'){ rpClear(i); }
+  try{ sfx.coin(); }catch(er){} renderPanel(); },true);
+document.head.insertAdjacentHTML('beforeend',`<style>
+.rp-box{display:flex;flex-direction:column;gap:8px;margin:0 0 12px}
+.rp-head{display:flex;flex-direction:column;gap:2px} .rp-head b{font:800 15px var(--display,system-ui);color:#fff} .rp-head span{font-size:12px;color:#9fb2c8}
+.rp-list{display:grid;gap:8px}
+.rp-card{display:flex;flex-direction:column;gap:4px;padding:10px 12px;border-radius:12px;background:#0a1424;border:1px solid #ffffff18}
+.rp-card.on{border-color:#7fe3c4;box-shadow:0 0 0 1px #7fe3c4 inset}
+.rp-card.empty{border-style:dashed;align-items:flex-start}
+.rp-n{font:800 11px var(--display,system-ui);letter-spacing:.07em;text-transform:uppercase;color:#8fa6bf} .rp-card.on .rp-n{color:#7fe3c4}
+.rp-card b{font:800 15px var(--display,system-ui);color:#fff} .rp-lv{font-size:12px;color:#9fb2c8} .rp-card em{font-style:normal;color:#7f93a8;font-size:13px}
+.rp-atts{display:flex;flex-wrap:wrap;gap:4px} .rp-att{padding:2px 8px;border-radius:999px;background:#ffffff10;font-size:11.5px;color:#dbe6f2} .rp-att.none{color:#7f93a8}
+.rp-acts{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px;align-items:center}
+</style>`);
+// =====================================================================
+// Shiny sparkles (director, 2026-11-18: "remove the static sparkles from shiny fish. All sparkles should be animated and
+// dynamic to the fish sprite. Prismatic and other high-end shiny variants need some distinct graphical separation, and perhaps
+// the sparkles are different colours"). Shared drawing for every platform:
+//  - the fixed sparkles painted into fish pictures and the fixed sparkle overlay on shiny cards are gone
+//  - instead every shiny, prismatic or Mythic fish picture twinkles with sparkles that sit ON the fish itself (positions are
+//    picked from the fish's own pixels) and come and go over time
+//  - colours: shiny = warm gold, Mythic = pink and teal, Rainbow = every colour, Starry = light blue, Spectral = purple,
+//    Ancient = old gold; prismatic fish also twinkle more
+//  - cheap: only pictures on screen animate, about 15 times a second; spots are worked out once per fish picture size
+// =====================================================================
+shineDecorate=function(){};
+const SPK=new Map(), SPK_SPOTS=new Map();
+const SPK_COL={shiny:['#fff6c8','#ffd36a'], mythic:['#ff9ae0','#8affea'], rainbow:null, starry:['#bfe6ff','#7fc8ff'], spectral:['#d6b8ff','#a77cff'], ancient:['#ffe9a8','#e8b860']};
+const spkVis=window.IntersectionObserver?new IntersectionObserver(es=>{ for(const e of es){ const o=SPK.get(e.target); if(o) o.vis=e.isIntersecting; } }):null;
+function spkWants(sp,known,shiny){ return !!(known&&sp&&(shiny||sp.r===5)); }
+function spkDrop(cnv){ if(SPK.has(cnv)){ SPK.delete(cnv); if(spkVis) spkVis.unobserve(cnv); } }
+// start twinkling on a canvas that already shows the fish (without sparkles)
+function spkAttach(cnv,sp,shiny,pv){ try{ const w=cnv.width, h=cnv.height; if(w<8||h<8) return; const base=document.createElement('canvas'); base.width=w; base.height=h; base.getContext('2d').drawImage(cnv,0,0);
+    const kind=shiny===2?(pv&&SPK_COL.hasOwnProperty(pv)?pv:'rainbow'):shiny?'shiny':'mythic', key=[sp.id,w,h,kind,typeof V3ON!=='undefined'&&V3ON?1:0].join('|');
+    let spots=SPK_SPOTS.get(key);
+    if(!spots){ // spots on the fish: solid pixels only (the soft glow around shiny fish is see-through, so it never gets a sparkle)
+      const d=cnv.getContext('2d').getImageData(0,0,w,h).data, pts=[], st=Math.max(2,Math.round(Math.min(w,h)/40)); for(let y=0;y<h;y+=st) for(let x=0;x<w;x+=st){ if(d[(y*w+x)*4+3]>215) pts.push([x,y]); }
+      if(!pts.length) return; const n=shiny===2?9:6, r=v3rng(hashStr(sp.id)+w); spots=[];
+      for(let i=0;i<n;i++){ const p=pts[Math.floor(r()*pts.length)]; spots.push({x:p[0],y:p[1],ph:r()*6.28,sp:.8+r()*1.4,sz:(.7+r()*.6)*Math.max(2.6,w*(shiny===2?.032:.027))}); }
+      if(SPK_SPOTS.size>400) SPK_SPOTS.clear(); SPK_SPOTS.set(key,spots); }
+    const was=SPK.get(cnv); SPK.set(cnv,{base,spots,kind,vis:was?was.vis:true}); if(spkVis&&!was) spkVis.observe(cnv); }catch(e){} }
+{ const _fc=fishCanvas; fishCanvas=function(cnv,sp,known=true,shiny=false,pv=null){ spkDrop(cnv);
+    const keep=sparkles; sparkles=function(){}; SHINY3.still=true; try{ _fc.apply(this,arguments); } finally{ sparkles=keep; SHINY3.still=false; }
+    if(spkWants(sp,known,shiny)&&cnv.isConnected) spkAttach(cnv,sp,shiny,pv); }; }
+// menu pictures are drawn once into a kept copy and then copied onto the page: attach to the page canvas, never the kept copy
+{ const _pf=paintFish; paintFish=function(P){ const r=_pf.apply(this,arguments); try{ P.querySelectorAll('canvas[data-fish]').forEach(c=>{ const sp=SPI[c.dataset.fish], known=c.dataset.known!=='0', sh=+c.dataset.sh||0;
+      if(spkWants(sp,known,sh)) spkAttach(c,sp,sh,c.dataset.pv||null); else spkDrop(c); }); }catch(e){} return r; }; }
+function spkStar(c,x,y,s,col,a){ c.globalAlpha=a; c.fillStyle=col; c.beginPath(); c.moveTo(x,y-s); c.quadraticCurveTo(x+s*.16,y-s*.16,x+s,y); c.quadraticCurveTo(x+s*.16,y+s*.16,x,y+s); c.quadraticCurveTo(x-s*.16,y+s*.16,x-s,y); c.quadraticCurveTo(x-s*.16,y-s*.16,x,y-s); c.fill();
+  c.globalAlpha=a*.55; c.beginPath(); c.arc(x,y,s*.32,0,7); c.fillStyle='#ffffff'; c.fill(); }
+function spkDraw(cnv,o,t){ const c=cnv.getContext('2d'); c.save(); c.setTransform(1,0,0,1,0,0); c.globalAlpha=1; c.clearRect(0,0,cnv.width,cnv.height); c.drawImage(o.base,0,0); const cols=SPK_COL[o.kind];
+  o.spots.forEach((s,i)=>{ const k=Math.sin(t*s.sp*2.2+s.ph); if(k<=.15) return; const a=Math.min(1,(k-.15)/.85); const col=cols?cols[i%cols.length]:'hsl('+Math.round((t*60+i*47)%360)+',100%,75%)'; spkStar(c,s.x,s.y,s.sz*(.55+.45*a),col,a); });
+  c.restore(); }
+setInterval(()=>{ if(document.hidden||!SPK.size) return; const t=performance.now()/1000; for(const [cnv,o] of SPK){ if(!cnv.isConnected){ spkDrop(cnv); continue; } if(o.vis) spkDraw(cnv,o,t); } },66);
+// =====================================================================
+// Stonebrook River rework (director, round 6: "rework the environment and the water; remove the grass behind each pillar;
+// maybe a dam and/or a village in the background; the boat should be closer to or tied to the dock; the waterwheel could
+// use a rework"). Shared scene art for every platform (the river scene itself is in f2_areas.js):
+//  - a small village with a church on the far hill above the bridge, its windows lit after dusk, chimney smoke by day
+//  - the arches show the river running on upstream (f2_areas.js) instead of a wall of green
+//  - a little mill jetty on the far bank with the rowboat tied to it by a rope
+//  - a proper overshot waterwheel: two rims, buckets, a hub, an axle into the mill wall and a wooden flume pouring water on it
+//  - the river reads as moving water: a deeper channel in the middle, lighter shallows along the far bank
+// =====================================================================
+const RV_HOUSES=[[.478,.0,1],[.503,.012,0],[.53,.022,1],[.558,.03,0],[.634,.026,1],[.66,.016,0],[.687,.008,1],[.712,0,0]];
+const RV_CHURCH=.596; const RV_CHURCH_DY=.036;
+// sizes of the river buildings follow the screen height, capped on tall phone screens so the bridge and mill keep their shape
+function rvH(){ return Math.min(H,W*.8); }
+function rvBaseY(hz,dy){ return hz-rvH()*(.125+dy); }
+function riverVillage(x,P,hz){ // the hill the village climbs: a rise behind the bridge so every house stands on ground
+  x.fillStyle=mix(mix(P.far,P.farHaze,.25),P.hill,.25); x.beginPath(); x.moveTo(W*.4,hz); x.bezierCurveTo(W*.47,hz-rvH()*.13,W*.52,hz-rvH()*.19,W*.6,hz-rvH()*.19); x.bezierCurveTo(W*.68,hz-rvH()*.19,W*.72,hz-rvH()*.13,W*.8,hz); x.closePath(); x.fill();
+  const haze=.42, nt=P.night||0, wall=mix(mix(mix('#e8dcc4',P.stone,.4),P.farHaze,haze),P.far,nt*.7), wallD=mix(wall,'#000000',.18), roof=mix(P.roof,P.farHaze,haze-.08), hh=rvH()*.017, hw=rvH()*.024;
+  for(const [fx,dy,big] of RV_HOUSES){ const bx=W*fx, by=rvBaseY(hz,dy), w=hw*(big?1.15:.9), h=hh*(big?1.05:.9);
+    x.fillStyle=wall; x.fillRect(bx-w/2,by-h,w,h+rvH()*.006); x.fillStyle=wallD; x.fillRect(bx+w*.18,by-h,w*.32,h+rvH()*.006);
+    x.fillStyle=roof; x.beginPath(); x.moveTo(bx-w*.62,by-h+.5); x.lineTo(bx-w*.1,by-h-h*.85); x.lineTo(bx+w*.62,by-h-h*.55); x.lineTo(bx+w*.62,by-h+.5); x.closePath(); x.fill();
+    x.fillStyle=mix(roof,'#000000',.25); x.fillRect(bx+w*.25,by-h-h*.95,w*.12,h*.5); // chimney
+    x.fillStyle=mix(wallD,'#000000',.35); x.fillRect(bx-w*.3,by-h*.62,w*.14,h*.26); if(big) x.fillRect(bx+w*.05,by-h*.62,w*.14,h*.26); }
+  // the church: nave, bell tower and spire
+  { const cx=W*RV_CHURCH, by=rvBaseY(hz,RV_CHURCH_DY), nw=hw*1.5, nh=hh*1.05, tw=hw*.5, th=hh*2.1;
+    x.fillStyle=wall; x.fillRect(cx-nw*.15,by-nh,nw,nh+rvH()*.006); x.fillStyle=roof; x.beginPath(); x.moveTo(cx-nw*.2,by-nh+.5); x.lineTo(cx+nw*.35,by-nh-nh*.7); x.lineTo(cx+nw*.9,by-nh+.5); x.closePath(); x.fill();
+    x.fillStyle=mix(wall,'#ffffff',.05); x.fillRect(cx-tw/2-nw*.18,by-th,tw,th+rvH()*.006); x.fillStyle=wallD; x.fillRect(cx-nw*.18,by-th,tw*.5,th+rvH()*.006);
+    x.fillStyle=roof; x.beginPath(); x.moveTo(cx-tw*.62-nw*.18,by-th+.5); x.lineTo(cx-nw*.18,by-th-th*.75); x.lineTo(cx+tw*.62-nw*.18,by-th+.5); x.closePath(); x.fill();
+    x.fillStyle=mix(wallD,'#000000',.4); x.beginPath(); x.arc(cx-nw*.18,by-th*.72,tw*.17,0,7); x.fill(); }
+  // a few small trees between the houses so the village sits in the hill
+  const r=v3rng(611); for(let i=0;i<7;i++){ const tx=W*(.47+r()*.25), ty=rvBaseY(hz,.004+r()*.02)+rvH()*.004; x.fillStyle=mix(P.back,P.farHaze,.5); x.beginPath(); x.arc(tx,ty-rvH()*.006,rvH()*(.006+r()*.004),0,7); x.fill(); } }
+m33wrap('river','live',function(P,t,hz){ const night=P.night, d=P.d, lit=clamp(night*1.2+d*.7,0,1), hh=rvH()*.017, hw=rvH()*.024;
+  if(lit>.05){ g.fillStyle=v3rgba('#ffcf7a',.25+lit*.7); for(const [fx,dy,big] of RV_HOUSES){ const bx=W*fx, by=rvBaseY(hz,dy), w=hw*(big?1.15:.9), h=hh*(big?1.05:.9), on=(Math.sin(fx*91)+1)/2<.75+lit*.25;
+      if(!on) continue; g.fillRect(bx-w*.3,by-h*.62,w*.14,h*.26); if(big) g.fillRect(bx+w*.05,by-h*.62,w*.14,h*.26); }
+    const cx=W*RV_CHURCH, by=rvBaseY(hz,RV_CHURCH_DY); v3glow(g,cx-hw*1.5*.18,by-hh*2.1*.72,hw*.9,'rgba(255,210,130,.9)',lit*.35); }
+  // chimney smoke drifting downstream (left) by day and dusk
+  if(S.settings.effects&&night<.7){ for(const [fx,dy,big] of RV_HOUSES){ if(!big) continue; const w=hw*1.15, h=hh*1.05, sx=W*fx+w*.31, sy=rvBaseY(hz,dy)-h-h*.95;
+      for(let k=0;k<4;k++){ const q=((t*.12+k/4+fx*7)%1); g.fillStyle=v3rgba(mix('#e8e8ee',P.farHaze,.3),.28*(1-q)*(1-night)); g.beginPath(); g.arc(sx-q*rvH()*.03,sy-q*rvH()*.035,rvH()*(.003+q*.006),0,7); g.fill(); } } }
+});
+// the river itself: a deeper channel in the middle and lighter shallows along the far bank (static, drawn once with the land)
+function riverWater(x,P,hz){ const deep=x.createLinearGradient(0,hz+H*.05,0,hz+H*.42); deep.addColorStop(0,v3rgba(P.wBot,0)); deep.addColorStop(.45,v3rgba(P.wBot,.16)); deep.addColorStop(1,v3rgba(P.wBot,0)); x.fillStyle=deep; x.fillRect(0,hz+H*.05,W,H*.37);
+  const sh=x.createLinearGradient(0,hz,0,hz+H*.03); sh.addColorStop(0,v3rgba(mix(P.wTop,'#ffffff',.35),.32)); sh.addColorStop(1,v3rgba(P.wTop,0)); x.fillStyle=sh; x.fillRect(0,hz+1,W,H*.03); }
+// the mill jetty on the far bank with the rowboat tied to it
+function riverJetty(x,P,hz){ riverWater(x,P,hz);
+  const jx=W*.79, bw=W*.018, fw=W*.026, len=rvH()*.034, top=hz-1, front=hz+len, wood=P.wood, woodD=mix(wood,'#000000',.35), woodL=mix(wood,P.rim,.25);
+  // posts into the water with their reflections
+  for(const px of [jx-fw/2+2,jx+fw/2-2]){ x.fillStyle=woodD; x.fillRect(px-1.5,front-1,3,rvH()*.014); x.fillStyle=v3rgba(woodD,.3); x.fillRect(px-1.5,front+rvH()*.013,3,rvH()*.012); }
+  for(const px of [jx-bw/2+2,jx+bw/2-2]){ x.fillStyle=woodD; x.fillRect(px-1.2,top+len*.45,2.4,rvH()*.01); }
+  // the deck, narrower at the far end (it points toward you)
+  x.fillStyle=wood; x.beginPath(); x.moveTo(jx-bw/2,top); x.lineTo(jx+bw/2,top); x.lineTo(jx+fw/2,front); x.lineTo(jx-fw/2,front); x.closePath(); x.fill();
+  x.strokeStyle=v3rgba(woodD,.8); x.lineWidth=.8; x.beginPath(); for(let k=1;k<7;k++){ const u=k/7, y=top+len*u*u*.4+len*u*.6, hw=(bw+(fw-bw)*u)/2; x.moveTo(jx-hw,y); x.lineTo(jx+hw,y); } x.stroke();
+  x.fillStyle=woodD; x.fillRect(jx-fw/2,front,fw,rvH()*.004); x.fillStyle=v3rgba(woodL,.6); x.fillRect(jx-fw/2,front-1,fw,1);
+  // the rowboat, side-on, nose tied to the jetty's front post
+  const s=rvH()*.0038, bx=jx-fw/2-s*11.5, by=hz+len*.86, hc=mix(P.wood,P.wMid,.15);
+  x.save(); x.globalAlpha=.22; x.fillStyle=hc; x.beginPath(); x.ellipse(bx,by+s*3,s*10,s*1.4,0,0,7); x.fill(); x.restore();
+  x.fillStyle=hc; x.beginPath(); x.moveTo(bx-s*10,by-s*1.6); x.lineTo(bx+s*10,by-s*1.6); x.quadraticCurveTo(bx+s*8,by+s*1.6,bx+s*5,by+s*1.8); x.lineTo(bx-s*6,by+s*1.8); x.quadraticCurveTo(bx-s*9,by+s*1.4,bx-s*10,by-s*1.6); x.fill();
+  x.fillStyle=mix(hc,'#000000',.3); x.fillRect(bx-s*8,by-s*1.6,s*16,s*.6); x.fillStyle=v3rgba(P.rim,.3); x.fillRect(bx-s*9,by-s*1.9,s*18,s*.4);
+  x.strokeStyle=mix(P.wood,'#000000',.2); x.lineWidth=1.3; x.beginPath(); x.moveTo(bx-s*3,by-s*1.4); x.lineTo(bx+s*4,by-s*5); x.stroke(); // oar
+  x.strokeStyle=mix('#d8c49a',P.wMid,.25+P.night*.4); x.lineWidth=1; x.beginPath(); x.moveTo(bx+s*9.6,by-s*1.6); x.quadraticCurveTo(bx+s*11.5,by+s*.6,jx-fw/2+2,front-rvH()*.004); x.stroke(); } // the rope
+// the waterwheel: overshot, fed by a wooden flume, turning clockwise; the part under the water is hidden
+function riverWheel(P,t,hz,mx,mb,mw,mh,FX){ const R=mh*.62, xL=mx-mw/2, cx=xL-R*.5, cy=mb-R*.42, a=t*.75, wood=P.wood, woodD=mix(wood,'#000000',.38), woodL=mix(wood,P.rim,.22), iron=mix('#3a3a40',P.front,.3+P.night*.4);
+  // the axle running into the mill wall
+  g.fillStyle=woodD; g.fillRect(cx,cy-R*.06,xL-cx+R*.2,R*.12);
+  g.save(); g.beginPath(); g.rect(cx-R*1.4,cy-R*1.6,R*2.9,(hz+1)-(cy-R*1.6)); g.clip();
+  const rim=(ox,oy,col,lw)=>{ g.strokeStyle=col; g.lineWidth=lw; g.beginPath(); g.arc(cx+ox,cy+oy,R,0,7); g.stroke(); g.beginPath(); g.arc(cx+ox,cy+oy,R*.78,0,7); g.stroke(); };
+  rim(R*.1,-R*.05,woodD,Math.max(1.2,R*.07));
+  // buckets between the rims
+  for(let i=0;i<12;i++){ const aa=a+i*Math.PI/6; g.save(); g.translate(cx+Math.cos(aa)*R*.89,cy+Math.sin(aa)*R*.89); g.rotate(aa); g.fillStyle=woodD; g.fillRect(-R*.11,-R*.05,R*.22,R*.13); g.fillStyle=woodL; g.fillRect(-R*.11,-R*.05,R*.22,R*.03); g.restore(); }
+  rim(0,0,wood,Math.max(1.4,R*.08));
+  // spokes and hub
+  g.strokeStyle=wood; g.lineWidth=Math.max(1.1,R*.06); g.beginPath(); for(let i=0;i<6;i++){ const aa=a+i*Math.PI/3; g.moveTo(cx+Math.cos(aa)*R*.12,cy+Math.sin(aa)*R*.12); g.lineTo(cx+Math.cos(aa)*R*.78,cy+Math.sin(aa)*R*.78); } g.stroke();
+  g.fillStyle=woodD; g.beginPath(); g.arc(cx,cy,R*.18,0,7); g.fill(); g.fillStyle=iron; g.beginPath(); g.arc(cx,cy,R*.09,0,7); g.fill();
+  g.restore();
+  // the flume on its trestle, coming in from upstream (the right, past the mill) over the top of the wheel
+  const fy=cy-R*1.18, fx0=cx-R*.05, fx1=xL+mw*.1;
+  g.fillStyle=woodD; g.fillRect(fx0+R*.15,fy,R*.08,cy-R*.95-fy); g.fillStyle=wood; g.fillRect(fx0,fy-R*.12,fx1-fx0,R*.14); g.fillStyle=woodL; g.fillRect(fx0,fy-R*.12,fx1-fx0,R*.035);
+  g.fillStyle=v3rgba(mix(P.wTop,'#ffffff',.5),.8); g.fillRect(fx0+1,fy-R*.1,fx1-fx0-2,R*.03);
+  // water pouring off the flume onto the buckets, then churning white where the wheel meets the river
+  const wc=mix(P.wTop,'#ffffff',.6); g.fillStyle=v3rgba(wc,.55); g.beginPath(); g.moveTo(fx0,fy-R*.08); g.quadraticCurveTo(fx0-R*.12,fy+R*.05,fx0-R*.05,cy-R*.86); g.lineTo(fx0+R*.07,cy-R*.86); g.quadraticCurveTo(fx0+R*.02,fy+R*.05,fx0+R*.05,fy-R*.06); g.closePath(); g.fill();
+  if(FX){ for(let i=0;i<6;i++){ const k=((t*1.6+i/6)%1); g.fillStyle=v3rgba(wc,.7*(1-k)); g.fillRect(fx0-R*.06+((i*7)%3)*R*.05,fy+k*(cy-R*.86-fy),1.3,2.4); }
+    for(let i=0;i<9;i++){ const u=i/8, al=.3+.3*Math.sin(t*4.5+i*2.1); g.fillStyle=v3rgba(wc,al); g.beginPath(); g.ellipse(cx-R*.95+u*R*1.9,hz+1.5+Math.sin(u*Math.PI)*R*.07,R*.14,R*.05,0,0,7); g.fill(); }
+    for(let i=0;i<4;i++){ const k=((t*.9+i/4)%1); g.strokeStyle=v3rgba(wc,.35*(1-k)); g.lineWidth=1; g.beginPath(); g.ellipse(cx-R*.2-k*R*1.4,hz+3+k*R*.12,R*(.25+k*.4),R*(.05+k*.06),0,0,7); g.stroke(); } } }
+// =====================================================================
 // Test notes (shared helper). Each platform's own notes file (src/pc, src/android, src/ios) calls addTestNotes(...) with
 // its text. In a preview build the notes go on top of the patch notes list and open once per device and notes text; the
 // live game ignores them. They carry no version number (the director picks it at release).
@@ -14644,6 +14859,175 @@ function addTestNotes(n){ try{ if(!window.DL_PREVIEW||!n||!Array.isArray(n.items
     const go=()=>{ if(G.st!=='idle'||(typeof MENU_OPEN!=='undefined'&&MENU_OPEN)){ if(++tries<20) setTimeout(go,1500); return; }
       try{ localStorage.setItem('dl-test-notes',id); }catch(e){} try{ showPatchNotes(n); }catch(e){} };
     setTimeout(go,3500); }catch(e){} }
+// =====================================================================
+// Phones (Android + iPhone), round 6 performance (director, 2026-11-18: "Aquarium tab on Android the only screen that
+// experiences lag while scrolling", "reeling in storms on Android has a severely impacted frame rate").
+// =====================================================================
+const MOB=()=>{ const b=document.body.classList; return b.contains('phone-app')||b.contains('phone-land'); };
+
+// 1) a menu covers the whole phone screen, so the fishing scene behind it is not drawn (the aquarium tank, the page and its
+//    scrolling get the whole frame). The line waits while a menu is open, so nothing on the water is missed.
+{ const _dr=draw; draw=function(now){ if(MENU_OPEN&&MOB()) return; return _dr.apply(this,arguments); }; }
+
+// 2) the aquarium tank: 30 frames a second on phones, and it holds still while you scroll the page (scrolling stays smooth)
+{ let lastT=0, scrollUntil=0; const P=$('panel'); if(P) P.addEventListener('scroll',()=>{ scrollUntil=performance.now()+180; },{passive:true});
+  addEventListener('touchmove',()=>{ if(S.tab==='aquarium') scrollUntil=performance.now()+180; },{passive:true});
+  const _dt=drawTank; drawTank=function(now){ if(MOB()){ const t=performance.now(); if(t<scrollUntil) return; if(t-lastT<32) return; lastT=t; } return _dt.apply(this,arguments); }; }
+
+// 3) steady frame rate: the water's resolution follows how the phone keeps up. If frames drop for a few seconds (a storm, a
+//    big fight), the water is drawn a little less sharp until the phone keeps up again; never more than two steps.
+let MOB_DPR_CAP=2;
+{ const _rd=renderDPR; renderDPR=function(w,h){ const d=_rd(w,h); return MOBDPR_ON()?Math.min(d,MOB_DPR_CAP):d; };
+  function MOBDPR_ON(){ return MOB(); }
+  const steps=[2,1.6,1.3]; let i=0, acc=0, n=0, slow=0, fast=0, last=0;
+  const tick=t=>{ requestAnimationFrame(tick); if(!MOB()||document.hidden||MENU_OPEN){ last=0; return; } if(last){ const dt=t-last; if(dt<200){ acc+=dt; n++; } } last=t;
+    if(n>=60){ const avg=acc/n; acc=0; n=0;
+      if(avg>21){ slow++; fast=0; if(slow>=2&&i<steps.length-1){ i++; slow=0; MOB_DPR_CAP=steps[i]; try{ resize(); }catch(e){} } }
+      else if(avg<15){ fast++; slow=0; if(fast>=8&&i>0){ i--; fast=0; MOB_DPR_CAP=steps[i]; try{ resize(); }catch(e){} } }
+      else { slow=0; fast=0; } } };
+  requestAnimationFrame(tick);
+  if(/[?&]test\b/.test(location.search)) window.__mobperf=()=>({cap:MOB_DPR_CAP, step:i}); }
+
+// 4) live events never move the game frame (director: "some live events on Android move the game frame as the counter moves
+//    down while in portrait mode, seen with Market Rush"): the goal / live chip keeps to one line, digits keep the same width,
+//    and the top bar chips keep their height, so the water above never gets re-measured while a countdown ticks
+document.head.insertAdjacentHTML('beforeend',`<style>
+body.phone-app,body.phone-land{font-variant-numeric:tabular-nums}
+body.phone-app.dl-fish .hud > #goalchip .gl-t{white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;display:block;min-width:0}
+body.phone-app.dl-fish .hud > #goalchip .gl-s{white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;display:block;min-width:0}
+body.phone-app.dl-fish .hud > #goalchip{overflow:hidden}
+</style>`);
+
+// 5) Bait on the fishing screen (phones): a Bait button beside Rest shows the bait you use and opens the bait list
+{ let btn=null; const label=()=>{ const b=BAIT[S.baitSel]||BAIT.worm; return '🪱 '+b.name+(S.baitSel!=='worm'?' · '+(S.bait[S.baitSel]||0):''); };
+  const place=()=>{ if(!MOB()) { if(btn) btn.hidden=true; return; } const st=$('stage'), rest=$('resttog'); if(!st) return;
+    if(!btn){ btn=document.createElement('button'); btn.type='button'; btn.id='baitqk'; btn.className='resttog baitqk'; btn.addEventListener('click',e=>{ e.stopPropagation(); try{ startAudio(); }catch(er){} try{ tackleView='bait'; }catch(er){} openMenu('shop'); }); st.appendChild(btn); }
+    btn.hidden=false; const t=label(); if(btn.textContent!==t) btn.textContent=t;
+    if(rest&&rest.offsetWidth){ const l=(rest.offsetLeft+rest.offsetWidth+8)+'px', tp=rest.offsetTop+'px', hh=rest.offsetHeight+'px'; // the Rest style pins left with !important, so ours must too
+      if(btn.style.left!==l) btn.style.setProperty('left',l,'important'); if(btn.style.top!==tp) btn.style.setProperty('top',tp,'important'); if(btn.style.height!==hh) btn.style.setProperty('height',hh,'important'); btn.style.setProperty('bottom','auto','important'); } };
+  setInterval(()=>{ try{ place(); }catch(e){} },1000); setTimeout(place,900); }
+document.head.insertAdjacentHTML('beforeend',`<style>
+body.phone-app #baitqk,body.phone-land #baitqk{max-width:46vw;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border-color:#7fe3c466!important}
+body.card-open #baitqk{opacity:0;pointer-events:none}
+body:not(.phone-app):not(.phone-land) #baitqk{display:none!important}
+</style>`);
+
+// 6) Rods (phones): the "Your rods" presets at the top of the Rods page
+{ const _rp=renderPanel; renderPanel=function(){ const r=_rp.apply(this,arguments); try{ if(S.tab!=='rods'||!MOB()) return r; const P=$('panel'); if(P.querySelector('.rp-box')) return r; const anchor=P.querySelector(':scope > .tile')||P.querySelector(':scope > .grid'); if(anchor) anchor.insertAdjacentHTML('beforebegin',rodPresetsHTML()); else P.insertAdjacentHTML('afterbegin',rodPresetsHTML()); }catch(e){} return r; }; }
+// =====================================================================
+// Phones, round 6 (director: "both phones get the modern PC look: teal = click me, gold = open now, the same navy panels and
+// card style"). Same colour decisions as PC, laid out for phones (Android + iPhone):
+//  - anything you can tap that opens something is teal (header chips with a page behind them, Rest, Bait, buttons)
+//  - what is open or chosen right now is gold (the page tab you are on, the chosen filter, the bottom tab already did this)
+//  - plain information stays on navy (coins, level, the goal, cards)
+// =====================================================================
+document.head.insertAdjacentHTML('beforeend',`<style>
+:root{--mt-teal:linear-gradient(180deg,#1f8a86,#14666a);--mt-teal-b:#7fe3c4;--mt-gold:linear-gradient(180deg,#ffe08a,#f3b94e);--mt-gold-b:#ffe6a3;--mt-navy:#0e1a2c}
+/* header: chips that open a page */
+body.phone-app .hud .hud-link,body.phone-app .hud button.stat,body.phone-app .hud .stat.opt,
+body.phone-land .hud .hud-link,body.phone-land .hud button.stat,body.phone-land .hud .stat.opt{background:var(--mt-teal)!important;border-color:var(--mt-teal-b)!important;box-shadow:inset 0 1px 0 #ffffff40,0 2px 0 #0b3a3c!important;color:#fff!important}
+body.phone-app .hud .hud-link .lbl,body.phone-app .hud button.stat .lbl,body.phone-app .hud .stat.opt .lbl,
+body.phone-land .hud .hud-link .lbl,body.phone-land .hud button.stat .lbl,body.phone-land .hud .stat.opt .lbl{color:#c8fff0!important}
+/* the aquarium chip turns gold when coins are ready to collect */
+body.phone-app .hud .st-aq.ready,body.phone-land .hud .st-aq.ready{background:var(--mt-gold)!important;border-color:var(--mt-gold-b)!important;color:#2a1c05!important;box-shadow:inset 0 1px 0 #fff6,0 2px 0 #8a5b12!important}
+body.phone-app .hud .st-aq.ready *,body.phone-land .hud .st-aq.ready *{color:#2a1c05!important}
+body.phone-app .hud button.st-aq.ready .lbl,body.phone-land .hud button.st-aq.ready .lbl{color:#5a3a08!important}
+/* settings and search */
+body.phone-app .hudbtns > button,body.phone-land .hudbtns > button{background:var(--mt-teal)!important;border:1px solid var(--mt-teal-b)!important;box-shadow:inset 0 1px 0 #ffffff40,0 2px 0 #0b3a3c!important}
+/* Rest and Bait on the fishing screen */
+body.phone-app #resttog,body.phone-app #baitqk,body.phone-land #resttog,body.phone-land #baitqk{background:var(--mt-teal)!important;border:1px solid var(--mt-teal-b)!important;color:#fff!important;box-shadow:inset 0 1px 0 #ffffff40,0 2px 0 #0b3a3c,0 4px 10px #0007!important}
+/* page tabs inside a menu: teal outline, the open one gold */
+body.phone-app #menuov .subbar .subp,body.phone-land #menuov .subbar .subp{background:var(--mt-navy)!important;border-color:#7fe3c466!important;color:#dff7ef!important}
+body.phone-app #menuov .subbar .subp.on,body.phone-land #menuov .subbar .subp.on{background:var(--mt-gold)!important;border-color:var(--mt-gold-b)!important;color:#2a1c05!important;box-shadow:inset 0 1px 0 #fff6,0 2px 0 #8a5b12!important}
+/* section tabs inside a page (Your rod / Rod rack / Attachments and the like): the one shown is gold */
+body.phone-app #menuov .bwx-nav > [aria-selected="true"],body.phone-land #menuov .bwx-nav > [aria-selected="true"]{background:var(--mt-gold)!important;border-color:var(--mt-gold-b)!important;color:#2a1c05!important;box-shadow:inset 0 1px 0 #fff6,0 2px 0 #8a5b12!important}
+body.phone-app #menuov .mo-tools .mo-tb,body.phone-land #menuov .mo-tools .mo-tb{background:var(--mt-teal)!important;border:1px solid var(--mt-teal-b)!important}
+/* buttons: teal; the quieter kind stays navy with a teal edge */
+body.phone-app #menuov .btn:not(.alt):not(:disabled),body.phone-land #menuov .btn:not(.alt):not(:disabled){background:var(--mt-teal)!important;border-color:var(--mt-teal-b)!important;color:#fff!important;box-shadow:inset 0 1px 0 #ffffff40,0 2px 0 #0b3a3c!important}
+body.phone-app #menuov .btn.alt:not(:disabled),body.phone-land #menuov .btn.alt:not(:disabled){background:var(--mt-navy)!important;border-color:#7fe3c466!important;color:#dff7ef!important}
+/* chosen filters and toggles: gold */
+body.phone-app #menuov .chips [aria-pressed="true"],body.phone-app #menuov .chips .on,body.phone-land #menuov .chips [aria-pressed="true"],body.phone-land #menuov .chips .on{background:var(--mt-gold)!important;border-color:var(--mt-gold-b)!important;color:#2a1c05!important}
+/* cards: one navy card style */
+body.phone-app #menuov .tile,body.phone-land #menuov .tile{background:linear-gradient(180deg,#132238,#0e1a2c)!important;border-radius:14px}
+</style>`);
+
+// ---------- Bait list on phones: everyday bait and water baits each get a heading (the order itself is shared data), and the
+// "Bait in use" row wraps instead of cutting its words ----------
+{ const _rp=renderPanel; renderPanel=function(){ const r=_rp.apply(this,arguments); try{ if(!MOB()) return r; const P=$('panel'); const cards=[...P.querySelectorAll('.tk-row')]; if(!cards.length||P.querySelector('.mb-sec')) return r;
+    const water=new Set(Object.values(BAIT).filter(b=>b.loc&&!b.junk).map(b=>b.name)), isW=c=>{ const b=c.querySelector('.tk-main b'); return !!b&&water.has(b.textContent.trim()); };
+    const fw=cards.find(isW), fe=cards.find(c=>!isW(c)&&!!c.querySelector('.tk-main b')); if(!fw||!fe) return r;
+    fe.insertAdjacentHTML('beforebegin','<h3 class="mb-sec">Everyday bait<span>Works at every water</span></h3>'); fw.insertAdjacentHTML('beforebegin','<h3 class="mb-sec">Water baits<span>Each one is best at its own water</span></h3>'); }catch(e){ console.error(e); } return r; }; }
+document.head.insertAdjacentHTML('beforeend',`<style>
+body.phone-app #panel .mb-sec,body.phone-land #panel .mb-sec{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 8px;margin:14px 2px 6px;font:800 15px var(--display,system-ui);color:#fff}
+body.phone-app #panel .mb-sec span,body.phone-land #panel .mb-sec span{font:600 12px system-ui;color:#9fb2c8}
+body.phone-app #panel .tk-cur.tk-slim,body.phone-land #panel .tk-cur.tk-slim{flex-wrap:wrap!important;row-gap:6px}
+body.phone-app #panel .tk-cur.tk-slim > *,body.phone-land #panel .tk-cur.tk-slim > *{white-space:nowrap;overflow:visible!important;text-overflow:clip!important;max-width:none!important}
+body.phone-app #panel .tk-cur.tk-slim > .btn,body.phone-land #panel .tk-cur.tk-slim > .btn{margin-left:0!important;flex:1 0 100%}
+</style>`);
+
+// ---------- critique fixes (round 6): bigger fish pictures in lists, card buttons lined up, the current water in gold ----------
+document.head.insertAdjacentHTML('beforeend',`<style>
+/* fish pictures in the Cooler and Aquarium lists: 72 px instead of 48, so the fish (and its shine) can be seen */
+body.phone-app #panel .fishrow,body.phone-land #panel .fishrow{grid-template-columns:72px minmax(0,1fr) auto!important}
+body.phone-app #panel .fishrow > canvas,body.phone-land #panel .fishrow > canvas{width:72px!important;height:36px!important}
+/* every card's button sits at the bottom, so the buttons in a row of cards line up (Skills, Tackle, Waters...) */
+body.phone-app #panel .grid > .tile > .btn:last-child,body.phone-land #panel .grid > .tile > .btn:last-child,
+body.phone-app #panel .grid > .tile > .row:last-child:has(> .btn),body.phone-land #panel .grid > .tile > .row:last-child:has(> .btn){margin-top:auto!important}
+/* the water you are at: its button is gold ("you are here"), not a greyed-out button */
+body.phone-app #panel .tile.loc.here .btn:disabled,body.phone-land #panel .tile.loc.here .btn:disabled{background:var(--mt-gold)!important;border-color:var(--mt-gold-b)!important;color:#2a1c05!important;opacity:1!important}
+</style>`);
+// Market Rush: the same clear money bag as PC (the small coin emoji read as a plain yellow dot)
+{ const m=SCHED.find(e=>e.id==='market'); if(m) m.icon='💰'; }
+document.head.insertAdjacentHTML('beforeend',`<style>
+/* Feats: the count always sits under the name, and the bar and reward sit at the bottom, so cards side by side line up */
+body.phone-app #panel .tile[data-cat] > .row.spread,body.phone-land #panel .tile[data-cat] > .row.spread{flex-direction:column!important;align-items:flex-start!important;gap:2px!important}
+body.phone-app #panel .tile[data-cat] > .prog,body.phone-land #panel .tile[data-cat] > .prog{margin-top:auto!important}
+</style>`);
+document.head.insertAdjacentHTML('beforeend',`<style>
+/* the settings button is gold while Settings, Stats or Save is open */
+body.phone-app #menuov .mo-tools .mo-tb.on,body.phone-land #menuov .mo-tools .mo-tb.on{background:var(--mt-gold)!important;border-color:var(--mt-gold-b)!important;color:#2a1c05!important}
+</style>`);
+// Pets: your favourite's "★ Favourite" reads as chosen (gold), not as a greyed-out button
+{ const _rp=renderPanel; renderPanel=function(){ const r=_rp.apply(this,arguments); try{ if(MOB()&&S.tab==='pets') $('panel').querySelectorAll('.tile .btn:disabled').forEach(b=>{ if(/^★\s*Favourite$/.test(b.textContent.trim())) b.classList.add('mt-chosen'); }); }catch(e){} return r; }; }
+document.head.insertAdjacentHTML('beforeend',`<style>
+body.phone-app #panel .btn.mt-chosen,body.phone-land #panel .btn.mt-chosen{background:var(--mt-gold)!important;border-color:var(--mt-gold-b)!important;color:#2a1c05!important;opacity:1!important}
+</style>`);
+// =====================================================================
+// Phones, round 6 critique: "Your home" on phones too (round 5 built it for PC only). Every water has a home (dock, pier,
+// boat, trawler, raft, ice camp, beach, stone ledge, crystal shelf); the page offers only what works there: wood where the
+// home has wood, the dock's style only at a dock, hull paint on boats, and the home's own light everywhere.
+// Shared data and drawing: bu_home05.js. This file is only the phone layout.
+// =====================================================================
+{ const L=()=>LOCS.find(x=>x.id===S.loc)||LOCS[0];
+  let lbl=null; const sync=()=>{ try{ const b=menuTabBtn('home'); if(!b) return; if(lbl==null) lbl=b.dataset.label; const want=MOB()?'🏠 Your home':lbl; if(b.dataset.label!==want){ b.dataset.label=want; menuSubKey=''; if(MENU_OPEN) menuSync(); } }catch(e){} };
+  new MutationObserver(sync).observe(document.body,{attributes:true,attributeFilter:['class']}); setTimeout(sync,0); setTimeout(sync,900);
+  const _rp=renderPanel; renderPanel=function(){ const r=_rp.apply(this,arguments); try{ if(S.tab!=='home'||!MOB()) return r; const P=$('panel'); if(P.querySelector('.hm-phone')) return r;
+      const loc=L(), feats=HOME_FEATURES[loc.plat]||['light'], hname=HOME_NAMES[loc.plat]||'home', h5=[...P.querySelectorAll(':scope > h5')];
+      const wood=h5.find(h=>/^Wood/i.test(h.textContent)), style=h5.find(h=>/style/i.test(h.textContent)), deco=h5.find(h=>/^Decorations/i.test(h.textContent));
+      const hide=h=>{ if(!h) return; h.style.display='none'; const n=h.nextElementSibling; if(n&&n.classList.contains('chips')) n.style.display='none'; };
+      if(!feats.includes('wood')) hide(wood); if(!feats.includes('style')) hide(style);
+      let html='<div class="hm-phone">';
+      if(feats.includes('hull')){ const cur=(S.dock&&S.dock.hull)||''; html+=`<h5>Hull paint</h5><div class="chips">${HOME_HULLS.map(([id,n,c])=>`<button type="button" class="chipb" data-home="hull:${id}" aria-pressed="${cur===id}"><span class="hm-sw" style="background:${c||'linear-gradient(135deg,#f2eee2,#9a2e24)'}"></span>${esc(n)}</button>`).join('')}</div>`; }
+      { const cur=(S.dock&&S.dock.light)||''; html+=`<h5>Light</h5><div class="chips">${HOME_LIGHTS.map(([id,n,rgb])=>`<button type="button" class="chipb" data-home="light:${id}" aria-pressed="${cur===id}"><span class="hm-sw hm-glow" style="background:${rgb?'radial-gradient(circle,rgb('+rgb+') 0%,rgba('+rgb+',.35) 55%,transparent 72%)':'radial-gradient(circle,#ffd690 0%,#ffb85a55 55%,transparent 72%)'}"></span>${esc(n)}</button>`).join('')}</div>`; }
+      html+=`<p class="hm-note">${feats.includes('style')?'The wood colours your dock; the style shapes it. ':feats.includes('wood')?'The wood colours the wooden parts of your '+esc(hname)+'. ':''}${feats.includes('hull')?'The hull paint colours your '+esc(hname)+'. ':''}The light recolours the ${loc.plat==='crystal'?'glow':loc.plat==='sand'?'torch':'lamp'} of your ${esc(hname)}. Free to change.</p></div>`;
+      if(deco) deco.insertAdjacentHTML('beforebegin',html); else P.insertAdjacentHTML('beforeend',html);
+      // the page switches between "Your home" and "Decorations": our block follows the home part, the sort row follows the decorations
+      const hm=P.querySelector('.hm-phone'), tools=P.querySelector(':scope > .shoptools'), grid=P.querySelector(':scope > .grid'), dockbar=P.querySelector(':scope > .dockbar');
+      const follow=()=>{ const homeOn=dockbar?dockbar.style.display!=='none':true; hm.style.display=homeOn?'':'none'; if(tools&&grid) tools.style.display=grid.style.display==='none'?'none':''; };
+      follow(); const nv=P.querySelector(':scope > .bwx-nav'); if(nv) nv.addEventListener('click',()=>setTimeout(follow,0));
+      // words: "home" instead of "dock" where the page talks about every water
+      const intro=P.querySelector('.dl-head'); if(intro){ for(const n of intro.querySelectorAll('*')) if(n.children.length===0&&/Every water has its own dock/.test(n.textContent)) n.textContent='Every water has its own home: here it is your '+hname+'. Pick its look and its decorations: the cozier it gets, the better you fish here.'; }
+      const nav=P.querySelector(':scope > .bwx-nav'); if(nav&&nav.firstElementChild&&/^Dock$/.test(nav.firstElementChild.textContent.trim())) nav.firstElementChild.textContent='Your '+hname;
+    }catch(e){ console.error(e); } return r; };
+  document.addEventListener('click',e=>{ const b=e.target.closest&&e.target.closest('#panel [data-home]'); if(!b||!MOB()) return; e.stopPropagation(); const [k,id]=b.dataset.home.split(':');
+    if(k==='light'&&homeLightOk(id)) S.dock.light=id; else if(k==='hull'&&homeHullOk(id)) S.dock.hull=id; else return;
+    try{ sfx.coin(); }catch(er){} save(); renderPanel(); },true); }
+document.head.insertAdjacentHTML('beforeend',`<style>
+body.phone-app #panel .hm-phone h5,body.phone-land #panel .hm-phone h5{margin:14px 0 6px}
+body.phone-app #panel .hm-sw,body.phone-land #panel .hm-sw{display:inline-block;width:12px;height:12px;border-radius:4px;margin-right:6px;vertical-align:-2px;box-shadow:inset 0 0 0 1px #ffffff33}
+body.phone-app #panel .hm-glow,body.phone-land #panel .hm-glow{border-radius:50%;width:14px;height:14px;box-shadow:none}
+body.phone-app #panel .hm-note,body.phone-land #panel .hm-note{margin:8px 2px 4px;font-size:12.5px;color:#9fb2c8;line-height:1.45}
+</style>`);
 // Android release notes (shown once to returning Android players). Kept exactly as shipped once published.
 PATCHES.unshift({v:'0.4.8', name:'Rewards Worth Chasing', items:[
   '## Rewards and balance',
@@ -14657,9 +15041,52 @@ PATCHES.unshift({v:'0.4.8', name:'Rewards Worth Chasing', items:[
   'Wardrobe and Pets stand on their own display stand instead of copying your dock.',
   '## Behind the scenes',
   'PC, Android and iPhone each have their own version of the game now, so a fix for one never disturbs another. Your progress is shared as before.']});
-// Android test notes (preview builds only; the live game never shows them). Empty until the next round: write what the next
-// test build changes here (spoiler-free), and it opens once in the Android test app. Released notes live in notes_release.js.
-const TEST_NOTES={v:'test', label:'Test build · Android', name:'', items:[]};
+PATCHES.unshift({v:'0.4.9', name:'Smoother and Steadier', items:[
+
+  '## Smoother',
+  'The Aquarium scrolls smoothly, and reeling in during storms no longer drops the frame rate.',
+  'Live event countdowns no longer move the game frame.',
+  '## Quality of life',
+  'Rows that scroll sideways show a small arrow at the edge that has more.',
+  'A Bait button beside Rest shows your bait and opens the bait list.',
+  'Travel here closes the menu and takes you straight to the new water.',
+  'The catch card shows what makes a hybrid special: its usual weight and value boost.',
+  'Rods: “Your rods” keeps three presets, each a rod with its attachments.',
+  'Bait: baits that are best at one water now cost in line with that water, and are grouped in the order the waters unlock.',
+  '## Looks',
+  'A cleaner look: teal means you can tap it, gold means it is open or chosen (your current water, your favourite pet, the page you are on).',
+  'Your home: every water has one now (dock, pier, boat, ice camp and more). Pick its light, and on boats its hull paint, at Customize.',
+  'Cards side by side line up: their buttons and rewards sit at the same height (Skills, Tackle, Waters, Feats).',
+  'Bigger fish pictures in the Cooler and Aquarium lists, so shine and colours show.',
+  'The bait list has an Everyday bait and a Water baits heading.',
+  'Shiny fish twinkle: their sparkles sit on the fish and come and go. Each prismatic kind has its own sparkle colour.',
+  'Aquarium fish and decorations are a little smaller, so every piece can be seen.',
+  'Stonebrook River has been reworked: a village on the hill, the river running on through the bridge arches, a rowboat tied at the mill jetty and a new waterwheel.',
+  'Your angler’s nearer shoe is drawn in front, the Ocean Sunfish’s fins sit on its body, and the otters swim clear of the rocks.'
+]});
+// Android test notes (preview builds only; the live game never shows them). Write what the next test build changes here
+// (spoiler-free); it opens once in the Android test app. Released notes live in notes_release.js.
+const TEST_NOTES={v:'test', label:'Test build · Android', name:'Smoother and Steadier', items:[
+  '## Smoother',
+  'The Aquarium scrolls smoothly, and reeling in during storms no longer drops the frame rate.',
+  'Live event countdowns no longer move the game frame.',
+  '## Quality of life',
+  'Rows that scroll sideways show a small arrow at the edge that has more.',
+  'A Bait button beside Rest shows your bait and opens the bait list.',
+  'Travel here closes the menu and takes you straight to the new water.',
+  'The catch card shows what makes a hybrid special: its usual weight and value boost.',
+  'Rods: “Your rods” keeps three presets, each a rod with its attachments.',
+  'Bait: baits that are best at one water now cost in line with that water, and are grouped in the order the waters unlock.',
+  '## Looks',
+  'A cleaner look: teal means you can tap it, gold means it is open or chosen (your current water, your favourite pet, the page you are on).',
+  'Your home: every water has one now (dock, pier, boat, ice camp and more). Pick its light, and on boats its hull paint, at Customize.',
+  'Cards side by side line up: their buttons and rewards sit at the same height (Skills, Tackle, Waters, Feats).',
+  'Bigger fish pictures in the Cooler and Aquarium lists, so shine and colours show.',
+  'The bait list has an Everyday bait and a Water baits heading.',
+  'Shiny fish twinkle: their sparkles sit on the fish and come and go. Each prismatic kind has its own sparkle colour.',
+  'Aquarium fish and decorations are a little smaller, so every piece can be seen.',
+  'Stonebrook River has been reworked: a village on the hill, the river running on through the bridge arches, a rowboat tied at the mill jetty and a new waterwheel.',
+  'Your angler’s nearer shoe is drawn in front, the Ocean Sunfish’s fins sit on its body, and the otters swim clear of the rocks.']};
 addTestNotes(TEST_NOTES);
 // =====================================================================
 // 0.4 release QA suite (test builds only: ?test, and build.ps1 leaves this file out of the release build).
@@ -14942,6 +15369,24 @@ if(/[?&]test\b/.test(location.search)) window.__timeSum=(names,run)=>{ const T={
 if(/[?&]test\b/.test(location.search)) window.__frameProf=(names,sec=15,slow=6)=>new Promise(done=>{ const T={}, orig={}; for(const k of names){ try{ orig[k]=eval(k); T[k]=0; eval(k+'=function(){ const t0=performance.now(); try{ return orig["'+k+'"].apply(this,arguments); } finally{ T["'+k+'"]+=performance.now()-t0; } }'); }catch(e){} }
   const R=window.requestAnimationFrame.bind(window), rows=[]; let n=0; window.requestAnimationFrame=cb=>R(t=>{ for(const k in T) T[k]=0; const t0=performance.now(); cb(t); const d=performance.now()-t0; n++; if(d>slow) rows.push(d.toFixed(1)+': '+Object.entries(T).filter(([k,v])=>v>.8).sort((a,b)=>b[1]-a[1]).map(([k,v])=>k+' '+v.toFixed(1)).join(', ')); });
   setTimeout(()=>{ window.requestAnimationFrame=R; for(const k in orig) try{ eval(k+'=orig["'+k+'"]'); }catch(e){} done({frames:n, slow:rows}); },sec*1000); });
+if(/[?&]test\b/.test(location.search)) window.__wev=loc=>waterEV(loc); // test builds: a water's average catch value (bait pricing)
+// shiny sparkle check (round 6): draws one fish in each look into a test strip and says which sparkle kind each got
+window.__spk=function(){ const old=document.getElementById('spktest'); if(old) old.remove(); const sp=SP.find(f=>f.r===3), my=SP.find(f=>f.r===5), out={}, box=document.createElement('div'); box.id='spktest'; box.style.cssText='position:fixed;left:10px;top:120px;z-index:99999;background:#123;padding:8px;display:flex;gap:6px;flex-wrap:wrap;width:700px'; document.body.appendChild(box);
+  for(const [k,f,sh,pv] of [['plain',sp,0,null],['shiny',sp,1,null],['rainbow',sp,2,'rainbow'],['starry',sp,2,'starry'],['spectral',sp,2,'spectral'],['ancient',sp,2,'ancient'],['mythic',my,0,null]]){ const c=document.createElement('canvas'); c.width=220; c.height=110; box.appendChild(c); fishCanvas(c,f,true,sh,pv); out[k]=SPK.has(c)?SPK.get(c).kind+':'+SPK.get(c).spots.length:'none'; }
+  out.tracked=SPK.size; return out; };
+// aquarium look check (round 6): fills the tank with 10 fish of different sizes and 5 decorations (test saves only)
+window.__aqfill=function(){ S.tank=SP.filter((s,i)=>i%47===0).slice(0,10).map(s=>({id:s.id,kg:(s.min+s.max)/2})); S.aq.decor=DECOR.filter(d=>d[0]!=='duck').slice(0,5).map(d=>d[0]||d.id); openMenu('aquarium'); return {tank:S.tank.length, decor:S.aq.decor}; };
+// page-by-page review (round 6): open any menu page by name, and list every page name
+window.__open=t=>{ try{ if(t==='dash') openMenu(); else openMenu(t); }catch(e){ return String(e); } return S.tab; };
+window.__tabs=()=>['dash',...[...document.querySelectorAll('#tabs > [data-tab]')].map(b=>b.dataset.tab)];
+// review save (test builds, local test save only): a cooler with normal, shiny, prismatic and Mythic fish, and their Fish Log entries
+window.__reviewSave=()=>{ const sps=SP.filter(s=>s.loc==='pond'||s.loc==='river'); S.cooler=[]; const kinds=[[0],[1],[2,'rainbow'],[2,'starry'],[2,'spectral'],[2,'ancient'],[0],[1]];
+  kinds.forEach(([sh,pv],i)=>{ const f=coolerEntry(rollFish(sps[(i*5)%sps.length],{})); if(sh){ f.sh=sh; if(pv) f.pv=pv; } S.cooler.push(f); });
+  const my=SP.find(s=>s.r===5); if(my) S.cooler[6]=coolerEntry(rollFish(my,{})); S.cooler=S.cooler.slice(0,gv('cooler')); renderPanel(); return S.cooler.map(f=>f.id+(f.shiny?':'+f.shiny+(f.pv||''):'')); };
+// review: land a fish through the real catch path to see its catch card. o = {sh:0|1|2, pv:'rainbow'|..., hy:true}
+window.__landReview=(o={})=>{ const sps=SP.filter(s=>s.loc===S.loc); const sp=sps[o.i||3]; const f=rollFish(sp,{}); if(o.sh){ f.shiny=o.sh; if(o.pv) f.pv=o.pv; } if(o.hy){ const other=sps.find(s=>s.id!==sp.id); f.hy=other.id; } G.fish=f; landFish(); return {id:sp.id, shiny:f.shiny, pv:f.pv, hy:f.hy}; };
+// review: which look fields change on a save -> load round trip
+window.__lookDiff=()=>{ const a=JSON.parse(JSON.stringify(S.look)), b=migrate(JSON.parse(JSON.stringify(S))).look, out={}; for(const k of new Set([...Object.keys(a||{}),...Object.keys(b||{})])) if(JSON.stringify(a[k])!==JSON.stringify(b[k])) out[k]=[a[k],b[k]]; return out; };
 
 // ---------- loop ----------
 let last=performance.now();
@@ -15078,7 +15523,7 @@ function renderAquarium(P){ accrue(); const rate=tankRate(); let AQS=null; const
   <div class="tank"><canvas id="tankcv"></canvas></div>${S.aq.decor.length?`<p class="sub" style="margin-top:6px">Drag a decoration along the sand to move it.</p>`:""}
   <div class="row spread" style="margin-top:10px"><span class="sub">${S.tank.length} of ${aqCap()} spots used</span>
   ${next!=null?`<button class="btn alt" data-act="buytank" ${S.money>=next?'':'disabled'}>Increase tank size · <span class="coin">${fmt(next)}</span></button>`:'<span class="sub">Your tank is as big as it gets</span>'}</div>`+
-  (S.tank.length ? '<div class="list">'+S.tank.map((f,i)=>{ const sp=SPI[f.id]; return `<div class="fishrow"><canvas width="128" height="64" data-fish="${f.id}" data-sh="${f.sh?1:0}"></canvas>
+  (S.tank.length ? '<div class="list">'+S.tank.map((f,i)=>{ const sp=SPI[f.id]; return `<div class="fishrow"><canvas width="128" height="64" data-fish="${f.id}" data-sh="${f.sh||0}" data-pv="${f.pv||''}"></canvas>
    <div class="nm"><span style="color:${RAR[sp.r].c}">${sp.name}</span><small>${RAR[sp.r].k} · ${kgStr(f.kg)}${tags(f)} · <span class="aq">${aqTxt(f)}</span></small></div>
    <div class="val"><span class="coin">${fmt((AQS||(AQS=aqShownRates()))[i])}</span><span class="sub"> / h</span></div><div class="acts"><button class="btn alt sm" data-act="untank" data-i="${i}" ${S.cooler.length<gv('cooler')?'':'disabled'}>Back to cooler</button></div></div>`; }).join('')+'</div>'
    : '<div class="empty">No fish on display yet. In the Cooler, press <b>To aquarium</b> on a fish you want to keep.</div>') + aqCustomHTML();
@@ -15306,7 +15751,7 @@ offlineIncome(); fillBounties(); ensureDaily(); accrueSpins(); checkFeats(); ref
 if(!S.stats.caught && !S.savedAt) setTimeout(()=>toast('Hold on the water to cast your first line'),600);
 })();
 </script>
-<span class="dlprev" style="position:fixed!important;right:10px!important;bottom:10px!important;top:auto!important;left:auto!important;z-index:30;display:inline-block!important;width:auto!important;height:auto!important;min-height:0!important;max-height:22px!important;white-space:nowrap!important;background:#2a2048cc;color:#ffd59a;border:1px solid #ffd59a88;border-radius:999px;padding:3px 10px!important;margin:0!important;font:700 11px/14px system-ui,sans-serif!important;pointer-events:none;box-sizing:border-box">test build - Android</span>
+<style>html body span.dlprev.dlprev{transform:none!important;right:10px!important;left:auto!important;top:auto!important;bottom:calc(env(safe-area-inset-bottom) + 84px)!important}@media (orientation:landscape){html body span.dlprev.dlprev{right:auto!important;left:calc(env(safe-area-inset-left) + 22px)!important;bottom:auto!important;top:calc(env(safe-area-inset-top) + 92px)!important}}</style><span class="dlprev" style="position:fixed!important;z-index:30;display:inline-block!important;width:auto!important;height:auto!important;min-height:0!important;max-height:22px!important;white-space:nowrap!important;background:#2a2048cc;color:#ffd59a;border:1px solid #ffd59a88;border-radius:999px;padding:3px 10px!important;margin:0!important;font:700 11px/14px system-ui,sans-serif!important;pointer-events:none;box-sizing:border-box">test build - Android</span>
 <div id="updbar" hidden style="position:fixed;left:50%;bottom:16px;transform:translateX(-50%);z-index:65;display:flex;gap:10px;align-items:center;background:#10222b;border:1px solid #ffc94d;color:#e6efe8;padding:8px 10px 8px 16px;border-radius:999px;font:700 14px system-ui,sans-serif;box-shadow:0 10px 30px #0008;max-width:calc(100% - 32px)">
   <span>🎣 A new Driftline update is ready <span style="opacity:.7;font-weight:400">· your progress is safe</span></span>
   <button id="updbtn" type="button" style="background:#ff6a3d;color:#1d0d06;border:0;border-radius:999px;padding:6px 14px;font:inherit;cursor:pointer">Update &amp; see what’s new</button>
