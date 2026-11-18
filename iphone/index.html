@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="DL Test iPhone">
 <script>
-window.DL_BUILD='ios'; window.DL_PREVIEW=true; window.DL_VERSION='2026.11.18-1455';
+window.DL_BUILD='ios'; window.DL_PREVIEW=true; window.DL_VERSION='2026.11.18-1507';
 window.addEventListener('beforeinstallprompt',function(e){ e.preventDefault(); window.__dlInstallPrompt=e; });
 </script>
 </head>
@@ -15907,6 +15907,56 @@ html body.phone-app #mbwx[data-k="Storm"],html body.phone-land #mbwx[data-k="Sto
 html body.phone-app #mbwx[data-k="Rain"],html body.phone-land #mbwx[data-k="Rain"]{border-left-color:#7fb4ff}
 </style>`);
 // =====================================================================
+// Phones, round 8: settings belong to the device (director, 2026-11-18: "we're even due for settings options separate to specific
+// devices... decide what's necessary for settings options to make the user have control over what's necessary").
+// Research (Apple HIG "Settings", Microsoft/Xbox accessibility guidance, mobile game support pages, WebKit status):
+//  - Sound, controls, display and performance choices depend on the device in your hand (a PC's volume or "tap to aim" make no sense
+//    on a phone), so they stay on this device. Moving progress (6-digit code, save code, cloud) carries your progress and the
+//    gameplay choices (protect rare fish, mini-games, auto bait, sell filters), never this device's settings.
+//  - Frame rate: phones offer 30 (battery saver: less heat and battery) / 60 / Max (the screen's own rate, e.g. 120 Hz Android).
+//    iPhone browsers draw at most 60, so iPhone shows 30 / 60 only.
+//  - Only settings that work on this device are shown: iPhone has no vibration and no page full screen in the browser, so those
+//    two are hidden there. The help text speaks about touch only (no mouse wheel, no keyboard).
+// Android + iPhone only.
+// =====================================================================
+const DEV_KEYS=['master','music','sfx','amb','musicOn','ambient','style','castMode','vibrate','effects','boostsOnScreen','hints','showFps','gfx','fpsCap','dockMini','hdrStat','logShow','vaultSort','hideGoal','lastPage','pageLast'];
+const DEV_STORE='dl-device-settings-v1';
+var DEV_GUARD=null;
+const IS_IPHONE=()=>/iPhone|iPod/.test(navigator.userAgent)||(/[?&]test\b/.test(location.search)&&/[?&]iphone\b/.test(location.search));
+{ let dev=null, cur=null; const done=new WeakSet(), _mig=migrate, DEF=fresh().settings||{};
+  const read=()=>{ try{ const r=localStorage.getItem(DEV_STORE); return r?JSON.parse(r):null; }catch(e){ return null; } };
+  const pick=st=>{ const o={}; if(st) for(const k of DEV_KEYS) if(st[k]!==undefined) o[k]=st[k]; return o; };
+  const write=()=>{ try{ localStorage.setItem(DEV_STORE,JSON.stringify(dev)); }catch(e){} };
+  const apply=s=>{ if(s&&s.settings&&dev){ for(const k of DEV_KEYS){ if(dev[k]!==undefined) s.settings[k]=dev[k]; else if(DEF[k]!==undefined) s.settings[k]=DEF[k]; else delete s.settings[k]; } } return s; };
+  /* first run after this update: this device keeps the settings it has now */
+  dev=read(); if(!dev||typeof dev!=="object"){ dev=pick(S.settings); write(); } apply(S); cur=S;
+  /* a fresh start or a save arriving from anywhere (code, transfer, cloud, backup) keeps this device's settings */
+  migrate=function(){ const s=apply(_mig.apply(this,arguments)); if(s&&typeof s==="object") done.add(s); return s; };
+  /* any replaced save (progress reset, code, transfer, cloud, backup) gets this device's settings back before it is used or saved */
+  const guard=()=>{ if(S!==cur){ if(!done.has(S)) apply(S); cur=S; } }; DEV_GUARD=guard;
+  const _save=save; save=function(){ guard(); if(S&&S.settings){ dev=pick(S.settings); write(); } return _save.apply(this,arguments); };
+  if(/[?&]test\b/.test(location.search)) window.__devSettings=()=>({store:read(), keys:DEV_KEYS.slice()}); }
+
+// ---------- frame rate: the game's work runs only as often as the chosen rate (the display keeps its own timing) ----------
+{ const _fr=frame; let shown=0;
+  const capMs=()=>{ const c=S.settings.fpsCap; return c==='30'?1000/30:c==='60'?1000/60:0; };
+  frame=function(now){ if(DEV_GUARD) DEV_GUARD(); const cap=MOB()?capMs():0; if(cap&&shown&&now>=shown&&now-shown<cap-2){ requestAnimationFrame(frame); return; } shown=(cap&&shown&&now>=shown&&now-shown<cap*2)?shown+cap:now; return _fr.apply(this,arguments); }; }
+
+// ---------- the Settings page on phones ----------
+{ const _rs=renderSettings;
+  renderSettings=function(P){ _rs(P); if(!MOB()) return; try{ const ip=IS_IPHONE(), dev=ip?'iPhone':'phone';
+    const sub=P.querySelector('h2 + .sub'); if(sub) sub.textContent='These settings belong to this '+dev+'. Moving your progress to another device keeps each device’s own settings.';
+    const rowOf=b=>b&&b.closest('.toggle');
+    if(ip){ const v=rowOf(P.querySelector('[data-act="tog"][data-k="vibrate"]')); if(v) v.remove(); const f=rowOf(P.querySelector('[data-act="fullscreen"]')); if(f) f.remove(); }
+    for(const m of P.querySelectorAll('.tile .meta')) if(/mouse wheel/i.test(m.textContent)) m.innerHTML='Reel by <b>holding</b> the water, or by <b>drawing circles</b> on it like a crank.';
+    const fr=rowOf(P.querySelector('[data-act="tog"][data-k="showFps"]')); if(fr){ const b=fr.querySelector('b'), m=fr.querySelector('.meta'); if(b) b.textContent='Frame rate counter'; if(m) m.textContent='Shows the current frame rate in the corner of the water.'; }
+    const disp=[...P.querySelectorAll('.tile')].find(t=>{ const h=t.querySelector('h4'); return h&&h.textContent.trim()==='Display'; });
+    if(disp){ const cur=S.settings.fpsCap||(ip?'60':'max'), opt=ip?[['30','30 · Saver'],['60','60 · Smooth']]:[['30','30 · Saver'],['60','60 · Standard'],['max','Max']];
+      const why={ '30':'Draws 30 frames a second: cooler phone, longer battery.', '60':ip?'Draws up to 60 frames a second, as smooth as an iPhone browser allows.':'Draws up to 60 frames a second.', 'max':'Draws as fast as your screen allows (90 or 120 on many phones). Uses the most battery.' };
+      disp.insertAdjacentHTML('beforeend',`<h5>Frame rate</h5><div class="chips">${opt.map(([k,n])=>`<button class="chipb" type="button" data-fps="${k}" aria-pressed="${cur===k}">${n}</button>`).join('')}</div><div class="meta" style="margin-top:6px">${why[cur]||why['60']}</div>`);
+      disp.querySelectorAll('[data-fps]').forEach(b=>b.addEventListener('click',e=>{ e.stopPropagation(); S.settings.fpsCap=b.dataset.fps; save(); renderPanel(); })); }
+  }catch(e){} }; }
+// =====================================================================
 // Phones: the SET MEASUREMENTS (director, 2026-11-18: "I want standards and set measurements for each platform going forward,
 // I'm tired of the same mistakes"). The numbers are written down in docs/PLATFORM_DESIGN.md ("Phone frame: set measurements")
 // and checked by window.__spec() in test builds. Rule: the water screen is the master; a menu matches it wherever the same thing
@@ -16093,6 +16143,43 @@ if(/[?&]test\b/.test(location.search)) window.__spec=()=>{ for(const a of docume
 { const MB_TOUCH=!!(window.matchMedia&&matchMedia('(pointer:coarse)').matches); /* our own check: the core's TOUCH is declared later in the build */
   const _sh=setHint; setHint=function(){ _sh.apply(this,arguments); if(!MB_TOUCH) return; try{ if(G.st==='bite'&&S.settings.hints){ const h=document.getElementById('hint'), t='<b>Now!</b> Tap the water to set the hook.'; if(h&&h.innerHTML!==t) h.innerHTML=t; } }catch(e){} };
   const tap=document.querySelector('#card .tap'); if(tap&&MB_TOUCH) tap.textContent='Tap to keep fishing'; }
+// =====================================================================
+// iPhone, round 8: landscape only (director, 2026-11-18: "iPhone versions should just have landscape available. It should be a full
+// forced landscape across the board so we don't keep having to run into problems. This is just for iPhone.").
+// Research: iPhone browsers and Home Screen web apps cannot lock the orientation (Safari has no screen.orientation.lock and ignores
+// the manifest's "orientation" field; WebKit status / caniuse, checked 2026-11-18). Rotating the whole page with CSS breaks taps,
+// safe areas and the keyboard. So the dependable way, used by web games: whenever an iPhone is held upright, a full screen asks you
+// to turn it sideways; the game underneath pauses (no time passes, nothing is drawn) and nothing can be tapped by accident.
+// The prompt also says how to turn off Portrait Orientation Lock, the usual reason a phone does not turn.
+// iPhone only (iPads keep every orientation and split view).
+// =====================================================================
+{ let el=null, on=false;
+  const upright=()=>IS_IPHONE()&&window.innerHeight>window.innerWidth;
+  const build=()=>{ if(el) return el; el=document.createElement('div'); el.id='dl-turn'; el.setAttribute('role','dialog'); el.setAttribute('aria-modal','true'); el.setAttribute('aria-label','Turn your iPhone sideways');
+    el.innerHTML=`<style>
+#dl-turn{position:fixed;inset:0;z-index:2147483000;display:none;align-items:center;justify-content:center;flex-direction:column;gap:14px;text-align:center;
+  padding:max(24px,env(safe-area-inset-top)) max(28px,env(safe-area-inset-right)) max(24px,env(safe-area-inset-bottom)) max(28px,env(safe-area-inset-left));
+  background:radial-gradient(120% 80% at 50% 35%,#13303d 0%,#0a161d 70%);color:#e6efe8;font:600 15px/1.4 "Bricolage Grotesque",system-ui,sans-serif;touch-action:none;-webkit-user-select:none;user-select:none}
+#dl-turn.on{display:flex}
+#dl-turn .tp{width:58px;height:96px;border:4px solid #7fc8a9;border-radius:14px;position:relative;animation:dlturn 2.4s ease-in-out infinite}
+#dl-turn .tp::after{content:"";position:absolute;left:50%;bottom:7px;width:18px;height:3px;margin-left:-9px;border-radius:2px;background:#7fc8a9}
+@keyframes dlturn{0%,25%{transform:rotate(0)}55%,85%{transform:rotate(-90deg)}100%{transform:rotate(0)}}
+@media (prefers-reduced-motion:reduce){#dl-turn .tp{animation:none;transform:rotate(-90deg)}}
+#dl-turn h2{margin:6px 0 0;font-size:22px;line-height:1.2;color:#fff}
+#dl-turn p{margin:0;max-width:300px;color:#97abc2;font-size:14px}
+#dl-turn p b{color:#e6efe8}
+</style><div class="tp" aria-hidden="true"></div><h2>Turn your iPhone sideways</h2><p>Driftline plays in landscape on iPhone. Your game is paused until you turn it.</p><p>Not turning? Swipe down from the top-right corner to open <b>Control Center</b> and switch off <b>Portrait Orientation Lock</b>.</p>`;
+    ['pointerdown','pointerup','click','touchstart','touchend','wheel'].forEach(ev=>el.addEventListener(ev,e=>{ e.stopPropagation(); if(ev!=='touchstart'&&ev!=='wheel') e.preventDefault(); },{passive:false}));
+    document.body.appendChild(el); return el; };
+  const check=()=>{ const v=upright(); if(v===on) return; on=v; build().classList.toggle('on',v); document.documentElement.classList.toggle('dl-turn-on',v);
+    if(v){ try{ if(document.activeElement&&document.activeElement.blur) document.activeElement.blur(); }catch(e){} } };
+  /* paused while upright: no time passes and nothing is drawn underneath (saves battery, and a fish on the line waits for you) */
+  const _up=update; update=function(){ if(on) return; return _up.apply(this,arguments); };
+  const _dr=draw; draw=function(){ if(on) return; return _dr.apply(this,arguments); };
+  addEventListener('resize',check); addEventListener('orientationchange',()=>setTimeout(check,60));
+  if(window.matchMedia) try{ matchMedia('(orientation:portrait)').addEventListener('change',check); }catch(e){}
+  if(document.body) check(); else addEventListener('DOMContentLoaded',check);
+  if(/[?&]test\b/.test(location.search)) window.__turn=()=>({iphone:IS_IPHONE(), upright:upright(), shown:on}); }
 // iPhone release notes (shown once to returning iPhone players). Kept exactly as shipped once published.
 PATCHES.unshift({v:'0.4.8', name:'Rewards Worth Chasing', items:[
   '## Rewards and balance',
@@ -16196,6 +16283,10 @@ PATCHES.unshift({v:'0.4.8.4', name:'Lined Up', items:[
   'Weather news also waits while the catch card is open.',
   'Your boost timers now sit in the top-left corner, under the time and weather, so the Rest and Bait buttons no longer cover them. A weather note shows just below them.']});
 PATCHES.unshift({v:'0.4.8.5', name:'Steady Tabs', items:[
+  '## New',
+  'Driftline now plays in landscape on iPhone: hold your iPhone sideways (if you hold it upright, the game pauses and shows you how).',
+  'Your settings now belong to each device: moving your progress to another phone or computer no longer changes this iPhone’s sound, controls or display settings.',
+  'Frame rate setting (Settings, Display): 30 to save battery, or 60 for the smoothest picture.',
   '## Fixes',
   'Menus now fit every iPhone: they stay clear of the Dynamic Island, the rounded corners and the home bar, and match the fishing screen on every model (the bigger Pro Max screens were cut off under the camera).',
   'Menus open faster: the Aquarium no longer stalls when you open it, and the very first tap of a session no longer pauses while the music loads.',
@@ -16210,6 +16301,7 @@ PATCHES.unshift({v:'0.4.8.5', name:'Steady Tabs', items:[
 // iPhone test notes (preview builds only; the live game never shows them). Write what the next test build changes here
 // (spoiler-free); it opens once in the iPhone test app. Released notes live in notes_release.js.
 const TEST_NOTES={v:'test', label:'Test build · iPhone', name:'One Look, Easy Aquarium', items:[
+  'NEW in this build: iPhone plays in landscape only (hold it upright and the game pauses with a "turn your iPhone" screen). Settings now belong to this iPhone and are no longer changed by moving your progress. New Frame rate choice in Settings, Display (30 saves battery). Vibration and Full screen are hidden on iPhone because iPhone browsers cannot do them.',
   'NEW in this build: menus fit every iPhone (Pro Max, Pro, Air, Plus and the base models from the 15 on): they stay clear of the Dynamic Island, corners and home bar, the same as the fishing screen. The Aquarium opens faster and the first tap no longer pauses while the music loads. Split screen and small windows now use the normal phone layout.',
   'One look everywhere: every button, tab, badge and label of the same kind has the same size and style on every page; long button labels stay on one line; upright, a long goal no longer pushes the water down; sideways, page-tab badges sit on the corner.',
   'Menu page tabs (Events, Bounties, Feats...) take every tap and no longer jiggle; section bars no longer slide sideways when stuck to the top; on small phones held sideways the tabs show names only, badges on the corner.',
