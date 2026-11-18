@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="DL Test iPhone">
 <script>
-window.DL_BUILD='ios'; window.DL_PREVIEW=true; window.DL_VERSION='2026.11.18-0907';
+window.DL_BUILD='ios'; window.DL_PREVIEW=true; window.DL_VERSION='2026.11.18-0923';
 window.addEventListener('beforeinstallprompt',function(e){ e.preventDefault(); window.__dlInstallPrompt=e; });
 </script>
 </head>
@@ -1587,9 +1587,9 @@ function hookIt(){ const perfect = (G.waitT - (G.biteEnd - hookWin())) < .3*hook
 function breakStreak(){ const n=S.streak; if(!n) return; const keep=maxed("streaker")?Math.floor(n/2):0; /* director 2026-11-18: a streak ends only when a fish that bit gets away; On a Roll maxed keeps half */ S.streak=keep; if(n>=3) setTimeout(()=>toast(keep?"Fish lost: streak "+n+" halved to "+keep:"Streak of "+n+" ended"),1200); save(); } /* 0.3.6: saved at once, so a refresh can't bring a broken streak back */
 function endFight(kind){
   if(kind==='caught'){ G.st='landing'; G.land={t:0, dur:.85, x0:G.bob.x, y0:G.bob.y}; splash(G.bob.x,G.bob.y,24); sfx.pull(); return; }
-  G.st='idle'; G.fish=null; G.inHot=false; breakStreak();
+  G.st='idle'; G.fish=null; G.inHot=false; if(kind!=='nohook') breakStreak(); /* director 2026-11-18: a missed strike keeps the streak; only a hooked fish that gets away ends it */
   if(kind==='snap'){ S.stats.snapped++; sfx.snap(); toast((G.temper>1.6 ? 'Snap! It lost its temper. Let go now and then. ' : 'Snap! Ease off when it runs. ')+quip('snap')); checkFeats(); save(); }
-  else if(kind==='nohook'){ sfx.lost(); toast('Too slow: it bit and swam off. Strike on the big splash.'); } /* a missed strike said "slipped off the hook" before */
+  else if(kind==='nohook'){ sfx.lost(); toast(S.streak>=2?'Too slow: it swam off, but your streak of '+S.streak+' is safe. Strike on the big splash.':'Too slow: it bit and swam off. Strike on the big splash.'); } /* a missed strike said "slipped off the hook" before */
   else { sfx.lost(); toast((kind==='spool' ? 'It ran out all your line. ' : 'It slipped off the hook. ')+quip('lost')); }
 }
 function finishCatch(){ const f=G.fish; G.land=null; if(!f){ G.st='idle'; return; } if(V3ON) vib([30,40,70]);
@@ -12630,7 +12630,7 @@ const CHAL={
     onCatch:(c,f)=>{ if(!c.seen.includes(f.sp.id)){ c.seen.push(f.sp.id); c.prog=c.seen.length; return true; } } },
   long:  {name:'Long Cast', icon:'🎯', mins:6, m:.25, rule:c=>'Land '+c.need+' fish from far casts', hint:()=>'Charge your cast past the far mark on the power bar. Far casts also bring better fish. Long Caster lowers the mark.',
     setup:()=>({need:5}), onCatch:(c,f,perfect,far)=>{ if(far){ c.prog++; return true; } } },
-  steady:{name:'Steady Hands', icon:'✋', mins:6, m:.25, rule:c=>'Land '+c.need+' perfect-hook fish without losing one', hint:()=>'Strike the instant it bites. A late hook just does not count; only a fish that gets away resets the count. A longer hook window (Hook upgrades, Quick Reflexes) helps.',
+  steady:{name:'Steady Hands', icon:'✋', mins:6, m:.25, rule:c=>'Land '+c.need+' perfect-hook fish without losing one', hint:()=>'Strike the instant it bites. A late hook just does not count; only a hooked fish that gets away resets the count. A longer hook window (Hook upgrades, Quick Reflexes) helps.',
     setup:()=>({need:4}), onCatch:(c,f,perfect)=>{ if(perfect){ c.prog++; return true; } }, onLost:(c)=>{ if(c.prog){ c.prog=0; toast('Fish lost: Steady Hands count back to 0.'); return true; } } }, /* director 2026-11-18: counters reset only on a failed catch, never on a late hook that still lands the fish */
   treasure:{name:'Treasure Dive', icon:'🧭', mins:6, m:.3, rule:c=>'Fish up '+c.need+' piece'+(c.need>1?'s':'')+' of junk or treasure', hint:()=>'Your chance of junk or treasure per bite here: '+fmtOdds(junkChance())+'. Magnet Lures, the Magnet Tip and Scavenger raise it.',
     setup:()=>({need:Math.max(1,Math.min(5,Math.round(6*CATCHES_PER_MIN*junkChance()*.85)))}), onJunk:(c)=>{ c.prog++; return true; } },
@@ -12729,7 +12729,7 @@ document.head.insertAdjacentHTML('beforeend',`<style>
 setInterval(()=>{ const el=$('goalchip'); if(!el) return; const live=!!(S.chal||liveScheds().length); el.classList.toggle('live',live); const k=el.querySelector('.gl-k'); if(k&&live&&k.textContent!=='Live') k.textContent='Live'; },700);
 if(/[?&]test\b/.test(location.search)) window.__ev={chalStart, chalEnd, CHAL, SCHED, schedLeft, schedNext, shoalLeft, shoalNext, bonus:k=>bonus(k), junk:()=>junkChance(), rare:()=>rareScore(distanceMods(),false,false,phase())};
 // a fish that bit and got away (missed strike, snap, slipped off, ran out the line) is the only thing that resets a challenge count
-{ const _ef=endFight; endFight=function(kind){ try{ if(kind!=='caught'&&S.chal){ const C=CHAL[S.chal.id]; if(C&&C.onLost&&C.onLost(S.chal)){ save(); if(S.tab==='events') renderPanel(); } } }catch(e){ console.error(e); } return _ef.apply(this,arguments); }; }
+{ const _ef=endFight; endFight=function(kind){ try{ if(kind!=='caught'&&kind!=='nohook'&&S.chal){ const C=CHAL[S.chal.id]; if(C&&C.onLost&&C.onLost(S.chal)){ save(); if(S.tab==='events') renderPanel(); } } }catch(e){ console.error(e); } return _ef.apply(this,arguments); }; }
 // =====================================================================
 // 0.4 Hunts (Fish Log). Pick up to HUNT_MAX fish per water to hunt: each hunted fish's catch weight is multiplied by
 // HUNT_MULT inside catchW, the one weight function the catch roll and every on-screen odds number share, so the bonus
@@ -15727,9 +15727,9 @@ PATCHES.unshift({v:'0.4.8.1', name:'Smoother and Steadier', items:[
 // (spoiler-free); it opens once in the iPhone test app. Released notes live in notes_release.js.
 const TEST_NOTES={v:'test', label:'Test build · iPhone', name:'One Look, Easy Aquarium', items:[
   '## Fairer streaks',
-  'Reeling in early or casting by accident never costs you anything: your streak stays. A streak only ends when a fish that bit gets away (a missed strike, a snapped line, a fish that slips off or runs out your line).',
+  'Reeling in early, casting by accident or missing a strike never costs you anything: your streak stays. A streak only ends when a fish you have hooked gets away (a snapped line, a fish that slips off or runs out your line).',
   'On a Roll, fully learned: a lost fish now only halves your streak instead of ending it.',
-  'Steady Hands challenge: a late hook just does not count; only a fish that gets away resets the count.',
+  'Steady Hands challenge: a late hook just does not count; only a hooked fish that gets away resets the count.',
   '## One look everywhere',
   'Every button, chip, tab and card now shares one style: the same navy, the same corners, the same lettering, and line icons instead of emoji pictures.',
   'Everything you can tap in the top bar looks like a button now (teal outline, and a small arrow when held sideways). Coins and level are plain text, so you can tell at a glance.',
