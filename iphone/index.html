@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="DL Test iPhone">
 <script>
-window.DL_BUILD='ios'; window.DL_PREVIEW=true; window.DL_VERSION='2026.11.18-1237';
+window.DL_BUILD='ios'; window.DL_PREVIEW=true; window.DL_VERSION='2026.11.18-1312';
 window.addEventListener('beforeinstallprompt',function(e){ e.preventDefault(); window.__dlInstallPrompt=e; });
 </script>
 </head>
@@ -15923,6 +15923,26 @@ html body.phone-land.dock-mini #menuov > #toast{left:calc((100% - ${L.railWMini+
 html body.phone-land #menuov #panel:not(.aq07){padding-top:8px!important} /* breathing room under the top row (the page box itself still starts at 49) */
 html body.phone-land #menuov .subbar{align-self:start!important;height:${L.row1H}px!important;padding-top:0!important;padding-bottom:0!important}
 html body.phone-land #menuov .subbar > .subp{height:${L.row1H}px!important;min-height:${L.row1H}px!important;box-sizing:border-box!important}
+/* the page-tab row only ever scrolls sideways (director, 2026-11-18: "this menu's top headers are unresponsive at times and don't feel
+   fluid"). It could also scroll up/down by 4 px while the tabs slide in (0.28 s after a section opens), so a tap that moved a pixel
+   became a tiny scroll: the tabs jiggled and the phone cancelled the tap. Both orientations. */
+html body.phone-app #menuov .subbar,html body.phone-land #menuov .subbar{overflow-y:hidden!important;touch-action:pan-x!important;overscroll-behavior:contain!important}
+/* ...and when a badge ("Events 1") makes the tabs a few px too wide for the row, they squeeze instead of the row scrolling sideways
+   (it slid 2 px under the finger at 844 px wide): side padding follows the screen width, and tabs may shrink */
+html body.phone-land #menuov .subbar > .subp{padding-left:clamp(6px,1.2vw,11px)!important;padding-right:clamp(6px,1.2vw,11px)!important;flex:0 1 auto!important;min-width:0!important}
+/* narrow sideways screens (iPhone SE / 8 at 667 px): five page tabs (Challenges) don't fit with icons in the ~350 px row, so the
+   header tabs show their names only there (each icon + gap is 23 px) */
+@media (orientation:landscape) and (max-width:759px){ html body.phone-land #menuov .subbar > .subp > .subi{display:none!important} html body.phone-land #menuov .subbar > .subp{gap:4px!important} }
+/* sideways, header-tab badges always sit on the tab's top corner (like the side rail's), at every width: a count never makes a tab wider,
+   so the row never changes size when a badge appears */
+html body.phone-land #menuov .subbar > .subp{position:relative!important}
+html body.phone-land #menuov .subbar > .subp > .subdot{position:absolute!important;top:1px!important;right:1px!important;margin:0!important;min-width:15px!important;height:15px!important;font-size:9.5px!important;line-height:15px!important;padding:0 3px!important;box-sizing:border-box!important}
+/* in-page section bars (Gear / Bait..., Games / Prize counter...) sit inside the scrolling page, so they keep vertical page swipes; they
+   only lose their own few-pixel vertical scroll */
+html body.phone-app #menuov #panel .bwx-nav,html body.phone-land #menuov #panel .bwx-nav{overflow-y:hidden!important}
+/* the backdrop behind a section bar stuck to the top reached 10 px past the bar (inset -24 -10 -10). The bar clips it, so those 10 px
+   were invisible, but they made every stuck bar scroll 10 px sideways (and 10 px down): it shifted under the finger. Kept inside. */
+html body.phone-app #menuov #panel .bwx-nav.stuck:not(.wd-top)::before,html body.phone-land #menuov #panel .bwx-nav.stuck:not(.wd-top)::before{inset:0!important}
 </style>`);
 // ---- Back: the guard against the phone's follow-up tap now covers only a small circle where the finger lifted (it covered the
 // whole screen for 0.45 s, so a quick next tap anywhere did nothing: "unresponsive at times") ----
@@ -15945,6 +15965,13 @@ if(/[?&]test\b/.test(location.search)) window.__spec=()=>{ for(const a of docume
     if(!land) for(const e of vis('#menuov .subbar > .subp')){ const r=R(e); if(r.y<U.row2Top-1) bad('page tabs',r.y,'>= '+U.row2Top); }
     const body=mo.querySelector('.mo-body'); if(body){ const r=R(body); if(!near(r.x,F.edge)) bad('menu left edge',r.x,F.edge); if(land){ if(!near(r.y,L.contentTop)) bad('menu content top',r.y,L.contentTop); if(!near(r.r,vw-L.edge-RW-L.railGap)) bad('menu content right',r.r,vw-L.edge-RW-L.railGap); if(!near(r.b,vh-L.bottom)) bad('menu content bottom',r.b,vh-L.bottom); } }
     const sb=mo.querySelector('.secbar'); if(sb){ const r=R(sb); if(land){ if(!near(r.w,RW)||!near(r.r,vw-L.edge)||!near(r.y,L.contentTop)||!near(r.b,vh-L.bottom)) bad('menu side rail',r.x+','+r.y+' '+r.w+'w '+r.h+'h',(vw-L.edge-RW)+','+L.contentTop+' '+RW+'w'); } else if(!near(r.x,U.edge)||!near(r.b,vh-U.barBottom)||!near(r.h,U.barH)) bad('menu bottom tabs',r.x+','+r.b+' '+r.h+'h',U.edge+','+(vh-U.barBottom)+' '+U.barH+'h'); } }
+  // no wobbly rows: anything holding buttons that can scroll by only a few pixels in some direction swallows taps as tiny scrolls
+  for(const s of vis('#menuov *, .hud, #catdock, #stage > *')){ if(!s.querySelector||!s.querySelector('button')) continue; if(s.matches('#panel,.mo-body,.aq07-body')) continue; /* page scroll areas may scroll any amount */ const cs=getComputedStyle(s);
+    const dy=s.scrollHeight-s.clientHeight, dx=s.scrollWidth-s.clientWidth;
+    if(/(auto|scroll)/.test(cs.overflowY)&&dy>0&&dy<=12) bad('row scrolls up/down by '+dy+' px "'+(s.className||s.id||s.tagName).toString().split(' ')[0]+'"',dy+' px','0 (fits, or a real scroll area)');
+    if(/(auto|scroll)/.test(cs.overflowX)&&dx>0&&dx<=12) bad('row scrolls sideways by '+dx+' px "'+(s.className||s.id||s.tagName).toString().split(' ')[0]+'"',dx+' px','0 (fits, or a real scroll area)'); }
+  // no cut labels: a tab or button whose own text is wider than the button
+  for(const b of vis('#menuov .subp, #menuov #panel .bwx-nav > button, .hud > *')){ if(b.scrollWidth>b.clientWidth+1) bad('label cut "'+b.innerText.trim().replace(/\s+/g,' ').slice(0,20)+'"',b.scrollWidth+' px of text in '+b.clientWidth,'fits'); }
   // every button you can see must take the tap (nothing on top of its middle)
   const card=document.getElementById('evcard'), cardOn=!!(card&&card.getClientRects().length); /* a popup card is on top by design: only its own buttons count then */
   const sticky=t=>{ for(let e=t;e&&e!==document.body;e=e.parentElement){ const p=getComputedStyle(e).position; if(p==='sticky') return true; } return false; }; /* scrolled under a sticky bar: scroll back to reach it */
@@ -16061,9 +16088,15 @@ PATCHES.unshift({v:'0.4.8.4', name:'Lined Up', items:[
   'Held sideways, the side panel in menus is the same height as on the water, and notices are centred over the page.',
   'Weather news also waits while the catch card is open.',
   'Your boost timers now sit in the top-left corner, under the time and weather, so the Rest and Bait buttons no longer cover them. A weather note shows just below them.']});
+PATCHES.unshift({v:'0.4.8.5', name:'Steady Tabs', items:[
+  '## Fixes',
+  'Page tabs at the top of a menu (Events, Bounties, Feats, Tide Pass, Boardwalk and the others) take every tap: the row could shift a few pixels under your finger, which made taps feel unresponsive and the tabs jiggle.',
+  'Section bars inside pages (Gear / Bait, Waters / Set sail again...) no longer slide sideways when they stick to the top.',
+  'On smaller phones held sideways, the page tabs show their names only so they always fit, and badges sit on the tab corner.']});
 // iPhone test notes (preview builds only; the live game never shows them). Write what the next test build changes here
 // (spoiler-free); it opens once in the iPhone test app. Released notes live in notes_release.js.
 const TEST_NOTES={v:'test', label:'Test build · iPhone', name:'One Look, Easy Aquarium', items:[
+  'Menu page tabs (Events, Bounties, Feats...) take every tap and no longer jiggle; section bars no longer slide sideways when stuck to the top; on small phones held sideways the tabs show names only, badges on the corner.',
   '## Aquarium and Fish Log',
   'The aquarium tank animates smoothly: it no longer skips frames now and then, and it keeps moving (at a steady pace) while you scroll the list.',
   'The aquarium tank fills the screen. The Options button under it opens a panel with Your tank and Decorate (under the tank when upright, on the right when sideways); Hide closes it and gives the whole space back to the tank. Your phone remembers which you like.',
