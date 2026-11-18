@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="DL Test iPhone">
 <script>
-window.DL_BUILD='ios'; window.DL_PREVIEW=true; window.DL_VERSION='2026.11.18-1028';
+window.DL_BUILD='ios'; window.DL_PREVIEW=true; window.DL_VERSION='2026.11.18-1044';
 window.addEventListener('beforeinstallprompt',function(e){ e.preventDefault(); window.__dlInstallPrompt=e; });
 </script>
 </head>
@@ -15122,10 +15122,18 @@ const MOB=()=>{ const b=document.body.classList; return b.contains('phone-app')|
 //    scrolling get the whole frame). The line waits while a menu is open, so nothing on the water is missed.
 { const _dr=draw; draw=function(now){ if(MENU_OPEN&&MOB()) return; return _dr.apply(this,arguments); }; }
 
-// 2) the aquarium tank: 30 frames a second on phones, and it holds still while you scroll the page (scrolling stays smooth)
+// 2) the aquarium tank: a steady pace on phones (round 7 below), a steady half rate while the page scrolls
 { let lastT=0, scrollUntil=0; const P=$('panel'); if(P) P.addEventListener('scroll',()=>{ scrollUntil=performance.now()+180; },{passive:true});
   addEventListener('touchmove',()=>{ if(S.tab==='aquarium') scrollUntil=performance.now()+180; },{passive:true});
-  const _dt=drawTank; drawTank=function(now){ if(MOB()){ const t=performance.now(); if(t<scrollUntil) return; if(t-lastT<15) return; lastT=t; /* full rate (round 6, director: more frames); still pauses while scrolling */ } return _dt.apply(this,arguments); }; }
+  // round 7 (director, 2026-11-18: "horrible stuttering in the aquarium preview"): the old rule skipped any frame that came less than
+  // 15 ms after the last one; on a 60 Hz screen frames arrive every 16.7 ms with a little jitter, so an early one was dropped now and
+  // then (a 33 ms gap, a visible hitch), and the tank froze completely while the list scrolled (it is always on screen now). Now the
+  // pace is steady: every display frame on 60 Hz screens, exactly every other frame on 120 Hz screens (measured, not a cut-off), and a
+  // steady half rate while the page scrolls instead of a freeze.
+  let ema=16.7, rawLast=0, odd=false;
+  const _dt=drawTank; drawTank=function(now){ if(MOB()){ const t=performance.now(), d=t-rawLast; rawLast=t; if(d>2&&d<60) ema=ema*.92+d*.08;
+      const half=ema<11||t<scrollUntil; /* 120 Hz screen, or the page is scrolling */ if(half){ odd=!odd; if(odd) return; } else odd=false; lastT=t; }
+    return _dt.apply(this,arguments); }; }
 
 // 3) steady frame rate: the water's resolution follows how the phone keeps up. If frames drop for a few seconds (a storm, a
 //    big fight), the water is drawn a little less sharp until the phone keeps up again (round 7: five steps, see below).
@@ -15582,7 +15590,7 @@ html body.phone-app .hud #coolerct[style*="danger"],html body.phone-land .hud #c
 //  - A third tab, "Add fish", lists the fish in your Cooler with "To aquarium", so the tank can be filled without leaving the page.
 // Android + iPhone only; PC keeps its own aquarium layout.
 // =====================================================================
-{ let AQ_ADD=false;
+{ let AQ_ADD=false, AQ_FULL=false;
   const addHTML=()=>{ const full=S.tank.length>=aqCap(); const rows=S.cooler.map((f,i)=>({f,i})).reverse();
     if(!rows.length) return `<div class="aq07-add"><div class="empty">Your Cooler is empty. Fish you catch can go on display from here.</div></div>`;
     return `<div class="aq07-add"><p class="aq07-note">${full?'The tank is full ('+S.tank.length+' of '+aqCap()+'). Make room or buy a bigger tank to add more.':'Tap <b>To aquarium</b> to put a fish on display. It starts earning right away.'}</p><div class="list">`+rows.map(({f,i})=>{ const sp=SPI[f.id];
@@ -15605,6 +15613,12 @@ html body.phone-app .hud #coolerct[style*="danger"],html body.phone-land .hud #c
       nav.querySelectorAll('[data-sect]').forEach(b=>b.addEventListener('click',()=>{ if(AQ_ADD) show(false); },true));
       show(AQ_ADD);
       P.dataset.aqLand=document.body.classList.contains('phone-land')?'1':'0'; /* which layout this page was built for */
+      /* round 7d (director: "it could use its own full screen toggle to open up Your tank, Decorate and Add fish in landscape"):
+         sideways, a button at the end of the tabs gives the lists the whole width (the tank steps aside) and brings the tank back */
+      P.classList.toggle('aq07-full',AQ_FULL&&P.dataset.aqLand==='1');
+      if(P.dataset.aqLand==='1'){ const fs=document.createElement('button'); fs.type='button'; fs.className='aq07-fs'; const paintFs=()=>{ fs.setAttribute('aria-pressed',String(AQ_FULL)); fs.setAttribute('aria-label',AQ_FULL?'Show the tank again':'Give the lists the whole screen'); fs.title=fs.getAttribute('aria-label');
+          fs.innerHTML=AQ_FULL?'<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"/></svg>':'<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>'; };
+        paintFs(); nav.appendChild(fs); fs.addEventListener('click',e=>{ e.preventDefault(); e.stopPropagation(); AQ_FULL=!AQ_FULL; P.classList.toggle('aq07-full',AQ_FULL); paintFs(); }); }
     }catch(e){ console.error(e); } return r; };
   /* turning the phone while the aquarium is open rebuilds it for the new layout (checked after the resize settles, against the layout
      the page was built for, so the very first turn counts too) */
@@ -15737,6 +15751,19 @@ html body.phone-app #menuov #panel.aq07 .aq07-pin > .aq07-bank,html body.phone-l
   html body.phone-land #menuov #panel.aq07 .aq07-pin > .tank{height:calc(100dvh - 150px - env(safe-area-inset-top) - env(safe-area-inset-bottom))!important}
 }
 </style>`);
+// full-width lists (sideways): the tank steps aside, the tabs keep their place and the full-screen button sits at their end
+document.head.insertAdjacentHTML('beforeend',`<style>
+@media (orientation:landscape) and (max-height:560px){
+  html body.phone-land #menuov #panel.aq07 .aq07-side > .sect-nav{grid-template-columns:repeat(3,minmax(0,1fr)) 40px!important}
+  html body.phone-land #menuov #panel.aq07 .aq07-fs{border:0;border-radius:10px;min-height:36px;background:#13233a;color:#7fe3c4;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0}
+  html body.phone-land #menuov #panel.aq07 .aq07-fs[aria-pressed="true"]{background:linear-gradient(180deg,#ffe08a,#f3b94e);color:#2a1c05}
+  html body.phone-land #menuov #panel.aq07.aq07-full{grid-template-columns:minmax(0,1fr)!important}
+  html body.phone-land #menuov #panel.aq07.aq07-full > .aq07-pin{display:none!important}
+  html body.phone-land #menuov #panel.aq07.aq07-full > .aq07-side{grid-column:1!important}
+  html body.phone-land #menuov #panel.aq07.aq07-full .aq07-dgrid{grid-template-columns:repeat(4,minmax(0,1fr))!important}
+  html body.phone-land #menuov #panel.aq07.aq07-full .aq07-side .list:not([style*="none"]){display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px} /* only when its tab shows it */
+}
+</style>`);
 // =====================================================================
 // Phones, round 7 performance (director, 2026-11-18, Pixel 10: "storms can still majorly drop frames on Android, even more so on
 // open seas; the first three waters hold about 50 fps, the others drop to 20-30 when you switch to them, storms to 20 or below").
@@ -15768,6 +15795,28 @@ html body.phone-app #menuov #panel.aq07 .aq07-pin > .aq07-bank,html body.phone-l
       const wx=weather(), on=S.settings.effects&&typeof WXA==='number'&&WXA>.01, k=on?wx.k:'', a=on?WXA:0;
       const c=build(night||0,k,a); g.save(); g.imageSmoothingEnabled=true; g.drawImage(c,0,0,W,H); g.restore(); }; }
   if(/[?&]test\b/.test(location.search)) window.__ov=()=>OV&&{key:OV.key,w:OV.c.width,h:OV.c.height}; }
+// =====================================================================
+// Phones, round 7: the Fish Log's Normal / Shiny switch (director, 2026-11-18: "shiny toggle in mobile fish log missing"). PC has had
+// it since 2026-11-17 (pc/ui_fhd.js); phones get the same switch under the fish picture in the details, in the phone look:
+// Normal by default, Shiny once you have caught that species (it shows what its shiny looks like). Android + iPhone only.
+// =====================================================================
+{ let shinyView=false, lastSel=null; const _rj=renderJournal;
+  renderJournal=function(P){ _rj.apply(this,arguments); try{ if(!MOB()) return;
+      const det=P.querySelector('.tile.detail'), sel=encSel&&SPI[encSel]; if(!det||!sel) return;
+      if(sel.id!==lastSel){ lastSel=sel.id; shinyView=false; } /* a different fish starts on Normal */
+      const caught=!!S.journal[sel.id], cv=det.querySelector('canvas[data-fish]'); if(!cv||det.querySelector('.mb-shsw')) return;
+      const sw=document.createElement('div'); sw.className='mb-shsw'; sw.setAttribute('role','group'); sw.setAttribute('aria-label','Show the normal or the shiny look');
+      sw.innerHTML=`<button type="button" data-v="0" aria-pressed="${!shinyView}">Normal</button><button type="button" data-v="1" aria-pressed="${shinyView}" ${caught?'':'disabled'}>✦ Shiny</button>${caught?'':'<span class="mb-shnote">Catch it to see its shiny look</span>'}`;
+      cv.after(sw); if(caught){ cv.dataset.sh=shinyView?'1':'0'; paintFish(det); }
+      sw.querySelectorAll('button').forEach(b=>b.addEventListener('click',e=>{ e.stopPropagation(); if(b.disabled) return; shinyView=b.dataset.v==='1'; sw.querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',String(x===b))); cv.dataset.sh=shinyView?'1':'0'; paintFish(det); }));
+    }catch(e){ console.error(e); } }; }
+document.head.insertAdjacentHTML('beforeend',`<style>
+html body.phone-app #panel .mb-shsw,html body.phone-land #panel .mb-shsw{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:8px 0 4px;padding:4px;border-radius:12px;background:#0c1626;border:1px solid #ffffff17;width:max-content;max-width:100%;box-sizing:border-box}
+html body.phone-app #panel .mb-shsw button,html body.phone-land #panel .mb-shsw button{border:0;border-radius:10px;min-height:36px;padding:0 14px;background:transparent;color:#9fb3c8;font:800 13px var(--display);cursor:pointer}
+html body.phone-app #panel .mb-shsw button[aria-pressed="true"],html body.phone-land #panel .mb-shsw button[aria-pressed="true"]{background:linear-gradient(180deg,#ffe08a,#f3b94e);color:#2a1c05}
+html body.phone-app #panel .mb-shsw button:disabled,html body.phone-land #panel .mb-shsw button:disabled{opacity:.45;cursor:default}
+html body.phone-app #panel .mb-shnote,html body.phone-land #panel .mb-shnote{font:700 11.5px var(--display);color:#9fb3c8;padding:0 6px}
+</style>`);
 // iPhone release notes (shown once to returning iPhone players). Kept exactly as shipped once published.
 PATCHES.unshift({v:'0.4.8', name:'Rewards Worth Chasing', items:[
   '## Rewards and balance',
@@ -15817,6 +15866,10 @@ PATCHES.unshift({v:'0.4.8.1', name:'Smoother and Steadier', items:[
 // iPhone test notes (preview builds only; the live game never shows them). Write what the next test build changes here
 // (spoiler-free); it opens once in the iPhone test app. Released notes live in notes_release.js.
 const TEST_NOTES={v:'test', label:'Test build · iPhone', name:'One Look, Easy Aquarium', items:[
+  '## Aquarium and Fish Log',
+  'The aquarium tank animates smoothly: it no longer skips frames now and then, and it keeps moving (at a steady pace) while you scroll the list.',
+  'Held sideways, a full-screen button at the end of the aquarium tabs gives Your tank, Decorate and Add fish the whole width; tap it again to bring the tank back.',
+  'Fish Log: a Normal / Shiny switch under the fish picture shows what a fish you have caught looks like when it is shiny.',
   '## Smoother frames',
   'Willow Pond no longer stutters: the willow used to redraw its whole curtain every third frame; its work is now spread evenly over every frame.',
   'Storms are lighter: the darkening and the soft frame around the picture are drawn in one layer instead of up to four, and storm waves on the open sea draw in a handful of shapes instead of hundreds.',
