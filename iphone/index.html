@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="DL Test iPhone">
 <script>
-window.DL_BUILD='ios'; window.DL_PREVIEW=true; window.DL_VERSION='2026.11.18-0110';
+window.DL_BUILD='ios'; window.DL_PREVIEW=true; window.DL_VERSION='2026.11.18-0127';
 window.addEventListener('beforeinstallprompt',function(e){ e.preventDefault(); window.__dlInstallPrompt=e; });
 </script>
 </head>
@@ -2785,7 +2785,7 @@ document.addEventListener('keydown',()=>startAudio(),{once:true});
 // Update 1.5: rods & attachments, pet dress-up / petting / bond,
 // daily tasks & gift, patch notes, safe reset, Boardwalk 2.0, quips
 // =====================================================================
-const GAME_VERSION = '0.4.7';
+const GAME_VERSION = '0.4.8';
 const PATCHES = [
 {v:'0.4.7', name:'Full Screen Fix', items:['## PC','The PC layout now shows in full screen too: the one-row header, the clear water with its strip above, the new Fish Log, Feats, Settings and every other PC page. Full screen used to bring back the old layout with the bar at the bottom.']},
 {v:'0.4.6', name:'Hotfix', items:['## PC','Patch notes are a proper reader: the updates you missed are listed on the left, the one you pick on the right with its sections side by side, and Let’s fish! always at the top.','The header stays at the top in narrower windows and with browser zoom (it went back to the bottom under 900 pixels wide). In small windows it turns compact: icon tabs, short counters.','## Everywhere','The tip line no longer shows as an empty bubble, and it hides while a card is open over the water.']},
@@ -14663,26 +14663,28 @@ function homeHullDark(def,defDark){ const k=S&&S.dock&&S.dock.hull, h=k&&HOME_HU
 // its text. In a preview build the notes go on top of the patch notes list and open once per device and notes text; the
 // live game ignores them. They carry no version number (the director picks it at release).
 // =====================================================================
-function addTestNotes(n){ try{ if(!window.DL_PREVIEW||!n||!Array.isArray(n.items)) return; PATCHES.unshift(n);
+function addTestNotes(n){ try{ if(!window.DL_PREVIEW||!n||!Array.isArray(n.items)||!n.items.length) return; PATCHES.unshift(n);
     const id='dl-test-notes:'+(window.DL_BUILD||'')+':'+n.name+':'+n.items.length; let seen=''; try{ seen=localStorage.getItem('dl-test-notes')||''; }catch(e){}
     if(seen===id) return; let tries=0;
     const go=()=>{ if(G.st!=='idle'||(typeof MENU_OPEN!=='undefined'&&MENU_OPEN)){ if(++tries<20) setTimeout(go,1500); return; }
       try{ localStorage.setItem('dl-test-notes',id); }catch(e){} try{ showPatchNotes(n); }catch(e){} };
     setTimeout(go,3500); }catch(e){} }
-// iPhone test notes (preview builds only; the live game never shows them). Only what reaches iPhone is listed.
-const TEST_NOTES={v:'test', label:'Test build · iPhone', name:'Rewards Worth Chasing', items:[
-  '## Latest fixes',
-  'You can hunt fish you have already caught: a shiny hunt, until you land it shiny.',
-  'Wardrobe and Pets stand on their own display stand instead of copying your dock.',
+// iPhone release notes (shown once to returning iPhone players). Kept exactly as shipped once published.
+PATCHES.unshift({v:'0.4.8', name:'Rewards Worth Chasing', items:[
   '## Rewards and balance',
   'Paths are rethought: no more downsides, and they open much earlier.',
   'Bounties pay a bonus on top of their coins: bait for that water, a special lure, Scales or Tide Pass progress. You can see it on each bounty.',
   'Finishing a whole Feats category gives a permanent boost.',
   'Completing a water’s Fish Log makes its fish worth more, forever. The Fish Log says so next to each water’s progress.',
-  '## iPhone',
-  'This test version is its own app now, DL Test iPhone, so it never gets mixed up with the real game. It keeps its own progress: bring yours over with Settings › Save & codes › Move progress.',
+  '## Hunts',
+  'You can hunt fish you have already caught: a shiny hunt, until you land it shiny.',
+  '## Small things',
+  'Wardrobe and Pets stand on their own display stand instead of copying your dock.',
   '## Behind the scenes',
-  'PC, Android and iPhone each have their own version of the game now, so a fix for one never disturbs another. Your progress is shared between them as before.']};
+  'PC, Android and iPhone each have their own version of the game now, so a fix for one never disturbs another. Your progress is shared as before.']});
+// iPhone test notes (preview builds only; the live game never shows them). Empty until the next round: write what the next
+// test build changes here (spoiler-free), and it opens once in the iPhone test app. Released notes live in notes_release.js.
+const TEST_NOTES={v:'test', label:'Test build · iPhone', name:'', items:[]};
 addTestNotes(TEST_NOTES);
 // =====================================================================
 // 0.4 release QA suite (test builds only: ?test, and build.ps1 leaves this file out of the release build).
@@ -15329,7 +15331,7 @@ offlineIncome(); fillBounties(); ensureDaily(); accrueSpins(); checkFeats(); ref
 if(!S.stats.caught && !S.savedAt) setTimeout(()=>toast('Hold on the water to cast your first line'),600);
 })();
 </script>
-<div class="dlprev" style="position:fixed;right:10px;bottom:10px;z-index:30;background:#2a2048cc;color:#ffd59a;border:1px solid #ffd59a88;border-radius:999px;padding:4px 10px;font:700 11px system-ui,sans-serif;pointer-events:none">preview Â· iPhone</div>
+<span class="dlprev" style="position:fixed!important;right:10px!important;bottom:10px!important;top:auto!important;left:auto!important;z-index:30;display:inline-block!important;width:auto!important;height:auto!important;min-height:0!important;max-height:22px!important;white-space:nowrap!important;background:#2a2048cc;color:#ffd59a;border:1px solid #ffd59a88;border-radius:999px;padding:3px 10px!important;margin:0!important;font:700 11px/14px system-ui,sans-serif!important;pointer-events:none;box-sizing:border-box">test build - iPhone</span>
 <div id="updbar" hidden style="position:fixed;left:50%;bottom:16px;transform:translateX(-50%);z-index:65;display:flex;gap:10px;align-items:center;background:#10222b;border:1px solid #ffc94d;color:#e6efe8;padding:8px 10px 8px 16px;border-radius:999px;font:700 14px system-ui,sans-serif;box-shadow:0 10px 30px #0008;max-width:calc(100% - 32px)">
   <span>🎣 A new Driftline update is ready <span style="opacity:.7;font-weight:400">· your progress is safe</span></span>
   <button id="updbtn" type="button" style="background:#ff6a3d;color:#1d0d06;border:0;border-radius:999px;padding:6px 14px;font:inherit;cursor:pointer">Update &amp; see what’s new</button>
