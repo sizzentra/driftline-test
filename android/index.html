@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="DL Test Android">
 <script>
-window.DL_BUILD='android'; window.DL_PREVIEW=true; window.DL_VERSION='2026.11.19-0422';
+window.DL_BUILD='android'; window.DL_PREVIEW=true; window.DL_VERSION='2026.11.19-0824';
 window.addEventListener('beforeinstallprompt',function(e){ e.preventDefault(); window.__dlInstallPrompt=e; });
 </script>
 </head>
@@ -854,7 +854,7 @@ const SPI = Object.fromEntries(SP.map(s=>[s.id,s]));
 const GEAR = {
   rod:   {name:'Rod length', what:'Longer casts and better odds on far casts', lv:[22,26,31,36,42,48,55,62,70,80], cost:[0,250,1200,5000,18000,50000,130000,300000,900000,2500000], fmt:v=>v+' m cast'},
   reel:  {name:'Reel',   what:'How fast you wind line in', lv:[3.1,3.8,4.6,5.5,6.5,7.6,8.8,10.1,11.5,13.2,15], cost:[0,200,1000,4000,14000,40000,100000,240000,500000,1400000,3500000], fmt:v=>v.toFixed(1)+' m/s'},
-  line:  {name:'Line',   what:'How much tension before it snaps', lv:[10,14,19,26,35,46,60,78,100,135,180,230], cost:[0,180,800,3000,10000,30000,80000,200000,450000,1200000,3000000,7000000], fmt:v=>v+' kg test'},
+  line:  {name:'Line',   what:'How much tension before it snaps', lv:[10,14,19,26,35,46,60,78,100,135,180,230], cost:[0,180,800,3000,10000,30000,80000,200000,450000,1200000,3000000,7000000], fmt:v=>Math.round(wNum(v))+' '+wUnit()+' test'},
   hook:  {name:'Hook',   what:'Longer window to set the hook', lv:[.6,.7,.8,.9,1.0,1.1,1.2], cost:[0,150,900,4000,14000,45000,120000], fmt:v=>v.toFixed(1)+' s window'},
   cooler:{name:'Cooler', what:'Fish you can carry before selling', lv:[8,12,18,26,36,50,66,85,110,140], cost:[0,120,700,3000,10000,30000,80000,200000,600000,1500000], fmt:v=>v+' fish'},
   finder:{name:'Fish Finder', what:'Reads the bite before you strike, and finds more hotspots', lv:[0,1,2,3,4,5], cost:[0,900,5000,20000,70000,200000],
@@ -1352,8 +1352,8 @@ const fresh = () => ({v:3, money:0, xp:0, lvl:1, gear:{rod:0,reel:0,line:0,hook:
   perks:{}, bonusPts:0, tank:[], tankSlots:3, tankT:0, tankBank:0, feats:{}, pearls:0, tides:0, streak:0,
   buffs:[], look:{g:'m',skin:1,hair:1,shirt:'#3a6f9a',pat:'none',pants:'#2f3b4a',hat:'cap',hatCol:'#c8553a',hairStyle:'auto',beard:'none',glasses:'none',outfit:'none',outCol:'#d8a020',build:'average',eye:0,shoes:'boots',neck:'none',back:'none',accCol:'#c8553a',nose:'button',brows:'soft',mouth:'smile',blush:'on'},
   owned:{hats:['none','cap','bucket'],cols:[],pats:['none'],pets:['dog'],outfits:['none','vest'],glasses:['none','round'],shoes:['boots','sneakers','barefoot'],necks:['none'],backs:['none']}, pet:'dog', junk:{}, tickets:0, freeSpins:1,
-  settings:{master:.8, music:.55, sfx:.7, amb:.5, musicOn:true, ambient:true, style:'auto', castMode:'meter', vibrate:true, minigames:true, rest:false, effects:true, boostsOnScreen:true, hints:true, protectRare:true},
-  aq:{theme:'lagoon', sand:'gold', decor:[], owned:['lagoon','gold']}, fedT:0, wheelT:0, rankClaimed:0, tokens:{small:0,big:0,legend:0},
+  settings:{master:.8, music:.55, sfx:.7, amb:.5, musicOn:true, ambient:true, style:'auto', castMode:'meter', vibrate:true, minigames:true, rest:false, effects:true, boostsOnScreen:true, hints:true, protectRare:true, units:'kg'},
+  aq:{theme:'lagoon', sand:'gold', decor:[], hid:[], owned:['lagoon','gold']}, fedT:0, wheelT:0, rankClaimed:0, tokens:{small:0,big:0,legend:0},
   gstats:{frenzy:0, frenzyFish:0, chests:0, stars:0, spins:0, crates:0, flips:0, flipWins:0, scratch:0, scratchWins:0, pets:0, tasks:0},
   petLook:{}, bond:{}, petTints:['none'], petAccs:['none','bandana'], scales:0, specs:{}, relics:[], castN:0,
   pet2:null, dock:{wood:'oak', decor:[], owned:['oak']}, pass:{xp:0,lvl:0,claimed:0}, derby:null, medals:{gold:0,silver:0,bronze:0},
@@ -1395,7 +1395,7 @@ function migrate(o){ const d=fresh(); if(!isObj(o)) return d; o=saveClean(o,d);
   m.tickets=+o.tickets||0; if(o.freeSpins==null) m.freeSpins = (Date.now()-(o.wheelT||0)>=3600000) ? 1 : 0;
   if(!m.owned.hats.includes(m.look.hat)) m.look.hat='cap'; if(!PETI[m.pet]||!m.owned.pets.includes(m.pet)) m.pet='dog';
   m.buffs=(o.buffs||[]).filter(b=>b&&BK[b.k]&&b.until>Date.now()); m.junk=Object.assign({},o.junk||{});
-  m.settings=Object.assign(fresh().settings,o.settings||{}); const aq=Object.assign(fresh().aq,o.aq||{}); aq.owned=uniq(['lagoon','gold',...(aq.owned||[])]); aq.decor=(aq.decor||[]).filter(x=>aq.owned.includes(x)); m.aq=aq;
+  m.settings=Object.assign(fresh().settings,o.settings||{}); if(m.settings.units!=='lb') m.settings.units='kg'; const aq=Object.assign(fresh().aq,o.aq||{}); aq.owned=uniq(['lagoon','gold',...(aq.owned||[])]); aq.decor=(aq.decor||[]).filter(x=>aq.owned.includes(x)); aq.hid=(Array.isArray(aq.hid)?aq.hid:[]).filter(x=>aq.decor.includes(x)); m.aq=aq;
   m.tokens=Object.assign(fresh().tokens,o.tokens||{}); m.gstats=Object.assign(fresh().gstats,o.gstats||{}); delete m.muted;
   m.petLook=Object.assign({},o.petLook||{}); m.bond=Object.assign({},o.bond||{}); m.petTints=uniq(['none',...(o.petTints||[])]); m.petAccs=uniq(['none','bandana',...(o.petAccs||[])]);
   const rd=Object.assign(fresh().rods,o.rods||{}); rd.owned=uniq(['bamboo',...(rd.owned||[])]); if(!rd.owned.includes(rd.eq)) rd.eq='bamboo'; rd.lvl=Object.assign({},rd.lvl||{}); rd.att=Object.assign({},rd.att||{}); m.rods=rd;
@@ -1435,7 +1435,10 @@ const gv = k => GEAR[k].lv[S.gear[k]];
 const pr = k => S.perks[k]||0;
 const locIdx = id => LOCS.findIndex(l=>l.id===id);
 const curLoc = () => LOCS[locIdx(S.loc)];
-const kgStr = kg => kg < 10 ? kg.toFixed(2)+' kg' : kg < 100 ? kg.toFixed(1)+' kg' : fmt(kg)+' kg';
+/* weights: one formatter for the whole game, in the unit picked in Settings (director, 2026-11-19: "metric and imperial") */
+const wLb=()=>!!(S&&S.settings&&S.settings.units==='lb'), wNum=kg=>wLb()?kg*2.20462:kg, wUnit=()=>wLb()?'lb':'kg';
+const wFix=(kg,d)=>wNum(kg).toFixed(d)+' '+wUnit();
+const kgStr = kg => { const v=wNum(kg), u=' '+wUnit(); return v < 10 ? v.toFixed(2)+u : v < 100 ? v.toFixed(1)+u : fmt(v)+u; };
 const xpNeed = l => Math.round(l<=20 ? 80*Math.pow(1.38,l-1) : 80*Math.pow(1.38,19)*Math.pow(1.22,l-20)); // 0.3: gentler past level 20 so late levels stay reachable
 const PEARL_COIN=.25, PEARL_RARE=.03, PEARL_DIV=250000; // 0.3: pearls are rarer but each one does more
 const coinMult = () => 1 + PEARL_COIN*S.pearls + voyageLegacy(); /* 0.3.6: plus the Legacy of every voyage completed */
@@ -2674,7 +2677,7 @@ function renderSettings(P){ const s=S.settings; const sl=(k,label)=>`<div class=
      ${tg('musicOn','Music','Calm music that plays while you fish.')}${tg('ambient','Nature sounds','Waves, birds, crickets and wind for each water.')}
      <h5>Music style</h5><div class="chips">${styles.map(([k,n])=>`<button class="chipb" data-act="mstyle" data-k="${k}" aria-pressed="${s.style===k}">${n}</button>`).join('')}</div></div>
    ${V3ON?`<div class="tile"><h4>Controls</h4><h5>Casting</h5><div class="chips"><button class="chipb" data-act="castmode" data-k="meter" aria-pressed="${s.castMode!=='aim'}">Power meter</button><button class="chipb" data-act="castmode" data-k="aim" aria-pressed="${s.castMode==='aim'}">Tap to aim</button></div><div class="meta" style="margin-top:6px">${s.castMode==='aim'?'Tap the spot on the water you want. The line lands close to it, never quite perfect.':'Hold to fill the meter, let go at the right moment.'}</div>${tg('vibrate','Vibration','Phones buzz on a bite, when the line is close to snapping, and on a catch.')}<div class="meta" style="margin-top:6px">Reel by <b>holding</b>, by <b>drawing circles</b> on the water like a crank, or with the <b>mouse wheel</b>. Controllers work too: <b>A</b> casts and reels, the <b>right trigger</b> reels with pressure.</div></div>`:''}
-   <div class="tile"><h4>Display</h4>${tg('effects','Weather effects','Rain, snow, lightning flashes and sparkles.')}${tg('boostsOnScreen','Boost timers on screen','Show active boosts in the corner of the water.')}${tg('hints','Hints','The help line under the water.')}${tg('showFps','Frame rate','Shows how many frames per second the game draws, in the corner of the water.')}
+   <div class="tile"><h4>Display</h4>${tg('effects','Weather effects','Rain, snow, lightning flashes and sparkles.')}${tg('boostsOnScreen','Boost timers on screen','Show active boosts in the corner of the water.')}${tg('hints','Hints','The help line under the water.')}<h5>Weights</h5><div class="chips"><button class="chipb" data-act="units" data-k="kg" aria-pressed="${s.units!=='lb'}">Kilograms (kg)</button><button class="chipb" data-act="units" data-k="lb" aria-pressed="${s.units==='lb'}">Pounds (lb)</button></div>${tg('showFps','Frame rate','Shows how many frames per second the game draws, in the corner of the water.')}
      <div class="toggle"><div><b>Full screen</b><div class="meta">Fill the whole screen with the game.</div></div><button class="btn alt sm" data-act="fullscreen">Toggle</button></div></div>
    <div class="tile"><h4>Gameplay</h4>${tg('protectRare','Protect rare fish','“Sell all” keeps Epic, Legendary and shiny fish in your cooler.')}${tg('minigames','Mini-games','Now and then a mini-game pops up between catches. Turn this off and they never will.')}
      </div>
@@ -2696,6 +2699,7 @@ function extraAct(b){ const k=b.dataset.k, i=+b.dataset.i;
     case 'tog': S.settings[k]=!S.settings[k]; applyVolumes(); if(k==='musicOn'||k==='ambient') startAudio(); return;
     case 'mstyle': S.settings.style=k; return;
     case 'castmode': S.settings.castMode=k==='aim'?'aim':'meter'; return;
+    case 'units': S.settings.units=k==='lb'?'lb':'kg'; return;
     case 'fullscreen': { const d=document; try{ if(d.fullscreenElement) d.exitFullscreen(); else d.documentElement.requestFullscreen(); }catch(e){} return 'skip'; }
     case 'spin': { if(WH.spinning) return 'skip'; accrueSpins(); const freeSpin=k==='free' && S.freeSpins>0; if(!freeSpin){ const c=wheelCost(); if(S.money<c) return 'skip'; S.money-=c; } else { if(S.freeSpins>=SPIN_BANK) S.wheelT=Date.now(); S.freeSpins--; } b.disabled=true; taskProgress('game',1); spinWheel(!freeSpin); lastHud=''; return 'skip'; }
     case 'crate': { if(!['small','big','legend'].includes(k)) return; if(b.dataset.free){ if(S.tokens[k]<=0) return; S.tokens[k]--; } else { const c=crateCost(k); if(S.money<c) return; S.money-=c; } openCrate(k); addTickets({small:8,big:25,legend:80}[k]); taskProgress('game',1); return; }
@@ -2708,18 +2712,21 @@ function extraAct(b){ const k=b.dataset.k, i=+b.dataset.i;
     case 'feed': { if(Date.now()-S.fedT<3600000) return; S.fedT=Date.now(); addBuff('tank',.25,30,'Fed fish'); feedAnim=performance.now(); sfx.coin(); toast('Your fish are happy: +25% aquarium income for 30 min'); return; }
     case 'aqtheme': { const th=THEMES.find(x=>x[0]===k); if(!th) return; if(!S.aq.owned.includes(k)){ if(S.money<th[2]) return; S.money-=th[2]; S.aq.owned.push(k); sfx.coin(); } S.aq.theme=k; return; }
     case 'aqsand': { const sd=SANDS.find(x=>x[0]===k); if(!sd) return; if(!S.aq.owned.includes(k)){ if(S.money<sd[2]) return; S.money-=sd[2]; S.aq.owned.push(k); sfx.coin(); } S.aq.sand=k; return; }
+    case 'decorhide': { if(!S.aq.decor.includes(k)) return 'skip'; const h=S.aq.hid||(S.aq.hid=[]); S.aq.hid=h.includes(k)?h.filter(x=>x!==k):[...h,k]; return; } /* hide from view, keep the bonus */
     case 'decor': { const d=DECORI[k]; if(!d) return; if(!S.aq.owned.includes(k)){ if(!d.price||S.money<d.price) return; S.money-=d.price; S.aq.owned.push(k); sfx.coin(); }
-      if(S.aq.decor.includes(k)) S.aq.decor=S.aq.decor.filter(x=>x!==k); else if(S.aq.decor.length<aqSlots()) S.aq.decor.push(k); else toast('All decoration spots are used. Remove one first, or build more tanks.'); return; }
+      if(S.aq.decor.includes(k)){ S.aq.decor=S.aq.decor.filter(x=>x!==k); S.aq.hid=(S.aq.hid||[]).filter(x=>x!==k); } else if(S.aq.decor.length<aqSlots()) S.aq.decor.push(k); else toast('All decoration spots are used. Remove one first, or build more tanks.'); return; }
   }
   return 'skip'; }
 function aqCustomHTML(){ const fedLeft=Math.max(0,3600000-(Date.now()-S.fedT));
   const chip=(act,list,cur)=>list.map(x=>{ const own=S.aq.owned.includes(x[0]); const pvk=act==='aqtheme'?'theme':'sand'; const pv=AQ_PV&&AQ_PV.kind===pvk&&AQ_PV.id===x[0]; return `<button class="chipb" data-act="${own?act:'aqpv'}" data-k="${own?x[0]:pvk+':'+x[0]}" aria-pressed="${cur===x[0]||pv}" title="${own?'':'Preview first, then buy'}"><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${x[3]};margin-right:6px;vertical-align:-1px"></span>${x[1]}${own?'':' · '+fmt(x[2])}</button>`; }).join('');
   return `<div class="jsec">${aqPvBarHTML()}<div class="row spread"><h2>Decorate</h2><button class="btn ${fedLeft?'alt':''} sm" data-act="feed" ${fedLeft?'disabled':''}>${fedLeft?'Fed. Hungry again in '+Math.ceil(fedLeft/60000)+' min':'Feed your fish (+25% income, 30 min)'}</button></div>
    <h5>Water</h5><div class="chips">${chip('aqtheme',THEMES,S.aq.theme)}</div><h5>Floor</h5><div class="chips">${chip('aqsand',SANDS,S.aq.sand)}</div>
-   <h5>Decorations · ${S.aq.decor.length} of ${aqSlots()} spots used · +${Math.round(decorBonus()*100)}% aquarium income</h5><div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(150px,1fr))">${DECOR.map(d=>{ const own=S.aq.owned.includes(d.id), placed=S.aq.decor.includes(d.id);
-     return `<div class="tile ${placed?'done':''}" style="align-items:center;text-align:center;gap:4px"><canvas width="160" height="120" data-decor="${d.id}" data-own="${own?1:0}" style="width:80px;height:60px;cursor:default"></canvas><b style="font-size:14px">${own||d.price?d.name:'???'}</b><span class="meta">+${Math.round(d.b*100)}% income</span>
+   <h5>Decorations · ${S.aq.decor.length} of ${aqSlots()} spots used${(S.aq.hid||[]).length?' · '+S.aq.hid.length+' hidden':''}${[['income',decorBonus()],['boost',decorBoost()],['show',decorShow()]].filter(p=>p[1]>0).map(p=>' · +'+Math.round(p[1]*100)+'% '+DECOR_KIND_NAME[p[0]]).join('')}</h5><div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(150px,1fr))">${DECOR.map(d=>{ const own=S.aq.owned.includes(d.id), placed=S.aq.decor.includes(d.id), hidden=placed&&(S.aq.hid||[]).includes(d.id);
+     return `<div class="tile ${placed?'done':''}${hidden?' dhid':''}" style="position:relative;align-items:center;text-align:center;gap:4px">${placed?`<button type="button" class="dhide" data-act="decorhide" data-k="${d.id}" aria-pressed="${hidden}" title="${hidden?'Hidden from your tank, its bonus still counts. Show it again':'Hide it from your tank and keep its bonus'}">${hidden?'Hidden':'Hide'}</button>`:''}<canvas width="160" height="120" data-decor="${d.id}" data-own="${own?1:0}" style="width:80px;height:60px;cursor:default"></canvas><b style="font-size:14px">${own||d.price?d.name:'???'}</b><span class="meta">+${Math.round(d.b*100)}% income</span>
      ${own?`<button class="btn ${placed?'alt':''} sm" data-act="decor" data-k="${d.id}">${placed?'Remove':'Place'}</button>`:d.price?`<div class="row" style="justify-content:center;gap:4px"><button class="btn alt sm" data-act="aqpv" data-k="decor:${d.id}">Preview</button><button class="btn sm" data-act="decor" data-k="${d.id}" ${S.money>=d.price?'':'disabled'}>Buy · <span class="coin">${fmt(d.price)}</span></button></div>`:'<span class="meta">Mystery crates or prizes only</span>'}</div>`; }).join('')}</div></div>`; }
 function paintDecor(P){ P.querySelectorAll('canvas[data-decor]').forEach(c=>{ const x=c.getContext('2d'); x.clearRect(0,0,c.width,c.height); if(c.dataset.own!=='1'&&!DECORI[c.dataset.decor].price) mysteryThumb(x,c.width,c.height,c.dataset.decor); else drawDecor(x,c.dataset.decor,80,c.dataset.decor==='duck'?70:112,1,0); }); }
+/* hide a placed decoration from view, keep its bonus (director, 2026-11-19): a small switch in the card's corner */
+document.head.insertAdjacentHTML('beforeend','<style>#panel .dhide{position:absolute;top:34px;right:6px;z-index:2;min-height:32px;padding:0 11px;border-radius:999px;border:1px solid #ffffff2a;background:#0c1626e6;color:#cfe0f0;font:800 11.5px var(--display,system-ui);cursor:pointer}#panel .dhide[aria-pressed="true"]{background:linear-gradient(180deg,#ffe08a,#f3b94e);color:#2a1c05;border-color:#ffe6a3}#panel .tile.dhid canvas[data-decor]{opacity:.45}</style>');
 
 // ---------- music & ambience (all generated live, nothing to download) ----------
 const MUS={started:false, next:0, step:0, bar:0, idx:4, style:null, timer:null, n:null};
@@ -3807,7 +3814,7 @@ function petPreviewLook(id=editPet()){ const lk=Object.assign({},petLook(id)); i
 function petPvBarHTML(){ if(!PET_PV) return ''; const p=PET_PV;
   const buy = p.prize ? `<button class="btn sm" data-act="prize" data-k="${p.prize}" ${S.tickets>=p.price?'':'disabled'}>Get · 🎟 ${p.price}</button>` : `<button class="btn sm" data-act="${p.kind==='tint'?'pettint':'petacc'}" data-k="${p.id}" ${S.money>=p.price?'':'disabled'}>Buy · <span class="coin">${fmt(p.price)}</span></button>`;
   return `<div class="pvbar"><span>Previewing: <b>${esc(p.name)}</b></span><span class="row">${buy}<button class="btn alt sm" data-act="petpvoff">Stop</button></span></div>`; }
-function aqView(){ const v={theme:S.aq.theme, sand:S.aq.sand, decor:S.aq.decor.slice()}; if(!AQ_PV) return v;
+function aqView(){ const hid=S.aq.hid||[]; const v={theme:S.aq.theme, sand:S.aq.sand, decor:S.aq.decor.filter(id=>!hid.includes(id))}; /* hidden decorations keep their bonus but are not drawn (director, 2026-11-19) */ if(!AQ_PV) return v;
   if(AQ_PV.kind==='theme') v.theme=AQ_PV.id; else if(AQ_PV.kind==='sand') v.sand=AQ_PV.id; else if(!v.decor.includes(AQ_PV.id)) v.decor.push(AQ_PV.id); return v; }
 function aqPvBarHTML(){ if(!AQ_PV) return ''; const p=AQ_PV;
   const buy = p.prize ? `<button class="btn sm" data-act="prize" data-k="${p.prize}" ${S.tickets>=p.price?'':'disabled'}>Get · 🎟 ${p.price}</button>` : `<button class="btn sm" data-act="${p.kind==='theme'?'aqtheme':p.kind==='sand'?'aqsand':'decor'}" data-k="${p.id}" ${S.money>=p.price?'':'disabled'}>Buy · <span class="coin">${fmt(p.price)}</span></button>`;
@@ -4006,15 +4013,15 @@ function endDerby(){ const d=S.derby; if(!d) return; const place=derbyPlace(), b
   if(medal){ const m=[1,.5,.25][place-1]; const coins=earn(base*25*m*coinMult()), sc=Math.round(30*m), tk=Math.round(150*m); S.scales+=sc; S.tickets+=tk; S.medals[medal]++; addPassXP(300*m); txt=`+${fmt(coins)} coins, +${sc} Scales, +${tk} tickets`; sfx.catch(4); }
   else { S.tickets+=20; txt='+20 tickets for taking part'; sfx.lost(); }
   G.st = G.st==='idle'||G.st==='result'?G.st:G.st; $('evin').innerHTML=`<div class="rar" style="color:var(--gold)">Fishing derby results</div><h3>${medal?['🥇 First place!','🥈 Second place','🥉 Third place'][place-1]:'Fourth place. Next time!'}</h3>
-   <div class="list" style="margin:8px 0">${[{name:'You',score:d.total},...d.rivals].sort((a,b)=>b.score-a.score).map((r,i)=>`<div class="row spread prize"><span>${i+1}. <b>${esc(r.name)}</b></span><span>${r.score.toFixed(1)} kg</span></div>`).join('')}</div>
+   <div class="list" style="margin:8px 0">${[{name:'You',score:d.total},...d.rivals].sort((a,b)=>b.score-a.score).map((r,i)=>`<div class="row spread prize"><span>${i+1}. <b>${esc(r.name)}</b></span><span>${wFix(r.score,1)}</span></div>`).join('')}</div>
    <p class="sub">${txt}</p><button class="btn" data-ev="skip">Back to fishing</button>`; if(G.st==='idle'){ G.st='event'; $('evcard').hidden=false; } else { setTimeout(()=>{ if(G.st==='idle'){ G.st='event'; $('evcard').hidden=false; } else toast('Derby over: place '+place+'. '+txt); },2500); } checkFeats(); save(); }
 setInterval(()=>{ if(S.derby && Date.now()>=S.derby.until) endDerby(); const dl=$('derbyleft'); if(dl&&S.derby) dl.textContent=mmss(Math.max(0,Math.ceil((S.derby.until-Date.now())/1000)))+' left'; },1000);
 function derbyHTML(){ const d=S.derby; if(d){ const left=Math.max(0,Math.ceil((d.until-Date.now())/1000));
-    return `<div class="tile bwt" style="--c:#ffc94d;margin-bottom:12px"><div class="row spread"><h4>Fishing derby at ${LOCS[locIdx(d.loc)].name}</h4><span class="badge g" id="derbyleft">${mmss(left)} left</span></div><div class="meta">Your total: <b>${d.total.toFixed(1)} kg</b> from ${d.n} fish · you’re in place ${derbyPlace()}${S.loc!==d.loc?' · <span style="color:var(--danger)">travel back there for catches to count!</span>':''}</div>
-     ${d.rivals.map(r=>`<div class="meta">${esc(r.name)}: ${r.score.toFixed(1)} kg</div>`).join('')}</div>`; }
+    return `<div class="tile bwt" style="--c:#ffc94d;margin-bottom:12px"><div class="row spread"><h4>Fishing derby at ${LOCS[locIdx(d.loc)].name}</h4><span class="badge g" id="derbyleft">${mmss(left)} left</span></div><div class="meta">Your total: <b>${wFix(d.total,1)}</b> from ${d.n} fish · you’re in place ${derbyPlace()}${S.loc!==d.loc?' · <span style="color:var(--danger)">travel back there for catches to count!</span>':''}</div>
+     ${d.rivals.map(r=>`<div class="meta">${esc(r.name)}: ${wFix(r.score,1)}</div>`).join('')}</div>`; }
   return `<div class="tile bwt" style="--c:#ffc94d;margin-bottom:12px"><div class="row spread"><div><h4>Fishing derby</h4><div class="meta">Four minutes at ${curLoc().name}: land the heaviest total catch to beat ${RIVALS.map(r=>r[0]).join(', ')}. Medals pay coins, Scales, tickets and Tide Pass XP.</div><div class="meta">Medals: 🥇 ${S.medals.gold} · 🥈 ${S.medals.silver} · 🥉 ${S.medals.bronze}</div></div>
     <button class="btn" data-act="derby" ${S.money>=derbyCost()&&G.st==='idle'?'':'disabled'}>Enter · <span class="coin">${fmt(derbyCost())}</span></button></div></div>`; }
-function drawDerbyHUD(){ const d=S.derby; if(!d) return; const left=Math.max(0,Math.ceil((d.until-Date.now())/1000)); const txt='🏆 Derby '+mmss(left)+' · '+d.total.toFixed(1)+' kg · #'+derbyPlace()+(S.loc!==d.loc?' (wrong water)':'');
+function drawDerbyHUD(){ const d=S.derby; if(!d) return; const left=Math.max(0,Math.ceil((d.until-Date.now())/1000)); const txt='🏆 Derby '+mmss(left)+' · '+wFix(d.total,1)+' · #'+derbyPlace()+(S.loc!==d.loc?' (wrong water)':'');
   g.font='700 12px system-ui'; const tw=g.measureText(txt).width; g.fillStyle='rgba(5,14,20,.78)'; rr(W-tw-34,40,tw+20,24,12); g.fill(); g.fillStyle='#ffc94d'; g.textAlign='left'; g.fillText(txt,W-tw-24,56); }
 
 // ---------- richer scenery ----------
@@ -10938,7 +10945,7 @@ function statsHTML(){ const wx=weather(), b=BAIT[S.baitSel]||BAIT.worm, dm={rare
   return `<div class="st-grid">
     <div class="tile"><h4>Catching</h4>${statRow('Bite speed',mulS(bite),'Bait, level, skills, weather, boosts')}${statRow('Hook window',hookWin().toFixed(2)+' s')}${statRow('Rare odds score',rs.toFixed(2),'Far casts: '+rsFar.toFixed(2))}
       ${statRow('Epic or better',fmtOdds(epNow),'per fish here, '+fmtOdds(epBase)+' with no bonuses')}${statRow('Legendary or better',fmtOdds(legNow),'per fish here, '+fmtOdds(legW)+' with no bonuses')}${statRow('Shiny chance',(sh*100).toFixed(2)+'%')}${statRow('Hybrid chance',(hybridChance()*100).toFixed(2)+'%')}${statRow('Junk chance',(junkChance()*100).toFixed(1)+'%')}${statRow('Far casts count from',Math.round(farAt()*100)+'% power')}</div>
-    <div class="tile"><h4>Fighting</h4>${statRow('Reel speed',reelSpeed().toFixed(2)+' m/s')}${statRow('Line strength',gv('line')+' kg')}${statRow('Line tension',mulS(tensionMult()),'Lower is better')}${statRow('Temper build-up',mulS(tempMult()),'Lower is better')}${statRow('Max line out',Math.round(gv('rod')*rodCast()+28+rodSpool())+' m')}</div>
+    <div class="tile"><h4>Fighting</h4>${statRow('Reel speed',reelSpeed().toFixed(2)+' m/s')}${statRow('Line strength',Math.round(wNum(gv('line')))+' '+wUnit())}${statRow('Line tension',mulS(tensionMult()),'Lower is better')}${statRow('Temper build-up',mulS(tempMult()),'Lower is better')}${statRow('Max line out',Math.round(gv('rod')*rodCast()+28+rodSpool())+' m')}</div>
     <div class="tile"><h4>Coins & XP</h4>${statRow('Sale price',mulS(sm),'Level, Haggler, rank, boosts, pearls')}${statRow('XP',mulS(xm))}${statRow('Wisdom Pearls',mulS(cm),S.pearls+' pearl'+(S.pearls===1?'':'s'))}${statRow('Streak bonus cap','+'+Math.round(streakCap()*100)+'% XP')}
       ${statRow('Aquarium',fmt(Math.round(tankRate()*60))+' / hour',S.tank.length+' fish · up to '+Math.round(offlineCap()/60)+' h away')}${statRow('Cozy level',cozy()+' ♥','+'+cozyBonus()+'% XP, +'+(cozyBonus()*.5)+'% bite speed and sale price')}</div>
     <div class="tile"><h4>Right now</h4>${statRow('Water',esc(curLoc().name))}${statRow('Weather',esc(wxName(wx.k)),esc(wx.note||''))}${statRow('Time of day',isNight()?'Night':'Day')}${statRow('Active boosts',S.buffs.filter(x=>x.until>Date.now()).length||'None')}${statRow('Skill points',ptsFree()+' free · '+ptsSpent()+' spent')}</div>
@@ -11043,7 +11050,6 @@ function shopToolsFor(grid,which){ if(!grid) return; const st=SHOPT[which], tile
   const items=tiles.map(t=>({t,it:shopItem(t,which)})).filter(x=>x.it);
   // aquarium tiles say what kind of bonus they give
   if(which==='aq') for(const {t,it} of items){ const m=t.querySelector('.meta'); if(m&&/income$/.test(m.textContent.trim())) m.innerHTML=`+${Math.round(it.bonus*100)}% ${DECOR_KIND_NAME[it.kind]}`; if(!t.querySelector('.dkind')){ const b=document.createElement('span'); b.className='dkind k-'+it.kind; b.textContent=DECOR_KIND_SHORT[it.kind]; t.insertBefore(b,t.firstChild); } }
-  if(which==='aq'){ const h=[...grid.parentNode.querySelectorAll('h5')].find(x=>/^Decorations/.test(x.textContent)); if(h){ const parts=[['income',decorBonus()],['boost',decorBoost()],['show',decorShow()]].filter(p=>p[1]>0).map(p=>`+${Math.round(p[1]*100)}% ${DECOR_KIND_NAME[p[0]]}`); h.textContent=`Decorations · ${S.aq.decor.length} of ${aqSlots()} spots used`+(parts.length?' · '+parts.join(' · '):''); } }
   let bar=grid.previousElementSibling; if(!bar||!bar.classList||!bar.classList.contains('shoptools')){ bar=document.createElement('div'); bar.className='shoptools'; grid.parentNode.insertBefore(bar,grid); }
   const chip=(grp,v,label,cur)=>`<button type="button" class="chipb" data-st="${grp}" data-v="${v}" aria-pressed="${cur===v}">${label}</button>`;
   const sorts=[['price','Price: low to high'],['pricehi','Price: high to low'],['name','Name A to Z'],['bonus',which==='aq'?'Bonus: biggest first':'Cozy: most first']];
@@ -12211,6 +12217,7 @@ const SEARCH_IDX=[
  ['Settings: sound','settings','Sound','sound music volume ambient'],
  ['Settings: controls','settings','Controls','controls cast aim keyboard'],
  ['Settings: display','settings','Display','display effects motion full screen'],
+ ['Settings: weights (kg or lb)','settings','Display','weight weights units kg kilograms lb pounds metric imperial'],
  ['Settings: gameplay','settings','Gameplay','gameplay protect rare fish minigames'],
  ['Settings: patch notes','settings','Patch notes','patch notes updates whats new changes'],
  ['Settings: save & codes','settings','Save & codes','save code backup restore erase'],
@@ -12622,7 +12629,7 @@ function chalEnd(won){ const c=S.chal; if(!c) return; const C=CHAL[c.id]; S.chal
   else { m=won?C.m:0; title=won?C.name+' complete!':C.name+': out of time'; }
   let txt; if(m>0){ const r=chalReward(m); earn(r.coins); S.scales+=r.scales; S.tickets+=r.tickets; addPassXP(r.xp); txt=`+${fmt(r.coins)} coins, +${r.scales} Scales, +${r.tickets} tickets`; try{ sfx.catch(4); }catch(e){} S.stats.chalWins=(S.stats.chalWins||0)+1; }
   else { S.tickets+=10; txt='+10 tickets for taking part'; try{ sfx.lost(); }catch(e){} }
-  const table=C.ranked?`<div class="list" style="margin:8px 0">${[['You',c.best],...c.rivals].sort((a,b)=>b[1]-a[1]).map((r,i)=>`<div class="row spread prize"><span>${i+1}. <b>${esc(r[0])}</b></span><span>${r[1]?r[1].toFixed(2)+' kg':'–'}</span></div>`).join('')}</div>`:`<p class="sub">${c.prog} / ${c.need}</p>`;
+  const table=C.ranked?`<div class="list" style="margin:8px 0">${[['You',c.best],...c.rivals].sort((a,b)=>b[1]-a[1]).map((r,i)=>`<div class="row spread prize"><span>${i+1}. <b>${esc(r[0])}</b></span><span>${r[1]?wFix(r[1],2):'–'}</span></div>`).join('')}</div>`:`<p class="sub">${c.prog} / ${c.need}</p>`;
   const show=()=>{ $('evin').innerHTML=`<div class="rar" style="color:var(--gold)">${C.icon} ${esc(C.name)}</div><h3>${esc(title)}</h3>${table}<p class="sub">${txt}</p><button class="btn" data-ev="skip">Back to fishing</button>`; G.st='event'; $('evcard').hidden=false; };
   if(G.st==='idle') show(); else setTimeout(()=>{ if(G.st==='idle') show(); else toast(C.name+': '+title+'. '+txt); },2500);
   checkFeats(); save(); if(S.tab==='events') renderPanel(); }
@@ -12647,7 +12654,7 @@ setInterval(()=>{ const c=S.chal; if(c&&Date.now()>=c.until) chalEnd(false);
 const _nextGoal_036=nextGoal;
 nextGoal=function(){ const c=S.chal; if(c){ const C=CHAL[c.id], left=mmss(Math.max(0,Math.ceil((c.until-Date.now())/1000)));
     const wrong=S.loc!==c.loc?' (at '+LOCS[locIdx(c.loc)].name+')':'';
-    if(C.ranked) return {t:C.icon+' '+C.name+' · '+left+wrong, sub:(c.best?'Your best '+c.best.toFixed(2)+' kg · place '+chalPlace(c):'No fish weighed yet')+' · to beat: '+Math.max(...c.rivals.map(r=>r[1])).toFixed(2)+' kg', p:Math.min(1,c.best/Math.max(...c.rivals.map(r=>r[1]))), tab:'events', live:true};
+    if(C.ranked) return {t:C.icon+' '+C.name+' · '+left+wrong, sub:(c.best?'Your best '+wFix(c.best,2)+' · place '+chalPlace(c):'No fish weighed yet')+' · to beat: '+wFix(Math.max(...c.rivals.map(r=>r[1])),2), p:Math.min(1,c.best/Math.max(...c.rivals.map(r=>r[1]))), tab:'events', live:true};
     return {t:C.icon+' '+C.name+' · '+left+wrong, sub:C.rule(c)+': '+c.prog+' / '+c.need, p:c.prog/c.need, tab:'events', live:true}; }
   const e=liveScheds()[0]; if(e){ const l=schedLeft(e); return {t:e.icon+' '+e.name+' · '+mmss(Math.ceil(l/1000))+' left', sub:e.what+' at every water', p:l/(e.len*MIN), tab:'events', live:true}; }
   return _nextGoal_036(); };
@@ -12662,7 +12669,7 @@ renderEvents=function(P){ const o=catchOdds(), c=S.chal;
     return `<div class="tile ev-active"><div class="row spread"><div><span class="rar" style="color:var(--gold)">Your challenge · ${esc(LOCS[locIdx(c.loc)].name)}</span><h4>${C.icon} ${esc(C.name)}</h4></div><span class="badge g"><span data-evleft="chal">${mmss(left)}</span> left</span></div>
       <div class="meta">${esc(C.rule(c))}${C.ranked?'':': <b>'+c.prog+' / '+c.need+'</b>'}${S.loc!==c.loc?' · <b style="color:#ff9a8a">Only catches at '+esc(LOCS[locIdx(c.loc)].name)+' count</b>':''}</div>
       <i class="ev-bar"><b style="width:${Math.round(pct*100)}%"></b></i>
-      ${C.ranked?`<div class="list" style="margin-top:6px">${[['You',c.best],...c.rivals].sort((a,b)=>b[1]-a[1]).map((r,i)=>`<div class="row spread prize"><span>${i+1}. <b>${esc(r[0])}</b></span><span>${r[1]?r[1].toFixed(2)+' kg':'–'}</span></div>`).join('')}</div>`:''}
+      ${C.ranked?`<div class="list" style="margin-top:6px">${[['You',c.best],...c.rivals].sort((a,b)=>b[1]-a[1]).map((r,i)=>`<div class="row spread prize"><span>${i+1}. <b>${esc(r[0])}</b></span><span>${r[1]?wFix(r[1],2):'–'}</span></div>`).join('')}</div>`:''}
       <div class="row" style="margin-top:8px"><button class="btn alt sm" data-act="chalquit">Give up</button></div></div>`; })():'';
   const tiles=Object.entries(CHAL).map(([id,C])=>{ const cd=S.chalCd&&S.chalCd[id]>Date.now(), fake={need:C.slow?1:C.setup(o).need};
     const btn=c?'<button class="btn sm" disabled>Finish your challenge first</button>':cd?`<button class="btn alt sm" disabled>Ready in <span data-evleft="${id}">${mmss(Math.ceil((S.chalCd[id]-Date.now())/1000))}</span></button>`:`<button class="btn sm" data-act="chalgo" data-k="${id}">Start · ${C.mins} min</button>`;
@@ -12977,7 +12984,7 @@ const DW={
     if(c){ const C=CHAL[c.id], left=Math.max(0,c.until-Date.now()), here=S.loc===c.loc; state='ready live';
       const best=C.ranked?Math.max(...c.rivals.map(r=>r[1])):0;
       sum=cd(left)+' left';
-      body+=`<div class="dwq"><div class="dwqt"><b>${C.icon} ${esc(C.name)}${here?'':' · at '+esc(LOCS[locIdx(c.loc)].name)}</b><span class="meta">${C.ranked?(c.best?'Your best '+c.best.toFixed(2)+' kg · place '+chalPlace(c):'No fish weighed yet')+' · to beat '+best.toFixed(2)+' kg':esc(C.rule(c))+': '+c.prog+' / '+c.need}</span>${dwBar(C.ranked?Math.min(1,(c.best||0)/best):c.prog/c.need,'linear-gradient(90deg,#7fe3c4,#ffd36a)')}</div></div>`; }
+      body+=`<div class="dwq"><div class="dwqt"><b>${C.icon} ${esc(C.name)}${here?'':' · at '+esc(LOCS[locIdx(c.loc)].name)}</b><span class="meta">${C.ranked?(c.best?'Your best '+wFix(c.best,2)+' · place '+chalPlace(c):'No fish weighed yet')+' · to beat '+wFix(best,2):esc(C.rule(c))+': '+c.prog+' / '+c.need}</span>${dwBar(C.ranked?Math.min(1,(c.best||0)/best):c.prog/c.need,'linear-gradient(90deg,#7fe3c4,#ffd36a)')}</div></div>`; }
     for(const e of lives){ const l=schedLeft(e); state=state||'live'; if(!sum) sum=e.icon+' live';
       body+=`<div class="dwq"><div class="dwqt"><b>${e.icon} ${esc(e.name)} <span class="dwlive">LIVE</span></b><span class="meta">${esc(e.what)} · ${cd(l)} left</span>${dwBar(l/(e.len*MIN),e.col)}</div></div>`; }
     if(!lives.length){ const nx=SCHED.map(e=>[e,schedNext(e)]).sort((a,b)=>a[1]-b[1])[0]; if(nx){ body+=`<div class="dwrow"><span class="meta">Next: ${nx[0].icon} ${esc(nx[0].name)} in ${cd(nx[1])}</span></div>`; if(!sum) sum='next in '+cd(nx[1]); } }
@@ -15620,7 +15627,7 @@ document.head.insertAdjacentHTML('beforeend',`<style>
         grid.querySelectorAll(':scope > .tile').forEach(t=>{ const c=t.querySelector('canvas[data-decor]'); if(!c) return; const id=c.dataset.decor, own=S.aq.owned.includes(id), placed=S.aq.decor.includes(id), d=DECORI[id];
           const pvB=t.querySelector('[data-act="aqpv"]'), useB=t.querySelector('[data-act="decor"]'); const trying=AQ_PV&&AQ_PV.kind==='decor'&&AQ_PV.id===id;
           t.classList.toggle('aq07-trying',!!trying); t.classList.toggle('aq07-placed',placed);
-          const st=document.createElement('span'); st.className='aq07-st'; st.innerHTML= own?(placed?'In your tank · tap to remove':'Owned · tap to place'):(d&&d.price?(trying?'Trying · buy below the tank':'<span class="coin">'+fmt(d.price)+'</span> · tap to try'):'Crates and prizes only'); t.appendChild(st);
+          const st=document.createElement('span'); st.className='aq07-st'; st.innerHTML= own?(placed?((S.aq.hid||[]).includes(id)?'Hidden · bonus still counts · tap to remove':'In your tank · tap to remove'):'Owned · tap to place'):(d&&d.price?(trying?'Trying · buy below the tank':'<span class="coin">'+fmt(d.price)+'</span> · tap to try'):'Crates and prizes only'); t.appendChild(st);
           t.querySelectorAll(':scope > .row, :scope > .btn').forEach(x=>x.classList.add('aq07-hide'));
           if(own&&useB||(!own&&pvB)){ t.setAttribute('role','button'); t.tabIndex=0; t.addEventListener('click',e=>{ if(e.target.closest('button')) return; if(own) useB.click(); else if(!trying) pvB.click(); }); } }); }
     }catch(e){ console.error(e); } return r; }; }
@@ -15772,14 +15779,24 @@ html body.phone-app #menuov #panel.aq07 .aq07-trying .aq07-st,html body.phone-la
       const caught=!!S.journal[sel.id], cv=det.querySelector('canvas[data-fish]'); if(!cv||det.querySelector('.mb-shsw')) return;
       const sw=document.createElement('div'); sw.className='mb-shsw'; sw.setAttribute('role','group'); sw.setAttribute('aria-label','Show the normal or the shiny look');
       sw.innerHTML=`<button type="button" data-v="0" aria-pressed="${!shinyView}">Normal</button><button type="button" data-v="1" aria-pressed="${shinyView}" ${caught?'':'disabled'}>✦ Shiny</button>${caught?'':'<span class="mb-shnote">Catch it to see its shiny look</span>'}`;
-      cv.after(sw); if(caught){ cv.dataset.sh=shinyView?'1':'0'; paintFish(det); }
+      const row=document.createElement('div'); row.className='mb-flrow'; row.appendChild(sw); cv.after(row); if(caught){ cv.dataset.sh=shinyView?'1':'0'; paintFish(det); }
       sw.querySelectorAll('button').forEach(b=>b.addEventListener('click',e=>{ e.stopPropagation(); if(b.disabled) return; shinyView=b.dataset.v==='1'; sw.querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',String(x===b))); cv.dataset.sh=shinyView?'1':'0'; paintFish(det); }));
-    }catch(e){ console.error(e); } }; }
+      const bk=document.createElement('button'); bk.type='button'; bk.className='mb-flback'; bk.textContent='↩ Back to the list'; row.appendChild(bk);
+      bk.addEventListener('click',e=>{ e.stopPropagation(); const c=P.querySelector(`.jcard[data-k="${sel.id}"]`); c&&c.scrollIntoView({block:'center',behavior:'smooth'}); });
+    }catch(e){ console.error(e); } };
+  /* director, 2026-11-19 ("is not shown on Android"): the details (with the switch) render at the top of the page while the
+     player taps a fish far down the list, so the tap looked like it did nothing. After the tap (never during a render) the
+     details scroll into view; "Back to the list" returns to that fish's card. */
+  document.addEventListener('click',e=>{ if(!MOB()) return; const c=e.target.closest&&e.target.closest('#panel .jcard[data-act="enc"]'); if(!c) return;
+    const k=c.dataset.k; setTimeout(()=>{ if(encSel!==k) return; const det=document.querySelector('#panel .tile.detail'); det&&det.scrollIntoView({block:'start',behavior:'smooth'}); },0); },true); }
 document.head.insertAdjacentHTML('beforeend',`<style>
 html body.phone-app #panel .mb-shsw,html body.phone-land #panel .mb-shsw{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:8px 0 4px;padding:4px;border-radius:12px;background:#0c1626;border:1px solid #ffffff17;width:max-content;max-width:100%;box-sizing:border-box}
 html body.phone-app #panel .mb-shsw button,html body.phone-land #panel .mb-shsw button{border:0;border-radius:10px;min-height:36px;padding:0 14px;background:transparent;color:#9fb3c8;font:800 13px var(--display);cursor:pointer}
 html body.phone-app #panel .mb-shsw button[aria-pressed="true"],html body.phone-land #panel .mb-shsw button[aria-pressed="true"]{background:linear-gradient(180deg,#ffe08a,#f3b94e);color:#2a1c05}
 html body.phone-app #panel .mb-shsw button:disabled,html body.phone-land #panel .mb-shsw button:disabled{opacity:.45;cursor:default}
+html body.phone-app #panel .mb-flrow,html body.phone-land #panel .mb-flrow{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:8px 0 4px}
+html body.phone-app #panel .mb-flrow .mb-shsw,html body.phone-land #panel .mb-flrow .mb-shsw{margin:0}
+html body.phone-app #panel .mb-flback,html body.phone-land #panel .mb-flback{border:1px solid #ffffff17;border-radius:10px;min-height:44px;padding:0 14px;margin:0;background:#0c1626;color:#cfe0f0;font:800 13px var(--display);cursor:pointer}
 html body.phone-app #panel .mb-shnote,html body.phone-land #panel .mb-shnote{font:700 11.5px var(--display);color:#9fb3c8;padding:0 6px}
 </style>`);
 // =====================================================================
@@ -15925,7 +15942,7 @@ html body.phone-app #mbwx[data-k="Rain"],html body.phone-land #mbwx[data-k="Rain
 //    two are hidden there. The help text speaks about touch only (no mouse wheel, no keyboard).
 // Android + iPhone only.
 // =====================================================================
-const DEV_KEYS=['master','music','sfx','amb','musicOn','ambient','style','castMode','vibrate','effects','boostsOnScreen','hints','showFps','gfx','fpsCap','dockMini','hdrStat','logShow','vaultSort','hideGoal','lastPage','pageLast'];
+const DEV_KEYS=['master','music','sfx','amb','musicOn','ambient','style','castMode','units','vibrate','effects','boostsOnScreen','hints','showFps','gfx','fpsCap','dockMini','hdrStat','logShow','vaultSort','hideGoal','lastPage','pageLast'];
 const DEV_STORE='dl-device-settings-v1';
 var DEV_GUARD=null;
 const IS_IPHONE=()=>/iPhone|iPod/.test(navigator.userAgent)||(/[?&]test\b/.test(location.search)&&/[?&]iphone\b/.test(location.search));
@@ -15944,9 +15961,15 @@ const IS_IPHONE=()=>/iPhone|iPod/.test(navigator.userAgent)||(/[?&]test\b/.test(
   if(/[?&]test\b/.test(location.search)) window.__devSettings=()=>({store:read(), keys:DEV_KEYS.slice()}); }
 
 // ---------- frame rate: the game's work runs only as often as the chosen rate (the display keeps its own timing) ----------
-{ const _fr=frame; let shown=0;
+{ const _fr=frame; let ema=0, lastRaw=0, k=0;
   const capMs=()=>IS_IPHONE()?0:1000/60; /* Android draws 60 frames a second (on a 120 Hz screen too: director 2026-11-18, "his default was always working perfectly fine"), iPhone runs at its natural rate; no frame-rate setting on either phone, any old saved fpsCap is ignored */
-  frame=function(now){ if(DEV_GUARD) DEV_GUARD(); const cap=MOB()?capMs():0; if(cap&&shown&&now>=shown&&now-shown<cap-2){ requestAnimationFrame(frame); return; } shown=(cap&&shown&&now>=shown&&now-shown<cap*2)?shown+cap:now; return _fr.apply(this,arguments); }; }
+  /* 2026-11-19 (director: "Android: Aquarium preview choppy"): the old limiter skipped by time, so on a 90 Hz screen it drew after
+     11 ms, then 22 ms, then 11... (simulated: half the gaps short, half long) and on 144 Hz 14/21 ms: an uneven rhythm reads as
+     stutter. Now it draws every n-th screen refresh, n = the smallest that stays at or under 60 a second: steady 60 on 60/120 Hz,
+     steady 45 on 90 Hz, steady 48 on 144 Hz. The screen's rate is measured (adaptive screens change it), never assumed. */
+  frame=function(now){ if(DEV_GUARD) DEV_GUARD(); const cap=MOB()?capMs():0;
+    if(cap){ const d=now-lastRaw; lastRaw=now; if(d>3&&d<50) ema=ema?ema*.9+d*.1:d; const n=ema?Math.max(1,Math.ceil(cap/ema-.15)):1; if(++k<n){ requestAnimationFrame(frame); return; } k=0; }
+    return _fr.apply(this,arguments); }; }
 
 // ---------- the Settings page on phones ----------
 { const _rs=renderSettings;
@@ -17037,7 +17060,7 @@ html body.phone-land .hud > .mb-stat8 > .stat.loc .lbl::after,html body.phone-ap
       h.addEventListener('pointerdown',e=>e.stopPropagation()); h.addEventListener('click',e=>{ e.stopPropagation(); e.preventDefault(); try{ startAudio(); }catch(er){} openMenu('home'); }); }
     if(h.previousElementSibling!==aq) aq.after(h);
     let v='—'; try{ v=cozy()+' ♥'; }catch(e){} const b=h.querySelector('b'); if(b.textContent!==v) b.textContent=v; };
-  setTimeout(ensure,60); setInterval(ensure,1000); addEventListener('resize',()=>setTimeout(ensure,220)); }
+  ensure(); setInterval(ensure,1000); addEventListener('resize',()=>setTimeout(ensure,220)); } /* built as the page loads (a 60 ms delay let the top bar open without Home and then shift; the QA top-bar check caught it right after a reload) */
 document.head.insertAdjacentHTML('beforeend',`<style>html body.phone-land .hud > .mb-stat8,html body.phone-land .hud > .mb-stat8 > .stat{flex:0 0 auto!important;min-width:max-content!important}html body.phone-land .hud > .mb-stat8 > .stat .lbl,html body.phone-land .hud > .mb-stat8 > .stat b{white-space:nowrap!important;overflow:visible!important;text-overflow:clip!important}</style>`); /* the info box never squeezes its words; the chips to its right make room (Tasks steps aside first) */
 /* round 8 (director, 2026-11-18: "goal shouldn't be on the top header. Bait should move up there instead"): the goal lives in Quests
    (side panel); Bait sits in the top bar after Tasks: the bait you use (and how many are left), tap to open Tackle, Bait. The Bait
@@ -17049,7 +17072,7 @@ document.head.insertAdjacentHTML('beforeend',`<style>html body.phone-land .hud >
     const after=document.getElementById('mbtasks')||document.getElementById('mblive'), cool=hud.querySelector('.st-cool');
     if(cool&&c.nextElementSibling!==cool) cool.before(c); else if(!cool&&after&&c.previousElementSibling!==after) after.after(c);
     const t=lbl(), b=c.querySelector('b'); if(b.textContent!==t) b.textContent=t; };
-  setTimeout(ensure,80); setInterval(ensure,1000); addEventListener('resize',()=>setTimeout(ensure,230)); }
+  ensure(); setInterval(ensure,1000); addEventListener('resize',()=>setTimeout(ensure,230)); }
 document.head.insertAdjacentHTML('beforeend',`<style>
 html body.phone-land .hud > #mbgoal,html body.phone-app .hud > #mbgoal,html body.phone-land #goalchip,html body.phone-app #goalchip{display:none!important}
 
@@ -17874,6 +17897,9 @@ PATCHES.unshift({v:'0.4.8.7', name:'Lighter and Smoother', items:[
   'Less work on every frame, everything looks the same: lights and glows, still home decorations, coloured pets, the top bar and Starfall’s sky all cost less to draw.',
   'In narrow windows (split-screen), the top bar shows Home again and your coins, level and water are readable instead of cut off.']});
 PATCHES.unshift({v:'0.4.9', name:'Work in progress', items:[
+  '## New',
+  'Settings › Display: choose kilograms or pounds for every fish weight in the game.',
+  'Aquarium › Decorate: hide a placed decoration from your tank and keep its bonus, handy for sticking to a theme.',
   '## Fixes',
   'Pets in the shop, Wardrobe and previews are awake again at night (only pets on your dock fall asleep).',
   'When a bigger fish swallows your catch, the first fish stays a surprise until you land it.',
@@ -17899,11 +17925,19 @@ PATCHES.unshift({v:'0.4.9', name:'Work in progress', items:[
   'Aquarium coins use the short form for big amounts (like the top bar), so they always fit.',
   'Inside Settings only the Settings tab lights up (the gear next to it no longer lights up too).',
   'In narrow windows the side panel shows its icons, so every section fits without scrolling.',
+  'Fish Log: tapping a fish brings its details into view (they appeared out of sight at the top), with the Normal / Shiny switch and a “Back to the list” button.',
+  'Home and Bait are in the top bar from the first moment, so it no longer shifts just after the game opens.',
+  'Smoother on 90 Hz and 144 Hz screens: frames arrive at an even pace (the Aquarium tank looked choppy).',
   '## Behind the scenes',
   'Old unused parts of the game were cleared out (a retired menu button, an old hairstyle, old dolphin and Boardwalk drawings), so it starts with a little less work and has less to keep running every second.']});
 // Android test notes (preview builds only; the live game never shows them). One short line per change in the next test build,
 // curly apostrophes only. The card opens once per device whenever the text changes. Released notes live in notes_release.js.
-const TEST_NOTES={v:'test', label:'Test build · Android', name:'0.4.9, part 1: fixes (5)', items:[
+const TEST_NOTES={v:'test', label:'Test build · Android', name:'0.4.9, part 2: batch 1 finished', items:[
+  'New: Settings › Display › Weights: kilograms or pounds.',
+  'New: Aquarium › Decorate: “Hide” on a placed decoration takes it out of the tank but keeps its bonus.',
+  'Fish Log: tap a fish far down the list: its details (with Normal / Shiny) come into view; “Back to the list” returns you.',
+  'The top bar has Home and Bait from the first moment (it shifted just after opening).',
+  'Smoother frame pacing on 90 Hz and 144 Hz screens; please check the Aquarium tank.',
   'Clean-up: unused old parts removed (retired Menu and Overview buttons, an old hairstyle, old dolphins and Boardwalk drawings). Nothing should look different; tell me if anything does.',
   'Settings: only the Settings tab lights up (the gear no longer lights up next to it).',
   'Narrow windows (split-screen): the side panel shows icons only, so all sections fit.',
@@ -17935,6 +17969,9 @@ function restore(s){ const o=JSON.parse(s); for(const k of Object.keys(S)) delet
 function T(name,fn){ const s0=snap(); const g0={st:G.st}; let r; try{ r=fn(); }catch(e){ r={ok:false, detail:'THREW '+(e&&e.message)+' '+String(e&&e.stack||'').split('\n')[1]}; }
   finally{ try{ restore(s0); G.st=g0.st==='idle'?'idle':G.st; }catch(e){} }
   const ok=r===true||!!(r&&r.ok===true); QA.R.push({sys:QA.sys, name, ok, detail:r===true?'':(r&&r.detail!=null?String(r.detail):String(r))}); return ok; }
+/* the top bar as the page finished loading (before any timer ran): checked against the settled bar by "top bar is complete from the first frame" */
+const BAR_SEL=['.hud > .st-cool','.hud > .st-aq','.hud > #mbhome','.hud > .st-log','.hud #settingsbtn','#mbbait','.hud > .mb-stat8','#pchead .pch-stats > .st-cool','#pchead .pch-stats > .st-aq','#pchead .pch-stats > .st-log','#pchead [data-pch="settings"]','#pcscene > .stat.loc','#catdock .cdb'];
+let BAR0=null; addEventListener('DOMContentLoaded',()=>{ BAR0=BAR_SEL.filter(q=>document.querySelector(q)); },{once:true});
 const eq=(a,b,eps=1e-9)=>Math.abs(a-b)<=eps*Math.max(1,Math.abs(a),Math.abs(b));
 const fin=x=>typeof x==='number'&&isFinite(x);
 // a real click on a hidden button inside the page: runs the game's own action handler (checks, save, refresh)
@@ -18050,6 +18087,32 @@ ui(){ QA.sys='UI';
     if(seen<.55) return {ok:false,detail:'the test could not make a night scene (night '+seen.toFixed(2)+')'};
     const m=petMood3('duck'); return m.sleep?{ok:false,detail:'after a night scene (night '+seen.toFixed(2)+') a shop pet is drawn asleep'}:{ok:true,detail:'night '+seen.toFixed(2)+' stayed in the scene'}; });
   T('menu top row: only one thing is lit at a time (the gear and the Settings tab were both gold)',()=>{ const mob=typeof MOB==='function'&&MOB(); if(!mob) return {ok:true,detail:'phones only'}; const bad=[]; for(const t of qaAllPages()){ openMenu(t); const top=[...document.querySelectorAll('#menuov .mo-tools *, #menuov .subbar *')].filter(e=>e.offsetParent!==null&&(e.matches('button,[role="tab"]'))&&(e.classList.contains('on')||e.getAttribute('aria-selected')==='true'||e.getAttribute('aria-pressed')==='true')); if(top.length>1) bad.push(t+': '+top.map(e=>(e.getAttribute('aria-label')||e.textContent).trim().slice(0,18)).join(' + ')); } closeMenu(); return bad.length?{ok:false,detail:[...new Set(bad)].slice(0,6).join(' | ')}:{ok:true}; });
+  T('weights: with Pounds picked, no page shows kg, and the numbers convert (Settings: metric / imperial)',()=>{ const bad=[]; const keep=S.settings.units; S.settings.units='lb'; try{ if(kgStr(1)!=='2.20 lb') bad.push('kgStr(1) = '+kgStr(1)); if(kgStr(30)!=='66.1 lb') bad.push('kgStr(30) = '+kgStr(30));
+      const look=tag=>{ const txt=($('panel').innerText||'')+' '+(document.querySelector('.hud')||{innerText:''}).innerText; const m=txt.match(/\d[\d.,]*\s?kg\b/); if(m) bad.push(tag+': "'+m[0]+'"'); };
+      for(const t of qaAllPages()){ openMenu(t); look(t); for(const b of [...document.querySelectorAll('#menuov .sect-nav [data-sect], #panel .sect-nav [data-sect]')]){ b.click(); look(t+'/'+b.dataset.sect); } }
+      openMenu('journal'); const c=$('panel').querySelector('[data-act="enc"]'); if(c){ c.click(); look('journal details'); } closeMenu();
+    } finally{ S.settings.units=keep; } return bad.length?{ok:false,detail:[...new Set(bad)].slice(0,6).join(' | ')}:{ok:true,detail:'every page in lb'}; });
+  T('frame pacing (Android): a steady rhythm at or under 60 a second on 60, 90, 120 and 144 Hz screens (90 Hz alternated 11/22 ms: "aquarium preview choppy")',()=>{ const mob=typeof MOB==='function'&&MOB(); if(!mob||IS_IPHONE()) return {ok:true,detail:'Android only'}; const bad=[], out=[]; const raf=window.requestAnimationFrame, _d=draw, _u=update, _h=hud, _t=drawTank; let draws=[];
+    window.requestAnimationFrame=()=>0; draw=function(now){ draws.push(now); }; update=function(){}; hud=function(){}; drawTank=function(){};
+    try{ let t=performance.now()+1e6; for(const hz of [60,90,120,144]){ draws=[]; for(let i=0;i<600;i++){ t+=1000/hz+((i*7919)%13-6)*.08; frame(t); } const g=draws.slice(60).map((x,i,a)=>i?x-a[i-1]:null).slice(1); const lo=Math.min(...g), hi=Math.max(...g), fps=1000*g.length/g.reduce((a,b)=>a+b,0);
+        out.push(hz+' Hz: '+fps.toFixed(0)+' fps'); if(fps>61) bad.push(hz+' Hz draws '+fps.toFixed(0)+' a second'); if(hi-lo>3) bad.push(hz+' Hz uneven: '+lo.toFixed(1)+'–'+hi.toFixed(1)+' ms'); t+=1000; }
+    } finally{ window.requestAnimationFrame=raf; draw=_d; update=_u; hud=_h; drawTank=_t; } return bad.length?{ok:false,detail:bad.join(' | ')}:{ok:true,detail:out.join(', ')}; });
+  T('top bar is complete from the first frame: nothing in it appears late and shifts the rest (Home and Bait came 60 ms after load)',()=>{ if(!BAR0) return {ok:false,detail:'no snapshot from page load'}; const late=BAR_SEL.filter(q=>document.querySelector(q)&&!BAR0.includes(q)); return late.length?{ok:false,detail:'added after load: '+late.join(', ')}:{ok:true,detail:BAR0.length+' parts there at load'}; });
+  T('no unreachable content: a page box that cannot scroll is never taller inside than outside (PC Fish Log at 1440x900 hid 133 px)',()=>{ const bad=[]; for(const t of qaAllPages()){ openMenu(t); const P=$('panel'); const boxes=[P,...P.querySelectorAll(':scope > *, :scope > * > *')];
+      for(const b of boxes){ if(b.offsetParent===null&&b!==P) continue; const s=getComputedStyle(b); if(b.clientHeight<150||!/hidden|clip/.test(s.overflowY)) continue; const over=b.scrollHeight-b.clientHeight; if(over>4) bad.push(t+': '+((b.id&&'#'+b.id)||String(b.className).split(' ')[0]||b.tagName)+' hides '+over+' px'); } }
+    closeMenu(); return bad.length?{ok:false,detail:[...new Set(bad)].slice(0,6).join(' | ')}:{ok:true,detail:innerWidth+'x'+innerHeight}; });
+  T('decorations: a hidden one leaves the tank but keeps its spot and bonus; removing it or loading a save cleans the list',()=>{ const e=[]; const ids=DECOR.slice(0,2).map(d=>d.id); S.aq.owned=uniq([...S.aq.owned,...ids]); S.aq.decor=ids.slice(); S.aq.hid=[]; const b0=decorBonus();
+    act('decorhide',{k:ids[0]}); if(!(S.aq.hid||[]).includes(ids[0])) e.push('not hidden'); if(aqView().decor.includes(ids[0])) e.push('still drawn'); if(!S.aq.decor.includes(ids[0])) e.push('lost its spot'); if(decorBonus()!==b0) e.push('bonus changed');
+    openMenu('aquarium'); const sw=$('panel').querySelector(`.dhide[data-k="${ids[0]}"]`); if(!sw) e.push('no Hide switch on the card'); else { if(sw.getAttribute('aria-pressed')!=='true') e.push('switch not shown as hidden'); const tg=sw.parentElement.querySelector('.dkind'), a=sw.getBoundingClientRect(), b=tg&&tg.getBoundingClientRect(); if(b&&a.width&&b.width&&!(a.bottom<=b.top||a.top>=b.bottom||a.right<=b.left||a.left>=b.right)) e.push('switch covers the card tag'); } closeMenu();
+    act('decorhide',{k:ids[0]}); if(!aqView().decor.includes(ids[0])) e.push('not shown again'); act('decorhide',{k:ids[1]}); act('decor',{k:ids[1]}); if((S.aq.hid||[]).includes(ids[1])) e.push('removed decoration stayed in the hidden list');
+    const m=migrate(Object.assign(JSON.parse(JSON.stringify(S)),{aq:Object.assign({},S.aq,{hid:[ids[1],'nope',ids[0]],decor:[ids[0]]})})); if(JSON.stringify(m.aq.hid)!==JSON.stringify([ids[0]])) e.push('save loaded hidden list '+JSON.stringify(m.aq.hid));
+    return e.length?{ok:false,detail:e.join(' | ')}:{ok:true}; });
+  T('badges: no count circle is cut by the box around it, on the fishing screen and every page, also with "99+" (PC full screen cut the top of the orange circle)',()=>{ const bad=[]; const SEL='.cddot,.secdot,.subdot,.sdot,.q8-dot,.od-dot,.dot'; const forced=[];
+    const check=tag=>{ for(const d of document.querySelectorAll(SEL)){ if(d.hidden&&d.matches('.cddot,.secdot,.subdot')&&d.closest('button')&&d.closest('button').offsetParent!==null){ forced.push([d,d.textContent]); d.hidden=false; d.textContent='99+'; } if(d.offsetParent===null) continue; const r=d.getBoundingClientRect(); if(r.width<4) continue; const own=d.closest('button,[role="tab"],a')||d.parentElement, o=own.getBoundingClientRect();
+        for(let p=own.parentElement;p&&p!==document.documentElement;p=p.parentElement){ const cs=getComputedStyle(p); if(cs.overflowX==='visible'&&cs.overflowY==='visible') continue; const q=p.getBoundingClientRect(); const ownIn=o.top>=q.top-.5&&o.bottom<=q.bottom+.5&&o.left>=q.left-.5&&o.right<=q.right+.5; if(!ownIn) break; const cut=Math.max(q.top-r.top,r.bottom-q.bottom,q.left-r.left,r.right-q.right); if(cut>.5) bad.push(tag+': '+d.className+' cut '+cut.toFixed(1)+' px by '+((p.id&&'#'+p.id)||String(p.className).split(' ')[0])); } }
+      for(const [d,t] of forced.splice(0)){ d.textContent=t; d.hidden=true; } };
+    closeMenu(); check('fishing'); for(const t of qaAllPages()){ openMenu(t); check(t); } closeMenu(); check('fishing again');
+    return bad.length?{ok:false,detail:[...new Set(bad)].slice(0,6).join(' | ')}:{ok:true,detail:'no badge cut'}; });
 T('page tabs: a part hidden by a page tab never stays on screen (a forced style once kept the Events calendar on every tab)',()=>{ const bad=[]; const pages=qaAllPages(); let n=0; for(const t of pages){ openMenu(t); const P=$('panel'); for(const b of [...document.querySelectorAll('#menuov .sect-nav [data-sect], #panel .sect-nav [data-sect]')]){ b.click(); n++; for(const e of P.querySelectorAll('*')){ if(e.style.display==='none'&&getComputedStyle(e).display!=='none') bad.push(t+' / '+b.dataset.sect+': '+((e.className||e.tagName)+'').slice(0,30)); } } } closeMenu(); return bad.length?{ok:false,detail:[...new Set(bad)].slice(0,8).join(' | ')}:{ok:true,detail:n+' page tabs checked'}; });
   T('weekly quests: progress from counters, each pays once, crate once, week rollover and damaged saves rebuild',()=>{ const e=[]; S.weekly=null; const w=ensureWeekly(); if(w.quests.length!==4) e.push('quests '+w.quests.length); for(const q of w.quests){ const m={caught:()=>S.stats.caught+=q.n,shiny:()=>S.stats.shiny+=q.n,earned:()=>S.stats.earned+=q.n,tasks:()=>S.gstats.tasks+=q.n,hot:()=>S.stats.hot+=q.n,chal:()=>S.stats.chalWins=(S.stats.chalWins||0)+q.n,species:()=>{}}; m[q.t](); } const sc0=S.scales; w.quests.forEach((q,i)=>{ if(q.t==='species') q.base-=q.n; act('wqclaim',{i}); act('wqclaim',{i}); }); const want=w.quests.reduce((a,q)=>a+q.scales,0); if(S.scales-sc0!==want) e.push('scales '+(S.scales-sc0)+' want '+want); const big=S.tokens.big; act('wqbonus',{}); act('wqbonus',{}); if(S.tokens.big-big!==1) e.push('crate '+(S.tokens.big-big)); S.weekly.wk='2000-01-03'; if(ensureWeekly().wk!==weekKey()) e.push('rollover'); S.weekly={wk:1,quests:[null]}; if(!Array.isArray(ensureWeekly().quests)||ensureWeekly().quests.length!==4) e.push('rebuild'); return e.length?{ok:false,detail:e.join('; ')}:{ok:true,detail:'claims, crate, rollover and rebuild ok'}; });
   T('weather forecast matches the real weather schedule, in order and in the future',()=>{ const e=[]; const f=wxForecast(6), now=Date.now()/1000; let last=0; for(const x of f){ const t=x.at+now+1, real=(window.__wxTime?__wxTime.kindAt(t):weatherAt(Math.floor(t/WX_LEN))).k; if(real!==x.k) e.push(x.k+' forecast, '+real+' real at +'+Math.round(x.at)+' s'); if(window.__wxTime){ const R=__wxTime.RULE[x.k]; if(R&&(R==='night')!==__wxTime.night(t)) e.push(x.k+' at the wrong time of day'); } if(x.at<=0||x.at<last) e.push('order '+x.at); last=x.at; } if(!f.length) e.push('empty'); return e.length?{ok:false,detail:e.join('; ')}:{ok:true,detail:f.map(x=>x.k).join(', ')}; });
