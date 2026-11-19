@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="DL Test Android">
 <script>
-window.DL_BUILD='android'; window.DL_PREVIEW=true; window.DL_VERSION='2026.11.18-1829';
+window.DL_BUILD='android'; window.DL_PREVIEW=true; window.DL_VERSION='2026.11.18-1840';
 window.addEventListener('beforeinstallprompt',function(e){ e.preventDefault(); window.__dlInstallPrompt=e; });
 </script>
 </head>
@@ -16148,7 +16148,7 @@ html body.phone-app #menuov #panel.dk08 .dk08-bank,html body.phone-land #menuov 
 html body.phone-app #menuov #panel.dk08 .dk08-bank b,html body.phone-land #menuov #panel.dk08 .dk08-bank b{display:block;font:800 14px var(--display)!important;color:#fff;overflow:hidden;text-overflow:ellipsis}
 html body.phone-app #menuov #panel.dk08 .dockbar,html body.phone-land #menuov #panel.dk08 .dockbar{margin:0!important}
 html body.phone-app #menuov #panel.dk08 .hm-phone > h5:first-child,html body.phone-land #menuov #panel.dk08 .hm-phone > h5:first-child{margin-top:14px!important}
-@media (orientation:landscape) and (max-height:560px) and (max-width:760px){ html body.phone-land #menuov #panel.dk08 .dk08-bank{grid-template-columns:repeat(3,minmax(0,1fr))!important} }
+@media (orientation:landscape) and (max-height:560px) and (max-width:760px){ html body.phone-land #menuov #panel.dk08 .dk08-bank{grid-template-columns:repeat(2,minmax(0,1fr))!important;row-gap:4px!important} html body.phone-land #menuov #panel.dk08 .dk08-bank > div:first-child{grid-column:1 / -1} } /* narrow phones: Cozy (its name can be long) gets its own line, Bonus and Placed share the next */
 </style>`);
 /* ---------- Your home shows the REAL home of every water (director, 2026-11-18: "make sure the home works for ALL maps, in each way
    that applies to them"). The phone view used to draw a generic wooden dock everywhere (wrong at a boat, trawler, raft, ice camp,
@@ -16265,7 +16265,7 @@ function DK_SCENE_OK(now){ if(S.tab!=='home'||!MOB()) return false; const c=$('h
       rest.forEach(c=>body.appendChild(c));
       let nv=nav;
       if(!nv&&cfg.groups){ try{ const K=[...body.children].filter(c=>!c.classList.contains('pg08-note')); const gs=cfg.groups(K).filter(g=>g.nodes.length); if(gs.length>1){ sectionize(body,tab,gs); nv=body.querySelector(':scope > .bwx-nav'); } }catch(e){ console.error(e); } }
-      [...P.children].forEach(c=>{ if(!c.classList.contains('crumb')) c.remove(); }); P.appendChild(bar); P.appendChild(sheet); if(nv){ sheet.appendChild(nv); const n=nv.querySelectorAll(':scope > button').length; nv.style.setProperty('grid-template-columns',`repeat(${n<=4?n:n<=6?3:4},minmax(0,1fr))`,'important'); } /* up to 4 tabs in one row; 5-6 in balanced rows of 3 */ sheet.appendChild(body);
+      [...P.children].forEach(c=>{ if(!c.classList.contains('crumb')) c.remove(); }); P.appendChild(bar); P.appendChild(sheet); if(nv){ sheet.appendChild(nv); const n=nv.querySelectorAll(':scope > button').length; nv.style.setProperty('grid-template-columns',`repeat(${PG_COLS(nv,n)},minmax(0,1fr))`,'important'); } /* up to 4 tabs in one row; 5-6 in balanced rows of 3 */ sheet.appendChild(body);
       P.classList.add('aq07','aq07-open','pg08','pg08-nostage'); P.classList.remove('dk08'); P.dataset.pgTab=tab;
       // keep the scroll place on a refresh of the same page and section; a new section starts at the top
       const curSec=()=>{ const s=nv&&nv.querySelector('[aria-selected="true"], [aria-pressed="true"], .on'); return s?(s.dataset.sect||s.dataset.k||s.dataset.v||txt(s).replace(/\s*\d+$/,'')):''; };
@@ -16310,8 +16310,8 @@ html body.phone-app #menuov #panel.pg08 .pg08-bar > .pg08-side,html body.phone-l
       paint(); bar.appendChild(tog); tog.addEventListener('click',e=>{ e.preventDefault(); e.stopPropagation(); WD_OPEN=!WD_OPEN; try{ localStorage.setItem('dl-wd-open',WD_OPEN?'1':'0'); }catch(er){} P.classList.toggle('aq07-open',WD_OPEN); paint(); });
       const sheet=h('div','aq07-sheet'), body=h('div','aq07-body '+wrap.className); sheet.appendChild(nav); sheet.appendChild(body); body.appendChild(main);
       [...P.children].forEach(c=>{ if(!c.classList.contains('crumb')) c.remove(); }); P.append(stage,bar,sheet);
-      const n=nav.querySelectorAll(':scope > button').length; nav.style.setProperty('grid-template-columns',`repeat(${n<=4?n:n<=6?3:4},minmax(0,1fr))`,'important');
       P.classList.add('aq07','wd08'); P.classList.toggle('aq07-open',WD_OPEN); P.classList.remove('pg08','pg08-nostage','dk08');
+      const n=nav.querySelectorAll(':scope > button').length; nav.style.setProperty('grid-template-columns',`repeat(${PG_COLS(nav,n)},minmax(0,1fr))`,'important'); nav.querySelectorAll('.wl').forEach(l=>{ if(l.textContent.trim()==='Neck & back'&&l.scrollWidth>l.clientWidth+1){ l.textContent='Neck/back'; l.parentElement.title='Neck & back'; } }); /* narrowest phones */
     }catch(e){ console.error(e); } return r; };
   let rt=0, lastL=null; addEventListener('resize',()=>{ clearTimeout(rt); rt=setTimeout(()=>{ try{ const l=document.body.classList.contains('phone-land'); if(MOB()&&S.tab==='style'&&MENU_OPEN&&lastL!==null&&l!==lastL) renderPanel(); lastL=l; }catch(e){} },160); }); }
 document.head.insertAdjacentHTML('beforeend',`<style>
@@ -16350,7 +16350,7 @@ html body.phone-app #menuov #panel.wd08 .aq07-sheet > .bwx-nav,html body.phone-l
 document.addEventListener('click',e=>{ const b=e.target.closest&&e.target.closest('#panel.aq07 .aq07-sheet > .bwx-nav > button, #panel.aq07 .aq07-sheet > .sect-nav > button'); if(!b||!MOB()) return;
   setTimeout(()=>{ try{ const body=document.querySelector('#panel .aq07-body'); if(!body) return; const n=document.createComment(''); body.appendChild(n); n.remove(); }catch(er){} },0); },true);
 /* short tab names where the full one does not fit a phone row */
-{ const SHORT={'Move to another device':'Move progress'};
+{ const SHORT={'Move to another device':'Move progress','Aquarium & pets':'Tank & pets'};
   const _rp=renderPanel; renderPanel=function(){ const r=_rp.apply(this,arguments); try{ if(MOB()) document.querySelectorAll('#panel .aq07-sheet > .bwx-nav > button[data-sect]').forEach(b=>{ const s=SHORT[b.dataset.sect]; if(s&&b.firstChild&&b.firstChild.nodeType===3) b.firstChild.nodeValue=s+(b.firstChild.nodeValue.endsWith(' ')?' ':''); }); }catch(e){} return r; }; }
 /* Waters, Set sail again: the locked button's label is shortened on phones so it fits its card ("Reach Hollow Trench first" -> "Reach Hollow Trench") */
 { const _rp=renderPanel; renderPanel=function(){ const r=_rp.apply(this,arguments); try{ if(MOB()&&S.tab==='map') document.querySelectorAll('#panel button[data-act="retire"][disabled]').forEach(b=>{ const m=b.textContent.trim().match(/^Reach (.+) first$/); if(m) b.textContent='Reach '+m[1]; }); }catch(e){} return r; }; }
@@ -16431,6 +16431,11 @@ html body.phone-land #menuov #tabs .secbar .secb .secdot,html body.phone-app #me
 document.head.insertAdjacentHTML('beforeend',`<style>
 html body.phone-land.dock-mini #menuov #tabs .secbar .secb .secdot{top:0!important;right:0!important;bottom:auto!important;left:auto!important;transform:none!important} html body.phone-land.dock-mini #menuov #tabs .secbar .secb{justify-content:center!important;padding-left:0!important;padding-right:0!important} html body.phone-land.dock-mini #menuov #tabs .secbar .secb .seci{margin:0!important;transform:translateY(3px)} /* collapsed rail (director: "doesn't look centered"): every icon in the middle of its button, a touch low so the badge fits in the top-right corner */
 </style>`);
+/* how many section tabs share a row: up to 4 in one row, 5-6 in rows of 3, 7-8 in rows of 4, but never narrower than ~70 px a tab (the fit step shrinks a long label a little, never below 11 px)
+   (round 8: the Wardrobe's side sheet is only ~234 px wide on the smallest iPhone, where 4 tabs a row cut "Clothes") */
+function PG_COLS(el,n){ const base=n<=4?n:n<=6?3:4; let w=0; try{ w=el&&el.isConnected?el.getBoundingClientRect().width:0; }catch(e){} return w>0?Math.max(2,Math.min(base,Math.floor((w+6)/74))):base; }
+document.head.insertAdjacentHTML('beforeend',`<style>html body.phone-app #menuov #panel.wd08 .aq07-sheet > .bwx-nav > button .wl,html body.phone-land #menuov #panel.wd08 .aq07-sheet > .bwx-nav > button .wl{white-space:nowrap!important}</style>`); /* one line per tab; the fit step shrinks a long one a little */
+document.head.insertAdjacentHTML('beforeend',`<style>@media (orientation:landscape) and (max-height:560px) and (max-width:760px){ html body.phone-land #menuov #panel.wd08 .aq07-sheet > .bwx-nav{gap:4px!important} html body.phone-land #menuov #panel.wd08 .aq07-sheet > .bwx-nav > button{padding-left:2px!important;padding-right:2px!important} html body.phone-land #menuov #panel.wd08 .aq07-sheet > .bwx-nav > button .wl{max-width:100%!important;overflow:hidden!important} }</style>`); /* smallest iPhones: the Wardrobe's 3-a-row tabs get 4 px more room each */
 // =====================================================================
 // Phones and tablets, round 8: the top bar's goal (director, 2026-11-18: "The 'next goal' function on mobile upper header is too big
 // and doesn't even work right now with proper goals and quick opens associating with the correct next goal. After it's condensed
@@ -16631,10 +16636,44 @@ html body.phone-app .hud > #mbgoal > .lbl,html body.phone-land .hud > #mbgoal > 
       else if(cost==null) hr.insertAdjacentHTML('afterend',`<p class="meta mb-tankwhy">Your tank is as big as it gets: ${cap} fish.</p>`); }
   }catch(e){ console.error(e); } return r; }; }
 
+/* Rods (director, 2026-11-18: "Rod rack looks weird when you switch headers. Consider a rework for it to make a lot more sense and
+   look cleaner"). The presets box sat outside the page's sections, so it showed on top of Your rod, Rod rack AND Attachments (the
+   tab you picked was hidden under it). Now:
+   - the presets live in Your rod, under the rod in your hands, and leave with it when you pick Rod rack or Attachments
+   - each preset is one compact row: number + rod name + level / slots / attachments on the left, its buttons on the right
+   - the preset in use shows a gold "In use" tag and only Clear (the old dead "Saved" button is gone: it follows every change anyway);
+     the others show Use, Replace (save the rod in your hands over it) and Clear; an empty one shows "Save current rod" */
+{ const _rph=rodPresetsHTML;
+  rodPresetsHTML=function(){ if(!MOB()) return _rph.apply(this,arguments);
+    const rows=[0,1,2].map(i=>{ const p=S.rodPresets[i], on=S.rodPreset===i, R=p&&ROD_I[p.rod];
+      if(!R) return `<div class="rp-card rp8-row empty"><div class="rp8-info"><span class="rp-n">Preset ${i+1}</span><em>Empty</em></div><div class="rp8-acts"><button type="button" class="btn alt sm" data-rp="save:${i}">Save current rod</button></div></div>`;
+      const atts=p.att.filter(a=>a&&ATT_I[a]).map(a=>ATT_I[a].name), lv=(S.rods.lvl&&S.rods.lvl[p.rod])||0;
+      const meta=`Level ${lv} / 10 · ${R.slots} slot${R.slots>1?'s':''} · ${atts.length?esc(atts.join(', ')):'no attachments'}`;
+      return `<div class="rp-card rp8-row${on?' on':''}"><div class="rp8-info"><span class="rp-n">Preset ${i+1}${on?' <span class="rp8-tag">In use</span>':''}</span><b>${esc(R.name)}</b><span class="rp-lv">${meta}</span></div><div class="rp8-acts">${on?'':`<button type="button" class="btn sm" data-rp="use:${i}">Use</button><button type="button" class="btn alt sm" data-rp="save:${i}" title="Save the rod in your hands (with its attachments) over this preset">Replace</button>`}<button type="button" class="btn alt sm" data-rp="clear:${i}">Clear</button></div></div>`; }).join('');
+    return `<div class="rp-box rp8"><h5>Presets</h5><p class="meta rp8-why">Save a rod with its attachments, then switch to it in one tap. The preset in use follows every change you make.</p><div class="rp-list">${rows}</div></div>`; };
+  const _rp=renderPanel; renderPanel=function(){ const r=_rp.apply(this,arguments); try{ if(!MOB()||S.tab!=='rods') return r; const P=$('panel'); const box=P&&P.querySelector('.rp-box'), now=P&&P.querySelector('.tile.rodnow'); if(!box||!now) return r;
+      P.querySelectorAll('h2').forEach(h=>{ if(/^(Rod rack|Attachments)$/.test(h.textContent.trim())) h.classList.add('rp8-dup'); }); /* the tab above already names it */
+      now.after(box); const sync=()=>{ box.style.display=now.style.display; }; sync(); new MutationObserver(sync).observe(now,{attributes:true,attributeFilter:['style']}); /* shown and hidden with Your rod */
+    }catch(e){ console.error(e); } return r; }; }
+
 document.head.insertAdjacentHTML('beforeend',`<style>
-html body.phone-app #menuov #panel.aq07 .aq07-bank,html body.phone-land #menuov #panel.aq07 .aq07-bank{grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,.8fr) auto auto!important}
+html body.phone-land #menuov #panel h2.rp8-dup,html body.phone-app #menuov #panel h2.rp8-dup{display:none!important}
+html body.phone-land #menuov #panel .rp-box.rp8,html body.phone-app #menuov #panel .rp-box.rp8{margin:14px 0 4px!important;gap:6px!important}
+html body.phone-land #menuov #panel .rp8 > h5,html body.phone-app #menuov #panel .rp8 > h5{margin:0!important}
+html body.phone-land #menuov #panel .rp8 .rp8-why,html body.phone-app #menuov #panel .rp8 .rp8-why{margin:0 0 4px!important;font-size:12.5px!important;color:#9fb3c8!important}
+html body.phone-land #menuov #panel .rp8 .rp-list,html body.phone-app #menuov #panel .rp8 .rp-list{gap:6px!important}
+html body.phone-land #menuov #panel .rp8 .rp8-row,html body.phone-app #menuov #panel .rp8 .rp8-row{flex-direction:row!important;align-items:center!important;justify-content:space-between;gap:10px!important;padding:9px 12px!important;min-height:56px;box-sizing:border-box}
+html body.phone-land #menuov #panel .rp8 .rp8-row.empty,html body.phone-app #menuov #panel .rp8 .rp8-row.empty{background:transparent!important}
+html body.phone-land #menuov #panel .rp8 .rp8-info,html body.phone-app #menuov #panel .rp8 .rp8-info{display:flex;flex-direction:column;gap:1px;min-width:0;flex:1 1 auto}
+html body.phone-land #menuov #panel .rp8 .rp8-info b,html body.phone-app #menuov #panel .rp8 .rp8-info b{font:800 14.5px var(--display,system-ui)!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+html body.phone-land #menuov #panel .rp8 .rp8-info .rp-lv,html body.phone-app #menuov #panel .rp8 .rp8-info .rp-lv{font-size:11.5px!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+html body.phone-land #menuov #panel .rp8 .rp8-info em,html body.phone-app #menuov #panel .rp8 .rp8-info em{font-size:13px}
+html body.phone-land #menuov #panel .rp8 .rp-n,html body.phone-app #menuov #panel .rp8 .rp-n{display:flex;align-items:center;gap:6px}
+html body.phone-land #menuov #panel .rp8 .rp8-tag,html body.phone-app #menuov #panel .rp8 .rp8-tag{padding:1px 7px;border-radius:999px;background:linear-gradient(180deg,#ffd36a,#f0b43c);color:#2a1a04;font:800 10px var(--display,system-ui);letter-spacing:.04em}
+html body.phone-land #menuov #panel .rp8 .rp8-acts,html body.phone-app #menuov #panel .rp8 .rp8-acts{display:flex;gap:6px;flex:0 0 auto;align-items:center}
+html body.phone-app #menuov #panel.aq07 .aq07-bank:has(.mb-tankcell),html body.phone-land #menuov #panel.aq07 .aq07-bank:has(.mb-tankcell){grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,.8fr) auto auto!important}
 html body.phone-app #menuov #panel.aq07 .aq07-bank .mb-tankcell b,html body.phone-land #menuov #panel.aq07 .aq07-bank .mb-tankcell b{font:800 14px var(--display)!important;color:var(--ink)}
-@media (orientation:landscape) and (max-height:560px) and (max-width:760px){ html body.phone-land #menuov #panel.aq07 .aq07-bank{grid-template-columns:repeat(3,minmax(0,1fr))!important} }
+@media (orientation:landscape) and (max-height:560px) and (max-width:760px){ html body.phone-land #menuov #panel.aq07 .aq07-bank:has(.mb-tankcell){grid-template-columns:repeat(6,minmax(0,1fr))!important} html body.phone-land #menuov #panel.aq07 .aq07-bank:has(.mb-tankcell) > div{grid-column:span 2} html body.phone-land #menuov #panel.aq07 .aq07-bank:has(.mb-tankcell) > .btn{grid-column:span 3} }
 html body.phone-app #menuov #panel.aq07 .mb-tankcap,html body.phone-land #menuov #panel.aq07 .mb-tankcap{font:700 13px var(--display);color:#9fb3c8;white-space:nowrap}
 html body.phone-app #menuov #panel.aq07 .mb-tankwhy,html body.phone-land #menuov #panel.aq07 .mb-tankwhy{margin:2px 0 8px!important;font-size:12.5px!important;line-height:1.4;color:#b8c8d6}
 html body.phone-land .hud > .st-lvl[data-mbtap],html body.phone-app .hud > .st-lvl[data-mbtap]{background:linear-gradient(180deg,#1f8a86,#14666a)!important;border:1px solid #7fe3c4!important;box-shadow:0 3px 10px #0007!important;color:#fff!important;cursor:pointer}
@@ -16972,12 +17011,14 @@ PATCHES.unshift({v:'0.4.8.6', name:'Tidy Up', items:[
   'Page summaries and intros no longer repeat the same numbers, and the side menu’s badges are never cut off or covering the button above.',
   'Mountains look clean again: no more thin stripes running down them or their reflections.',
   'Your home’s live view is smooth now: it plays at your screen’s full frame rate instead of a few frames a second.',
-  'Aquarium: the strip under the tank shows how many fish it holds, and the tank upgrade says what you get (room for how many fish) and why it helps.']});
+  'Aquarium: the strip under the tank shows how many fish it holds, and the tank upgrade says what you get (room for how many fish) and why it helps.',
+  'Rods: each tab shows only its own things. Your rod has the rod in your hands and your presets, now tidy rows: Use, Replace or Clear, and a gold In use tag on the one you’re holding.',
+  'Small iPhones: nothing in the page summaries or tabs is cut off any more (Home, Skills, Wardrobe).']});
 
 // Android test notes (preview builds only; the live game never shows them). Write what the next test build changes here
 // (spoiler-free); it opens once in the Android test app. Released notes live in notes_release.js.
 const TEST_NOTES={v:'test', label:'Test build · Android', name:'One Look, Easy Aquarium', items:[
-  'NEW in this build (0.4.8.6): smooth Home live view; tank size + clear tank upgrade in the Aquarium; mountains drawn without stripes; Stats has its own side-panel button (and the Level chip); folded side panel centred; top bar never cuts off settings; Settings no longer repeats Save (gift code and backup tools are in Save); summaries no longer repeat numbers.',
+  'NEW in this build (0.4.8.6): Rods tabs fixed + tidy presets; small-iPhone cut-offs fixed; smooth Home live view; tank size + clear tank upgrade in the Aquarium; mountains drawn without stripes; Stats has its own side-panel button (and the Level chip); folded side panel centred; top bar never cuts off settings; Settings no longer repeats Save (gift code and backup tools are in Save); summaries no longer repeat numbers.',
   'NEW in this build: fish fight shows a tension ring at the fish with the instruction above it; hints are touch only; homes are never called docks; the layout always switches when you turn the phone; smoother storms at Starfall.',
   'NEW in this build: Android phones are landscape only (upright pauses the game). Compact Goal chip (opens the right page) and a separate Live chip, plus Tasks and Tide Pass in the top bar. Your home shows the real home of every water. Colour choices are round swatches.',
   'NEW in this build: every menu page works like the aquarium (key numbers and main button first, sections as tabs, one scrolling list, badges where rewards wait). The Wardrobe shows your angler big with the categories in Options. Pages keep your place when they refresh.',
