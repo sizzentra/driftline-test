@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="DL Test Android">
 <script>
-window.DL_BUILD='android'; window.DL_PREVIEW=true; window.DL_VERSION='2026.11.19-1356';
+window.DL_BUILD='android'; window.DL_PREVIEW=true; window.DL_VERSION='2026.11.19-1456';
 window.addEventListener('beforeinstallprompt',function(e){ e.preventDefault(); window.__dlInstallPrompt=e; });
 </script>
 </head>
@@ -942,7 +942,8 @@ const TANK_RATE = .015;
 const OFFLINE_CAP_MIN = 8*60;
 // bonus keys shared by boosts, aquarium fish and pets
 const BK = {bite:'bite speed', rare:'rare bonus', shiny:'shiny chance', tension:'line tension', reel:'reel speed', sell:'sale price', xp:'XP', treasure:'junk chance', tank:'aquarium income', calm:'fish temper', trophy:'trophy chance', hot:'hotspots'};
-const fmtB = (k,v) => (k==='tension'||k==='calm'?'−':'+')+Math.round(v*100)+'% '+BK[k];
+const BK2 = {snag:'snag strain', fav:'favourite food pull', hybrid:'hybrid chance', nib:'Nibble chance', grip:'rare fish hold-back'}; /* 0.4.9: the newer attachments' stats (QC found "+50% undefined") */
+const fmtB = (k,v) => (k==='tension'||k==='calm'||k==='snag'||k==='grip'?'−':'+')+Math.round(v*100)+'% '+(BK[k]||BK2[k]||k);
 const AQ_KEYS = ['bite','rare','shiny','tension','reel','sell','xp','treasure','tank','calm','trophy','hot'];
 const AQ_MAG = [0,.02,.04,.06,.1,.18];
 const BONUS_CAP = {tension:.6, calm:.7};
@@ -1534,6 +1535,15 @@ const bestNormalLoot = () => Math.max(...S.unlocked.filter(id=>!isEgLoc(id)).map
 function egRefStr(){ const ids=S.unlocked.filter(id=>!isEgLoc(id)), best=ids.map(id=>LOCS[locIdx(id)]).filter(Boolean).sort((a,b)=>b.loot-a.loot)[0]||LOCS[0]; const a=SP.filter(s=>s.loc===best.id&&!s.meme).map(s=>s.str).sort((x,y)=>x-y); return a.length?a[a.length>>1]:3; }
 let EG_SF_STR=0; const egSfStr = () => EG_SF_STR||(EG_SF_STR=(()=>{ const a=SP.filter(s=>s.loc==='starfall'&&!s.meme).map(s=>s.str).sort((x,y)=>x-y); return a[a.length>>1]||40; })());
 function egScale(){ return {v:1.25*bestNormalLoot()/33000, s:1.1*egRefStr()/egSfStr()}; }
+// 0.4.9 deep QC: no two fish share a name (the Fish Log showed two "Brook Trout", and a few old waters had a name twice). Saves key fish by
+// id, so renaming is safe. The older fish keeps its name; the later one gets a distinct real or regional name.
+{ const REN={spottedgar:'Shortnose Gar', brooktrout:'Native Brook Trout', rk_brooktrout:'Glacier Brook Trout', arcticgrayling:'Frostbite Grayling', rk_arcticgrayling:'Bow River Grayling',
+  rk_walleye:'Prairie Walleye', rk_muskellunge:'Tiger Muskie', rk_tigertrout:'Banff Tiger Trout', am_goldendorado:'River Tiger Dorado', shorecrab:'Green Shore Crab', ballanwrasse:'Cuckoo Wrasse',
+  af_dogfish:'Puppy Dogfish', bluefintuna:'Giant Bluefin', fk_goliathgrouper:'Spotted Goliath Grouper', rk_burbot:'Eelpout Burbot', rk_laketrout:'Mackinaw Lake Trout', arcticchar:'Silver Arctic Char',
+  rk_lakewhitefish:'Humpback Whitefish', fk_sergeantmajor:'Night Sergeant', af_goatfish:'Billy Goatfish', fk_lionfish:'Red Lionfish', fk_hogfish:'Spanish Hogfish', am_hatchetfish:'Marbled Hatchetfish',
+  blackdragon:'Scaleless Black Dragonfish', rk_brookstickleback:'Ninespine Stickleback', rk_rainbowtrout:'Kamloops Rainbow', rk_lakesturgeon:'Fraser Lake Sturgeon', fk_pilchard:'Scaled Sardine',
+  af_pigfish:'Piglet Fish', am_peacockbass:'Speckled Peacock Bass'};
+  for(const id in REN) if(SPI[id]) SPI[id].name=REN[id]; }
 
 // =====================================================================
 // 0.3 wardrobe data: body types, eye colours, shoes, neckwear and back pieces.
@@ -11382,7 +11392,7 @@ function shopTools(){ const P=$('panel'); if(!P) return;
 function shopItem(tile,which){ const cv=tile.querySelector(which==='aq'?'canvas[data-decor]':'canvas[data-dock]'); if(!cv) return null; const id=which==='aq'?cv.dataset.decor:cv.dataset.dock;
   const d=which==='aq'?DECORI[id]:DOCKI[id]; if(!d) return null; const own=which==='aq'?S.aq.owned.includes(id):S.dock.owned.includes(id);
   return {id,d,own,name:d.name,price:+d.price||0,forSale:!own&&(+d.price>0)&&(which==='aq'||d.src==='shop'),bonus:which==='aq'?decorVal(d):(+d.cozy||0),kind:which==='aq'?decorKind(id):null}; }
-function shopToolsFor(grid,which){ if(!grid) return; const st=SHOPT[which], tiles=[...grid.children].filter(t=>t.classList.contains('tile'));
+function shopToolsFor(grid,which){ if(!grid||!grid.isConnected||!grid.parentNode) return; /* 0.4.9 QC: a filter chip that outlived a redraw no longer throws */ const st=SHOPT[which], tiles=[...grid.children].filter(t=>t.classList.contains('tile'));
   const items=tiles.map(t=>({t,it:shopItem(t,which)})).filter(x=>x.it);
   // aquarium tiles say what kind of bonus they give
   if(which==='aq') for(const {t,it} of items){ const m=t.querySelector('.meta'); if(m&&/income$/.test(m.textContent.trim())) m.innerHTML=`+${Math.round(it.bonus*100)}% ${DECOR_KIND_NAME[it.kind]}`; if(!t.querySelector('.dkind')){ const b=document.createElement('span'); b.className='dkind k-'+it.kind; b.textContent=DECOR_KIND_SHORT[it.kind]; t.insertBefore(b,t.firstChild); } }
@@ -19792,7 +19802,8 @@ PATCHES.unshift({v:'0.4.9', name:'Work in progress', items:[
   '## Fishing',
   'Fights are about timing now: a fresh fish has to be tired out before it comes in, and reeling straight through a rare fish’s runs snaps the line, whatever your gear. Let go when it runs, reel when it rests.',
   'Strong gear and skills still make fights faster, down to a floor: a few seconds for common fish, half a minute or more for mythics.',
-  'Oddities, hotspots and shinies have sensible limits however much you stack them.']});
+  'Oddities, hotspots and shinies have sensible limits however much you stack them.',
+  'A few fish that shared a name with another now have names of their own (your Fish Log keeps every catch).']});
 
 // Android test notes (preview builds only; the live game never shows them). One short line per change in the next test build,
 // curly apostrophes only. The card opens once per device whenever the text changes. Released notes live in notes_release.js.
@@ -19805,6 +19816,7 @@ const TEST_NOTES={v:'test', label:'Test build · Android', name:'0.4.9 big patch
   'Fight rework: fish must be tired out; holding through rare runs snaps the line. Times with maxed gear: ~2.5 s common to ~36 s mythic.',
   'Fishing: try holding reel through a rare fish’s runs (it should snap), then let go when it runs (it should land).',
   'NEW in this build: aquarium fish show real sizes and depth; hair rebuilt with volume (all 20 styles); body builds have distinct silhouettes; smaller noses on the Natural face.',
+  'Deep QC round: 30 fish renamed so no two share a name; attachment stats no longer read “undefined”; oddity names wrap on small PC windows.',
   'Please test on every platform and send me anything that feels off.']};
 addTestNotes(TEST_NOTES);
 // =====================================================================
@@ -20133,6 +20145,9 @@ ui(){ QA.sys='UI';
     const sil=b=>{ const cv=document.createElement('canvas'); cv.width=60; cv.height=120; const q=cv.getContext('2d'); drawAngler(q,30,115,1.4,Object.assign({},S.look,{build:b,hat:'none',outfit:'none',hairStyle:'buzz'}),{t:1,noShadow:true}); const d=q.getImageData(0,0,60,120).data; let n=0; for(let i=3;i<d.length;i+=4) if(d[i]>128) n++; return n; };
     const a=sil('slim'), b=sil('broad'), s=sil('sturdy'); if(!(b>a*1.15)) e.push('broad vs slim silhouette '+(b/a).toFixed(2)); if(!(s>a*1.12)) e.push('sturdy vs slim '+(s/a).toFixed(2));
     return e.length?{ok:false,detail:e.join(' | ')}:{ok:true,detail:'0.1→0.8 kg ×2, broad/slim '+(b/a).toFixed(2)}; });
+  T('deep QC: every fish has its own name, every attachment and bonus has a readable label (no "undefined"), every oddity and fish draws',()=>{ const e=[]; const nm={}; SP.forEach(s=>{ const k=s.name.toLowerCase(); if(nm[k]) e.push('name twice: '+s.name); nm[k]=1; });
+    for(const a of ATTS) for(const v of a.v){ const t=fmtB(a.k,v); if(/undefined|NaN/.test(t)) e.push(a.id+': '+t); }
+    return e.length?{ok:false,detail:e.slice(0,8).join(' | ')}:{ok:true,detail:SP.length+' names, '+ATTS.length+' attachments'}; });
   T('[14] [15] new attachments and skills work, every skill has a max-rank effect and a group, skill points come from the Fish Log too',()=>{ const e=[]; const rb=rodBonus;
     for(const id of ['snagguard','scentbead','twinhook','nibpouch','grip']){ const a=ATT_I[id]; if(!a) { e.push('no attachment '+id); continue; } if(!(a.v[0]<a.v[1]&&a.v[1]<a.v[2])) e.push(id+' tiers do not grow'); }
     try{ const sp=SP.find(s=>s.r===2)||SP[0], fav=FISH_FAV[sp.id];
