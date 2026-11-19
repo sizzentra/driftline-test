@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="DL Test iPhone">
 <script>
-window.DL_BUILD='ios'; window.DL_PREVIEW=true; window.DL_VERSION='2026.11.18-2216';
+window.DL_BUILD='ios'; window.DL_PREVIEW=true; window.DL_VERSION='2026.11.18-2220';
 window.addEventListener('beforeinstallprompt',function(e){ e.preventDefault(); window.__dlInstallPrompt=e; });
 </script>
 </head>
@@ -14353,7 +14353,7 @@ document.head.insertAdjacentHTML('beforeend',`<style>
 { const el=document.createElement('div'); el.id='fpsbox'; el.hidden=true; const st=$('stage'); if(st) st.appendChild(el);
   let on=false, ts=[], lastT=0, shown=0;
   const loop=t=>{ if(!on) return; if(lastT) ts.push(t-lastT); lastT=t; if(ts.length>240) ts.shift();
-    if(t-shown>500&&ts.length>10){ shown=t; const win=ts.slice(-120), avg=win.reduce((a,b)=>a+b,0)/win.length, worst=Math.max(...win); el.textContent=Math.round(1000/avg)+' fps · slowest '+worst.toFixed(1)+' ms'; }
+    if(t-shown>500&&ts.length>10){ shown=t; const win=ts.slice(-120), avg=win.reduce((a,b)=>a+b,0)/win.length, worst=Math.max(...win); { const mt=(typeof MOB==='function'&&MOB()&&typeof mobFpsText==='function')?mobFpsText(Math.round(1000/avg)):null; el.textContent=mt||(Math.round(1000/avg)+' fps · slowest '+worst.toFixed(1)+' ms'); } } /* phones: frames actually drawn (settings08) */
     requestAnimationFrame(loop); };
   const sync=()=>{ const v=!!(S.settings&&S.settings.showFps); if(v===on) return; on=v; el.hidden=!v; ts=[]; lastT=0; if(v) requestAnimationFrame(loop); };
   setInterval(sync,700); sync(); }
@@ -16014,6 +16014,12 @@ const IS_IPHONE=()=>/iPhone|iPod/.test(navigator.userAgent)||(/[?&]test\b/.test(
       disp.insertAdjacentHTML('beforeend',`<h5>Frame rate</h5><div class="chips">${opt.map(([k,n])=>`<button class="chipb" type="button" data-fps="${k}" aria-pressed="${cur===k}">${n}</button>`).join('')}</div><div class="meta" style="margin-top:6px">${why[cur]||why['60']}</div>`);
       disp.querySelectorAll('[data-fps]').forEach(b=>b.addEventListener('click',e=>{ e.stopPropagation(); S.settings.fpsCap=b.dataset.fps; save(); renderPanel(); })); }
   }catch(e){} }; }
+
+// ---------- the frame counter counts frames actually DRAWN (director, 2026-11-18: "30 fps saver mode brought his fps to 120"):
+// the counter in bm_ui04 runs its own loop, so it measured the screen's refresh (120 Hz on a Pixel) even while the game drew only
+// 30 frames. On phones it now shows drawn frames per second, the screen's rate and the slowest gap between drawn frames.
+const MOB_DRAWN=[]; { const _dw=draw; draw=function(now){ const r=_dw.apply(this,arguments); try{ MOB_DRAWN.push(performance.now()); if(MOB_DRAWN.length>240) MOB_DRAWN.shift(); }catch(e){} return r; }; }
+function mobFpsText(screenFps){ const now=performance.now(), d=MOB_DRAWN.filter(t=>now-t<2000); if(d.length<3) return null; let worst=0; for(let i=1;i<d.length;i++) worst=Math.max(worst,d[i]-d[i-1]); const fps=Math.round((d.length-1)*1000/(d[d.length-1]-d[0])); return fps+' fps · screen '+screenFps+' Hz · slowest '+worst.toFixed(1)+' ms'; }
 // =====================================================================
 // Phones, round 8: landscape only, on iPhone AND Android phones (director, 2026-11-18: "iPhone versions should just have landscape
 // available... full forced landscape across the board", then "Also push landscape only on android too").
@@ -17759,10 +17765,20 @@ PATCHES.unshift({v:'0.4.8.6', name:'Tidy Up', items:[
   'Waters is now called Map on the side panel.',
   'Search works from the top bar only and always opens the right page and tab; Settings has its gear back; Events no longer repeat the same things across Calendar, Challenges and Derby; Feats cards are smaller, so more fit on screen.']});
 
+PATCHES.unshift({v:'0.4.8.6.2', name:'Fixes', items:[
+  'Patch notes and other long cards scroll with your finger, and their button stays at the bottom so you can always close them.',
+  'The Aquarium and Your home keep their full size again (the page title and a boost tag were squeezing the tank and the list).',
+  'Notices like "Travelled to …" appear below the weather and streak tags instead of covering them.',
+  'Side-panel counts never cover a button’s name, even at 99+.',
+  'Opening a menu while an info card is up closes the card first, so Travel here always works.',
+  'The update message only appears when there really is an update (it kept coming back on phones).',
+  'Smoother on phones with fast screens: the game runs at 60 frames a second unless you pick Max in Settings, Display.',
+  'The frame counter (Settings, Display) shows the frames the game draws, plus your screen’s own rate.',
+  'Android: full screen stays on when you close the game, and it is the default (turn it off in Settings).']});
 // iPhone test notes (preview builds only; the live game never shows them). Write what the next test build changes here
 // (spoiler-free); it opens once in the iPhone test app. Released notes live in notes_release.js.
 const TEST_NOTES={v:'test', label:'Test build · iPhone', name:'One Look, Easy Aquarium', items:[
-  'NEW in this build (0.4.8.6.1+): frame rate defaults to 60 on every phone (Android ran at its screen’s 120 and slowed down); side-panel badges never cover names (even 99+); Tester tools in Stats: pearls, levels, fill Fish Log, finish feats, fill cooler, skip 8 hours; Travel no longer greyed out behind an open card; Android remembers full screen when you close the app and starts in full screen; notices on the water sit below the weather and streak chips; patch notes close (pinned button); Aquarium layout restored; fps counter below the streak chip; search fixed (top bar only, opens the right tab); gear Settings icon; Events without repeats; smaller Feats cards; faster menu switching; Trophy wall on one screen; slimmer Tide Pass and Boardwalk; Waters renamed Map; bait descriptions; Bait page (Switch, Buy bait, Special lures) from the top bar; Tackle = Gear; Oddities/Treasures tabs; Aquarium + Home lessons in Quests; fps counter top corner; Quests (goals, lessons, find, help); Bait in the top bar; Home chip; Cooler rework; Oddities in Collection; coins/level/water in one box; Tasks tabs without repeats; Fish Log only from the top bar; Prestige page (Set sail again + Pearl relics); tidy Waters that opens at your water; Fishing renamed Catch; XP bar on Skills; side-panel counts never cover names; menus use the full width with a slim number strip; Skills categories without badges; Rods tabs fixed + tidy presets; small-iPhone cut-offs fixed; smooth Home live view; tank size + clear tank upgrade in the Aquarium; mountains drawn without stripes; Stats has its own side-panel button (and the Level chip); folded side panel centred; top bar never cuts off settings; Settings no longer repeats Save (gift code and backup tools are in Save); summaries no longer repeat numbers.',
+  'NEW in this build (0.4.8.6.1+): the frame counter shows frames drawn + the screen rate; 0.4.8.6.2 Fixes patch notes; frame rate defaults to 60 on every phone (Android ran at its screen’s 120 and slowed down); side-panel badges never cover names (even 99+); Tester tools in Stats: pearls, levels, fill Fish Log, finish feats, fill cooler, skip 8 hours; Travel no longer greyed out behind an open card; Android remembers full screen when you close the app and starts in full screen; notices on the water sit below the weather and streak chips; patch notes close (pinned button); Aquarium layout restored; fps counter below the streak chip; search fixed (top bar only, opens the right tab); gear Settings icon; Events without repeats; smaller Feats cards; faster menu switching; Trophy wall on one screen; slimmer Tide Pass and Boardwalk; Waters renamed Map; bait descriptions; Bait page (Switch, Buy bait, Special lures) from the top bar; Tackle = Gear; Oddities/Treasures tabs; Aquarium + Home lessons in Quests; fps counter top corner; Quests (goals, lessons, find, help); Bait in the top bar; Home chip; Cooler rework; Oddities in Collection; coins/level/water in one box; Tasks tabs without repeats; Fish Log only from the top bar; Prestige page (Set sail again + Pearl relics); tidy Waters that opens at your water; Fishing renamed Catch; XP bar on Skills; side-panel counts never cover names; menus use the full width with a slim number strip; Skills categories without badges; Rods tabs fixed + tidy presets; small-iPhone cut-offs fixed; smooth Home live view; tank size + clear tank upgrade in the Aquarium; mountains drawn without stripes; Stats has its own side-panel button (and the Level chip); folded side panel centred; top bar never cuts off settings; Settings no longer repeats Save (gift code and backup tools are in Save); summaries no longer repeat numbers.',
   'NEW in this build: fish fight shows a tension ring at the fish with the instruction above it; hints are touch only; homes are never called docks; the layout always switches when you turn the phone; smoother storms at Starfall.',
   'NEW in this build: Compact Goal chip (opens the right page) and a separate Live chip, plus Tasks and Tide Pass in the top bar. Your home shows the real home of every water. Colour choices are round swatches.',
   'NEW in this build: every menu page works like the aquarium (key numbers and main button first, sections as tabs, one scrolling list, badges where rewards wait). The Wardrobe shows your angler big with the categories in Options. Pages keep your place when they refresh.',
