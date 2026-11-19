@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="DL Test iPhone">
 <script>
-window.DL_BUILD='ios'; window.DL_PREVIEW=true; window.DL_VERSION='2026.11.19-0210';
+window.DL_BUILD='ios'; window.DL_PREVIEW=true; window.DL_VERSION='2026.11.19-0235';
 window.addEventListener('beforeinstallprompt',function(e){ e.preventDefault(); window.__dlInstallPrompt=e; });
 </script>
 </head>
@@ -444,6 +444,20 @@ body.v3 #panel.pin > *{ animation:v3in .22s ease-out both }
 @media (prefers-reduced-motion:reduce){ body.v3 #panel > *{ animation:none } body.v3 .tile:hover, body.v3 .jcard:hover{ transform:none } }
 </style>
 `); }
+// =====================================================================
+// PLAT: platform settings with neutral defaults (2026-11-19). Shared code never asks "is this a phone?"; it reads a named
+// setting here, and a platform layer replaces the setting (phones: src/mobile/perf_round6.js). build.ps1 refuses phone checks
+// (the phone-layout test) in shared files, so platform behaviour always lives in its platform folder.
+// =====================================================================
+const PLAT={
+  willowRepaintS:()=>.03,      // seconds between Willow Pond curtain repaints (f3_foliage)
+  rippleBands:()=>false,       // rain rings drawn as 3 brightness bands instead of one stroke each (ap_weather033)
+  anglerReuseMs:()=>0,         // reuse the lit angler picture for this long (g_angler)
+  glowPx:()=>256,              // size of the ready-made soft glow dot (cd_efficiency)
+  movingDecorMs:()=>0,         // moving dock decorations: 0 = drawn fresh every frame, else cached for this long (cd_efficiency)
+  quietTabSwitch:()=>false,    // tab switches skip the per-card entry animation and its forced layout (af_smooth, aw_menu035, bm_ui04)
+  fpsText:null                 // (fps)=>text for the frame counter, null = default text (bm_ui04)
+};
 // ---------- data ----------
 const RAR = [
   {k:'Common',    c:'#b9c6c3', w:60,  f:0,   xp:1,   val:1,    aq:1,   sc:0},
@@ -6269,7 +6283,7 @@ function v3willow(P,t,hz){ const DP=Math.min(DPR||1,2), bxw=W*.905, x0=bxw-H*.17
   for(let i=0;i<V3WIL_N;i++){ if(!V3WIL.c[i]) V3WIL.c[i]=document.createElement('canvas'); const C=V3WIL.c[i]; if(C.width!==w||C.height!==h){ C.width=w; C.height=h; V3WIL.k=''; } }
   const paint=i=>{ const c=V3WIL.c[i].getContext('2d'); c.setTransform(1,0,0,1,0,0); c.clearRect(0,0,w,h); c.setTransform(DP,0,0,DP,-x0*DP,-y0*DP); v3willowDraw(c,P,t,hz,i); V3WIL.t[i]=t; };
   if(V3WIL.k!==key){ const fresh=V3WIL.k===""; V3WIL.k=key; if(fresh){ for(let i=0;i<V3WIL_N;i++) paint(i); } else V3WIL.t=V3WIL.t.map(()=>-9); } /* first time or a new size: all at once; a new light level: each slice catches up on its turn (3 frames) */
-  else { const i=V3WIL.turn; V3WIL.turn=(i+1)%V3WIL_N; if(Math.abs(t-V3WIL.t[i])>((typeof MOB==='function'&&MOB())?.25:.03)) paint(i); } /* phones (director, 2026-11-19: Willow Pond was the one water that dragged Android down): each slice repaints at most every 0.25 s; the strands sway about 1 px a second, so they move under 0.3 px between repaints (invisible), and the tree costs about an eighth of the work per frame. (A bend of a finished picture instead was tried and rejected: it also slides the trunk.) */
+  else { const i=V3WIL.turn; V3WIL.turn=(i+1)%V3WIL_N; if(Math.abs(t-V3WIL.t[i])>PLAT.willowRepaintS()) paint(i); } /* phones (director, 2026-11-19: Willow Pond was the one water that dragged Android down): each slice repaints at most every 0.25 s; the strands sway about 1 px a second, so they move under 0.3 px between repaints (invisible), and the tree costs about an eighth of the work per frame. (A bend of a finished picture instead was tried and rejected: it also slides the trunk.) */
   for(let i=0;i<V3WIL_N;i++) g.drawImage(V3WIL.c[i],x0,y0,w/DP,h/DP); }
 function v3willowDraw(c,P,t,hz,part){ /* part: undefined = the whole tree; 0, 1, 2 = a third of it in drawing order (0 includes the trunk, limbs and crown) */
   const ALL=part===undefined, BASE=ALL||part===0;
@@ -6689,7 +6703,7 @@ function wx3Water(P,t,hz){ const k=wx3k(), a=wx3A(); if(a<.01) return; const nig
   if((k==='Rain'||k==='Storm')&&FX){ const NM=Math.round((k==="Storm"?46:28)*gfxK()), N=Math.ceil(NM*a); g.strokeStyle=v3rgba(foam,.45); g.lineWidth=1;
     /* phones (director, 2026-11-18: storms drop Android to 30-40 fps): rings are grouped into 3 brightness bands and drawn as 3 strokes
        instead of up to 46 separate ones; PC is unchanged */
-    const mobB=(typeof MOB==='function'&&MOB())?[[],[],[]]:null;
+    const mobB=PLAT.rippleBands()?[[],[],[]]:null;
     for(let i=0;i<N;i++){ const per=.55+(i%5)*.07, ph=(t/per+i*.618)%1, cyc=Math.floor(t/per+i*.618), r1=((Math.sin((cyc+i)*12.9898)*43758.5)%1+1)%1, r2=((Math.sin((cyc+i)*78.233)*12345.6)%1+1)%1;
       const y=hz+H*.02+Math.pow(r2,1.3)*(H-hz)*.95, u=(y-hz)/(H-hz), x=r1*W, rr=(1.5+ph*7)*(.4+u*1.2), al=(1-ph)*.9*clamp(NM*a-i,0,1);
       if(mobB){ if(al>.02) mobB[Math.min(2,Math.floor(al/.3))].push(x,y,rr); continue; }
@@ -7380,8 +7394,8 @@ function drawAngler3(c,x,y,s,lk,o={}){
   /* phones only (director, 2026-11-18: Android 25-38 fps at 60): the lit picture below costs two offscreen canvases and ~8 blend
      passes, which Android graphics chips pay for with a flush each. On phones it is redrawn at most every 33 ms and reused in between
      (with its hand positions, so the rod and line still attach), and at once when the fishing state, look, night or size changes. */
-  const mobKey=(live&&typeof MOB==='function'&&MOB())?[w,h,Math.round((o.night||0)*40),o.rim||'',o.glow||'',o.sit?1:0,(typeof G==='object'&&G)?G.st:''].join('|'):null, nowMs=performance.now();
-  const reuse=!!(mobKey&&O.res&&O.key===mobKey&&nowMs-O.at<33);
+  const reuseMs=live?PLAT.anglerReuseMs():0, mobKey=reuseMs?[w,h,Math.round((o.night||0)*40),o.rim||'',o.glow||'',o.sit?1:0,(typeof G==='object'&&G)?G.st:''].join('|'):null, nowMs=performance.now();
+  const reuse=!!(mobKey&&O.res&&O.key===mobKey&&nowMs-O.at<reuseMs);
   let res; if(reuse) res=O.res; else {
   const ax=O.a.getContext('2d'); ax.setTransform(1,0,0,1,0,0); ax.clearRect(0,0,w,h);
   res=a3Body(ax,BX*ps,BT*ps,ps,lk,o,live);
@@ -11081,7 +11095,7 @@ renderPanel = function(){ const P=$('panel'); if(!P) return _renderPanel_2();
   const ps=P.scrollTop, ws=window.scrollY;
   const open=newTab?[]:[...P.querySelectorAll('details[open]')].map(d=>(d.querySelector('summary')||{}).textContent||'');
   _renderPanel_2();
-  if(newTab){ if(document.body.classList.contains('pch-on')) return; if(typeof MOB==='function'&&MOB()) return; /* phones (round 8 speed): no forced layout here; the phone page engine fades pages in itself */ /* PC: the page's own fade covers it (no per-card animation, no forced layout) */ P.classList.remove('pin'); void P.offsetWidth; P.classList.add('pin'); clearTimeout(P._pinT); P._pinT=setTimeout(()=>P.classList.remove('pin'),400); return; }
+  if(newTab){ if(document.body.classList.contains('pch-on')) return; if(PLAT.quietTabSwitch()) return; /* phones: no forced layout here; the phone page engine fades pages in itself */ /* PC: the page's own fade covers it (no per-card animation, no forced layout) */ P.classList.remove('pin'); void P.offsetWidth; P.classList.add('pin'); clearTimeout(P._pinT); P._pinT=setTimeout(()=>P.classList.remove('pin'),400); return; }
   if(open.length) for(const d of P.querySelectorAll('details')){ const s=(d.querySelector('summary')||{}).textContent||''; if(open.includes(s)) d.open=true; }
   if(P.scrollTop!==ps) P.scrollTop=ps; if(window.scrollY!==ws) window.scrollTo(0,ws); };
 
@@ -11380,7 +11394,7 @@ function menuSync(){ const T=$('tabs'); if(!T) return; const sec=menuSecOf(S.tab
   // the pills of the open section (rebuilt only when the section changes)
   const list=sec?menuTabsIn(sec):[], key=(sec?sec.id:'')+'|'+list.join(',');
   if(key!==menuSubKey){ menuSubKey=key; sb.innerHTML=list.map(t=>{ const [ic,nm]=menuTabLabel(t); return `<button type="button" class="subp" data-sub="${t}" aria-pressed="false"><span class="subi" aria-hidden="true">${ic}</span><span>${nm}</span><span class="subdot" hidden></span></button>`; }).join('');
-    if(document.body.classList.contains('pch-on')){ sb.querySelectorAll('.subp').forEach((p,i)=>{ try{ if(p.animate&&!matchMedia('(prefers-reduced-motion:reduce)').matches) p.animate([{opacity:0,transform:'translateY(4px)'},{opacity:1,transform:'none'}],{duration:280,delay:Math.min(i,3)*30,easing:'ease-out',fill:'backwards'}); }catch(e){} }); } else if(typeof MOB==='function'&&MOB()){ try{ sb.animate([{opacity:.35},{opacity:1}],{duration:200,easing:'ease-out'}); }catch(e){} } /* phones (round 8 speed): the same fade without a forced layout */ else { sb.classList.remove('subin'); void sb.offsetWidth; sb.classList.add('subin'); } }
+    if(document.body.classList.contains('pch-on')){ sb.querySelectorAll('.subp').forEach((p,i)=>{ try{ if(p.animate&&!matchMedia('(prefers-reduced-motion:reduce)').matches) p.animate([{opacity:0,transform:'translateY(4px)'},{opacity:1,transform:'none'}],{duration:280,delay:Math.min(i,3)*30,easing:'ease-out',fill:'backwards'}); }catch(e){} }); } else if(PLAT.quietTabSwitch()){ try{ sb.animate([{opacity:.35},{opacity:1}],{duration:200,easing:'ease-out'}); }catch(e){} } /* phones (round 8 speed): the same fade without a forced layout */ else { sb.classList.remove('subin'); void sb.offsetWidth; sb.classList.add('subin'); } }
   sb.hidden=!list.length; let onP=null; sb.querySelectorAll('.subp').forEach(p=>{ const on=p.dataset.sub===S.tab; p.setAttribute('aria-pressed',on?'true':'false'); p.classList.toggle('on',on); if(on) onP=p; });
   // keep the open page's pill in view when the row scrolls sideways (small phones), without moving the page
   menuPillView(sb,onP); requestAnimationFrame(()=>menuPillView(sb,onP));
@@ -11904,7 +11918,7 @@ if(/[?&]test\b/.test(location.search)) window.__audit=async(label)=>{ const out=
   for(const s of [...document.querySelectorAll('#tabs .secb')]){ s.click(); await new Promise(r=>setTimeout(r,220)); for(const b of [...document.querySelectorAll('#tabs .subbar .subp')]){ b.click(); await new Promise(r=>setTimeout(r,260)); check(s.textContent.trim().replace(/\d+/g,'')+'>'+b.textContent.trim().replace(/\d+/g,'')); } }
   return {label:label||vw+'x'+vh, n:out.length, out:[...new Set(out)].slice(0,40)}; };
 // QC (test mode only): every page, every visible label that is cut off with "…" (text-overflow) or clipped
-if(/[?&]test\b/.test(location.search)) window.__trunc=async()=>{ const out=new Set(); const look=where=>{ document.querySelectorAll('#panel *, .hud *, #tabs *').forEach(e=>{ if(!e.offsetParent||e.children.length>2) return; const cs=getComputedStyle(e); const t=(e.textContent||'').trim(); if(!t) return;
+if(/[?&]test\b/.test(location.search)) window.__trunc=async()=>{ const out=new Set(); const look=where=>{ document.querySelectorAll('#panel *, .hud *, #tabs *').forEach(e=>{ if(!e.offsetParent||e.children.length>2||e.clientWidth<=2) return; /* 1 px labels are hidden on purpose (screen-reader names on swatches) */ const cs=getComputedStyle(e); const t=(e.textContent||'').trim(); if(!t) return;
     if(e.scrollWidth>e.clientWidth+1&&(cs.textOverflow==='ellipsis'||cs.overflow==='hidden'||cs.overflowX==='hidden')) out.add(where+': "'+t.slice(0,28)+'"'); }); };
   for(const s of [...document.querySelectorAll('#tabs .secb')]){ s.click(); await new Promise(r=>setTimeout(r,200)); for(const b of [...document.querySelectorAll('#tabs .subbar .subp')]){ b.click(); await new Promise(r=>setTimeout(r,260)); look(s.textContent.trim().replace(/\d+/g,'')+'>'+b.textContent.trim().replace(/\d+/g,'')); } }
   return [...out].slice(0,60); };
@@ -14232,7 +14246,7 @@ document.addEventListener('click',e=>{ const P=document.querySelector('#menuov #
     for(const v of P.querySelectorAll(':scope > .bwx-nav')){ const on=P.scrollTop>0&&v.getBoundingClientRect().top-pr.top-pad<=1.5; if(v.classList.contains('stuck')!==on) v.classList.toggle('stuck',on); } };
   const soon=()=>{ if(!q) q=requestAnimationFrame(sync); };
   if(P){ P.addEventListener('scroll',soon,{passive:true}); P.addEventListener('click',soon); }
-  addEventListener('resize',soon); const _rp=renderPanel; renderPanel=function(){ const r=_rp.apply(this,arguments); if(typeof MOB==='function'&&MOB()) soon(); else sync(); return r; }; } /* phones (round 8 speed): checked on the next frame, not mid-switch */
+  addEventListener('resize',soon); const _rp=renderPanel; renderPanel=function(){ const r=_rp.apply(this,arguments); if(PLAT.quietTabSwitch()) soon(); else sync(); return r; }; } /* phones (round 8 speed): checked on the next frame, not mid-switch */
 // Touch screens: no hover effects. A phone counts a tap as "hovering" first, so hover looks (a blue glow, a lift) showed
 // before the button acted, and iPhone sometimes treated the first tap as only a hover. Every :hover rule is switched off there.
 if(matchMedia('(hover: none)').matches){ const strip=list=>{ for(let i=list.cssRules.length-1;i>=0;i--){ const r=list.cssRules[i];
@@ -14366,7 +14380,7 @@ document.head.insertAdjacentHTML('beforeend',`<style>
 { const el=document.createElement('div'); el.id='fpsbox'; el.hidden=true; const st=$('stage'); if(st) st.appendChild(el);
   let on=false, ts=[], lastT=0, shown=0;
   const loop=t=>{ if(!on) return; if(lastT) ts.push(t-lastT); lastT=t; if(ts.length>240) ts.shift();
-    if(t-shown>500&&ts.length>10){ shown=t; const win=ts.slice(-120), avg=win.reduce((a,b)=>a+b,0)/win.length, worst=Math.max(...win); { const mt=(typeof MOB==='function'&&MOB()&&typeof mobFpsText==='function')?mobFpsText(Math.round(1000/avg)):null; el.textContent=mt||(Math.round(1000/avg)+' fps · slowest '+worst.toFixed(1)+' ms'); } } /* phones: frames actually drawn (settings08) */
+    if(t-shown>500&&ts.length>10){ shown=t; const win=ts.slice(-120), avg=win.reduce((a,b)=>a+b,0)/win.length, worst=Math.max(...win); { const mt=PLAT.fpsText?PLAT.fpsText(Math.round(1000/avg)):null; el.textContent=mt||(Math.round(1000/avg)+' fps · slowest '+worst.toFixed(1)+' ms'); } } /* phones: frames actually drawn (settings08) */
     requestAnimationFrame(loop); };
   const sync=()=>{ const v=!!(S.settings&&S.settings.showFps); if(v===on) return; on=v; el.hidden=!v; ts=[]; lastT=0; if(v) requestAnimationFrame(loop); };
   setInterval(sync,700); sync(); }
@@ -15135,7 +15149,7 @@ function riverWheel(P,t,hz,mx,mb,mw,mh,FX){ const R=mh*.62, xL=mx-mw/2, cx=xL-R*
 // They started in src/mobile/polish08.js (phones only) and moved here. Phone-only trade-offs (things that do change the picture a
 // little, like fewer light steps) stay in the phone files.
 // =====================================================================
-const EFF_MOB=()=>typeof MOB==='function'&&MOB();
+/* Platform values (glow dot size, how often moving decorations refresh) come from PLAT (a3_plat.js); phones set their own. */
 
 /* 1) Wrong scenery after opening a menu (director, 2026-11-18: "clicking settings and exiting brought up the wrong map for a bit"):
    a Map thumbnail for another water reused the live scenery canvases (and the Willow Pond slices), so the real water could show the
@@ -15150,7 +15164,7 @@ const EFF_MOB=()=>typeof MOB==='function'&&MOB();
    wherever the dock or boat carries it. Still items are lit once and reused until the light level changes; moving ones (flags,
    campfire, wind chime...) are drawn fresh every frame on PC and refreshed 10 times a second on phones. Same box as litDraw uses. */
 { const _dd=drawDockItem, DC=new Map(), DA={}; /* DA[id]: true = this decoration moves, false = still */ for(const k of ['birdhouse','bunting','campfire','cottage','minilight','mug','plants','radio','shipwheel','tideflag','windchime']) DA[k]=true; /* from the drawing code (cases that use the clock); other items are tested once */
-  drawDockItem=function(c,id,x,y,s,t,night,back){ if(c!==g) return _dd.apply(this,arguments); const mob=EFF_MOB(); if(DA[id]&&!mob) return _dd.apply(this,arguments);
+  drawDockItem=function(c,id,x,y,s,t,night,back){ if(c!==g) return _dd.apply(this,arguments); const mvMs=PLAT.movingDecorMs(); if(DA[id]&&!mvMs) return _dd.apply(this,arguments);
     const m=c.getTransform(), k=Math.hypot(m.a,m.b); if(m.b||m.c||!(k>0)||!(s>0)) return _dd.apply(this,arguments);
     const big=id==='cottage', w=(big?46:44)*s, hg=(big?64:96)*s, bx=-w, by=-hg, bw=2*w, bh=hg+6*s, pw=Math.ceil(bw*k), ph=Math.ceil(bh*k);
     if(!(pw>2&&ph>2)||pw*ph>4e6) return _dd.apply(this,arguments);
@@ -15159,8 +15173,8 @@ const EFF_MOB=()=>typeof MOB==='function'&&MOB();
     e.seen=now;
     const paint=(cv2,tt)=>{ if(cv2.width!==pw||cv2.height!==ph){ cv2.width=pw; cv2.height=ph; } const tx=cv2.getContext('2d'); tx.setTransform(1,0,0,1,0,0); tx.clearRect(0,0,pw,ph); tx.setTransform(k,0,0,k,-bx*k,-by*k); _dd(tx,id,0,0,s,tt,night,back); };
     if(DA[id]===undefined){ try{ const t2=document.createElement('canvas'); paint(e.c,t||0); paint(t2,(t||0)+.37); const a=e.c.getContext('2d').getImageData(0,0,pw,ph).data, b=t2.getContext('2d').getImageData(0,0,pw,ph).data; let same=true; for(let i=0;i<a.length;i+=16){ if(a[i]!==b[i]||a[i+3]!==b[i+3]){ same=false; break; } } DA[id]=!same; e.at=now; }catch(er){ DA[id]=true; }
-      if(DA[id]&&!mob){ DC.delete(key); return _dd.apply(this,arguments); } }
-    else if(e.at<0||(DA[id]&&now-e.at>=100)){ paint(e.c,t); e.at=now; }
+      if(DA[id]&&!mvMs){ DC.delete(key); return _dd.apply(this,arguments); } }
+    else if(e.at<0||(DA[id]&&now-e.at>=mvMs)){ paint(e.c,t); e.at=now; }
     c.drawImage(e.c,x+bx,y+by,bw,bh); }; }
 
 /* 3) Glows: v3glow (108 uses: lanterns, lamps, Starfall's star whale, blossoms, sun and moon) built a new radial gradient on every
@@ -15170,7 +15184,7 @@ const EFF_MOB=()=>typeof MOB==='function'&&MOB();
   const parse=col=>{ col=String(col).trim(); let m=/^rgba?\(([^)]+)\)$/i.exec(col); if(m){ const p=m[1].split(',').map(s=>s.trim()); if(p.length<3) return null; const a=p[3]!==undefined?parseFloat(p[3]):1; return isFinite(a)?{rgb:p[0]+','+p[1]+','+p[2],a}:null; }
     m=/^#([0-9a-f]{6})$/i.exec(col); if(m){ const v=parseInt(m[1],16); return {rgb:((v>>16)&255)+','+((v>>8)&255)+','+(v&255),a:1}; } return null; };
   v3glow=function(c,x,y,r,col,a){ if(!(r>0)) return _gl.apply(this,arguments); const p=parse(col); if(!p) return _gl.apply(this,arguments);
-    const S2=EFF_MOB()?128:256, H=S2/2, key=p.rgb+'|'+S2;
+    const S2=PLAT.glowPx(), H=S2/2, key=p.rgb+'|'+S2;
     let s=GS.get(key); if(!s){ s=document.createElement('canvas'); s.width=s.height=S2; const sx=s.getContext('2d'), gr=sx.createRadialGradient(H,H,0,H,H,H); gr.addColorStop(0,'rgba('+p.rgb+',1)'); gr.addColorStop(1,'rgba(0,0,0,0)'); sx.fillStyle=gr; sx.fillRect(0,0,S2,S2); if(GS.size>96) GS.clear(); GS.set(key,s); }
     const ga=a*p.a; if(!(ga>0)) return; c.save(); c.globalAlpha=Math.min(1,ga); c.drawImage(s,x-r,y-r,r*2,r*2); c.restore(); }; }
 
@@ -15282,6 +15296,15 @@ body:not(.phone-app):not(.phone-land) #baitqk{display:none!important}
 
 // 6) Rods (phones): the "Your rods" presets at the top of the Rods page
 { const _rp=renderPanel; renderPanel=function(){ const r=_rp.apply(this,arguments); try{ if(S.tab!=='rods'||!MOB()) return r; const P=$('panel'); if(P.querySelector('.rp-box')) return r; const anchor=P.querySelector(':scope > .tile')||P.querySelector(':scope > .grid'); if(anchor) anchor.insertAdjacentHTML('beforebegin',rodPresetsHTML()); else P.insertAdjacentHTML('afterbegin',rodPresetsHTML()); }catch(e){} return r; }; }
+
+// 7) Phone values for the shared platform settings (PLAT in a3_plat.js). Each one only applies while the phone layout is on.
+PLAT.willowRepaintS=()=>MOB()?.25:.03;      /* Willow curtain repaints 4x a second (its sway is slow) */
+PLAT.rippleBands=MOB;                       /* storms: rain rings in 3 brightness bands, 3 strokes instead of ~46 */
+PLAT.anglerReuseMs=()=>MOB()?33:0;          /* the lit angler picture is redrawn ~30x a second, at once on any state change */
+PLAT.glowPx=()=>MOB()?128:256;              /* smaller glow dots */
+PLAT.movingDecorMs=()=>MOB()?100:0;         /* moving decorations refresh 10x a second */
+PLAT.quietTabSwitch=MOB;                    /* tab switches without the per-card animation or a forced layout */
+PLAT.fpsText=fps=>(MOB()&&typeof mobFpsText==='function')?mobFpsText(fps):null;
 // =====================================================================
 // Phones, round 6 (director: "both phones get the modern PC look: teal = click me, gold = open now, the same navy panels and
 // card style"). Same colour decisions as PC, laid out for phones (Android + iPhone):
@@ -18166,7 +18189,7 @@ if(/[?&]test\b/.test(location.search)) window.__profUI=(page,n=3)=>{ const acc={
   try{ for(let i=0;i<n;i++){ setTab(DASH); setTab(page); } } finally{ un.forEach(u=>u()); setTab(DASH); }
   return Object.fromEntries(Object.entries(acc).map(([k,v])=>[k,+(v/n).toFixed(1)])); };
 // test-mode layout check: the dashboard, every page (via __audit / __trunc) and the menu header in each category
-if(/[?&]test\b/.test(location.search)) window.__layoutQC=async()=>{ const chk=()=>{ const out=[]; const vw=document.documentElement.clientWidth; document.querySelectorAll('#panel *, .hud *, #tabs *, #menuov .mo-top *').forEach(e=>{ const r=e.getBoundingClientRect(); if(!r.width||!r.height||!e.offsetParent) return; if(window.__inHScroll&&__inHScroll(e)) return; const cs=getComputedStyle(e); if(cs.position==='fixed') return; if(r.right>vw+2&&!e.closest('.subbar')) out.push('off '+(e.className||e.tagName)+' "'+(e.textContent||'').trim().slice(0,20)+'"'); const t=(e.textContent||'').trim(); if(t&&e.children.length<=2&&e.scrollWidth>e.clientWidth+1&&(cs.textOverflow==='ellipsis'||cs.overflow==='hidden'||cs.overflowX==='hidden')) out.push('cut "'+t.slice(0,30)+'"'); }); if(document.documentElement.scrollWidth>vw+1) out.push('page scrolls sideways'); return out; };
+if(/[?&]test\b/.test(location.search)) window.__layoutQC=async()=>{ const chk=()=>{ const out=[]; const vw=document.documentElement.clientWidth; document.querySelectorAll('#panel *, .hud *, #tabs *, #menuov .mo-top *').forEach(e=>{ const r=e.getBoundingClientRect(); if(!r.width||!r.height||!e.offsetParent) return; if(window.__inHScroll&&__inHScroll(e)) return; const cs=getComputedStyle(e); if(cs.position==='fixed') return; if(r.right>vw+2&&!e.closest('.subbar')) out.push('off '+(e.className||e.tagName)+' "'+(e.textContent||'').trim().slice(0,20)+'"'); const t=(e.textContent||'').trim(); if(t&&e.clientWidth>2&&e.children.length<=2&&e.scrollWidth>e.clientWidth+1&&(cs.textOverflow==='ellipsis'||cs.overflow==='hidden'||cs.overflowX==='hidden')) out.push('cut "'+t.slice(0,30)+'"'); }); if(document.documentElement.scrollWidth>vw+1) out.push('page scrolls sideways'); return out; };
   const r={size:innerWidth+'x'+innerHeight, layout:document.body.className.replace(/\bv3\b|plat-\w+/g,'').trim()}; closeMenu(); await new Promise(x=>setTimeout(x,500)); { const w=document.querySelector('.wrap').getBoundingClientRect(), s=$('stage').getBoundingClientRect(), c=$('cv').getBoundingClientRect(); r.fishing={stageFillsToBottom:Math.abs(w.bottom-Math.max(s.bottom,$('catdock').getBoundingClientRect().bottom))<=2, waterUncovered:(()=>{ const d=$('catdock').getBoundingClientRect(); return !(d.left<s.right-1&&d.right>s.left+1&&d.top<s.bottom-1&&d.bottom>s.top+1); })(), canvasFillsStage:Math.abs(c.height-s.height)<=2&&Math.abs(c.width-s.width)<=2, menuButton:!!$('catdock')&&$('catdock').offsetParent!==null&&$('catdock').getBoundingClientRect().bottom<=w.bottom+1, pageScrolls:document.documentElement.scrollHeight>innerHeight+1, hudCut:chk().filter(x=>!/#panel/.test(x))}; } openMenu(DASH); await new Promise(x=>setTimeout(x,500)); r.dash=chk(); r.audit=(await __audit()).out; r.trunc=await __trunc(); const heads=[]; for(const s of [...document.querySelectorAll('#tabs .secb')]){ s.click(); await new Promise(x=>setTimeout(x,150)); heads.push(...chk().filter(x=>!/#panel/.test(x))); } r.head=[...new Set(heads)]; closeMenu(); const f=r.fishing; r.clean=!r.dash.length&&!r.audit.length&&!r.trunc.length&&!r.head.length&&f.stageFillsToBottom&&f.waterUncovered&&f.canvasFillsStage&&f.menuButton&&!f.pageScrolls&&!f.hudCut.length; return r; };
 // test builds: ?test&open=<page> opens that menu page right after load (for screenshots of a menu page)
 if(/[?&]test\b/.test(location.search)){ const m=location.search.match(/[?&]open=([\w-]+)/); if(m) setTimeout(()=>{ try{ openMenu(m[1]==='dash'?undefined:m[1]); }catch(e){} },700); }
