@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="DL Test iPhone">
 <script>
-window.DL_BUILD='ios'; window.DL_PREVIEW=true; window.DL_VERSION='2026.11.19-0001';
+window.DL_BUILD='ios'; window.DL_PREVIEW=true; window.DL_VERSION='2026.11.19-0015';
 window.addEventListener('beforeinstallprompt',function(e){ e.preventDefault(); window.__dlInstallPrompt=e; });
 </script>
 </head>
@@ -6687,8 +6687,14 @@ for(const id in V3SCENES) m33wrap(id,'sky',function(P,t,hz){ wx3Sky(P,t,hz); });
 // ---------- water layer: hooked into every scene's live step (after the land, before the dock and angler) ----------
 function wx3Water(P,t,hz){ const k=wx3k(), a=wx3A(); if(a<.01) return; const night=P.night||0, FX=S.settings.effects, foam=mix(P.wTop||'#a8cfdf','#ffffff',.7);
   if((k==='Rain'||k==='Storm')&&FX){ const NM=Math.round((k==="Storm"?46:28)*gfxK()), N=Math.ceil(NM*a); g.strokeStyle=v3rgba(foam,.45); g.lineWidth=1;
+    /* phones (director, 2026-11-18: storms drop Android to 30-40 fps): rings are grouped into 3 brightness bands and drawn as 3 strokes
+       instead of up to 46 separate ones; PC is unchanged */
+    const mobB=(typeof MOB==='function'&&MOB())?[[],[],[]]:null;
     for(let i=0;i<N;i++){ const per=.55+(i%5)*.07, ph=(t/per+i*.618)%1, cyc=Math.floor(t/per+i*.618), r1=((Math.sin((cyc+i)*12.9898)*43758.5)%1+1)%1, r2=((Math.sin((cyc+i)*78.233)*12345.6)%1+1)%1;
-      const y=hz+H*.02+Math.pow(r2,1.3)*(H-hz)*.95, u=(y-hz)/(H-hz), x=r1*W, rr=(1.5+ph*7)*(.4+u*1.2); g.globalAlpha=(1-ph)*.9*clamp(NM*a-i,0,1); /* each new ring fades in as the rain builds */ g.beginPath(); g.ellipse(x,y,rr,rr*.3,0,0,7); g.stroke(); }
+      const y=hz+H*.02+Math.pow(r2,1.3)*(H-hz)*.95, u=(y-hz)/(H-hz), x=r1*W, rr=(1.5+ph*7)*(.4+u*1.2), al=(1-ph)*.9*clamp(NM*a-i,0,1);
+      if(mobB){ if(al>.02) mobB[Math.min(2,Math.floor(al/.3))].push(x,y,rr); continue; }
+      g.globalAlpha=al; /* each new ring fades in as the rain builds */ g.beginPath(); g.ellipse(x,y,rr,rr*.3,0,0,7); g.stroke(); }
+    if(mobB) for(let b=0;b<3;b++){ const L=mobB[b]; if(!L.length) continue; g.globalAlpha=.15+b*.3; g.beginPath(); for(let j=0;j<L.length;j+=3){ g.moveTo(L[j]+L[j+2],L[j+1]); g.ellipse(L[j],L[j+1],L[j+2],L[j+2]*.3,0,0,7); } g.stroke(); }
     g.globalAlpha=1;
     const dg=g.createLinearGradient(0,hz,0,H); dg.addColorStop(0,'rgba(20,28,40,'+(a*(k==='Storm'?.22:.1))+')'); dg.addColorStop(1,'rgba(10,14,22,'+(a*(k==='Storm'?.3:.14))+')'); g.fillStyle=dg; g.fillRect(0,hz,W,H-hz);
     const mg=g.createLinearGradient(0,hz-H*.03,0,hz+H*.05); mg.addColorStop(0,'rgba(190,200,210,0)'); mg.addColorStop(.5,'rgba(190,200,210,'+(a*.22)+')'); mg.addColorStop(1,'rgba(190,200,210,0)'); g.fillStyle=mg; g.fillRect(0,hz-H*.03,W,H*.08); }
@@ -17132,8 +17138,10 @@ html body.phone-land .hud > #mbbait > b{max-width:120px;white-space:nowrap;overf
     /* the tension ring */
     g.lineCap='round'; g.lineWidth=Math.max(5,r*.2);
     g.strokeStyle='rgba(5,14,20,.55)'; g.beginPath(); g.arc(cx,cy,r,0,7); g.stroke();
-    if(danger){ g.shadowColor='#ff5468'; g.shadowBlur=12+Math.sin(t*14)*6; }
-    g.strokeStyle=col; g.beginPath(); g.arc(cx,cy,r,-Math.PI/2,-Math.PI/2+Math.PI*2*Math.max(.02,ten)); g.stroke(); g.shadowBlur=0;
+    /* the danger glow: a soft wider ring underneath instead of shadowBlur (director, 2026-11-18: Android drops during actions; a
+       glow shadow is one of the slowest things a phone graphics chip draws, and it pulsed every frame of a tense fight) */
+    if(danger){ const a0=-Math.PI/2, a1=-Math.PI/2+Math.PI*2*Math.max(.02,ten), lw=g.lineWidth, pulse=.5+.5*Math.sin(t*14); g.strokeStyle='rgba(255,84,104,'+(.18+.12*pulse)+')'; g.lineWidth=lw+8+pulse*5; g.beginPath(); g.arc(cx,cy,r,a0,a1); g.stroke(); g.strokeStyle='rgba(255,84,104,'+(.28+.12*pulse)+')'; g.lineWidth=lw+3; g.beginPath(); g.arc(cx,cy,r,a0,a1); g.stroke(); g.lineWidth=lw; }
+    g.strokeStyle=col; g.beginPath(); g.arc(cx,cy,r,-Math.PI/2,-Math.PI/2+Math.PI*2*Math.max(.02,ten)); g.stroke();
     g.fillStyle='rgba(255,84,104,.35)'; g.beginPath(); g.arc(cx,cy,r+g.lineWidth*.5+2,-Math.PI/2+Math.PI*2*.8,-Math.PI/2+Math.PI*2,false); g.arc(cx,cy,r+g.lineWidth*.5+5,-Math.PI/2+Math.PI*2,-Math.PI/2+Math.PI*2*.8,true); g.fill(); /* the red zone: snapping risk */
     /* the instruction, right above */
     const msg = G.ev==='jump' ? 'It jumped! Let go!' : G.ev==='shake' ? 'Head shake! Ease off' : G.run ? 'It’s running! Ease off' : G.temper>1.7&&G.hold ? 'It’s angry! Let go a moment' : danger ? 'Line strained! Ease off' : G.hold ? 'Reeling…' : 'Hold to reel';
@@ -17855,6 +17863,7 @@ const TEST_NOTES={v:'test', label:'Test build · iPhone', name:'Natural frame ra
   'Water pictures for the Map are only made while the Map is open, so other menus stay light.',
   'Much smoother with a decorated home: decorations on the dock are no longer re-lit from scratch every frame (a moved save with many decorations made Android drop to about 25 fps).',
   'After moving your progress from another device, patch notes you already saw on this phone don’t come back.',
+  'Smoother fights and storms on phones: the red danger glow on the fight ring and the rain ripples on the water are much cheaper to draw.',
   'Tester tools (Stats), Graphics test: the angler, pets, home decorations, moving cosmetic effects and oddities now have their own buttons. If a moved save makes the game slow, turn them off one at a time and watch the frame counter.']};
 addTestNotes(TEST_NOTES);
 // =====================================================================
