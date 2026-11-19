@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="DL Test Android">
 <script>
-window.DL_BUILD='android'; window.DL_PREVIEW=true; window.DL_VERSION='2026.11.19-0106';
+window.DL_BUILD='android'; window.DL_PREVIEW=true; window.DL_VERSION='2026.11.19-0129';
 window.addEventListener('beforeinstallprompt',function(e){ e.preventDefault(); window.__dlInstallPrompt=e; });
 </script>
 </head>
@@ -17484,6 +17484,33 @@ document.head.insertAdjacentHTML('beforeend',`<style>html body.phone-land #catdo
    frames over 8 ms during those transitions, every water). Phones now use 5 / 3 / 2 steps and a 5 s cross-fade between them, so the
    light still flows smoothly but the scenery is rebuilt about a fifth as often. PC keeps its own steps. */
 { const _st=v3steps, _fd=v3fade; v3steps=function(){ return (MOB()&&!document.body.classList.contains('pch-on'))?[5,3,2]:_st(); }; v3fade=function(){ return (MOB()&&!document.body.classList.contains('pch-on'))?5:_fd(); }; }
+
+/* "Fix it, don't leave it" round (director, 2026-11-19). Phones only; PC is untouched.
+   1) Glows: v3glow (108 uses: lanterns, lamps, Starfall's star whale, blossoms, sun and moon) built a new radial gradient on every
+      call, over 30 a frame at Starfall. Phones stamp a ready-made soft dot per colour (128 px, same centre colour, same fade to
+      nothing) at the same size and strength. */
+{ const _gl=v3glow, GS=new Map();
+  const parse=col=>{ col=String(col).trim(); let m=/^rgba?\(([^)]+)\)$/i.exec(col); if(m){ const p=m[1].split(',').map(s=>s.trim()); if(p.length<3) return null; const a=p[3]!==undefined?parseFloat(p[3]):1; return isFinite(a)?{rgb:p[0]+','+p[1]+','+p[2],a}:null; }
+    m=/^#([0-9a-f]{6})$/i.exec(col); if(m){ const v=parseInt(m[1],16); return {rgb:((v>>16)&255)+','+((v>>8)&255)+','+(v&255),a:1}; } return null; };
+  v3glow=function(c,x,y,r,col,a){ if(!MOB()||!(r>0)) return _gl.apply(this,arguments); const p=parse(col); if(!p) return _gl.apply(this,arguments);
+    let s=GS.get(p.rgb); if(!s){ s=document.createElement('canvas'); s.width=s.height=128; const sx=s.getContext('2d'), gr=sx.createRadialGradient(64,64,0,64,64,64); gr.addColorStop(0,'rgba('+p.rgb+',1)'); gr.addColorStop(1,'rgba(0,0,0,0)'); sx.fillStyle=gr; sx.fillRect(0,0,128,128); if(GS.size>96) GS.clear(); GS.set(p.rgb,s); }
+    const ga=a*p.a; if(!(ga>0)) return; c.save(); c.globalAlpha=Math.min(1,ga); c.drawImage(s,x-r,y-r,r*2,r*2); c.restore(); }; }
+/* 2) Starfall's sky events: sfEvent counted every event from the start of the session on every call (twice a frame), a little more
+      work the longer you play. Phones resume from where the last call got to (same events, same timing). */
+{ const _sf=sfEvent; let cs=0, cn=0;
+  sfEvent=function(t){ if(!MOB()) return _sf(t); if(!(t>=cs)){ cs=0; cn=0; } let start=cs, n=cn; while(true){ const gap=18+((Math.sin(n*91.7)*43758.5)%1+1)%1*22; if(start+gap>t) break; start+=gap; n++; } cs=start; cn=n;
+    const kind=Math.floor((((Math.sin(n*37.3)*12345.6)%1+1)%1)*5); return {kind,into:t-start,n}; }; }
+/* 3) Tinted pets: a canvas colour filter makes every brush stroke of the pet go through the filter separately. Phones draw the pet
+      once without the tint into a small picture, then put it on the water through the filter in one step. */
+{ const _dp=drawPetStyled; let PC=null;
+  drawPetStyled=function(c,id,x,y,s,t,night,lkOver){ if(!MOB()||c!==g||id==='daxniko') return _dp.apply(this,arguments); /* Dax & Niko tint each dog on its own (never the hearts or z's): left as before */ let lk, f='none'; try{ lk=lkOver||petLook(id); f=tintFilter(lk,t); }catch(e){ return _dp.apply(this,arguments); }
+    if(!f||f==='none') return _dp.apply(this,arguments);
+    const m=c.getTransform(), k=Math.hypot(m.a,m.b); if(m.b||m.c||!(m.a>0)||!(m.d>0)||!(s>0)) return _dp.apply(this,arguments); /* mirrored (facing left) or rotated: as before */
+    const bw=170*s, bh=150*s, bx=-bw/2, by=-bh*.82, pw=Math.ceil(bw*k), ph=Math.ceil(bh*k); if(pw*ph>4e6) return _dp.apply(this,arguments);
+    if(!PC) PC=document.createElement('canvas'); if(PC.width<pw||PC.height<ph){ PC.width=Math.max(PC.width,pw); PC.height=Math.max(PC.height,ph); }
+    const px=PC.getContext('2d'); px.setTransform(1,0,0,1,0,0); px.clearRect(0,0,PC.width,PC.height); px.setTransform(k,0,0,k,-(x+bx)*k,-(y+by)*k);
+    const r=_dp(px,id,x,y,s,t,night,Object.assign({},lk,{tint:undefined}));
+    c.save(); c.setTransform(1,0,0,1,0,0); c.filter=f; c.drawImage(PC,0,0,pw,ph,m.a*(x+bx)+m.e,m.d*(y+by)+m.f,pw,ph); c.restore(); return r; }; }
 // =====================================================================
 // Phones: the SET MEASUREMENTS (director, 2026-11-18: "I want standards and set measurements for each platform going forward,
 // I'm tired of the same mistakes"). The numbers are written down in docs/PLATFORM_DESIGN.md ("Phone frame: set measurements")
@@ -17848,6 +17875,7 @@ PATCHES.unshift({v:'0.4.8.6.2', name:'Fixes', items:[
   'The update message only appears when there really is an update (it kept coming back on phones).',
   'Much smoother with a decorated home: decorations on the dock (and on boats and floating docks) no longer slow the game down.',
   'Smoother fights, storms, dusk, dawn and weather changes on phones.',
+  'Lighter on phones: glowing lights (lanterns, lamps, Starfall’s sky) and coloured pets cost far less to draw, and the game no longer stays at a lower sharpness after switching waters.',
   'Opening and closing a menu no longer shows another water’s scenery for a moment.',
   'After moving your progress from another device, patch notes you already saw on this phone don’t come back.',
   'Android draws a steady 60 frames a second (also on 120 Hz screens) and iPhone runs at its natural rate; the frame-rate choice is gone from Settings.',
@@ -17866,6 +17894,7 @@ const TEST_NOTES={v:'test', label:'Test build · Android', name:'Natural frame r
   'Smoother fights and storms on phones: the red danger glow on the fight ring and the rain ripples on the water are much cheaper to draw.',
   'Smoother on boats and floating docks: decorations that bob with the water are no longer re-lit every frame.',
   'Switching waters no longer leaves the game stuck at a lower sharpness: the automatic resolution comes back up once the phone keeps up again (it could not on a 60 Hz screen).',
+  'Lighter on phones everywhere: lanterns, lamps, glows and Starfall’s star whale are drawn with ready-made soft lights (they look the same), and coloured pets no longer slow the game down.',
   'The frame counter also shows the current water sharpness (res 2x = full, lower = the game is easing off).',
   'Smoother dusk, dawn and weather changes: the scenery’s light now changes in fewer, softer steps on phones, so the game rebuilds it far less often.',
   'Tester tools (Stats), Graphics test: the angler, pets, home decorations, moving cosmetic effects and oddities now have their own buttons. If a moved save makes the game slow, turn them off one at a time and watch the frame counter.']};
@@ -17993,6 +18022,7 @@ ui(){ QA.sys='UI';
   T('aquarium: each fish\'s coins per hour add up exactly to the total shown, each within a coin of its true value',()=>{ const e=[]; const base=S.tank.slice(); const pool=[...S.cooler,...base]; if(!pool.length) return {ok:true,detail:'no fish to test'};
     for(let k=1;k<=Math.min(12,aqCap());k++){ S.tank=Array.from({length:k},(_,i)=>pool[i%pool.length]); const sh=aqShownRates(), tot=Math.floor(tankRate()*60); if(sh.reduce((a,b)=>a+b,0)!==tot) e.push(k+' fish: '+sh.reduce((a,b)=>a+b,0)+' vs '+tot); S.tank.forEach((f,i)=>{ if(Math.abs(sh[i]-fishRate(f)*60)>=1) e.push('fish '+i+' off by '+(sh[i]-fishRate(f)*60).toFixed(2)); }); }
     S.tank=base; return e.length?{ok:false,detail:e.slice(0,6).join(' | ')}:{ok:true}; });
+  window.__baitRank=(L,ph)=>{ const off0=window.__off; setPhaseNow(ph); const base=window.__off; for(let k=0;k<120;k++){ window.__off=base+k*CYCLE*1000; if(weather().k==='Clear') break; } const l0=S.loc; S.loc=L; const baits=Object.keys(BAIT).filter(k=>!BAIT[k].junk&&!BAIT[k].scales); const r=baits.map(k=>{ const o=catchOdds({bait:k}); return [k,+(o.epic*100).toFixed(2),+o.rare.toFixed(2)]; }).sort((a,b)=>b[1]-a[1]); const ctx={lastCast:G.lastCast, rareBuff:bonus('rare'), wx:weather().k}; S.loc=l0; window.__off=off0; return {ctx, rank:r.slice(0,6)}; }; /* test builds: rare-odds ranking of every bait at a water (used to explain the each-water-bait test) */
   T('each water bait is the best bait at its own water (rare odds and coins per hour, clear day and night) and never a top-2 pick elsewhere',()=>{ const e=[]; const off0=window.__off; const baits=Object.keys(BAIT).filter(k=>!BAIT[k].junk&&!BAIT[k].scales); const spV={};
     const clearAt=ph=>{ setPhaseNow(ph); const base=window.__off; for(let k=0;k<120;k++){ window.__off=base+k*CYCLE*1000; if(weather().k==='Clear') return true; } return false; };
     const coins=L=>{ S.loc=L; if(!S.unlocked.includes(L)) S.unlocked.push(L); S.baitSel='worm'; for(const s of SP.filter(s=>s.loc===L)) if(spV[s.id]==null){ let t=0; for(let i=0;i<120;i++) t+=salePrice(rollFish(s,{dist:{rare:0,weight:1}})); spV[s.id]=t/120; }
