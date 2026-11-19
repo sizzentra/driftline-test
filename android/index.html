@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="DL Test Android">
 <script>
-window.DL_BUILD='android'; window.DL_PREVIEW=true; window.DL_VERSION='2026.11.18-1820';
+window.DL_BUILD='android'; window.DL_PREVIEW=true; window.DL_VERSION='2026.11.18-1829';
 window.addEventListener('beforeinstallprompt',function(e){ e.preventDefault(); window.__dlInstallPrompt=e; });
 </script>
 </head>
@@ -15103,7 +15103,7 @@ const MOB=()=>{ const b=document.body.classList; return b.contains('phone-app')|
 
 // 1) a menu covers the whole phone screen, so the fishing scene behind it is not drawn (the aquarium tank, the page and its
 //    scrolling get the whole frame). The line waits while a menu is open, so nothing on the water is missed.
-{ const _dr=draw; draw=function(now){ if(MENU_OPEN&&MOB()&&!(typeof DK_SCENE_OK==='function'&&DK_SCENE_OK(now))) return; return _dr.apply(this,arguments); }; } /* round 8: Your home shows the live scene, so it keeps drawing (30 a second) while that page is open (dock08.js) */
+{ const _dr=draw; draw=function(now){ if(MENU_OPEN&&MOB()){ if(!(typeof DK_SCENE_OK==='function'&&DK_SCENE_OK(now))) return; const f=resize.force; resize.force=true; try{ return _dr.apply(this,arguments); } finally{ resize.force=f; } } return _dr.apply(this,arguments); }; } /* Your home: past the shared "menus draw 4 a second" limit (bm_ui04), which made the live preview choppy */ /* round 8: Your home shows the live scene, so it keeps drawing (30 a second) while that page is open (dock08.js) */
 
 // 2) the aquarium tank: a steady pace on phones (round 7 below), a steady half rate while the page scrolls
 { let lastT=0, scrollUntil=0; const P=$('panel'); if(P) P.addEventListener('scroll',()=>{ scrollUntil=performance.now()+180; },{passive:true});
@@ -16157,13 +16157,20 @@ html body.phone-app #menuov #panel.dk08 .hm-phone > h5:first-child,html body.pho
    open the scene keeps drawing 30 times a second (the rest of the time menus pause it, as before); dragging decorations and pets
    moves them to the exact spots the game uses. Falls back to the drawn view if the scene is not available. ---------- */
 function DK_SCENE_OK(now){ if(S.tab!=='home'||!MOB()) return false; const c=$('homecv'); if(!c||!c.isConnected||!c.closest('.dk08-view')) return false;
-  if(DK_SCENE_OK.t&&now-DK_SCENE_OK.t<32&&now>=DK_SCENE_OK.t) return false; DK_SCENE_OK.t=now; return true; }
+  /* round 8 (director: "Home preview is very choppy and low fps"): a steady pace like the aquarium tank, every display frame on 60 Hz
+     screens and exactly every other frame on 120 Hz screens (the old "at least 32 ms" rule dropped frames on timing jitter), and the
+     preview is copied in the same frame the scene is drawn (it used to have its own unsynced 30-a-second timer, so many copies showed
+     a frame that had not changed) */
+  const S0=DK_SCENE_OK, d=now-(S0.raw||0); S0.raw=now; if(d>2&&d<60) S0.ema=(S0.ema||16.7)*.92+d*.08;
+  if((S0.ema||16.7)<11||(S0.cost||0)>9){ S0.odd=!S0.odd; /* 120 Hz screen, or a phone that needs more than ~9 ms for the scene: a steady every other frame */ if(S0.odd) return false; } else S0.odd=false; S0.drew=now; S0.drewAt=performance.now(); return true; }
 { const crop=c=>{ const L=LOCS[locIdx(S.loc)], f=(L&&(L.plat==='boat'||L.plat==='trawler'||L.plat==='raft'))?.55:.64; const top=(typeof MB_STATUS_B==='number'?MB_STATUS_B:40)+4; /* below the weather label and boost timers drawn on the water */ let sw=Math.min(W,W*.62), sh=sw*c.height/c.width; if(sh>H-top){ sh=H-top; sw=Math.min(W,sh*c.width/c.height); } return {sx:0, sy:Math.max(top,Math.min(H-sh,H*.6-sh*f)), sw, sh}; };
   const live=()=>typeof cv!=='undefined'&&cv&&cv.width>40&&W>40&&H>40;
   const _ph=paintHome; paintHome=function(){ const c=$('homecv'); if(!c||!MOB()||!c.closest('.dk08-view')||!live()) return _ph.apply(this,arguments);
+    if(!paintHome.now&&performance.now()-(DK_SCENE_OK.drewAt||0)<150) return; /* the live scene copies itself right after each draw (below) */
     const r=c.getBoundingClientRect(); if(r.width<20||r.height<20) return; const k=Math.min(2,window.devicePixelRatio||1), w=Math.round(r.width*k), hh=Math.round(r.height*k);
     if(c.width!==w||c.height!==hh){ c.width=w; c.height=hh; } const b=crop(c), d=cv.width/W, x=c.getContext('2d'); x.imageSmoothingEnabled=true; x.imageSmoothingQuality='low';
     x.drawImage(cv,b.sx*d,b.sy*d,b.sw*d,b.sh*d,0,0,w,hh); };
+  { const _dr=draw; draw=function(now){ const a=performance.now(), r=_dr.apply(this,arguments); if(DK_SCENE_OK.drew===now&&now){ DK_SCENE_OK.cost=(DK_SCENE_OK.cost||6)*.85+(performance.now()-a)*.15; DK_SCENE_OK.drew=-1; paintHome.now=true; try{ paintHome(); }catch(e){} paintHome.now=false; } return r; }; } /* copy the frame just drawn */
   /* drag decorations and pets along the real home (the same fractions the game uses) */
   document.addEventListener('pointerdown',e=>{ const c=e.target; if(!c||c.id!=='homecv'||!MOB()||!c.closest('.dk08-view')||!live()) return; e.stopImmediatePropagation(); e.preventDefault();
     const b=crop(c), r=c.getBoundingClientRect(), gx=ev=>b.sx+(ev.clientX-r.left)/r.width*b.sw, X0=W*.008, SPAN=W*.17, frac=v=>clamp((v-X0)/SPAN,0,1);
@@ -16607,7 +16614,29 @@ html body.phone-app .hud > #mbgoal > .lbl,html body.phone-land .hud > #mbgoal > 
         try{ host.insertAdjacentHTML('beforeend',dangerHTML()); }catch(e){} } }
   }catch(e){ console.error(e); } return r; }; }
 
+/* Aquarium (director, 2026-11-18: "Tank doesn't show tank size, upgrade lacks proper description"):
+   - the strip under the tank gets a Tank cell: fish on display / how many it holds
+   - Your tank's heading says how many fish it holds, and the upgrade says what you get ("Room for 8 fish") with a line explaining
+     it: how many more fish, what that means for earnings and boosts, and the price */
+{ const _rp=renderPanel; renderPanel=function(){ const r=_rp.apply(this,arguments); try{ if(!MOB()||S.tab!=='aquarium') return r; const P=$('panel'); if(!P||!P.classList.contains('aq07')) return r;
+    const cap=aqCap(), n=S.tank.length, bank=P.querySelector('.aq07-bank');
+    if(bank&&!bank.querySelector('.mb-tankcell')){ const cells=[...bank.children].filter(c=>c.tagName==='DIV'); const last=cells[cells.length-1];
+      const cell=document.createElement('div'); cell.className='mb-tankcell'; cell.title='Fish on display / how many your tank holds';
+      cell.innerHTML=`<div class="sub">Tank</div><b>${n} / ${cap}</b>`; if(last) last.after(cell); else bank.prepend(cell); }
+    const hr=P.querySelector('.aq07-sec-tank > .aq07-h'); if(hr&&!hr.querySelector('.mb-tankcap')){ const h2=hr.querySelector('h2'); if(h2) h2.insertAdjacentHTML('beforeend',` <span class="mb-tankcap">· holds ${cap} fish</span>`);
+      const buy=hr.querySelector('[data-act="buytank"]'); const cost=TANK_COST[S.tankSlots];
+      if(buy&&cost!=null){ S.tankSlots++; const nx=aqCap(); S.tankSlots--; const more=nx-cap;
+        buy.innerHTML=`Room for ${nx} fish · <span class="coin">${fmt(cost)}</span>`; buy.title='A bigger tank: '+cap+' → '+nx+' fish';
+        hr.insertAdjacentHTML('afterend',`<p class="meta mb-tankwhy">A bigger tank holds <b>${more} more fish</b> (${cap} → ${nx}). Every fish on display earns coins from visitors and adds its boost, so more room means more coins and stronger boosts.${S.money<cost?` You need <span class="coin">${fmt(cost-S.money)}</span> more.`:''}</p>`); }
+      else if(cost==null) hr.insertAdjacentHTML('afterend',`<p class="meta mb-tankwhy">Your tank is as big as it gets: ${cap} fish.</p>`); }
+  }catch(e){ console.error(e); } return r; }; }
+
 document.head.insertAdjacentHTML('beforeend',`<style>
+html body.phone-app #menuov #panel.aq07 .aq07-bank,html body.phone-land #menuov #panel.aq07 .aq07-bank{grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,.8fr) auto auto!important}
+html body.phone-app #menuov #panel.aq07 .aq07-bank .mb-tankcell b,html body.phone-land #menuov #panel.aq07 .aq07-bank .mb-tankcell b{font:800 14px var(--display)!important;color:var(--ink)}
+@media (orientation:landscape) and (max-height:560px) and (max-width:760px){ html body.phone-land #menuov #panel.aq07 .aq07-bank{grid-template-columns:repeat(3,minmax(0,1fr))!important} }
+html body.phone-app #menuov #panel.aq07 .mb-tankcap,html body.phone-land #menuov #panel.aq07 .mb-tankcap{font:700 13px var(--display);color:#9fb3c8;white-space:nowrap}
+html body.phone-app #menuov #panel.aq07 .mb-tankwhy,html body.phone-land #menuov #panel.aq07 .mb-tankwhy{margin:2px 0 8px!important;font-size:12.5px!important;line-height:1.4;color:#b8c8d6}
 html body.phone-land .hud > .st-lvl[data-mbtap],html body.phone-app .hud > .st-lvl[data-mbtap]{background:linear-gradient(180deg,#1f8a86,#14666a)!important;border:1px solid #7fe3c4!important;box-shadow:0 3px 10px #0007!important;color:#fff!important;cursor:pointer}
 html body.phone-land .hud > .st-lvl[data-mbtap] .lbl,html body.phone-app .hud > .st-lvl[data-mbtap] .lbl{color:#c8fff0!important}
 html body.phone-land .hud > .st-lvl[data-mbtap]:active,html body.phone-app .hud > .st-lvl[data-mbtap]:active{transform:translateY(1px)}
@@ -16941,12 +16970,14 @@ PATCHES.unshift({v:'0.4.8.6', name:'Tidy Up', items:[
   'The top bar never cuts off the settings button: when a live event’s name gets long, Tide Pass and Tasks step aside until there is room again.',
   'Every tab lives in one place: Settings no longer repeats Save. The gift code and the backup and erase tools are in Save, Save codes.',
   'Page summaries and intros no longer repeat the same numbers, and the side menu’s badges are never cut off or covering the button above.',
-  'Mountains look clean again: no more thin stripes running down them or their reflections.']});
+  'Mountains look clean again: no more thin stripes running down them or their reflections.',
+  'Your home’s live view is smooth now: it plays at your screen’s full frame rate instead of a few frames a second.',
+  'Aquarium: the strip under the tank shows how many fish it holds, and the tank upgrade says what you get (room for how many fish) and why it helps.']});
 
 // Android test notes (preview builds only; the live game never shows them). Write what the next test build changes here
 // (spoiler-free); it opens once in the Android test app. Released notes live in notes_release.js.
 const TEST_NOTES={v:'test', label:'Test build · Android', name:'One Look, Easy Aquarium', items:[
-  'NEW in this build (0.4.8.6): mountains drawn without stripes; Stats has its own side-panel button (and the Level chip); folded side panel centred; top bar never cuts off settings; Settings no longer repeats Save (gift code and backup tools are in Save); summaries no longer repeat numbers.',
+  'NEW in this build (0.4.8.6): smooth Home live view; tank size + clear tank upgrade in the Aquarium; mountains drawn without stripes; Stats has its own side-panel button (and the Level chip); folded side panel centred; top bar never cuts off settings; Settings no longer repeats Save (gift code and backup tools are in Save); summaries no longer repeat numbers.',
   'NEW in this build: fish fight shows a tension ring at the fish with the instruction above it; hints are touch only; homes are never called docks; the layout always switches when you turn the phone; smoother storms at Starfall.',
   'NEW in this build: Android phones are landscape only (upright pauses the game). Compact Goal chip (opens the right page) and a separate Live chip, plus Tasks and Tide Pass in the top bar. Your home shows the real home of every water. Colour choices are round swatches.',
   'NEW in this build: every menu page works like the aquarium (key numbers and main button first, sections as tabs, one scrolling list, badges where rewards wait). The Wardrobe shows your angler big with the categories in Options. Pages keep your place when they refresh.',
