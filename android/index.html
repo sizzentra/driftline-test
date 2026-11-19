@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="DL Test Android">
 <script>
-window.DL_BUILD='android'; window.DL_PREVIEW=true; window.DL_VERSION='2026.11.19-1456';
+window.DL_BUILD='android'; window.DL_PREVIEW=true; window.DL_VERSION='2026.11.19-1532';
 window.addEventListener('beforeinstallprompt',function(e){ e.preventDefault(); window.__dlInstallPrompt=e; });
 </script>
 </head>
@@ -1535,6 +1535,7 @@ const bestNormalLoot = () => Math.max(...S.unlocked.filter(id=>!isEgLoc(id)).map
 function egRefStr(){ const ids=S.unlocked.filter(id=>!isEgLoc(id)), best=ids.map(id=>LOCS[locIdx(id)]).filter(Boolean).sort((a,b)=>b.loot-a.loot)[0]||LOCS[0]; const a=SP.filter(s=>s.loc===best.id&&!s.meme).map(s=>s.str).sort((x,y)=>x-y); return a.length?a[a.length>>1]:3; }
 let EG_SF_STR=0; const egSfStr = () => EG_SF_STR||(EG_SF_STR=(()=>{ const a=SP.filter(s=>s.loc==='starfall'&&!s.meme).map(s=>s.str).sort((x,y)=>x-y); return a[a.length>>1]||40; })());
 function egScale(){ return {v:1.25*bestNormalLoot()/33000, s:1.1*egRefStr()/egSfStr()}; }
+document.head.insertAdjacentHTML('beforeend','<style>#panel .eg-head{grid-column:1/-1;margin:14px 0 2px;padding-top:10px;border-top:1px solid #ffd36a44}#panel .eg-head h3{margin:0 0 2px;color:#ffe6a8}</style>');
 // 0.4.9 deep QC: no two fish share a name (the Fish Log showed two "Brook Trout", and a few old waters had a name twice). Saves key fish by
 // id, so renaming is safe. The older fish keeps its name; the later one gets a distinct real or regional name.
 { const REN={spottedgar:'Shortnose Gar', brooktrout:'Native Brook Trout', rk_brooktrout:'Glacier Brook Trout', arcticgrayling:'Frostbite Grayling', rk_arcticgrayling:'Bow River Grayling',
@@ -7776,13 +7777,7 @@ function a3Body(c,x,y,s,lk,o,live){ A3FXP={};
   const hairF=HD(hairC);
   // back hair (behind the upper body), follows the head tilt
   c.save(); c.translate(0,-50); c.rotate(tilt); c.scale(A3HEAD,A3HEAD); c.translate(0,50); { const hId=lk.hat||'none'; if(A3_HAT_FULL.has(hId)){ c.beginPath(); c.rect(0,0,0,0); c.clip(); } else if(!A3_HAT_OPEN.has(hId)){ c.beginPath(); c.rect(-30,-63.9,60,44); c.clip(); } }
-  const HB=typeof hairBack3==='function'&&hairBack3(c,hs,hairF,hairC,D,t,lean,live); /* 0.4.9: the parametric hair system draws the back layer (ct_hair.js) */
-  if(!HB&&hs==='long'){ /* falls from the crown, hugs the back of the head and neck, and settles over the shoulder blades in soft, uneven tips */
-    const sw=Math.sin(t*1.3)*.25+(live?-lean*2:0); c.fillStyle=hairF; c.beginPath(); c.moveTo(-6.4,-62.4); c.bezierCurveTo(-9.6,-60.6,-10.2,-55.6,-9.4,-51); c.bezierCurveTo(-8.8,-47.4,-9.4+sw,-44.4,-8.8+sw,-40.4); c.quadraticCurveTo(-8+sw,-41.4,-7.4+sw,-40.6); c.quadraticCurveTo(-6.8+sw,-41.6,-6.1+sw,-41.2); c.bezierCurveTo(-5.4,-43.6,-4,-45.4,-2.6,-46.4); c.lineTo(-2.4,-58); c.closePath(); c.fill();
-    c.strokeStyle=D(mix(hairC,'#000000',.32)); c.lineWidth=.42; c.beginPath(); c.moveTo(-8,-58); c.bezierCurveTo(-9.2,-53,-8.2,-47,-8+sw,-41.6); c.moveTo(-5.6,-56.6); c.bezierCurveTo(-6.6,-52,-6,-47,-6.6+sw,-42); c.stroke();
-    c.strokeStyle=D(mix(hairC,'#ffffff',.3)); c.lineWidth=.5; c.beginPath(); c.moveTo(-7.2,-59.4); c.bezierCurveTo(-9,-55,-8.8,-50.4,-8.4,-47); c.stroke(); }
-  if(!HB&&hs==='ponytail'){ const sw=Math.sin(t*1.6)*.12+(live?-lean*.8:0); c.save(); c.translate(-7.4,-58.5); c.rotate(.55+sw); c.fillStyle=hairF; c.beginPath(); c.moveTo(0,-.4); c.quadraticCurveTo(3.2,4,1.2,11.4); c.quadraticCurveTo(-3,6,0,-.4); c.fill(); c.strokeStyle=D(mix(hairC,'#000000',.3)); c.lineWidth=.4; c.beginPath(); c.moveTo(-.2,1.6); c.quadraticCurveTo(.4,6,.9,10.4); c.stroke(); c.fillStyle=D('#c8553a'); c.beginPath(); c.ellipse(0,.4,1.7,.9,.2,0,7); c.fill(); c.restore(); }
-  if(!HB&&hs==='bun'){ c.fillStyle=hairF; c.beginPath(); c.arc(-3.2,-65.2,3.6,0,7); c.fill(); c.strokeStyle=D(mix(hairC,'#000000',.3)); c.lineWidth=.4; c.beginPath(); c.arc(-3.2,-65.2,2,.4,3.4); c.stroke(); c.strokeStyle=D(mix(hairC,'#ffffff',.3)); c.lineWidth=.5; c.beginPath(); c.arc(-3.2,-65.2,2.6,3.6,4.6); c.stroke(); }
+  if(typeof hairBack3==='function') hairBack3(c,hs,hairF,hairC,D,t,lean,live); /* long, wavy, bob, mullet, ponytail and braid hair behind the body (ct_hair.js) */
   c.restore();
   // back arm: shoulder -> elbow -> hand on the grip behind the front hand
   const shB={x:-1.2*B.w,y:-45.4}, elB=a3IK(shB.x,shB.y,BH.x,BH.y,7.8,7.6,1), slD=D(mix(sleeve,'#000000',.2));
@@ -7867,23 +7862,7 @@ function a3Body(c,x,y,s,lk,o,live){ A3FXP={};
   // hand positions in this context's pixel space, for the rod and the finger overlay
   return {hand:{x:x+HW.x*s,y:y+HW.y*s}, back:{x:x+BW.x*s,y:y+BW.y*s}, reel:o.sit?null:{x:x+RC.x*s,y:y+RC.y*s,ca,r:3.3*s}, ra, sk, skD}; }
 
-function drawHair3(c,hs,hair,hairC,D,t){
-  const dk=D(mix(hairC,'#000000',.3)), lt=D(mix(hairC,'#ffffff',.25));
-  const cap=(fr)=>{ c.fillStyle=hair; c.beginPath(); c.arc(0,-57,7.95,Math.PI*.98,Math.PI*1.99); c.quadraticCurveTo(7.6,-59.4,6.4,-60.2); c.quadraticCurveTo(4.2,-58.8,1.6,-59.6); c.quadraticCurveTo(-1.6,-59,-2.6,-56.4); c.lineTo(-2.8,-52.6); c.lineTo(-6.6,-53.4); c.closePath(); c.fill();
-    c.strokeStyle=lt; c.lineWidth=.6; c.beginPath(); c.arc(0,-57.4,6.4,Math.PI*1.25,Math.PI*1.6); c.stroke(); };
-  switch(hs){
-    case 'short': cap(); break;
-    case 'long': cap(); c.fillStyle=hair; c.beginPath(); c.moveTo(-2.6,-57); c.bezierCurveTo(-3.5,-53,-3.1,-49.6,-4,-46.1); c.quadraticCurveTo(-4.7,-47.3,-5.3,-46.5); c.quadraticCurveTo(-5.8,-47.6,-6.3,-47.4); c.bezierCurveTo(-6.9,-50.4,-7,-53.4,-6.6,-56); c.closePath(); c.fill();
-      c.strokeStyle=dk; c.lineWidth=.35; c.beginPath(); c.moveTo(-4.4,-55); c.bezierCurveTo(-4.8,-52,-4.6,-49.6,-4.9,-47.4); c.stroke(); c.strokeStyle=lt; c.lineWidth=.4; c.beginPath(); c.moveTo(-3.4,-55.6); c.bezierCurveTo(-3.8,-53,-3.7,-50.6,-4.1,-48.4); c.stroke(); break;
-    case 'ponytail': case 'bun': cap(); c.fillStyle=hair; c.fillRect(-7.2,-60,1.4,1); break;
-    case 'buzz': c.save(); c.globalAlpha*=.8; c.fillStyle=hair; c.beginPath(); c.arc(0,-56.6,7.85,Math.PI*1.02,Math.PI*1.97); c.quadraticCurveTo(4,-59.6,0,-59.4); c.quadraticCurveTo(-2.4,-58.6,-2.6,-55); c.lineTo(-6.8,-54.6); c.closePath(); c.fill(); c.restore(); break;
-    case 'curly': drawCurly3(c,hair,hairC,D,t); break;
-    case 'coils': drawCurly3(c,hair,hairC,D,t); break; /* Coils was removed (0.3.3.1): old saves show Curly */
-    case 'spiky': drawSpiky3(c,hair,hairC,D,t,cap); break;
-    case 'bald': c.fillStyle='rgba(255,255,255,.22)'; c.beginPath(); c.ellipse(2,-61.4,2.6,1.1,-.3,0,7); c.fill(); break;
-    default: cap();
-  }
-}
+function drawHair3(c,hs,hair,hairC,D,t){ /* every hairstyle is drawn by the parametric system in ct_hair.js, which replaces this */ }
 
 // ---------- outfits, shaped to the body ----------
 function drawOutfit3(c,lk,D,f,t){ const o=lk.outfit||'none'; if(o==='none') return; const base=lk.outCol, oc=D(base||'#d8a020');
@@ -9653,7 +9632,7 @@ function wChips(k,list,cur,label){ return `<div class="chips">${list.map(([v,n])
 function wSw(k,list,cur){ return `<div class="chips">${list.map(([v,cl,n])=>`<button class="sw" data-act="look" data-k="${k}" data-v="${v}" aria-pressed="${String(cur)===String(v)}" style="background:${cl}" title="${esc(n||cl)}"></button>`).join('')}</div>`; }
 function wThumbGrid(k,kind,items,cur){ return `<div class="wd-thumbs">${items.map(([id,n])=>`<button class="wd-th" data-act="look" data-k="${k}" data-v="${id}" aria-pressed="${cur===id}"><canvas width="96" height="96" data-wthumb="${kind}:${id}"></canvas><span>${esc(n)}</span></button>`).join('')}</div>`; }
 renderStyle = function(P){ const lk=S.look, cols=[...FREE_COLS,...S.owned.cols].map(c=>[c,c]);
-  const secs=[['body','Body','👤'],['clothes','Clothes','👕'],['hats','Hats','🎩'],['glasses','Glasses','👓'],['shoes','Shoes','👟'],['neckback','Neck & back','🧣'],['shop','Shop','🛍️']];
+  const secs=[['body','Body','👤'],['clothes','Clothes','👕'],['hats','Hats','🎩'],['glasses','Glasses','👓'],['shoes','Shoes','👟'],['neckback','Neck & back','🧣'],['tidepass','Tide Pass','🌊'],['shop','Shop','🛍️']];
   let body='';
   if(wSec==='body') body=`<h5>Body</h5>${wChips('g',[['m','Man'],['f','Woman']],lk.g)}<h5>Build</h5>${wChips('build',BUILDS.map(b=>[b[0],b[1]]),lk.build||'average')}
     <h5>Skin</h5>${wSw('skin',SKINS.map((c,i)=>[i,c]),lk.skin)}<h5>Eyes</h5>${wSw('eye',EYES.map((e,i)=>[i,e[0],e[1]]),lk.eye|0)}<h5>Hair colour</h5>${wSw('hair',HAIRS.map((c,i)=>[i,c]),lk.hair)}
@@ -9666,6 +9645,7 @@ renderStyle = function(P){ const lk=S.look, cols=[...FREE_COLS,...S.owned.cols].
     <h5>Hat colour ${HATI[lk.hat]&&HATI[lk.hat].fixed?'<span style="text-transform:none;letter-spacing:0">(this hat keeps its own colours)</span>':''}</h5>${wSw('hatCol',cols,lk.hatCol)}`;
   if(wSec==='glasses') body=`<h5>Glasses</h5>${wThumbGrid('glasses','gls',GLASSES.filter(x=>S.owned.glasses.includes(x[0])).map(x=>[x[0],x[1]]),lk.glasses||'none')}`;
   if(wSec==='shoes') body=`<h5>Shoes</h5>${wThumbGrid('shoes','shoe',SHOES.filter(x=>S.owned.shoes.includes(x[0])).map(x=>[x[0],x[1]]),lk.shoes||'boots')}${SHOE_NOCOL.has(lk.shoes)?'':`<h5>Shoe colour</h5><div class="chips"><button class="chipb" data-act="look" data-k="shoeCol" data-v="" aria-pressed="${!lk.shoeCol}">Original</button></div>${wSw('shoeCol',cols,lk.shoeCol||'')}`}`;
+  if(wSec==='tidepass'&&typeof passWearHTML==='function') body=passWearHTML();
   if(wSec==='neckback') body=`<h5>Neckwear</h5>${wThumbGrid('neck','neck',NECKS.filter(x=>S.owned.necks.includes(x[0])).map(x=>[x[0],x[1]]),lk.neck||'none')}
     <h5>On your back</h5>${wThumbGrid('back','back',BACKS.filter(x=>S.owned.backs.includes(x[0])).map(x=>[x[0],x[1]]),lk.back||'none')}
     ${(lk.neck&&lk.neck!=='none')||(lk.back&&lk.back!=='none')?'<h5>Accessory colour</h5>'+wSw('accCol',cols,lk.accCol):''}`;
@@ -10231,52 +10211,10 @@ function a3Deltoid(c,sh,el,w,col,fabs){ const r=w*.6, cx=sh.x-.1, cy=sh.y-.15, a
   if(fabs&&fabs.length){ c.save(); path(); c.clip(); for(const f of fabs) drawFabric(c,f,null,cx-r*1.4,cy-r*1.4,r*2.8,r*2.8); c.restore(); }
   c.save(); path(); c.clip(); c.strokeStyle='rgba(255,244,226,.28)'; c.lineWidth=.6; c.beginPath(); c.arc(cx,cy,r*.82,Math.PI*1.1,Math.PI*1.7); c.stroke(); c.restore(); }
 
-// ---------- CURLY (0.3.3 redesign, per the director's brief): modern, medium-length, slightly messy curls that follow the
-// skull. About eleven soft curl clusters (C, S and loose spiral shapes) at irregular sizes and angles, moderate volume on
-// top, a couple of curls falling toward the forehead, small tight curls at the temple, a compact back tapering to the
-// nape. Three tones per colour (shadow, base, light) and only a soft outline. Head centre (0,-56), radius 7.5.
-const CURLY_LOBES=[ // x, y, rx, ry, rotation, curl type
-  [-6.3,-52.6,1.6,1.7,-1.4,'S'],[-7.3,-55.8,1.9,2.0,-1.2,'C'],[-7.2,-59.4,2.0,2.1,-1.0,'P'],[-5.9,-62.6,2.4,2.2,-.6,'C'],
-  [-3.2,-64.6,2.9,2.2,-.25,'S'],[.1,-65,3.0,2.2,-.05,'C'],[3.2,-64,2.8,2.1,.15,'S'],[-3.4,-60.8,2.4,2.1,.45,'P'],
-  [1.2,-61.8,2.3,1.8,.2,'S'],[5.4,-61.5,2.4,1.8,.35,'C'],[.4,-58.6,1.4,1.3,.8,'C'],[6.8,-59.8,1.35,1.25,.7,'C'],
-  [-1.9,-57,1.9,2.1,-1,'C'],[-2.4,-54.2,1.6,1.8,-1.2,'S'],[-4.4,-52.2,1.5,1.5,-1.3,'C']]; /* curls fall over the ear */
-function curlyCap(c){ c.beginPath(); c.moveTo(6.6,-60.2); c.bezierCurveTo(7.4,-63.6,4.6,-66.4,0,-66.4); c.bezierCurveTo(-4.8,-66.4,-8.2,-63.4,-8.4,-58.6); c.bezierCurveTo(-8.5,-55,-7.8,-52.2,-6.2,-50.8); c.bezierCurveTo(-4.8,-51.2,-3.6,-52,-3.2,-53.2); c.bezierCurveTo(-2.4,-55.8,-1.4,-57.6,.6,-58.6); c.bezierCurveTo(2.6,-59.6,4.6,-59.6,6.6,-60.2); c.closePath(); }
+// (0.4.9: the old curly and spiky hair drawings were removed: every hairstyle draws through ct_hair.js now)
 var A3HATON=false;
-// under a hat the curls sit tight to the head: only the ones below the brim, pulled in so nothing pokes out around it
-function curlyLobes(){ if(!A3HATON) return CURLY_LOBES; return CURLY_LOBES.filter(L=>L[1]>-61.5).map(([x,y,rx,ry,r,ty])=>[x*.86,y+(y<-58?1:0),rx*.8,ry*.8,r,ty]); }
-function drawCurly3(c,hair,hairC,D,t){ const LOBES=curlyLobes(), base=D(hairC), shade=D(mix(hairC,'#000000',.3)), light=D(mix(hairC,'#ffffff',.3)), line=D(mix(hairC,'#000000',.45));
-  const lobe=(L,grow)=>{ const [x,y,rx,ry,r]=L; c.beginPath(); c.ellipse(x,y,rx+grow,ry+grow,r,0,7); };
-  // soft outline: the whole shape a touch larger in the shadow tone, then the base colour over it
-  c.fillStyle=shade; curlyBase(c); for(const L of LOBES){ lobe(L,.32); c.fill(); }
-  c.fillStyle=base; curlyBase(c); for(const L of LOBES){ lobe(L,0); c.fill(); }
-  // each cluster: a shadow under its lower edge, the curl's line, and a light sweep on top
-  c.lineCap='round'; c.lineJoin='round';
-  for(const [x,y,rx,ry,r,ty] of LOBES){ const s=Math.min(rx,ry), cs=Math.cos(r), sn=Math.sin(r), P=(u,v)=>[x+u*cs-v*sn,y+u*sn+v*cs];
-    c.save(); c.beginPath(); c.ellipse(x,y,rx,ry,r,0,7); c.clip();
-    c.fillStyle=v3rgba(shade,.7); c.beginPath(); c.ellipse(x+sn*s*.35,y+cs*s*.45,rx*.95,ry*.55,r,0,7); c.fill();
-    c.fillStyle=base; c.beginPath(); c.ellipse(x-sn*s*.15,y-cs*s*.2,rx*.86,ry*.72,r,0,7); c.fill();
-    c.strokeStyle=v3rgba(line,.75); c.lineWidth=.42; c.beginPath();
-    if(ty==='C'){ c.ellipse(x,y,rx*.6,ry*.58,r,Math.PI*.15,Math.PI*1.35); }
-    else if(ty==='S'){ const [a1,b1]=P(-rx*.55,ry*.2), [a2,b2]=P(0,-ry*.25), [a3,b3]=P(rx*.55,ry*.15), [m1,n1]=P(-rx*.3,-ry*.55), [m2,n2]=P(rx*.3,ry*.6); c.moveTo(a1,b1); c.quadraticCurveTo(m1,n1,a2,b2); c.quadraticCurveTo(m2,n2,a3,b3); }
-    else { c.ellipse(x,y,rx*.62,ry*.6,r,Math.PI*1.0,Math.PI*2.2); c.moveTo(...P(rx*.62*Math.cos(Math.PI*2.2),ry*.6*Math.sin(Math.PI*2.2))); c.ellipse(x+cs*s*.12,y+sn*s*.12,rx*.32,ry*.3,r,Math.PI*.2,Math.PI*1.4); }
-    c.stroke();
-    c.strokeStyle=v3rgba(light,.85); c.lineWidth=.5; c.beginPath(); c.ellipse(x-sn*s*.08,y-cs*s*.12,rx*.68,ry*.58,r,Math.PI*1.2,Math.PI*1.72); c.stroke();
-    c.restore(); }
-  }
 if(S&&S.look&&S.look.hairStyle==='coils') S.look.hairStyle='curly';
 
-// ---------- spiky hair (0.3.3.1): swept-back tufts that grow out of the scalp along the curve of the head, varied
-// in length, each lit on its leading edge; under a hat only the short fringe and sides show ----------
-function drawSpiky3(c,hair,hairC,D,t,cap){ cap(); if(A3HATON) return; const base=D(hairC), dk=D(mix(hairC,'#000000',.3)), lt=D(mix(hairC,'#ffffff',.3));
-  const tufts=[[1.15,3.2],[1.28,4.4],[1.42,5.2],[1.56,5.4],[1.7,5],[1.84,4.4],[1.97,3.4]]; // angle on the head (x PI), length
-  for(let pass=0;pass<2;pass++) for(const [a,L] of tufts){ const ang=a*Math.PI, bx=Math.cos(ang)*7.3, by=-57+Math.sin(ang)*7.3, nx=Math.cos(ang), ny=Math.sin(ang), sw=-.55; // sweep toward the back
-    const dx=nx*Math.cos(sw)-ny*Math.sin(sw), dy=nx*Math.sin(sw)+ny*Math.cos(sw), tx=bx+dx*L, ty=by+dy*L, w=1.9, px=-ny*w, py=nx*w;
-    c.fillStyle=pass?base:dk; c.beginPath(); c.moveTo(bx-px*(pass?1:1.15),by-py*(pass?1:1.15)); c.quadraticCurveTo(bx+dx*L*.55-px*.4,by+dy*L*.55-py*.4,tx,ty); c.quadraticCurveTo(bx+dx*L*.45+px*.6,by+dy*L*.45+py*.6,bx+px*(pass?1:1.15),by+py*(pass?1:1.15)); c.closePath(); c.fill();
-    if(pass){ c.strokeStyle=v3rgba(lt,.7); c.lineWidth=.45; c.beginPath(); c.moveTo(bx-px*.4,by-py*.4); c.quadraticCurveTo(bx+dx*L*.5-px*.2,by+dy*L*.5-py*.2,tx,ty); c.stroke(); } }
-  c.fillStyle=base; c.beginPath(); c.arc(0,-57,7.6,Math.PI*1.08,Math.PI*1.95); c.lineTo(6,-60); c.quadraticCurveTo(0,-62.4,-6.6,-58); c.closePath(); c.fill(); }
-// the curly base mass: full size normally; under a hat a slightly smaller copy so it fills the scalp (no bald spot)
-// without poking out around the brim
-function curlyBase(c){ if(!A3HATON){ curlyCap(c); c.fill(); return; } c.save(); c.translate(0,-56); c.scale(.9,.92); c.translate(0,56); curlyCap(c); c.restore(); c.fill(); }
 
 // =====================================================================
 // 0.3 oddities: twenty new things humanity dropped in the water, from a lone sock to a megalodon tooth.
@@ -10831,7 +10769,7 @@ function passPickItem(L,pool){ if(!pool.length) return null; const decor=pool[0]
     let i=hashStr('tide'+l)%pool.length, n=0; while(used.has(pool[i].kind+pool[i].id)&&n<pool.length){ i=(i+1)%pool.length; n++; } pick=pool[i]; used.add(pick.kind+pick.id); }
   return pick; }
 function passPlainIndex(L){ let n=0; for(let i=1;i<=L;i++) if(!PASS_SPECIAL[i]) n++; return n; }
-passPlain = function(L){ if(S.pass.got&&S.pass.got[L]&&L<=S.pass.claimed) return {k:'got', name:S.pass.got[L], d:'Claimed.'}; if(L<=S.pass.claimed) return {k:'got', name:'Claimed', d:'Claimed before 0.3.'}; const slot=[0,1,2,3,4][(passPlainIndex(L)-1)%5];
+passPlain = function(L){ if(S.pass.got&&S.pass.got[L]&&L<=S.pass.claimed) return {k:'got', name:S.pass.got[L], d:'Claimed.'}; if(L<=S.pass.claimed) return {k:'got', name:'Claimed', d:'Already claimed.'}; const slot=[0,1,2,3,4][(passPlainIndex(L)-1)%5];
   if(slot===0||slot===2){ const it=passPickItem(L,passWearPool()); if(it) return {k:'wear', it, name:it.name, d:it.cat+': yours to wear, only a claim away.'};  return slot===0?PASS_FB_SCALES:PASS_FB_TIX; }
   if(slot===3){ const it=passPickItem(L,passDecorPool()); if(it) return {k:'decor', it, name:it.name, d:it.cat+' for your '+(it.kind==='dock'?'dock':'tank')+'.'};  return PASS_FB_SCALES; }
   if(slot===1) return {k:'big', name:'Big Mystery Crate', d:'Clothes, Boardwalk-only wear, decor and the rarer pets.'};
@@ -14985,7 +14923,7 @@ function homeHullDark(def,defDark){ const k=S&&S.dock&&S.dock.hull, h=k&&HOME_HU
 //  - the bait list order: everyday baits first, then every water bait together in the order the waters unlock, then lures
 // =====================================================================
 const BAIT_WATER_K=3;
-const niceNum=n=>{ if(n<100) return Math.round(n/5)*5; const p=Math.pow(10,Math.floor(Math.log10(n))-1); return Math.round(n/p)*p; };
+const niceNum=n=>{ if(n<100) return Math.round(n/5)*5; const p=Math.pow(10,Math.floor(Math.log10(n))-1); return Math.round(Math.round(n/p)*p); }; /* 0.4.9 QC: whole numbers (a fee read 339,999) */
 try{ for(const k in BAIT){ const b=BAIT[k]; if(b.loc&&!b.junk&&!b.scales&&LOCS.some(L=>L.id===b.loc)) b.price=niceNum(waterEV(b.loc)*BAIT_WATER_K); } }catch(e){}
 try{ const keys=Object.keys(BAIT), water=keys.filter(k=>BAIT[k].loc&&!BAIT[k].junk).sort((a,b)=>locIdx(BAIT[a].loc)-locIdx(BAIT[b].loc)), junk=keys.filter(k=>BAIT[k].junk), rest=keys.filter(k=>!water.includes(k)&&!junk.includes(k));
   const all=[...rest,...water,...junk], copy={}; for(const k of keys){ copy[k]=BAIT[k]; delete BAIT[k]; } for(const k of all) BAIT[k]=copy[k]; }catch(e){}
@@ -15613,9 +15551,9 @@ function pathCard(ti){ const T=SPEC_TIERS[ti], cur=S.specs[ti], locked=S.lvl<T.l
      return `<button class="spec ${on?'on':''}" data-act="spec" data-k="${ti}:${o[0]}" ${locked||on||(cur&&poor)?'disabled':''}><b>${esc(o[1])}</b><span class="up">▲ ${esc(o[2])}</span>${rk||on?`<span class="meta">Rank ${rk?PATH_RN[rk]:'0'}${rk<5?' · '+fmt(n)+' / '+fmt(PATH_RANKS[rk])+' fish':' · max'}</span>`:''}${cur&&!on&&!locked?`<span class="meta">Switch · ${fmt(fee)} coins</span>`:''}</button>`; }).join('')}</div>
    ${cur?`<div class="row spread" style="margin-top:6px"><span class="meta">Switch or remove: <b>${fmt(fee)}</b> coins</span><button class="btn alt sm" data-act="specrm" data-i="${ti}" ${poor?'disabled':''}>Remove</button></div>`:locked?'':`<div class="meta" style="margin-top:6px">Free to choose. Switching or removing later costs ${fmt(fee)} coins.</div>`}</div>`; }
 renderPaths=function(P){ const open=SPEC_TIERS.filter(T=>S.lvl>=T.lvl).length, chosen=pathChosen().length;
-  P.innerHTML=`<h2>Paths</h2><p class="sub">${SPEC_TIERS.length} forks on your angler’s road, opening from level 5 to 75: the rarer the thing a path changes, the later it opens. Pick one specialty per fork. A chosen path ranks up (I to V) as you land fish with it: each rank makes it stronger and adds +1% sale price and XP. You can switch or remove a path for a fee that grows with the fork’s level.</p>
+  P.innerHTML=`<h2>Paths</h2><p class="sub path-intro">${SPEC_TIERS.length} forks open from level 5 to 75. Pick one specialty per fork: it ranks up from I to V as you fish with it.<br>Switching or removing a path costs the fee shown on its fork.</p>
    <div class="meta" style="margin-top:4px">${chosen} chosen · ${open} of ${SPEC_TIERS.length} open at level ${S.lvl}</div>
-   <div style="display:flex;flex-direction:column;gap:10px;margin-top:12px">${PATH_ORDER.map(pathCard).join('')}</div>`; };
+   <div class="path-list">${PATH_ORDER.map(pathCard).join('')}</div>`; };
 { const _ea=extraAct7; extraAct7=function(b){ if(b.dataset.act==='specrm'){ const ti=+b.dataset.i, T=SPEC_TIERS[ti]; if(!T||!S.specs[ti]) return 'skip'; const fee=specFee(ti); if(S.money<fee){ toast('Removing this path costs '+fmt(fee)+' coins.'); return 'skip'; }
     const o=T.opts.find(o=>o[0]===S.specs[ti]); S.money-=fee; delete S.specs[ti]; toast('Removed '+(o?o[1]:'the path')+' ('+fmt(fee)+' coins). Its rank is kept if you pick it again.'); save(); return 'render'; } return _ea(b); }; }
 if(typeof ACT_OK==='object') ACT_OK.specrm=(k,i)=>Number.isInteger(i)&&i>=0&&i<SPEC_TIERS.length;
@@ -15624,6 +15562,7 @@ try{ const f5=FEATS.find(f=>f.id==='paths5'); if(f5){ f5.name='Five roads'; f5.d
   FEATS.push({id:'paths10', name:'Ten roads', d:'Choose ten Paths at once', p:()=>[pathChosen().length,10], coins:3000000, pt:3},
              {id:'paths15', name:'Every road taken', d:'Choose all fifteen Paths at once', p:()=>[pathChosen().length,15], coins:50000000, pt:5},
              {id:'pathrank', name:'Well travelled', d:'Raise a path to rank V', p:()=>[Math.max(0,...pathChosen().map(pathRank),...Object.keys(S.pathXP||{}).map(pathRank)),5], coins:5000000, pt:3}); }catch(e){}
+document.head.insertAdjacentHTML('beforeend','<style>#panel .path-list{display:grid;gap:10px;margin-top:12px;grid-template-columns:1fr}#panel .path-intro{max-width:760px}@media (min-width:1280px){#panel .path-list{grid-template-columns:repeat(2,minmax(0,1fr))}#panel .path-list .pathgrid{grid-template-columns:repeat(3,minmax(0,1fr))!important}}</style>');
 // =====================================================================
 // 0.4.9 [20] Voyages reworked (director, 2026-11-19: "Completely reworked voyage system. More buffs (that can be upgraded up to a limit)
 // at the end ... Game needs heavier scaling towards the end ... wisdom pearls get harder and harder to accumulate as a voyage continues
@@ -15768,6 +15707,8 @@ document.head.insertAdjacentHTML('beforeend',`<style>
 .voy-ps>div:first-child,.voy-boon>div:first-child{min-width:0;flex:1}.voy-ps .row{gap:6px;flex-wrap:nowrap}.voy-boon.on{border-color:#7fe3c455}
 .voy-boon .btn,.voy-ps .btn{white-space:nowrap}
 </style>`);
+/* 0.4.9 QC: the Boons panel took one narrow column, so every Boon wrapped a word per line; it now spans the page with Boons in a grid */
+document.head.insertAdjacentHTML('beforeend','<style>#panel .voy-boons{grid-column:1/-1}#panel .voy-boons .voy-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:6px}#panel .voy-boon{margin-top:0}</style>');
 // =====================================================================
 // 0.4.9 [52] Boardwalk, deeper (director, 2026-11-19: "needs to feel a ton more diverse and deep ... coin rewards do need to come back –
 // but at a slightly smaller scale ... ensuring this doesn't break pearl generation ... Focus on tickets with occasional big wins
@@ -15913,13 +15854,22 @@ function drawBobSkin(g,x,y,br,id){ const B=BOBI[id||(S.look&&S.look.bob)]; if(!B
     const ex=Object.keys(PASS_SPECIAL).map(Number).sort((a,b)=>a-b), got=ex.filter(L=>L<=S.pass.claimed).length;
     const html=`<div class="tile pass-ch"><div class="row spread"><h4>Chapter ${ch+1} of ${PASS_CHAPTERS.length}: ${esc(C[1])}</h4><span class="meta">Levels ${C[0]}–${end} · ${got} / ${ex.length} exclusives</span></div>
       <div class="prog" style="margin-top:4px"><i style="width:${clamp((pl-C[0]+1)/(end-C[0]+1),0,1)*100}%;background:var(--kelp)"></i></div>
-      <div class="pass-show">${ex.map(L=>{ const sp=PASS_SPECIAL[L], own=L<=S.pass.claimed; return `<span class="pass-ex ${own?'got':''} ${L<=pl&&!own?'ready':''}" title="${esc(sp[3])}"><b>${L}</b>${own?'✓ ':''}${esc(sp[2])}</span>`; }).join('')}</div></div>`;
+      <div class="pass-show">${ex.filter(L=>L>=C[0]&&L<=end).map(L=>{ const sp=PASS_SPECIAL[L], own=L<=S.pass.claimed; return `<div class="pass-ex ${own?'got':''} ${L<=pl&&!own?'ready':''}" title="${esc(sp[3])}"><canvas width="72" height="72" data-pex="${L}"></canvas><span><b>Lv ${L}</b>${own?' ✓':''}<br>${esc(sp[2])}</span></div>`; }).join('')||'<span class="meta">No exclusives in this chapter.</span>'}</div>
+      <div class="pass-chs">${PASS_CHAPTERS.map((c,i)=>{ const e2=PASS_CHAPTERS[i+1]?PASS_CHAPTERS[i+1][0]-1:PASS_MAX, l=ex.filter(L=>L>=c[0]&&L<=e2), g=l.filter(L=>L<=S.pass.claimed).length; return `<span class="${i===ch?'on':''}">${i+1}. ${esc(c[1])} <b>${g}/${l.length}</b></span>`; }).join('')}</div></div>`;
     const head=P.querySelector('.row.spread'); if(head) head.insertAdjacentHTML('afterend',html); else P.insertAdjacentHTML('afterbegin',html); }catch(e){} }; }
+{ const _rp2=renderPass; renderPass=function(P){ _rp2(P); try{ P.querySelectorAll("canvas[data-pex]").forEach(cv=>{ const x=cv.getContext("2d"); x.clearRect(0,0,cv.width,cv.height); passArt(x,cv.width,cv.height,+cv.dataset.pex); }); }catch(e){} }; }
 // ---------- Wardrobe: wear what the Pass gave you ----------
-function passWearHTML(){ const row=(k,list,cur,label)=>{ const own=passOwnList(k); return `<div class="pw-row"><b>${label}</b><div class="pw-chips"><button class="chipb ${!cur||cur==='none'?'on':''}" data-act="passwear" data-k="${k}:none">None</button>${list.map(a=>{ const o=own.includes(a[0]), L=Object.keys(PASS_SPECIAL).find(l=>PASS_SPECIAL[l][0]===k&&PASS_SPECIAL[l][1]===a[0]);
-    return `<button class="chipb ${cur===a[0]?'on':''}" data-act="passwear" data-k="${k}:${a[0]}" ${o?'':'disabled'} title="${o?'Wear it':'Tide Pass level '+L}">${esc(a[1].replace(/ (aura|Bobber|Line)$/,''))}${o?'':' · Lv '+L}</button>`; }).join('')}</div></div>`; };
-  return `<div class="jsec pw-sec"><h3>Tide Pass exclusives</h3><p class="sub">Auras, bobber skins and line colours: only from the Tide Pass.</p>${row('aura',AURAS,S.look.aura,'Aura')}${row('bob',BOBS,S.look.bob,'Bobber')}${row('line',LINES,S.look.line,'Line')}</div>`; }
-{ const _rs=renderStyle; renderStyle=function(P){ const r=_rs.apply(this,arguments); try{ (P||$('panel')).insertAdjacentHTML('beforeend',passWearHTML()); }catch(e){} return r; }; }
+// Wardrobe › Tide Pass tab: picture tiles (the same tiles as the rest of the Wardrobe), locked ones show the level that brings them
+function passWearHTML(){ const grid=(k,list,cur,label)=>{ const own=passOwnList(k); const tile=(id,name,ok,L)=>`<button class="wd-th${ok?'':' pw-lock'}" data-act="passwear" data-k="${k}:${id}" aria-pressed="${(cur||'none')===id}" ${ok?'':'disabled'} title="${ok?'Wear it':'Tide Pass level '+L}"><canvas width="96" height="96" data-pw="${k}:${id}"></canvas><span>${esc(name)}${ok?'':' · Lv '+L}</span></button>`;
+    return `<h5>${label}</h5><div class="wd-thumbs">${tile('none','None',true,0)}${list.map(a=>{ const L=Object.keys(PASS_SPECIAL).find(l=>PASS_SPECIAL[l][0]===k&&PASS_SPECIAL[l][1]===a[0]); return tile(a[0],a[1].replace(/ (aura|Bobber|Line)$/,''),own.includes(a[0]),L); }).join('')}</div>`; };
+  return `<p class="sub">Only from the Tide Pass. Auras move around your angler, bobber skins and line colours show on the water.</p>${grid('aura',AURAS,S.look.aura,'Aura')}${grid('bob',BOBS,S.look.bob,'Bobber')}${grid('line',LINES,S.look.line,'Line')}`; }
+function passWearPaint(root){ (root||document).querySelectorAll('canvas[data-pw]').forEach(cv=>{ const [k,id]=cv.dataset.pw.split(':'), x=cv.getContext('2d'), w=cv.width, h=cv.height; x.clearRect(0,0,w,h);
+  if(id==='none'){ x.strokeStyle='rgba(200,215,230,.35)'; x.lineWidth=3; x.beginPath(); x.arc(w/2,h/2,h*.22,0,7); x.moveTo(w*.35,h*.65); x.lineTo(w*.65,h*.35); x.stroke(); return; }
+  if(k==='aura') drawAngler(x,w/2,h*.97,h/94,Object.assign({},S.look,{aura:id}),{t:performance.now()/1000});
+  else if(k==='bob') drawBobSkin(x,w/2,h*.55,h*.18,id);
+  else { const L=LINEI[id]; x.lineWidth=4; x.strokeStyle=L[2]==='star'?'hsl(270,90%,80%)':L[2].replace('A',1); x.beginPath(); x.moveTo(w*.12,h*.2); x.quadraticCurveTo(w*.45,h*.95,w*.86,h*.42); x.stroke(); drawBobSkin(x,w*.86,h*.45,h*.08,null); } }); }
+{ const _rs=renderStyle; renderStyle=function(P){ const r=_rs.apply(this,arguments); try{ if(typeof wSec!=='undefined'&&wSec==='tidepass') passWearPaint(P||$('panel')); }catch(e){} return r; }; }
+document.head.insertAdjacentHTML('beforeend','<style>#panel .wd-th.pw-lock{opacity:.5}#panel .wd-th.pw-lock canvas{filter:grayscale(.7) brightness(.7)}</style>');
 { const _ea=extraAct7; extraAct7=function(b){ if(b.dataset.act==='passwear'){ const [k,id]=String(b.dataset.k||'').split(':'); if(!PASS_NEW_KINDS[k]) return 'skip'; if(id!=='none'&&!passOwnList(k).includes(id)) return 'skip';
     S.look[k]=id==='none'?'none':id; save(); return 'render'; } return _ea(b); }; }
 if(typeof ACT_OK==='object') ACT_OK.passwear=k=>/^(aura|bob|line):[a-z]+$/.test(String(k));
@@ -15927,8 +15877,10 @@ if(typeof ACT_OK==='object') ACT_OK.passwear=k=>/^(aura|bob|line):[a-z]+$/.test(
       if(m.look&&m.look[k]!=null&&m.look[k]!=='none'&&!m.owned[key].includes(m.look[k])) m.look[k]='none'; } }catch(e){} return m; }; }
 document.head.insertAdjacentHTML('beforeend',`<style>
 #panel .pass-ch{margin:10px 0}
-#panel .pass-show{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
-#panel .pass-ex{font-size:11.5px;padding:3px 8px;border-radius:10px;border:1px solid var(--line,#26385180);background:#0e1828;color:#97abc2;white-space:nowrap}
+#panel .pass-show{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:6px;margin-top:8px}
+#panel .pass-ex canvas{width:48px;height:48px;flex:none;border-radius:8px;background:#0a1220}#panel .pass-ex span{line-height:1.25;white-space:normal}
+#panel .pass-chs{display:flex;flex-wrap:wrap;gap:4px 12px;margin-top:8px;font-size:11.5px;color:#7f93ab}#panel .pass-chs .on{color:#ffe6a8}#panel .pass-chs b{color:#cde1f5;font-weight:700}
+#panel .pass-ex{display:flex;gap:7px;align-items:center;font-size:11.5px;padding:5px 7px;border-radius:10px;border:1px solid var(--line,#26385180);background:#0e1828;color:#97abc2}
 #panel .pass-ex b{margin-right:5px;color:#cde1f5}#panel .pass-ex.got{border-color:#7fe3c455;color:#bff5e2}#panel .pass-ex.ready{border-color:#ffd36a;color:#ffe6a8}
 #panel .pw-row{display:flex;flex-direction:column;gap:4px;margin-top:8px}#panel .pw-chips{display:flex;flex-wrap:wrap;gap:5px}
 </style>`);
@@ -15976,26 +15928,7 @@ HAIRSTYLES.push(['sidepart','Side part'],['bob','Bob'],['pixie','Pixie'],['wavy'
     if(id==='flat'){ c.strokeStyle=col; c.lineCap='round'; c.lineWidth=.7; c.beginPath(); c.moveTo(ex-1.5,by+.1); c.lineTo(ex+1.6,by+.1); c.stroke(); return; }
     if(id==='angled'){ c.strokeStyle=col; c.lineCap='round'; c.lineWidth=.8; c.beginPath(); c.moveTo(ex-1.5,by+.4); c.lineTo(ex+.6,by-.5); c.lineTo(ex+1.6,by+.2); c.stroke(); return; }
     return _b.apply(this,arguments); }; }
-// hairstyles (head centre 0,-56, radius 7.5, the face toward +x; front hair stays above the eyes at y -57)
-const A3_NEW_HAIR=new Set(['sidepart','bob','pixie','wavy','braid','topknot','mullet','undercut','mohawk','afro']);
-{ const _h=drawHair3; drawHair3=function(c,hs,hair,hairC,D,t){ if(!A3_NEW_HAIR.has(hs)) return _h.apply(this,arguments);
-  const dk=D(mix(hairC,'#000000',.3)), lt=D(mix(hairC,'#ffffff',.25));
-  const cap=()=>_h(c,'short',hair,hairC,D,t), buzz=a=>{ c.save(); c.globalAlpha*=a; _h(c,'buzz',hair,hairC,D,t); c.restore(); };
-  const back=(y2,x2,wav)=>{ c.fillStyle=hair; c.beginPath(); c.moveTo(-2.6,-57); c.bezierCurveTo(-3.2,-53,-3,y2+3,-3.6,y2); for(let i=0;i<=6;i++){ const u=i/6; c.lineTo(-3.6-u*(x2-3.6),y2+(wav?Math.sin(u*Math.PI*3)*.8:0)+(i%2?.5:0)); } c.bezierCurveTo(-x2-.4,y2-4,-7,-53,-6.6,-56); c.closePath(); c.fill(); c.strokeStyle=lt; c.lineWidth=.35; c.beginPath(); c.moveTo(-3.6,-55); c.bezierCurveTo(-4,-52,-4,y2+2,-4.4,y2+.6); c.stroke(); };
-  c.fillStyle=hair;
-  switch(hs){
-    case 'sidepart': cap(); c.fillStyle=hair; c.beginPath(); c.moveTo(-1.5,-63.4); c.quadraticCurveTo(4,-65,7.4,-60.6); c.quadraticCurveTo(5.6,-60.4,4,-61.2); c.quadraticCurveTo(1.6,-60.6,-.8,-61.6); c.closePath(); c.fill(); c.strokeStyle=dk; c.lineWidth=.35; c.beginPath(); c.moveTo(-1,-63.2); c.quadraticCurveTo(3,-64,6.4,-61); c.stroke(); break;
-    case 'bob': cap(); back(-49.5,7.6,false); c.fillStyle=hair; c.beginPath(); c.moveTo(3,-61.6); c.quadraticCurveTo(6.6,-61.4,7.6,-59.2); c.lineTo(5.6,-59.6); c.quadraticCurveTo(4,-59.4,3,-60.4); c.closePath(); c.fill(); break;
-    case 'pixie': cap(); c.fillStyle=hair; for(const [x,y] of [[4.4,-60.6],[5.6,-60.2],[6.6,-59.6]]){ c.beginPath(); c.moveTo(x-1.4,y-1.4); c.quadraticCurveTo(x+.4,y-.6,x+.6,y+.9); c.quadraticCurveTo(x-.4,y,x-1.6,y-.4); c.closePath(); c.fill(); } break;
-    case 'wavy': cap(); back(-44.5,8.2,true); break;
-    case 'braid': cap(); c.fillStyle=hair; for(let i=0;i<7;i++){ const y=-54.5+i*1.8, x=-6.6-i*.18+(i%2?.35:-.35); c.beginPath(); c.ellipse(x,y,1.05-i*.04,1.15,i%2?.4:-.4,0,7); c.fill(); c.strokeStyle=dk; c.lineWidth=.25; c.stroke(); } c.fillStyle=D('#c8553a'); c.beginPath(); c.arc(-7.9,-41.6,.6,0,7); c.fill(); break;
-    case 'topknot': cap(); c.fillStyle=hair; c.beginPath(); c.arc(-1.4,-65.6,2.5,0,7); c.fill(); c.strokeStyle=lt; c.lineWidth=.35; c.beginPath(); c.arc(-1.4,-65.6,1.6,3.6,5.4); c.stroke(); c.fillStyle=dk; c.fillRect(-2.6,-63.6,2.4,.6); break;
-    case 'mullet': cap(); c.fillStyle=hair; c.beginPath(); c.moveTo(-3,-55); c.quadraticCurveTo(-3.6,-50,-3.4,-46.4); c.lineTo(-6,-47.2); c.quadraticCurveTo(-7,-51,-6.6,-55.6); c.closePath(); c.fill(); break;
-    case 'undercut': buzz(.55); c.fillStyle=hair; c.beginPath(); c.moveTo(-5.6,-61); c.quadraticCurveTo(-2,-66.4,4,-65.2); c.quadraticCurveTo(7.6,-64,7.4,-61); c.quadraticCurveTo(4,-62,-.6,-61.6); c.quadraticCurveTo(-3.6,-61.2,-5.6,-61); c.closePath(); c.fill(); c.strokeStyle=lt; c.lineWidth=.4; c.beginPath(); c.moveTo(-3,-63.4); c.quadraticCurveTo(1,-65.4,5.6,-63.6); c.stroke(); break;
-    case 'mohawk': buzz(.4); c.fillStyle=hair; c.beginPath(); { const a0=Math.PI*1.28, a1=Math.PI*1.78; c.moveTo(Math.cos(a0)*7.4,-56+Math.sin(a0)*7.4); for(let i=0;i<=8;i++){ const a=a0+(a1-a0)*i/8, R=7.4+(i%2?1.2:3.4); c.lineTo(Math.cos(a)*R,-56+Math.sin(a)*R); } c.lineTo(Math.cos(a1)*7.4,-56+Math.sin(a1)*7.4); c.arc(0,-56,7.4,a1,a0,true); } c.closePath(); c.fill(); break;
-    case 'afro': cap(); c.fillStyle=hair; for(let i=0;i<=11;i++){ const a=-.35-i/11*(Math.PI*1.3), bx=-1+Math.cos(a)*7.9, by=-58+Math.sin(a)*7.9; c.beginPath(); c.arc(bx,by,3.3,0,7); c.fill(); }
-      c.strokeStyle=lt; c.lineWidth=.35; for(let i=1;i<11;i+=2){ const a=-.35-i/11*(Math.PI*1.3); c.beginPath(); c.arc(-1+Math.cos(a)*8.4,-58+Math.sin(a)*8.4,1.2,a-1,a+.4); c.stroke(); } break;
-  } }; }
+// hairstyles: the new styles are listed in HAIRSTYLES above and drawn by ct_hair.js (one system for every style)
 // the Wardrobe: face style and eye shape rows next to the other face options
 { const _rs=renderStyle; renderStyle=function(P){ const r=_rs.apply(this,arguments); try{ const pn=P||$('panel'), h=[...pn.querySelectorAll('h5')].find(x=>/^Nose$/.test(x.textContent.trim())); const lk=S.look;
     const chips=(k,L,cur)=>`<div class="chips">${L.map(([v,n])=>`<button class="chipb" data-act="look" data-k="${k}" data-v="${v}" aria-pressed="${cur===v}">${n}</button>`).join('')}</div>`;
@@ -16633,8 +16566,9 @@ for(const line of [...ODD_NEW,...ODD_SPARE]){ if(JUNK.length>=300) break; let [i
   const j={id,name,t:+t,e,q,art,cols:cols.split(','),loc:cond&&cond!=='night'?cond:null,night:cond==='night'};
   JUNK.push(j); JUNKI[id]=j; }
 // where and when an oddity can turn up
-{ const _pj=pickJunk; pickJunk=function(){ const n=isNight(), ws=JUNK.map(j=>(j.loc&&j.loc!==S.loc)||(j.night&&!n)?0:JUNK_W[j.t]*(j.loc?3:1)); let x=Math.random()*ws.reduce((a,b)=>a+b,0); for(let i=0;i<JUNK.length;i++){ x-=ws[i]; if(x<=0&&ws[i]>0) return JUNK[i]; } return _pj(); }; }
-function oddOdds(J){ const n=isNight(), tot=JUNK.reduce((a,j)=>a+((j.loc&&j.loc!==S.loc)||(j.night&&!n)?0:JUNK_W[j.t]*(j.loc?3:1)),0)||1; const w=(J.loc&&J.loc!==S.loc)||(J.night&&!n)?0:JUNK_W[J.t]*(J.loc?3:1); return w/tot; }
+function oddW(j,n){ return (j.loc&&j.loc!==S.loc)||(j.night&&!n)?0:JUNK_W[j.t]*(j.loc?3:1); } /* one rule for rolling and for the odds shown */
+{ const _pj=pickJunk; pickJunk=function(){ const n=isNight(), ws=JUNK.map(j=>oddW(j,n)); let x=Math.random()*ws.reduce((a,b)=>a+b,0); for(let i=0;i<JUNK.length;i++){ x-=ws[i]; if(x<=0&&ws[i]>0) return JUNK[i]; } return _pj(); }; }
+function oddOdds(J){ const n=isNight(), tot=JUNK.reduce((a,j)=>a+oddW(j,n),0)||1; return oddW(J,n)/tot; }
 // gold: your best water's catch value, a little less in earlier waters, and more for every repeat find
 function oddBase(L,J){ const bl=bestLoot(), f=Math.max(.6,Math.pow(Math.max(1,L.loot)/Math.max(1,bl),.1)), n=(S.junk&&S.junk[J.id])||0; return bl*f*(1+.1*Math.min(20,n))*pathMul('oddgold'); }
 // new effects (pet colours, Nibbles, the singing bass) on top of landJunk
@@ -16801,7 +16735,7 @@ function hairOutline(P){ const pts=[], a0=-.62, a1=-Math.PI-.95; /* from the hai
   for(let i=0;i<=26;i++){ const a=a0+(a1-a0)*i/26; let r=HC.r+P.vol*hairVolAt(a); if(P.curl) r+=P.curl*.55*Math.max(0,Math.sin(i*1.6))*hairVolAt(a); pts.push([HC.x+Math.cos(a)*r,HC.y+Math.sin(a)*r]); }
   return pts; }
 function hairShade(c,hairC,D,top,bot){ const g2=c.createLinearGradient(-3,top,3,bot); g2.addColorStop(0,D(mix(hairC,'#ffffff',.3))); g2.addColorStop(.4,D(hairC)); g2.addColorStop(1,D(mix(hairC,'#000000',.38))); return g2; }
-drawHair3=(function(_old){ return function(c,hs,hair,hairC,D,t){ const P=HAIR_P[hs]; if(P===undefined) return _old.apply(this,arguments); if(P===null){ c.fillStyle='rgba(255,255,255,.22)'; c.beginPath(); c.ellipse(2,-61.4,2.6,1.1,-.3,0,7); c.fill(); return; }
+drawHair3=(function(_old){ return function(c,hs,hair,hairC,D,t){ const P=HAIR_P[hs]===undefined?HAIR_P.short:HAIR_P[hs]; /* an unknown style draws as short hair */ if(P===null){ c.fillStyle='rgba(255,255,255,.22)'; c.beginPath(); c.ellipse(2,-61.4,2.6,1.1,-.3,0,7); c.fill(); return; }
   const dk=D(mix(hairC,'#000000',.32)), lt=D(mix(hairC,'#ffffff',.32)), fill=hairShade(c,hairC,D,-66,-48);
   // shaved sides: a soft short layer over the whole cap
   if(P.cap==='shave'||P.cap==='thin'){ c.save(); c.globalAlpha*=P.cap==='thin'?.85:.45; c.fillStyle=D(hairC); c.beginPath(); c.arc(HC.x,HC.y,HC.r+.25,-.62,-Math.PI-.95,true); c.lineTo(-3.4,-53.6); c.lineTo(-1.2,-58.4); c.lineTo(3.2,-60.2); c.closePath(); c.fill(); c.restore(); if(P.cap==='thin') return; }
@@ -18890,6 +18824,9 @@ html body.phone-app.dl-fish .hud > .st-log{grid-column:4!important;grid-row:2!im
 html body.phone-app.dl-fish .hud #settingsbtn{grid-column:5!important;grid-row:1!important}
 html body.phone-app.dl-fish .hud #searchbtn{grid-column:5!important;grid-row:2!important}
 </style>`);
+/* 0.4.9 QC (outsider pass): with a live event and a long water name the Bait chip was squeezed to 15 px ("BA|"): the small chips could shrink, so the bar
+   never overflowed and the "step aside" rule above never ran. Small chips now keep their full width; Tasks, then Live make room as designed. */
+document.head.insertAdjacentHTML('beforeend','<style>html body.phone-land .hud > .mb-x{flex-shrink:0!important;min-width:max-content!important}</style>');
 // =====================================================================
 // Phones and tablets, round 8: the fish fight is easy to watch (director, 2026-11-18: "right now the fish fight is too hard to watch on
 // top of watching your line breaking on mobile. Fix that too").
@@ -19817,6 +19754,8 @@ const TEST_NOTES={v:'test', label:'Test build · Android', name:'0.4.9 big patch
   'Fishing: try holding reel through a rare fish’s runs (it should snap), then let go when it runs (it should land).',
   'NEW in this build: aquarium fish show real sizes and depth; hair rebuilt with volume (all 20 styles); body builds have distinct silhouettes; smaller noses on the Natural face.',
   'Deep QC round: 30 fish renamed so no two share a name; attachment stats no longer read “undefined”; oddity names wrap on small PC windows.',
+  'Second QC round (looks): the Tide Pass page shows this chapter’s exclusives as pictures plus progress for every chapter; a new Wardrobe tab to wear auras, bobbers and lines; Paths is shorter and uses two columns on wide screens; path fees are round numbers; Boons fill the whole width; end-game waters get their own heading.',
+  'Top bar: with a live event and a long water name, the Bait chip no longer gets squeezed to a sliver; Tasks or the event chip make room instead.',
   'Please test on every platform and send me anything that feels off.']};
 addTestNotes(TEST_NOTES);
 // =====================================================================
@@ -20063,7 +20002,7 @@ ui(){ QA.sys='UI';
     if(Math.abs(coinMult()-c0-.1)>1e-9) e.push('coins +'+(coinMult()-c0).toFixed(3)); if(Math.abs(xpMult()-x0)>1e-6*x0) e.push('gold level changed XP');
     b.dataset.k='xp'; b.dataset.n='1'; extraAct7(b); if(!(xpMult()>x0)) e.push('XP level does nothing'); S.pshop.gold=99; S.pearls=100; b.dataset.k='gold'; b.dataset.n='10'; extraAct7(b); if(pshopLv('gold')!==100) e.push('cap '+pshopLv('gold'));
     S.boonPts=3; const bb=document.createElement('button'); bb.dataset.act='boon'; bb.dataset.k='shine'; const s0=bonus('shiny'); extraAct7(bb); extraAct7(bb); if(boonR('shine')!==2||S.boonPts!==0) e.push('boon ranks '+boonR('shine')+' pts '+S.boonPts); if(Math.abs(bonus('shiny')-s0-.12)>1e-9&&!BONUS_CAP.shiny) e.push('Glimmer');
-    const cl0=gv('cooler'); S.boons.cooler=3; voyApplyCooler(); if(gv('cooler')!==cl0+3) e.push('Deep Cooler '+(gv('cooler')-cl0)); S.boons.cooler=0; voyApplyCooler();
+    voyApplyCooler(); const cl0=gv('cooler'); S.boons.cooler=3; voyApplyCooler(); if(gv('cooler')!==cl0+3) e.push('Deep Cooler '+(gv('cooler')-cl0)); S.boons.cooler=0; voyApplyCooler();
     const o=JSON.parse(JSON.stringify(S)); delete o.pearlMig; delete o.boonMig; o.pearls=7; o.tides=5; o.pshop={gold:'250',bad:3}; o.boons={heavy:9,nope:2}; const m=migrate(o); if(m.pearlOld!==7||m.pearls!==7) e.push('old pearls '+m.pearlOld+'/'+m.pearls); if(m.pshop.gold!==100||'bad' in m.pshop) e.push('shop save '+JSON.stringify(m.pshop)); if(m.boons.heavy!==5||'nope' in m.boons) e.push('boon save'); if(!(m.boonPts>=3+3+3+4+4)) e.push('back pay '+m.boonPts);
     const m2=migrate(JSON.parse(JSON.stringify(m))); if(m2.pearlOld!==7) e.push('old pearls doubled on reload');
     openMenu(MENU_SECS.some(s=>s.id==='prestige')?'prestige':'map'); const t=$('panel').textContent; if(!/Pearl shop/.test(t)||!/Boons/.test(t)||!/Voyage milestones/.test(t)) e.push('Prestige page parts missing'); closeMenu();
@@ -20087,7 +20026,7 @@ ui(){ QA.sys='UI';
     S.petTints=['none']; const pb=document.createElement('button'); pb.dataset.act='pettint'; pb.dataset.k='coral'; S.money=1e7; try{ extraAct2(pb); }catch(er){} if(S.petTints.includes('coral')) e.push('Pass pet colour bought in the shop');
     if(!petColourPrize()||!TINT_BW.some(t=>S.petTints.includes(t[0]))) e.push('Boardwalk colour prize'); if(TINT_SHOP.some(t=>!(t[2]>0))) e.push('shop colours unpriced');
     S.pass.lvl=40; S.pass.claimed=30; openMenu('pass'); const t=$('panel').textContent; if(!/Chapter 2 of 5/.test(t)||!/Tide Swirl aura/.test(t)) e.push('chapter/showcase missing'); closeMenu();
-    openMenu('style'); if(!/Tide Pass exclusives/.test($('panel').textContent)) e.push('wardrobe section missing'); closeMenu();
+    wSec='tidepass'; openMenu('style'); if(!$('panel').querySelector('canvas[data-pw]')) e.push('Wardrobe Tide Pass tab missing'); wSec='body'; closeMenu();
     return e.length?{ok:false,detail:e.join(' | ')}:{ok:true,detail:ex.length+' exclusives'}; });
   T('start-up pass: an old save loaded at start-up gets the 0.4.9 save rules (old pearls kept, Boon back pay, Pass catch-up) before anything is saved',()=>{ const e=[]; const o=JSON.parse(JSON.stringify(S)); for(const k of ['pearlMig','boonMig','passMig','pathXP','pearlOld']) delete o[k]; o.pearls=9; o.tides=4; o.boonPts=0; o.pass.lvl=40; o.pass.claimed=40; o.owned.auras=[];
     const a=migrate(JSON.parse(JSON.stringify(o))); if(a.pearlOld!==9) e.push('full chain pearlOld '+a.pearlOld);
@@ -20098,7 +20037,7 @@ ui(){ QA.sys='UI';
     if(!(typeof DEV_KEYS!=='undefined'&&DEV_KEYS.includes('hand'))){ const o=JSON.parse(JSON.stringify(S)); o.settings.hand='x'; if(migrate(o).settings.hand!=='r') e.push('bad hand setting kept'); o.settings.hand='l'; if(migrate(o).settings.hand!=='l') e.push('left hand lost'); } /* phones keep it in the device store */
     try{ for(let i=0;i<5;i++) drawAngler(x,100,280,3,Object.assign({},S.look,{hat:'wizard'}),{t:i*1.3}); }catch(er){ e.push('wizard: '+er.message); }
     const st=new Set(SP.map(s=>fishDesign(s).eyeS)); if(st.size<6) e.push('only '+st.size+' eye styles'); try{ for(const s of SP.slice(0,60)) drawCreature(x,s,150,150,80,{}); }catch(er){ e.push('fish draw: '+er.message); }
-    for(const hs of A3_NEW_HAIR) for(const f of ['natural','classic']) try{ drawAngler(x,100,280,3,Object.assign({},S.look,{hairStyle:hs,face:f,hat:'none',nose:'hooked',mouth:'pout',brows:'bushy',eyeShape:'almond'}),{t:1}); }catch(er){ e.push(hs+': '+er.message); }
+    for(const hs of Object.keys(HAIR_P)) for(const f of ['natural','classic']) try{ drawAngler(x,100,280,3,Object.assign({},S.look,{hairStyle:hs,face:f,hat:'none',nose:'hooked',mouth:'pout',brows:'bushy',eyeShape:'almond'}),{t:1}); }catch(er){ e.push(hs+': '+er.message); }
     const o2=JSON.parse(JSON.stringify(S)); delete o2.look.face; delete o2.look.eyeShape; const m2=migrate(o2); if(m2.look.face!=='classic'||m2.look.eyeShape!=='round') e.push('old angler: '+m2.look.face+'/'+m2.look.eyeShape); if(fresh().look.face!=='natural') e.push('new anglers not Natural');
     const o3=JSON.parse(JSON.stringify(S)); o3.look.face='zzz'; o3.look.nose='afro'; if(migrate(o3).look.face!=='natural'||migrate(o3).look.nose!=='button') e.push('bad looks kept');
     openMenu('style'); const t=$('panel').textContent; if(!/Face style/.test(t)||!/Eye shape/.test(t)||!/Mohawk/.test(t)) e.push('Wardrobe rows missing'); closeMenu(); S.settings.hand='r';
@@ -20569,7 +20508,8 @@ function renderMap(P){
   LOCS.map((L,i)=>{ const open=S.unlocked.includes(L.id), here=S.loc===L.id; const prev=i?LOCS[i-1]:null; const met=unlockMet(i); const sps=spAt(L.id);
     const btn = here ? '<button class="btn alt" disabled>Fishing here</button>' : open ? `<button class="btn" data-act="goto" data-k="${L.id}" ${G.st==='idle'?'':'disabled'}>Travel here</button>`
       : `<button class="btn" data-act="unlock" data-k="${L.id}" ${met&&S.money>=locCost(L)&&(!prev||S.unlocked.includes(prev.id))?'':'disabled'}>Unlock · <span class="coin">${fmt(locCost(L))}</span></button>`;
-    return `<div class="tile loc ${here?'here':''}"><div class="sw2" style="background:linear-gradient(${L.sky[0]},${L.sky[1]} 48%,${L.water[0]} 52%,${L.water[1]})"></div>
+    const egHead=L.eg&&!(prev&&prev.eg)?`<div class="eg-head"><h3>End-game waters</h3><span class="meta">These open after later voyages (see Set sail again). Their fish are much tougher and worth much more.</span></div>`:"";
+    return egHead+`<div class="tile loc ${here?"here":""}"><div class="sw2" style="background:linear-gradient(${L.sky[0]},${L.sky[1]} 48%,${L.water[0]} 52%,${L.water[1]})"></div>
     <h4>${L.name}</h4><div class="meta">${L.blurb}</div><div class="meta">Depth ${L.depth} · ${caughtAt(L.id)}/${sps.length} species</div>${strStandHTML(sps)}
     ${!open&&prev?`<div class="meta" style="color:${met?'var(--kelp)':'var(--muted)'}">${met?'✓':'·'} ${unlockLine(i)}</div>`:''}${btn}</div>`; }).join('')+'</div>'+renderVoyage()+relicHTML();
 }
