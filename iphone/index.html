@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="DL Test iPhone">
 <script>
-window.DL_BUILD='ios'; window.DL_PREVIEW=true; window.DL_VERSION='2026.11.18-1755';
+window.DL_BUILD='ios'; window.DL_PREVIEW=true; window.DL_VERSION='2026.11.18-1814';
 window.addEventListener('beforeinstallprompt',function(e){ e.preventDefault(); window.__dlInstallPrompt=e; });
 </script>
 </head>
@@ -15913,6 +15913,40 @@ html body.phone-app #mbwx[data-k="Storm"],html body.phone-land #mbwx[data-k="Sto
 html body.phone-app #mbwx[data-k="Rain"],html body.phone-land #mbwx[data-k="Rain"]{border-left-color:#7fb4ff}
 </style>`);
 // =====================================================================
+// Phones and tablets, round 8: mountains without stripes (director, 2026-11-18, iPhone screenshot at Willow Pond by night: "Did
+// mountains lose their detail in mobile version? Right now they look bugged").
+// The shared mountain painter (v3range in f_v3scene.js) shades a range as hundreds of thin side-by-side strips, one per column of
+// pixels. On the iPhone the strips showed thin dark seams between them, so every mountain (and its reflection in the water) looked
+// like corrugated metal. Same shapes, same light, same snow here, but each range is painted as ONE shape with a smooth light
+// gradient running across it, and its snow as one shape on top: nothing can show between strips because there are no strips. It
+// is also much less work for the phone (2 fills instead of about 1,000 per range).
+// Android + iPhone + tablets. (PC keeps the original painter.)
+// =====================================================================
+{ const _vr=v3range;
+  v3range=function(c,o){ if(!MOB()) return _vr.apply(this,arguments);
+    const n=v3noise(o.seed), m=v3noise(o.seed+101), step=1.5/Math.min(DPR||1,2), raw=[];
+    for(let X=0;X<=W+step;X+=step){ const f=X/W;
+      let env=0; for(const [c0,a,w0] of o.massifs){ const d=Math.abs(f-c0)/w0; env=Math.max(env,a*Math.exp(-d*2.3)); }
+      const r=.62*(1-Math.abs(2*n(f*3+1.3)-1))+.3*(1-Math.abs(2*n(f*7+5.1)-1))+.08*n(f*16+9.7);
+      raw.push(o.amp*(.06+env*(.72+.28*r)+.05*r)); }
+    const N=raw.length, K=Math.max(3,Math.round(6/step)), cols=raw.map((h,i)=>{ let s=0,wsum=0; for(let j=-K;j<=K;j++){ const v=raw[Math.min(N-1,Math.max(0,i+j))], w=1-Math.abs(j)/(K+1); s+=v*w; wsum+=w; } return o.base-s/wsum; });
+    const sk=Math.max(4,Math.round(8/step)), sl=i=>{ const a=cols[Math.max(0,i-sk)], b=cols[Math.min(N-1,i+sk)]; return (b-a)/(2*sk*step); };
+    const lit=i=>clamp(.5+sl(i)*1.9,0,1), st=Math.max(1,Math.round(2/step)); /* a colour stop every ~2 px: the light changes slowly */
+    const grad=col=>{ const gr=c.createLinearGradient(0,0,W,0); for(let i=0;i<N;i+=st){ const f=i*step/W; if(f>1) break; gr.addColorStop(f,col(lit(i))); } gr.addColorStop(1,col(lit(Math.min(N-1,Math.round(W/step))))); return gr; };
+    c.save();
+    c.beginPath(); c.moveTo(0,o.base); for(let i=0;i<N;i++) c.lineTo(i*step,cols[i]); c.lineTo(W,o.base); c.closePath();
+    c.fillStyle=grad(k=>mix(o.shadow,o.light,k)); c.fill(); c.clip();
+    if(o.snow){ const snowC=mix(o.snow,'#8088bc',.4), depth=i=>{ const above=o.snowLine-cols[i]; return above*(.5+.45*m(i*step*.012))+above*.35*Math.max(0,m(i*step*.033+3)-.45); };
+      c.beginPath(); let i=0, any=false;
+      while(i<N){ if(cols[i]>=o.snowLine){ i++; continue; } const a=i; while(i<N&&cols[i]<o.snowLine) i++; const b=i-1; any=true;
+        /* one snow patch: along the crest, then back along its lower edge; the ends meet at the snow line */
+        const xa=Math.max(0,a-1)*step, xb=Math.min(N-1,b+1)*step;
+        c.moveTo(xa,o.snowLine); for(let k=a;k<=b;k++) c.lineTo(k*step,cols[k]-1); c.lineTo(xb,o.snowLine);
+        for(let k=b;k>=a;k--) c.lineTo(k*step,cols[k]+depth(k)); c.closePath(); }
+      if(any){ c.fillStyle=grad(k=>mix(snowC,o.snow,k)); c.fill(); } }
+    const hg=c.createLinearGradient(0,o.base-o.amp,0,o.base); hg.addColorStop(0,v3rgba(o.haze,0)); hg.addColorStop(.55,v3rgba(o.haze,o.hazeA*.35)); hg.addColorStop(1,v3rgba(o.haze,o.hazeA)); c.fillStyle=hg; c.fillRect(0,o.base-o.amp,W,o.amp+1);
+    c.restore(); }; }
+// =====================================================================
 // Phones, round 8: settings belong to the device (director, 2026-11-18: "we're even due for settings options separate to specific
 // devices... decide what's necessary for settings options to make the user have control over what's necessary").
 // Research (Apple HIG "Settings", Microsoft/Xbox accessibility guidance, mobile game support pages, WebKit status):
@@ -16917,12 +16951,13 @@ PATCHES.unshift({v:'0.4.8.5', name:'Easy Finds', items:[
 PATCHES.unshift({v:'0.4.8.6', name:'Tidy Up', items:[
   'Stats is easy to reach: it sits in Collection now (side menu), and tapping your Level in the top bar opens it.',
   'Every tab lives in one place: Settings no longer repeats Save. The gift code and the backup and erase tools are in Save, Save codes.',
-  'Page summaries and intros no longer repeat the same numbers, and the side menu’s badges are never cut off or covering the button above.']});
+  'Page summaries and intros no longer repeat the same numbers, and the side menu’s badges are never cut off or covering the button above.',
+  'Mountains look clean again: no more thin stripes running down them or their reflections.']});
 
 // iPhone test notes (preview builds only; the live game never shows them). Write what the next test build changes here
 // (spoiler-free); it opens once in the iPhone test app. Released notes live in notes_release.js.
 const TEST_NOTES={v:'test', label:'Test build · iPhone', name:'One Look, Easy Aquarium', items:[
-  'NEW in this build (0.4.8.6): Stats in Collection and on the Level chip; Settings no longer repeats Save (gift code and backup tools are in Save); summaries no longer repeat numbers.',
+  'NEW in this build (0.4.8.6): mountains drawn without stripes; Stats in Collection and on the Level chip; Settings no longer repeats Save (gift code and backup tools are in Save); summaries no longer repeat numbers.',
   'NEW in this build: fish fight shows a tension ring at the fish with the instruction above it; hints are touch only; homes are never called docks; the layout always switches when you turn the phone; smoother storms at Starfall.',
   'NEW in this build: Compact Goal chip (opens the right page) and a separate Live chip, plus Tasks and Tide Pass in the top bar. Your home shows the real home of every water. Colour choices are round swatches.',
   'NEW in this build: every menu page works like the aquarium (key numbers and main button first, sections as tabs, one scrolling list, badges where rewards wait). The Wardrobe shows your angler big with the categories in Options. Pages keep your place when they refresh.',
