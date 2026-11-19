@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="DL Test Android">
 <script>
-window.DL_BUILD='android'; window.DL_PREVIEW=true; window.DL_VERSION='2026.11.18-2354';
+window.DL_BUILD='android'; window.DL_PREVIEW=true; window.DL_VERSION='2026.11.19-0001';
 window.addEventListener('beforeinstallprompt',function(e){ e.preventDefault(); window.__dlInstallPrompt=e; });
 </script>
 </head>
@@ -15862,7 +15862,12 @@ html body.phone-app #panel .mb-shnote,html body.phone-land #panel .mb-shnote{fon
 // Settings button worked because it reacts to click). Now: on any finished tap, if full screen is your choice and the page is not
 // in full screen, it goes back (taps on the Full screen button itself are left to that button).
 { const want3=()=>true; /* round 4 (director, 2026-11-18: "automatic for all mobile builds, no menu option, like iPhone"): phones are always full screen; the Settings row is gone (settings08) */
-  const back=e=>{ if(!MOB()||document.fullscreenElement||!document.documentElement.requestFullscreen||!want3()) return; if(e&&e.target&&e.target.closest&&e.target.closest('[data-act="fullscreen"]')) return; try{ const p=document.documentElement.requestFullscreen(); if(p&&p.catch) p.catch(()=>{}); }catch(er){} };
+  /* round 5 (director, 2026-11-18: Android test build above 60 fps and jumpy on every action, fresh save): the installed Android app
+     now opens in the app's own full-screen mode (manifest), where document.fullscreenElement is empty, so every tap asked for full
+     screen again; each request re-laid the screen out, resized the water and drew extra frames outside the 60 limit. Now it only asks
+     when the screen is really not full screen (not in app full-screen mode, bars visible), at most once every 2 seconds. */
+  let lastAsk=0; const appFull=()=>{ try{ if(matchMedia('(display-mode: fullscreen)').matches) return true; }catch(er){} const sw=Math.max(screen.width,screen.height), sh=Math.min(screen.width,screen.height), iw=Math.max(innerWidth,innerHeight), ih=Math.min(innerWidth,innerHeight); return Math.abs(iw-sw)<2&&Math.abs(ih-sh)<2; };
+  const back=e=>{ if(!MOB()||document.fullscreenElement||!document.documentElement.requestFullscreen||!want3()) return; if(e&&e.target&&e.target.closest&&e.target.closest('[data-act="fullscreen"]')) return; const now=performance.now(); if(now-lastAsk<2000||appFull()) return; lastAsk=now; try{ const p=document.documentElement.requestFullscreen(); if(p&&p.catch) p.catch(()=>{}); }catch(er){} };
   ['pointerup','touchend','click','keyup'].forEach(ev=>document.addEventListener(ev,back,true)); }
 // =====================================================================
 // Phones, round 7: your active boosts are never hidden behind the buttons (director, 2026-11-18, screenshots: "the bottom left
@@ -17821,7 +17826,7 @@ PATCHES.unshift({v:'0.4.8.6.2', name:'Fixes', items:[
 // Released notes live in notes_release.js.
 const TEST_NOTES={v:'test', label:'Test build · Android', name:'Natural frame rate, Settings fix', items:[
   'Android draws a steady 60 frames a second again (also on 120 Hz screens), iPhone runs at its natural rate. No frame-rate choice in Settings.',
-  'Android stays automatically full screen, like iPhone.',
+  'Android stays automatically full screen, like iPhone, and no longer re-asks for full screen on every tap (that caused extra frames and jumpy fps during actions).',
   'Opening and closing Settings (or any menu) no longer shows another water’s scenery for a moment.',
   'Water pictures for the Map are only made while the Map is open, so other menus stay light.',
   'Much smoother with a decorated home: decorations on the dock are no longer re-lit from scratch every frame (a moved save with many decorations made Android drop to about 25 fps).',
