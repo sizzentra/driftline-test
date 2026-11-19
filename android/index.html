@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="DL Test Android">
 <script>
-window.DL_BUILD='android'; window.DL_PREVIEW=true; window.DL_VERSION='2026.11.19-1336';
+window.DL_BUILD='android'; window.DL_PREVIEW=true; window.DL_VERSION='2026.11.19-1356';
 window.addEventListener('beforeinstallprompt',function(e){ e.preventDefault(); window.__dlInstallPrompt=e; });
 </script>
 </head>
@@ -2063,7 +2063,7 @@ const anglerStr = () => gv('line')/tensionMult();
 const strTxt = v => Math.round(wNum(v))+' '+wUnit();
 function strStand(sps){ const ps=sps.map(fishPull), lo=Math.min(...ps), hi=Math.max(...ps), a=anglerStr(); return {lo, hi, a, beat:ps.filter(p=>p<=a).length, n:ps.length, pos:clamp((a-lo)/Math.max(1,hi-lo),0,1)}; }
 function strStandHTML(sps){ const s=strStand(sps); return `<div class="meta strst" title="Angler strength comes from your Line (Tackle) and skills that lower tension. Fish stronger than you are heavy: let them run, reel when they rest.">Fish ${strTxt(s.lo)}–${strTxt(s.hi)} <span class="strbar" aria-hidden="true"><i style="left:${(s.pos*100).toFixed(0)}%"></i></span> you ${strTxt(s.a)} · stronger than ${s.beat} of ${s.n}</div>`; }
-document.head.insertAdjacentHTML('beforeend','<style>.strst{white-space:nowrap}.strbar{display:inline-block;position:relative;width:56px;height:6px;border-radius:3px;margin:0 4px;vertical-align:middle;background:linear-gradient(90deg,#5ad8b0,#ffd36a,#ff7a5a)}.strbar i{position:absolute;top:-3px;width:4px;height:12px;margin-left:-2px;background:#fff;border-radius:2px;box-shadow:0 0 3px #000c}</style>');
+document.head.insertAdjacentHTML('beforeend','<style>.strst{white-space:normal;overflow-wrap:anywhere}.strst .strbar{white-space:nowrap}.strbar{display:inline-block;position:relative;width:56px;height:6px;border-radius:3px;margin:0 4px;vertical-align:middle;background:linear-gradient(90deg,#5ad8b0,#ffd36a,#ff7a5a)}.strbar i{position:absolute;top:-3px;width:4px;height:12px;margin-left:-2px;background:#fff;border-radius:2px;box-shadow:0 0 3px #000c}</style>');
 // Legendary and mythic fish have a signature surge: halfway in (and again near the end for mythics) they make one long,
 // heavy run with a burst of spray, then go still for a moment, then leap. Watching the fish beats it; holding loses it.
 function surgeTick(dt,f){ if(G.surge){ G.surge.t+=dt; const s=G.surge;
@@ -7718,7 +7718,7 @@ function a3Body(c,x,y,s,lk,o,live){ A3FXP={};
   if(live){ const dt=A3.lt<0?1:clamp(t-A3.lt,0,.1); A3.lt=t; const e=1-Math.exp(-dt*9), eh=1-Math.exp(-dt*24);
     A3.lean+=(lean-A3.lean)*e; A3.crouch+=(crouch-A3.crouch)*e; A3.stance+=(stance-A3.stance)*e; A3.tilt+=(tilt-A3.tilt)*e; A3.hx+=(hx-A3.hx)*eh; A3.hy+=(hy-A3.hy)*eh;
     lean=A3.lean; crouch=A3.crouch; stance=A3.stance; tilt=A3.tilt; hx=A3.hx; hy=A3.hy; }
-  const B=BUILDI[lk.build]||BUILDI.average; A3BELLY=B.belly; A3LW=B.lw; A3SHOE=lk.shoes||"boots"; A3SHOECOL=lk.shoeCol||null; const lift=o.sit?24-o.sit.seat:crouch-24*(B.l-1);
+  const B=BUILDI[lk.build]||BUILDI.average; A3BELLY=B.belly; A3LW=B.lw; A3SHAPE=typeof a3Shape==='function'?a3Shape(B,f):A3SHAPE0; A3SHOE=lk.shoes||"boots"; A3SHOECOL=lk.shoeCol||null; const lift=o.sit?24-o.sit.seat:crouch-24*(B.l-1);
   const ra=o.rodA!=null?o.rodA:-.72; // the rod's angle at the hand (screen space)
   // upper body space: crouch down, lean around the hips. Hands are given in final space so they meet the rod exactly.
   const lc=Math.cos(lean), ls=Math.sin(lean), hipY=-24+lift;
@@ -7766,12 +7766,13 @@ function a3Body(c,x,y,s,lk,o,live){ A3FXP={};
   const hairF=HD(hairC);
   // back hair (behind the upper body), follows the head tilt
   c.save(); c.translate(0,-50); c.rotate(tilt); c.scale(A3HEAD,A3HEAD); c.translate(0,50); { const hId=lk.hat||'none'; if(A3_HAT_FULL.has(hId)){ c.beginPath(); c.rect(0,0,0,0); c.clip(); } else if(!A3_HAT_OPEN.has(hId)){ c.beginPath(); c.rect(-30,-63.9,60,44); c.clip(); } }
-  if(hs==='long'){ /* falls from the crown, hugs the back of the head and neck, and settles over the shoulder blades in soft, uneven tips */
+  const HB=typeof hairBack3==='function'&&hairBack3(c,hs,hairF,hairC,D,t,lean,live); /* 0.4.9: the parametric hair system draws the back layer (ct_hair.js) */
+  if(!HB&&hs==='long'){ /* falls from the crown, hugs the back of the head and neck, and settles over the shoulder blades in soft, uneven tips */
     const sw=Math.sin(t*1.3)*.25+(live?-lean*2:0); c.fillStyle=hairF; c.beginPath(); c.moveTo(-6.4,-62.4); c.bezierCurveTo(-9.6,-60.6,-10.2,-55.6,-9.4,-51); c.bezierCurveTo(-8.8,-47.4,-9.4+sw,-44.4,-8.8+sw,-40.4); c.quadraticCurveTo(-8+sw,-41.4,-7.4+sw,-40.6); c.quadraticCurveTo(-6.8+sw,-41.6,-6.1+sw,-41.2); c.bezierCurveTo(-5.4,-43.6,-4,-45.4,-2.6,-46.4); c.lineTo(-2.4,-58); c.closePath(); c.fill();
     c.strokeStyle=D(mix(hairC,'#000000',.32)); c.lineWidth=.42; c.beginPath(); c.moveTo(-8,-58); c.bezierCurveTo(-9.2,-53,-8.2,-47,-8+sw,-41.6); c.moveTo(-5.6,-56.6); c.bezierCurveTo(-6.6,-52,-6,-47,-6.6+sw,-42); c.stroke();
     c.strokeStyle=D(mix(hairC,'#ffffff',.3)); c.lineWidth=.5; c.beginPath(); c.moveTo(-7.2,-59.4); c.bezierCurveTo(-9,-55,-8.8,-50.4,-8.4,-47); c.stroke(); }
-  if(hs==='ponytail'){ const sw=Math.sin(t*1.6)*.12+(live?-lean*.8:0); c.save(); c.translate(-7.4,-58.5); c.rotate(.55+sw); c.fillStyle=hairF; c.beginPath(); c.moveTo(0,-.4); c.quadraticCurveTo(3.2,4,1.2,11.4); c.quadraticCurveTo(-3,6,0,-.4); c.fill(); c.strokeStyle=D(mix(hairC,'#000000',.3)); c.lineWidth=.4; c.beginPath(); c.moveTo(-.2,1.6); c.quadraticCurveTo(.4,6,.9,10.4); c.stroke(); c.fillStyle=D('#c8553a'); c.beginPath(); c.ellipse(0,.4,1.7,.9,.2,0,7); c.fill(); c.restore(); }
-  if(hs==='bun'){ c.fillStyle=hairF; c.beginPath(); c.arc(-3.2,-65.2,3.6,0,7); c.fill(); c.strokeStyle=D(mix(hairC,'#000000',.3)); c.lineWidth=.4; c.beginPath(); c.arc(-3.2,-65.2,2,.4,3.4); c.stroke(); c.strokeStyle=D(mix(hairC,'#ffffff',.3)); c.lineWidth=.5; c.beginPath(); c.arc(-3.2,-65.2,2.6,3.6,4.6); c.stroke(); }
+  if(!HB&&hs==='ponytail'){ const sw=Math.sin(t*1.6)*.12+(live?-lean*.8:0); c.save(); c.translate(-7.4,-58.5); c.rotate(.55+sw); c.fillStyle=hairF; c.beginPath(); c.moveTo(0,-.4); c.quadraticCurveTo(3.2,4,1.2,11.4); c.quadraticCurveTo(-3,6,0,-.4); c.fill(); c.strokeStyle=D(mix(hairC,'#000000',.3)); c.lineWidth=.4; c.beginPath(); c.moveTo(-.2,1.6); c.quadraticCurveTo(.4,6,.9,10.4); c.stroke(); c.fillStyle=D('#c8553a'); c.beginPath(); c.ellipse(0,.4,1.7,.9,.2,0,7); c.fill(); c.restore(); }
+  if(!HB&&hs==='bun'){ c.fillStyle=hairF; c.beginPath(); c.arc(-3.2,-65.2,3.6,0,7); c.fill(); c.strokeStyle=D(mix(hairC,'#000000',.3)); c.lineWidth=.4; c.beginPath(); c.arc(-3.2,-65.2,2,.4,3.4); c.stroke(); c.strokeStyle=D(mix(hairC,'#ffffff',.3)); c.lineWidth=.5; c.beginPath(); c.arc(-3.2,-65.2,2.6,3.6,4.6); c.stroke(); }
   c.restore();
   // back arm: shoulder -> elbow -> hand on the grip behind the front hand
   const shB={x:-1.2*B.w,y:-45.4}, elB=a3IK(shB.x,shB.y,BH.x,BH.y,7.8,7.6,1), slD=D(mix(sleeve,'#000000',.2));
@@ -7798,7 +7799,7 @@ function a3Body(c,x,y,s,lk,o,live){ A3FXP={};
   c.save(); c.scale(SIDE_K,1); A3FXP.neck=c.getTransform(); A3FXP.nw=B.w; a3Neck(c,lk.neck,D,lk.accCol,t,B.w,lean); c.restore();
   const hatId=lk.hat||'none', hatFull=A3_HAT_FULL.has(hatId), hatCover=!hatFull&&!A3_HAT_OPEN.has(hatId);
   c.save(); c.translate(0,br*.2); c.translate(0,-50); c.rotate(tilt); c.scale(A3HEAD,A3HEAD); c.translate(0,50);
-  const NAT=lk.face==='natural', JW=NAT?[1.3,-52.3,4.7,3.25,.16]:[1.9,-51.9,5.4,3.5,.1]; /* [59] Natural face: a rounder head with a softer jaw */
+  const NAT=lk.face==='natural'; A3NAT=NAT; const JW=NAT?[1.3,-52.3,4.7,3.25,.16]:[1.9,-51.9,5.4,3.5,.1]; /* [59] Natural face: a rounder head with a softer jaw */
   c.fillStyle=sk; c.beginPath(); c.arc(0,-56,7.5,0,7); c.fill(); c.beginPath(); c.ellipse(JW[0],JW[1],JW[2],JW[3],JW[4],0,7); c.fill();
   // head volume: lit from the upper front, shade wrapping the back and under the jaw
   c.save(); c.beginPath(); c.arc(0,-56,7.5,0,7); c.ellipse(JW[0],JW[1],JW[2],JW[3],JW[4],0,7); c.clip();
@@ -9830,24 +9831,24 @@ setTimeout(()=>{ try{ if(S&&S.fabRefund){ toast('Shirt designs became fabrics. Y
 // front edge of the torso at height y (used to place buttons, zips and ties on the chest)
 function sideFront(y,f){ const bb=A3BELLY*2.0;
   if(f){ if(y<-42.4) return 3.4+(y+46.9)/4.5*3.0; if(y<-33.2) return 6.4+Math.sin((y+42.4)/9.2*Math.PI)*1.5-(y+42.4)/9.2*.8; return 5.6+bb*.6+(y+33.2)/9.6*(.6+bb*.4); }
-  if(y<-43) return 3.4+(y+46.9)/3.9*2.9; if(y<-35) return 6.3+(y+43)/8*.1+bb*.4*(y+43)/8; return 6.4+bb*.8+Math.sin((y+35)/11.4*Math.PI)*(.4+bb*1.2)-(y+35)/11.4*(.2+bb*.3); }
+  if(y<-43) return 3.4+(y+46.9)/3.9*2.9; if(y<-35) return 6.3+A3SHAPE.ch*.85+(y+43)/8*.1+bb*.4*(y+43)/8; return 6.4+bb*.8+Math.sin((y+35)/11.4*Math.PI)*(.4+bb*1.2)-(y+35)/11.4*(.2+bb*.3); }
 function sideTorsoPath(c,f){ const bb=A3BELLY*2.0; c.beginPath();
   c.moveTo(-4.6,-46.9);
-  c.bezierCurveTo(-6.6,-46.5,-7.3,-43.6,-7.1,-40.6);   // over the shoulder blade
-  c.bezierCurveTo(-6.9,-36.6,-5.9,-33.6,-6,-30.2);     // in at the small of the back
-  c.bezierCurveTo(-6.1,-27.4,-7,-25.4,-6.9,-23.6);     // out over the seat
+  c.bezierCurveTo(-6.6-A3SHAPE.bk*.5,-46.5,-7.3-A3SHAPE.bk,-43.6,-7.1-A3SHAPE.bk,-40.6);   // over the shoulder blade
+  c.bezierCurveTo(-6.9-A3SHAPE.bk*.6,-36.6,-5.9+A3SHAPE.wa,-33.6,-6+A3SHAPE.wa,-30.2);     // in at the small of the back
+  c.bezierCurveTo(-6.1-A3SHAPE.se*.5,-27.4,-7-A3SHAPE.se,-25.4,-6.9-A3SHAPE.se*.6,-23.6);     // out over the seat
   c.lineTo(6.2+bb*.5,-23.6);
-  if(f){ c.bezierCurveTo(6.6+bb*1.2,-26.5,6.3+bb*1.6,-30.5,5.6+bb*.6,-33.2); c.bezierCurveTo(7.9,-34.4,8.3,-39.6,6.4,-42.4); c.bezierCurveTo(5.4,-44.2,4.4,-46.2,3.4,-46.9); }
-  else { c.bezierCurveTo(6.8+bb*1.5,-26.8,7+bb*2.1,-31.6,6.4+bb*.8,-35); c.bezierCurveTo(6.9,-38.8,6.6,-43.2,3.4,-46.9); }
+  if(f){ c.bezierCurveTo(6.6+bb*1.2,-26.5,6.3+bb*1.6,-30.5,5.6+bb*.6-A3SHAPE.wa*.4,-33.2); c.bezierCurveTo(7.9+A3SHAPE.ch*.7,-34.4,8.3+A3SHAPE.ch*.7,-39.6,6.4,-42.4); c.bezierCurveTo(5.4,-44.2,4.4,-46.2,3.4,-46.9); }
+  else { c.bezierCurveTo(6.8+bb*1.5,-26.8,7+bb*2.1-A3SHAPE.wa*.4,-31.6,6.4+bb*.8-A3SHAPE.wa*.5,-35); c.bezierCurveTo(6.9+A3SHAPE.ch,-38.8,6.6+A3SHAPE.ch*.8,-43.2,3.4,-46.9); }
   c.quadraticCurveTo(-.6,-48.3,-4.6,-46.9); c.closePath(); }
 function sideCoatPath(c,f,hemY){ const bb=A3BELLY*2.0; c.beginPath();
   c.moveTo(-4.8,-47.1);
-  c.bezierCurveTo(-6.9,-46.6,-7.6,-43.6,-7.4,-40.6);
-  c.bezierCurveTo(-7.2,-36.6,-6.4,-33.6,-6.6,-30.2);
-  c.bezierCurveTo(-6.8,-27,-7.6,-24,-8.3,hemY);
+  c.bezierCurveTo(-6.9-A3SHAPE.bk*.5,-46.6,-7.6-A3SHAPE.bk,-43.6,-7.4-A3SHAPE.bk,-40.6);
+  c.bezierCurveTo(-7.2-A3SHAPE.bk*.6,-36.6,-6.4+A3SHAPE.wa*.5,-33.6,-6.6+A3SHAPE.wa*.5,-30.2);
+  c.bezierCurveTo(-6.8-A3SHAPE.se*.5,-27,-7.6-A3SHAPE.se,-24,-8.3-A3SHAPE.se*.6,hemY);
   c.quadraticCurveTo(0,hemY+1.4,7.7+bb*.8,hemY);
-  if(f){ c.bezierCurveTo(7.1+bb*1.2,-24,6.7+bb*1.6,-30.5,6+bb*.6,-33.2); c.bezierCurveTo(8.2,-34.4,8.6,-39.6,6.7,-42.4); c.bezierCurveTo(5.6,-44.3,4.6,-46.3,3.6,-47.1); }
-  else { c.bezierCurveTo(7.3+bb*1.5,-25,7.4+bb*2.1,-31.6,6.8+bb*.8,-35); c.bezierCurveTo(7.3,-38.8,6.9,-43.4,3.6,-47.1); }
+  if(f){ c.bezierCurveTo(7.1+bb*1.2,-24,6.7+bb*1.6,-30.5,6+bb*.6,-33.2); c.bezierCurveTo(8.2+A3SHAPE.ch*.7,-34.4,8.6+A3SHAPE.ch*.7,-39.6,6.7,-42.4); c.bezierCurveTo(5.6,-44.3,4.6,-46.3,3.6,-47.1); }
+  else { c.bezierCurveTo(7.3+bb*1.5,-25,7.4+bb*2.1,-31.6,6.8+bb*.8,-35); c.bezierCurveTo(7.3+A3SHAPE.ch,-38.8,6.9+A3SHAPE.ch*.8,-43.4,3.6,-47.1); }
   c.quadraticCurveTo(-.6,-48.6,-4.8,-47.1); c.closePath(); }
 a3TorsoPath=sideTorsoPath; a3CoatPath=sideCoatPath;
 
@@ -16722,6 +16723,115 @@ function oddDecor(c,J,a,b,R,E,Ci){ let h=0; for(let i=0;i<J.id.length;i++) h=(h*
   else if(v===6){ c.globalAlpha=.8; c.fillStyle='#ffffff'; for(const [x,y,s] of [[26,-30,5],[-30,-22,3.5],[32,10,3]]){ c.beginPath(); c.moveTo(x,y-s); c.lineTo(x+s*.3,y-s*.3); c.lineTo(x+s,y); c.lineTo(x+s*.3,y+s*.3); c.lineTo(x,y+s); c.lineTo(x-s*.3,y+s*.3); c.lineTo(x-s,y); c.lineTo(x-s*.3,y-s*.3); c.closePath(); c.fill(); } } /* glints */
   c.restore(); }
 // =====================================================================
+// 0.4.9 the aquarium shows real sizes (director, 2026-11-19: "Fish in the aquarium also don't feel like their size even affects how they
+// display. Definitely doesn't feel dynamic and real"). Shared by every platform.
+//  - Length follows the cube root of weight, as real fish do (8× the weight = 2× the length): 1 kg is about 11% of the tank's height,
+//    a 0.05 kg minnow a tiny dart, a 100 kg giant fills a good part of the glass. Big fish are softly capped so they always fit.
+//    (Before: a log scale made a 100 kg fish only about twice a 0.1 kg one, and a fish's own weight changed it by at most 25%.)
+//  - Depth: every fish swims at its own distance from the glass; far ones are smaller, a little hazier and drawn behind near ones.
+//  - Big fish move and beat their tails slower, small fish faster.
+// =====================================================================
+function tankLen(f,h,w){ const kg=Math.max(.005,+f.kg||.1), cap=Math.min(h*.46,w*.34), raw=h*.115*Math.cbrt(kg); return Math.max(9,cap*Math.tanh(raw/cap)); }
+function tankDepth(f,i){ const s=hashStr((f.id||'')+'|'+(f.kg||0)+'|'+i); return (s%1000)/1000; }
+const tankPace = f => clamp(1.3-.22*Math.log10(1+Math.max(0,+f.kg||0)*4),.5,1.3);
+drawTank=function(now){ const cnv=$('tankcv'); if(!cnv) return; const r=cnv.getBoundingClientRect(); const w=r.width, h=r.height; if(!w||h<20) return;
+  if(cnv.width!==Math.round(w*DPR)||cnv.height!==Math.round(h*DPR)){ cnv.width=Math.round(w*DPR); cnv.height=Math.round(h*DPR); }
+  const c=cnv.getContext('2d'); c.setTransform(DPR,0,0,DPR,0,0); const t=now/1000;
+  drawTankBack(c,w,h,t);
+  const list=S.tank.map((f,i)=>({f,i,sp:SPI[f.id],z:tankDepth(f,i)})).filter(o=>o.sp).sort((a,b)=>b.z-a.z); /* far first */
+  for(const o of list){ const {f,i,sp,z}=o, k=1-.3*z, L=tankLen(f,h,w)*k, pace=tankPace(f), tk=t*pace;
+    const M=tankMove(f,sp,i,tk,w,h,L); nibMove(f,M,t,w,h); const y=M.y+(z-.5)*h*.06; /* farther fish sit a touch higher, like looking into the tank */
+    c.save(); if(z>.35) c.globalAlpha=1-(z-.35)*.45;
+    drawCreature(c,sp,M.x,y,L,{shiny:f.sh||0,pv:f.pv,seedAdd:i,wag:tk*M.wag+i,flip:!M.dir}); c.restore(); }
+  c.fillStyle='rgba(220,245,255,.35)'; for(let i=0;i<12;i++){ const x=(i*73)%w+Math.sin(t+i)*4, y=h-((t*30+i*40)%h); c.beginPath(); c.arc(x,y,1.5+(i%3),0,7); c.fill(); }
+  nibDraw(c,t,w,h); drawTankFront(c,w,h,t);
+};
+// =====================================================================
+// 0.4.9 hair and body shapes, rebuilt (director, 2026-11-19: "Hair and body shape/design has been a huge problem for you ... figure out
+// why it hasn't been working").
+// Why it failed (from this project's history and how character artists work):
+//  - Hair was drawn as thin shapes hugging the skull: about half a unit of thickness over a 7.5-unit head. Real (and good stylised) hair is
+//    a VOLUME that sits above the skull, with a hairline and parting that frame the face; ours read as painted-on caps and helmets.
+//  - Every style was a separate hand-placed polygon with its own magic numbers, patched later in other files (hat fitting, curls, spikes),
+//    so styles never shared proportions and each fix broke another.
+//  - Body builds only stretched one torso ±20% sideways, which disappears in a silhouette: a build must be readable as a solid shape.
+// The fix:
+//  - One parametric hair system for every style: an outline around the skull with volume (most at the crown, less at the hairline and
+//    nape), a hairline at the temple, a back length (ear, nape, jaw, shoulder, mid-back), an optional fringe, side swoop or spikes, curl
+//    lobes, and extras (bun, ponytail, top knot, braid, mohawk). Shading is shared: lit crown, darker underside, a sheen band, a few
+//    strand lines that follow the flow. Long back hair is drawn behind the body, the rest on the head.
+//  - Builds change the side profile itself: chest, upper back, waist, seat and belly (plus limb weight), and female anglers get a waist
+//    and hips, so each build reads as its own silhouette.
+// Head space: skull centre (0,-56), radius 7.5, face toward +x, eye (4.4,-57), ear (-1.8,-55.4). Under a hat everything above y -63.9 is
+// clipped by the caller and extras above the brim are skipped.
+// =====================================================================
+var A3SHAPE0={bk:0,wa:0,se:0,ch:0}, A3SHAPE=A3SHAPE0;
+const A3_SHAPES={average:[1,1,1,0,{bk:0,wa:0,se:0,ch:0}], slim:[.8,1.04,.8,0,{bk:-.3,wa:.5,se:-.3,ch:-.4}], athletic:[1.1,1,1.12,0,{bk:.5,wa:.9,se:.4,ch:1.1}],
+  broad:[1.28,1,1.25,0,{bk:1,wa:0,se:.3,ch:1.2}], sturdy:[1.2,.94,1.18,1.5,{bk:.6,wa:-.6,se:.8,ch:.4}], tall:[.95,1.15,.95,0,{bk:0,wa:.3,se:0,ch:.2}], petite:[.86,.86,.86,0,{bk:-.2,wa:.4,se:.1,ch:-.2}]};
+for(const b of BUILDS){ const v=A3_SHAPES[b[0]]; if(v) Object.assign(b[2],{w:v[0],l:v[1],lw:v[2],belly:v[3],shape:v[4]}); }
+const A3_SHAPE_F=new Map();
+function a3Shape(B,f){ const s=B.shape||A3SHAPE0; if(!f) return s; let o=A3_SHAPE_F.get(s); if(!o){ o={bk:s.bk-.2,wa:s.wa+.7,se:s.se+.6,ch:s.ch}; A3_SHAPE_F.set(s,o); } return o; }
+// ---------- hair ----------
+// vol: thickness above the skull at the crown; front: 'none' | 'fringe' | 'side' | 'spikes' | 'quiff'; back: y where the back hair ends
+// (-52 nape, -50 jaw, -46 shoulder, -40 mid-back); bw: thickness of hanging back hair; curl: lobed edge; ear: hair covers the ear;
+// cap: 'shave' (sides shaved, only a top strip), 'thin' (a buzz); x: extra ('bun','pony','knot','braid','mohawk')
+const HAIR_P={
+  short:{vol:1.1,front:'quiff',back:-52.5}, buzz:{vol:.25,front:'none',back:-53,cap:'thin'}, long:{vol:1.2,front:'side',back:-40,bw:3.2},
+  ponytail:{vol:.8,front:'none',back:-53,x:'pony'}, bun:{vol:.8,front:'none',back:-53,x:'bun'}, curly:{vol:2.4,front:'fringe',back:-51,curl:1,ear:1},
+  coils:{vol:2.4,front:'fringe',back:-51,curl:1,ear:1}, spiky:{vol:1.3,front:'spikes',back:-52.5}, bald:null,
+  sidepart:{vol:1.4,front:'side',back:-52.5}, bob:{vol:1.5,front:'fringe',back:-50.2,bw:2.4,ear:1}, pixie:{vol:.9,front:'fringe',back:-53},
+  wavy:{vol:1.7,front:'side',back:-42,bw:3.6,wave:1}, braid:{vol:.8,front:'none',back:-53,x:'braid'}, topknot:{vol:.6,front:'none',back:-53,x:'knot'},
+  mullet:{vol:1,front:'quiff',back:-46,bw:2}, undercut:{vol:2,front:'quiff',back:-55,cap:'shave'}, mohawk:{vol:0,front:'none',back:-55,cap:'shave',x:'mohawk'},
+  afro:{vol:4.4,front:'fringe',back:-50.5,curl:1.6,ear:1}
+};
+const HC={x:0,y:-56,r:7.5};
+// volume around the skull by angle (0 = front, -π/2 = top, ±π = back): most at the crown, less at the hairline and nape
+function hairVolAt(a){ const d=Math.abs(a-(-1.85)); return Math.max(.2,1-Math.pow(d/2.2,2)); }
+function hairOutline(P){ const pts=[], a0=-.62, a1=-Math.PI-.95; /* from the hairline over the top to the nape */
+  for(let i=0;i<=26;i++){ const a=a0+(a1-a0)*i/26; let r=HC.r+P.vol*hairVolAt(a); if(P.curl) r+=P.curl*.55*Math.max(0,Math.sin(i*1.6))*hairVolAt(a); pts.push([HC.x+Math.cos(a)*r,HC.y+Math.sin(a)*r]); }
+  return pts; }
+function hairShade(c,hairC,D,top,bot){ const g2=c.createLinearGradient(-3,top,3,bot); g2.addColorStop(0,D(mix(hairC,'#ffffff',.3))); g2.addColorStop(.4,D(hairC)); g2.addColorStop(1,D(mix(hairC,'#000000',.38))); return g2; }
+drawHair3=(function(_old){ return function(c,hs,hair,hairC,D,t){ const P=HAIR_P[hs]; if(P===undefined) return _old.apply(this,arguments); if(P===null){ c.fillStyle='rgba(255,255,255,.22)'; c.beginPath(); c.ellipse(2,-61.4,2.6,1.1,-.3,0,7); c.fill(); return; }
+  const dk=D(mix(hairC,'#000000',.32)), lt=D(mix(hairC,'#ffffff',.32)), fill=hairShade(c,hairC,D,-66,-48);
+  // shaved sides: a soft short layer over the whole cap
+  if(P.cap==='shave'||P.cap==='thin'){ c.save(); c.globalAlpha*=P.cap==='thin'?.85:.45; c.fillStyle=D(hairC); c.beginPath(); c.arc(HC.x,HC.y,HC.r+.25,-.62,-Math.PI-.95,true); c.lineTo(-3.4,-53.6); c.lineTo(-1.2,-58.4); c.lineTo(3.2,-60.2); c.closePath(); c.fill(); c.restore(); if(P.cap==='thin') return; }
+  // the main mass: outline over the top and back, then in along the nape, behind the ear (or over it) and along the temple to the hairline
+  const O=P.cap==='shave'?hairOutline(P).slice(0,14):hairOutline(P), last=O[O.length-1];
+  c.fillStyle=fill; c.beginPath(); c.moveTo(O[0][0],O[0][1]); for(const p of O) c.lineTo(p[0],p[1]);
+  if(P.cap==='shave'){ c.lineTo(-5,-60.8); c.quadraticCurveTo(0,-62.6,4.2,-61.2); }
+  else { const by=Math.max(P.back,last[1]); c.lineTo(Math.min(last[0],-6.8),by); if(P.ear){ c.quadraticCurveTo(-4,by+.6,.4,Math.max(by,-51)); c.quadraticCurveTo(1.2,-55,2.6,-58.8); } else { c.quadraticCurveTo(-4.6,by,-3.6,-53.4); c.quadraticCurveTo(-3.2,-57.4,-1.2,-58.6); c.lineTo(2.6,-59.6); } }
+  c.lineTo(4.6,-60.6); c.closePath(); c.fill();
+  // the front: a quiff lifts at the hairline, a fringe falls to the brows, a side part sweeps across, spikes break the outline
+  c.fillStyle=fill;
+  if(P.front==='quiff'){ c.beginPath(); c.moveTo(1.4,-63.4-P.vol*.3); c.quadraticCurveTo(5.4,-64.2-P.vol*.25,6.7,-61.4); c.quadraticCurveTo(5.6,-60.7,4.2,-60.8); c.lineTo(1.8,-61.4); c.closePath(); c.fill(); }
+  else if(P.front==='fringe'){ c.beginPath(); c.moveTo(0,-64-P.vol*.3); c.quadraticCurveTo(6.6,-64.2-P.vol*.2,7.5+P.vol*.25,-60); c.lineTo(6.6,-59.6); c.lineTo(6,-60.4); c.lineTo(5.2,-59.4); c.lineTo(4.4,-60.2); c.lineTo(3.4,-59.6); c.lineTo(2.4,-61); c.closePath(); c.fill(); }
+  else if(P.front==='side'){ c.beginPath(); c.moveTo(-3,-64-P.vol*.5); c.bezierCurveTo(2.6,-66.4-P.vol*.3,7.4,-64.4,8.1,-60.4); c.quadraticCurveTo(7,-59.2,5.6,-59.9); c.quadraticCurveTo(3.4,-62.2,-.6,-62.4); c.closePath(); c.fill();
+    c.strokeStyle=dk; c.lineWidth=.32; c.beginPath(); c.moveTo(-2.2,-63.8-P.vol*.4); c.quadraticCurveTo(3.4,-64.8,7.2,-60.8); c.stroke(); }
+  else if(P.front==='spikes'&&!A3HATON){ for(let i=0;i<6;i++){ const a=-.75-i*.42, r0=HC.r+P.vol*hairVolAt(a)*.8, r1=r0+2.6+(i%2)*1.2; c.beginPath(); c.moveTo(Math.cos(a-.2)*r0,HC.y+Math.sin(a-.2)*r0); c.lineTo(Math.cos(a+.08)*r1,HC.y+Math.sin(a+.08)*r1); c.lineTo(Math.cos(a+.28)*r0,HC.y+Math.sin(a+.28)*r0); c.closePath(); c.fill(); } }
+  // shared finish: a sheen band across the crown and strand lines that follow the flow back and down
+  c.save(); c.globalAlpha*=.4; c.strokeStyle=lt; c.lineWidth=.7; c.beginPath(); c.arc(HC.x,HC.y,HC.r+P.vol*.55,-2.35,-1.15); c.stroke(); c.restore();
+  c.strokeStyle=v3rgba(dk,.55); c.lineWidth=.28; for(let i=0;i<3;i++){ const a=-1.1-i*.42, r=HC.r+P.vol*.5; c.beginPath(); c.moveTo(Math.cos(a)*r*.92,HC.y+Math.sin(a)*r*.92); c.quadraticCurveTo(Math.cos(a-.5)*(r+.4),HC.y+Math.sin(a-.5)*(r+.4),Math.cos(a-1)*r*.95,HC.y+Math.sin(a-1)*r*.95); c.stroke(); }
+  if(P.curl){ c.fillStyle=fill; for(let i=0;i<O.length;i+=2){ const p=O[i], a=Math.atan2(p[1]-HC.y,p[0]-HC.x); if(p[1]>-50.5) continue; c.beginPath(); c.arc(p[0]-Math.cos(a)*.4,p[1]-Math.sin(a)*.4,.9+P.curl*.9*hairVolAt(a),0,7); c.fill(); } /* a cloud of curls along the edge */
+    c.strokeStyle=v3rgba(dk,.5); c.lineWidth=.3; for(let i=0;i<9;i++){ const a=-.8-i*.32, r=HC.r+P.vol*hairVolAt(a)*.6; c.beginPath(); c.arc(Math.cos(a)*r,HC.y+Math.sin(a)*r,.9,0,5); c.stroke(); } }
+  // extras on top of the head (hidden under a hat)
+  if(!A3HATON){
+    if(P.x==='bun'){ c.fillStyle=fill; c.beginPath(); c.arc(-3.4,-65.4,3.4,0,7); c.fill(); c.strokeStyle=dk; c.lineWidth=.35; c.beginPath(); c.arc(-3.4,-65.4,2,.4,3.4); c.stroke(); }
+    if(P.x==='knot'){ c.fillStyle=fill; c.beginPath(); c.arc(-1.2,-64.9,2.4,0,7); c.fill(); c.fillStyle=dk; c.fillRect(-2.6,-63,2.8,.6); }
+    if(P.x==='mohawk'){ c.fillStyle=fill; c.beginPath(); const a0=-2.4, a1=-1.05; c.moveTo(Math.cos(a0)*7.6,HC.y+Math.sin(a0)*7.6); for(let i=0;i<=8;i++){ const a=a0+(a1-a0)*i/8, R=7.6+(i%2?1.4:3.6); c.lineTo(Math.cos(a)*R,HC.y+Math.sin(a)*R); } c.lineTo(Math.cos(a1)*7.6,HC.y+Math.sin(a1)*7.6); c.closePath(); c.fill(); } }
+}; })(drawHair3);
+// the back layer (behind the body): long and wavy hair, the bob's back, a mullet, ponytail, braid
+function hairBack3(c,hs,hairF,hairC,D,t,lean,live){ const P=HAIR_P[hs]; if(!P) return false; const sw=Math.sin(t*1.3)*.25+(live?-lean*2:0), fill=hairShade(c,hairC,D,-62,P.back), dk=D(mix(hairC,'#000000',.34));
+  if(P.bw&&P.back>-55){ const bw=P.bw; c.fillStyle=fill; c.beginPath(); c.moveTo(-5.4,-62.6); c.bezierCurveTo(-8.6-bw*.3,-61,-9.2-bw*.35,-56,-8.6-bw*.3,-51);
+    if(P.wave){ for(let y=-51;y<P.back;y+=2.2){ const k=Math.sin(y*1.4+t)*.7; c.lineTo(-8.6-bw*.3+k+sw*(y+51)/(P.back+51||1),y); } } else c.bezierCurveTo(-8.4-bw*.3,-48,-8.8-bw*.2+sw,P.back+3,-8.2+sw,P.back);
+    for(let i=0;i<4;i++) c.lineTo(-8.2+sw+i*(bw*.6),P.back+(i%2?-.8:.3)); c.bezierCurveTo(-5+sw*.5,P.back+4,-4.4,-48,-3.4,-53); c.lineTo(-3,-60); c.closePath(); c.fill();
+    c.strokeStyle=v3rgba(dk,.6); c.lineWidth=.35; for(let i=0;i<3;i++){ c.beginPath(); c.moveTo(-6-i*.8,-58); c.quadraticCurveTo(-7.6-i*.6,(P.back-58)/2,-7+sw-i*.5+i*bw*.4,P.back+.5); c.stroke(); } }
+  if(P.x==='pony'){ const s2=Math.sin(t*1.6)*.12+(live?-lean*.8:0); c.save(); c.translate(-7.4,-60); c.rotate(.45+s2);  c.fillStyle=fill; c.beginPath(); c.moveTo(0,-.6); c.quadraticCurveTo(3.4,4,1.6,11); c.quadraticCurveTo(.2,13,-1.2,11.4); c.quadraticCurveTo(-1.6,5,0,-.6); c.fill(); c.fillStyle=D('#c8553a'); c.fillRect(-.9,-.4,2.2,1.1); c.restore(); }
+  if(P.x==='braid'){ c.fillStyle=fill; for(let i=0;i<8;i++){ const y=-55+i*2, x=-7-i*.2+(i%2?.4:-.4)+sw*i*.08; c.beginPath(); c.ellipse(x,y,1.15-i*.04,1.25,i%2?.45:-.45,0,7); c.fill(); c.strokeStyle=v3rgba(dk,.7); c.lineWidth=.25; c.stroke(); } c.fillStyle=D('#c8553a'); c.beginPath(); c.arc(-8.6+sw*.6,-39.6,.6,0,7); c.fill(); }
+  return true; }
+// the Natural face keeps every nose smaller and closer to the face (the Classic face keeps the old big noses)
+var A3NAT=false;
+{ const _n=a3Nose; a3Nose=function(c,id,sk,skD){ if(!A3NAT) return _n.apply(this,arguments); c.save(); c.translate(6.9,-55.6); c.scale(.72,.8); c.translate(-6.9,55.6); const r=_n.apply(this,arguments); c.restore(); return r; }; }
+// =====================================================================
 // 0.4.9 start-up pass: the save is read in c_logic.js before later files add their own save rules (wrappers around migrate), so those
 // rules never ran on the save loaded at start-up, and the defaults from fresh() (pearlMig:1, boonMig, passMig) hid that the old save
 // still needed them. Here, once every core file has loaded, the stored save is run through the full migrate chain again and the parts
@@ -19641,6 +19751,7 @@ PATCHES.unshift({v:'0.4.8.9.2', name:'Hotfix', items:[
   'Stardust works better at Starfall Lake (odds ×3), so it is always the best bait there.',
   'Aquarium: each fish’s coins per hour now always add up exactly to the total shown.',
   'Small phones: a long bait name no longer pushes Search and Settings off the top bar (the bait name shortens instead).']});
+PATCHES.unshift({v:'0.4.8.9.3', name:'Hotfix', items:['Waters: each water’s fish strength line now wraps instead of running past its card on small screens.']});
 PATCHES.unshift({v:'0.4.9', name:'Work in progress', items:[
   '## Fish Nibbles',
   'Scrap a fish in the Cooler for Fish Nibbles of its species: always for common fish, less often for rarer ones, and more for shiny, hybrid and titled fish.',
@@ -19675,6 +19786,8 @@ PATCHES.unshift({v:'0.4.9', name:'Work in progress', items:[
   '## Looks',
   'Your second hand now turns the reel, the rod sways gently while you wait, and you can fish left-handed (Settings › Display).',
   'A new Natural face style (the old one stays as Classic), five eye shapes and many more noses, mouths, brows and hairstyles.',
+  'Aquarium fish show their real size: a heavier fish is a bigger fish, some swim nearer the glass and some farther back, and big ones move more slowly.',
+  'Hairstyles have real volume and shape, every body build has its own silhouette, and the Natural face has smaller noses.',
   'Fish have eyes of their own: colours and shapes that fit each species. The wizard hat’s magic is new. More pet colours in the shop and at the Boardwalk.',
   '## Fishing',
   'Fights are about timing now: a fresh fish has to be tired out before it comes in, and reeling straight through a rare fish’s runs snaps the line, whatever your gear. Let go when it runs, reel when it rests.',
@@ -19691,6 +19804,7 @@ const TEST_NOTES={v:'test', label:'Test build · Android', name:'0.4.9 big patch
   'Looks: reel hand + left-handed (Settings › Display), Natural face + new hair/noses/mouths/eye shapes (Wardrobe), new fish eyes, wizard hat, pet colours.',
   'Fight rework: fish must be tired out; holding through rare runs snaps the line. Times with maxed gear: ~2.5 s common to ~36 s mythic.',
   'Fishing: try holding reel through a rare fish’s runs (it should snap), then let go when it runs (it should land).',
+  'NEW in this build: aquarium fish show real sizes and depth; hair rebuilt with volume (all 20 styles); body builds have distinct silhouettes; smaller noses on the Natural face.',
   'Please test on every platform and send me anything that feels off.']};
 addTestNotes(TEST_NOTES);
 // =====================================================================
@@ -20012,6 +20126,13 @@ ui(){ QA.sys='UI';
       for(const r of [0,2,3]) if(out[r].s.p<.99) e.push('skilled loses rarity '+r); if(!(out[5].s.t>=30&&out[5].s.t<=60)) e.push('maxed mythic '+out[5].s.t.toFixed(1)+' s'); if(!(out[0].s.t>=1.5&&out[0].s.t<=5)) e.push('maxed common '+out[0].s.t.toFixed(1)+' s'); }
     finally{ save=sv; const o=JSON.parse(snap); for(const k of Object.keys(S)) delete S[k]; Object.assign(S,o); G.st='idle'; G.fish=null; }
     return e.length?{ok:false,detail:e.join(' | ')}:{ok:true,detail:Object.keys(out).map(r=>'r'+r+' '+out[r].s.t.toFixed(1)+'s').join(', ')}; });
+  T('aquarium sizes are real (cube root of weight: 8× the weight = 2× the length, capped to fit), deeper fish smaller, big fish slower; hair system: every style has volume above the skull and draws without errors; builds change the silhouette',()=>{ const e=[];
+    const L=kg=>tankLen({kg},300,800); if(Math.abs(L(.8)/L(.1)-2)>.05) e.push('0.1→0.8 kg ×'+(L(.8)/L(.1)).toFixed(2)); if(!(L(10000)<=Math.min(300*.46,800*.34)+.01)) e.push('giant not capped'); if(!(L(1000)>L(10)*1.8)) e.push('big range too small'); if(!(tankPace({kg:500})<tankPace({kg:.2}))) e.push('big fish not slower');
+    for(const hs of Object.keys(HAIR_P)){ const P=HAIR_P[hs]; if(P&&P.cap!=='thin'&&P.cap!=='shave'&&!(P.vol>=.5)) e.push(hs+' has no volume'); }
+    const c=document.createElement('canvas'); c.width=200; c.height=200; const x=c.getContext('2d'); for(const hs of HAIRSTYLES.map(h=>h[0])) for(const hat of ['none','cap']) for(const g2 of ['m','f']) try{ drawAngler(x,100,190,2.5,Object.assign({},S.look,{hairStyle:hs,hat,g:g2}),{t:1}); }catch(er){ e.push(hs+'/'+hat+': '+er.message); }
+    const sil=b=>{ const cv=document.createElement('canvas'); cv.width=60; cv.height=120; const q=cv.getContext('2d'); drawAngler(q,30,115,1.4,Object.assign({},S.look,{build:b,hat:'none',outfit:'none',hairStyle:'buzz'}),{t:1,noShadow:true}); const d=q.getImageData(0,0,60,120).data; let n=0; for(let i=3;i<d.length;i+=4) if(d[i]>128) n++; return n; };
+    const a=sil('slim'), b=sil('broad'), s=sil('sturdy'); if(!(b>a*1.15)) e.push('broad vs slim silhouette '+(b/a).toFixed(2)); if(!(s>a*1.12)) e.push('sturdy vs slim '+(s/a).toFixed(2));
+    return e.length?{ok:false,detail:e.join(' | ')}:{ok:true,detail:'0.1→0.8 kg ×2, broad/slim '+(b/a).toFixed(2)}; });
   T('[14] [15] new attachments and skills work, every skill has a max-rank effect and a group, skill points come from the Fish Log too',()=>{ const e=[]; const rb=rodBonus;
     for(const id of ['snagguard','scentbead','twinhook','nibpouch','grip']){ const a=ATT_I[id]; if(!a) { e.push('no attachment '+id); continue; } if(!(a.v[0]<a.v[1]&&a.v[1]<a.v[2])) e.push(id+' tiers do not grow'); }
     try{ const sp=SP.find(s=>s.r===2)||SP[0], fav=FISH_FAV[sp.id];
