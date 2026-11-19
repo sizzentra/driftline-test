@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="DL Test iPhone">
 <script>
-window.DL_BUILD='ios'; window.DL_PREVIEW=true; window.DL_VERSION='2026.11.18-2320';
+window.DL_BUILD='ios'; window.DL_PREVIEW=true; window.DL_VERSION='2026.11.18-2340';
 window.addEventListener('beforeinstallprompt',function(e){ e.preventDefault(); window.__dlInstallPrompt=e; });
 </script>
 </head>
@@ -16013,7 +16013,7 @@ const IS_IPHONE=()=>/iPhone|iPod/.test(navigator.userAgent)||(/[?&]test\b/.test(
 
 // ---------- frame rate: the game's work runs only as often as the chosen rate (the display keeps its own timing) ----------
 { const _fr=frame; let shown=0;
-  const capMs=()=>1000/60; /* phones are locked at 60 frames a second, iPhone and Android alike, no setting (director, 2026-11-18); any old saved fpsCap is ignored */
+  const capMs=()=>0; /* phones run naturally at the screen's own rate, iPhone and Android alike, no setting (director, 2026-11-18: "don't do the 60 fps rule, let them run naturally"; it ran fine before); any old saved fpsCap is ignored */
   frame=function(now){ if(DEV_GUARD) DEV_GUARD(); const cap=MOB()?capMs():0; if(cap&&shown&&now>=shown&&now-shown<cap-2){ requestAnimationFrame(frame); return; } shown=(cap&&shown&&now>=shown&&now-shown<cap*2)?shown+cap:now; return _fr.apply(this,arguments); }; }
 
 // ---------- the Settings page on phones ----------
@@ -16036,7 +16036,7 @@ function mobFpsText(screenFps){ const now=performance.now(), d=MOB_DRAWN.filter(
 // ---------- test builds only: Graphics test (director, 2026-11-18: Android holds 30 but drops to 25-38 at 60 = each frame costs
 // the phone ~30 ms). Each button switches one part of the water scene off, so the frame counter shows which part is too heavy on
 // that phone. Nothing here exists in the release build (DL_PREVIEW), and every part comes back with one more tap or a restart.
-const GT_PARTS=[['wx','Weather (rain, snow, fog)',['drawWeatherX']],['water','Water shimmer + reflections',['v3water','v3glitter','drawReflect','v3fishRing']],['glow','Lights and glows',['v3glow']],['mist','Mist',['v3mist']],['you','You, pets, dock',['drawAngler3','drawPetStyled','drawDockItem']],['plants','Trees and plants',['v3tree','v3willow','v3reeds','v3bushes','v3flowers','v3leafTree','v3pine','v3snowPine','v3palm']],['lowres','Low resolution (1x)',[]]];
+const GT_PARTS=[['wx','Weather (rain, snow, fog)',['drawWeatherX']],['water','Water shimmer + reflections',['v3water','v3glitter','drawReflect','v3fishRing']],['glow','Lights and glows',['v3glow']],['mist','Mist',['v3mist']],['you','You (the angler)',['drawAngler3']],['pets','Pets',['drawPetStyled']],['dock','Home decorations on the dock',['drawDockItem']],['wear','Moving cosmetic effects',['wearFxDraw']],['odd','Oddities and junk',['drawJunkAt']],['plants','Trees and plants',['v3tree','v3willow','v3reeds','v3bushes','v3flowers','v3leafTree','v3pine','v3snowPine','v3palm']],['lowres','Low resolution (1x)',[]]];
 const GT_OFF=new Set();
 if(window.DL_PREVIEW){
   const wrap=(name,key)=>{ try{ const f=eval(name); if(typeof f!=='function') return; eval(name+'=function(){ if(GT_OFF.has("'+key+'")) return; return f.apply(this,arguments); }'); }catch(e){} };
@@ -16046,6 +16046,15 @@ if(window.DL_PREVIEW){
     return base+`<details class="tile st-test" open><summary><b>Graphics test</b> <span class="meta">· turn parts of the water off, then read the frame counter</span></summary><p class="sub">Switch on the frame counter (Settings, Display), then tap one part at a time and look at the water. A part that makes the counter jump is the heavy one.</p><div class="row" style="gap:6px;flex-wrap:wrap">${GT_PARTS.map(([k,n])=>`<button class="btn${GT_OFF.has(k)?'':' alt'} sm" data-act="gtest" data-k="${k}">${GT_OFF.has(k)?'OFF: ':''}${n}</button>`).join('')}</div></details>`; };
   const _xa=extraAct2; extraAct2=function(b){ if(b.dataset.act==='gtest'){ const k=b.dataset.k; if(GT_OFF.has(k)) GT_OFF.delete(k); else GT_OFF.add(k); try{ if(typeof V3CACHE!=='undefined'&&V3CACHE) V3CACHE.key=''; }catch(e){} try{ resize(); }catch(e){} toast((GT_OFF.has(k)?'Off: ':'Back on: ')+GT_PARTS.find(p=>p[0]===k)[1]); return 'render'; } return _xa(b); };
 }
+
+// ---------- patch notes a phone has already shown stay shown (director, 2026-11-18: after moving progress from PC "my first relaunch
+// brought up the patch notes for the patch previous"): the save carries the last notes seen on the device it came from (PC 0.4.8.2),
+// so the phone showed its own older updates again. Phones remember the newest notes they showed; an arriving save never lowers it.
+{ const K='dl-seen-patch'; const get=()=>{ try{ return localStorage.getItem(K)||''; }catch(e){ return ''; } }, put=v=>{ try{ localStorage.setItem(K,v); }catch(e){} };
+  const fix=s=>{ try{ if(!MOB()||!s||typeof s!=='object') return; const d=get(); if(d&&(!s.seenPatch||verNewer(d,s.seenPatch))) s.seenPatch=d; }catch(e){} };
+  const _mg=migrate; migrate=function(){ const s=_mg.apply(this,arguments); fix(s); return s; };
+  const _sv=save; save=function(){ try{ if(MOB()&&S&&S.seenPatch){ const d=get(); if(!d||verNewer(S.seenPatch,d)) put(S.seenPatch); } }catch(e){} return _sv.apply(this,arguments); };
+  try{ fix(S); }catch(e){} }
 // =====================================================================
 // Phones, round 8: landscape only, on iPhone AND Android phones (director, 2026-11-18: "iPhone versions should just have landscape
 // available... full forced landscape across the board", then "Also push landscape only on android too").
@@ -17437,6 +17446,33 @@ document.head.insertAdjacentHTML('beforeend',`<style>html body.phone-land #stage
    now (MB_UI, frame07), so they end above the name; "99+" also gets tight padding and sits 1 px further into the corner, which keeps
    it clear of "Challenges" (the longest name) on the shortest rail (667x375, 32 px buttons). */
 document.head.insertAdjacentHTML('beforeend',`<style>html body.phone-land #catdock .cdb .cddot[class],html body.phone-land #menuov .secb .secdot[class],html body.phone-app #catdock .cdb .cddot[class],html body.phone-app #menuov .secb .secdot[class]{padding:0 3px!important;letter-spacing:-.4px}html body.phone-land #catdock .cdb .cddot,html body.phone-app #catdock .cdb .cddot{right:-6px!important}</style>`);
+
+/* Wrong scenery after opening a menu (director, 2026-11-18: "clicking settings and exiting brought up the wrong map for a bit"): water
+   thumbnails for the Map page are drawn on the game canvas while any menu is open. v3land then reused the live scenery picture's
+   canvas for the other water (Starfall) and the restore only put the object back, so the real water showed Starfall's scenery until
+   the light changed. Phones: a thumbnail always gets fresh scenery canvases (the live picture is never painted over), and thumbnails
+   are only made while the Map page is open (the only place they show): Settings and other menus no longer pay for them. */
+{ const _vt=v3Thumb; v3Thumb=function(id){ if(!MOB()||V3THUMB[id]) return _vt(id); const c=V3CACHE, p=V3PREV; V3CACHE=null; V3PREV=null; try{ return _vt(id); } finally{ V3CACHE=c; V3PREV=p; try{ v3palette.k=null; }catch(e){} } }; }
+{ const _tn=thumbNext; thumbNext=function(){ if(MOB()&&S.tab!=='map'){ setTimeout(thumbNext,1500); return; } return _tn.apply(this,arguments); }; }
+
+/* Saves with home decorations were slow on Android (director, 2026-11-18: a fresh install ran at 60 fps / 15-20 ms; the same phone
+   after loading a PC save ran at 25 fps / 50-60 ms). Every decoration on the dock is drawn through litDraw (ab_decor.js): its own
+   offscreen canvas plus several blend passes for the light, every frame, and Android graphics chips pay a flush per canvas switch.
+   A fresh save has no decorations placed; a well-decorated home multiplies the cost. Phones: a lit item that stays put on the water
+   canvas is kept as a finished picture and reused for up to 66 ms (redrawn ~15 times a second); anything that moves (new position)
+   is drawn as before. PC is untouched. */
+{ const _ld=litDraw, LC=new Map();
+  litDraw=function(c,bx0,by0,bx1,by1,fn,o){ if(!(MOB()&&c===g)) return _ld.apply(this,arguments);
+    const m=c.getTransform(), sc=Math.hypot(m.a,m.b), pw=Math.ceil((bx1-bx0)*sc), ph=Math.ceil((by1-by0)*sc);
+    if(!(pw>2&&ph>2)||pw*ph>6e6||m.b||m.c) return _ld.apply(this,arguments);
+    const key=Math.round(bx0*2)+'|'+Math.round(by0*2)+'|'+pw+'|'+ph+'|'+(o?o.top+o.rim+o.rimA:''), now=performance.now(), dx=m.a*bx0+m.e, dy=m.d*by0+m.f;
+    let e=LC.get(key);
+    if(e&&e.c&&now-e.at<66){ c.save(); c.setTransform(1,0,0,1,0,0); c.drawImage(e.c,dx,dy); c.restore(); e.seen=now; return; }
+    if(!e||now-e.seen>250){ LC.set(key,{c:null,at:0,seen:now}); if(LC.size>80){ for(const [k,v] of LC) if(now-v.seen>2000) LC.delete(k); } return _ld.apply(this,arguments); } /* first sighting: draw as usual */
+    if(!e.c) e.c=document.createElement('canvas'); if(e.c.width!==pw||e.c.height!==ph){ e.c.width=pw; e.c.height=ph; }
+    const tx=e.c.getContext('2d'); tx.setTransform(1,0,0,1,0,0); tx.clearRect(0,0,pw,ph); tx.setTransform(sc,0,0,sc,-bx0*sc,-by0*sc);
+    _ld(tx,bx0,by0,bx1,by1,fn,o); e.at=now; e.seen=now;
+    c.save(); c.setTransform(1,0,0,1,0,0); c.drawImage(e.c,dx,dy); c.restore(); }; }
 // =====================================================================
 // Phones: the SET MEASUREMENTS (director, 2026-11-18: "I want standards and set measurements for each platform going forward,
 // I'm tired of the same mistakes"). The numbers are written down in docs/PLATFORM_DESIGN.md ("Phone frame: set measurements")
@@ -17798,25 +17834,23 @@ PATCHES.unshift({v:'0.4.8.6.2', name:'Fixes', items:[
   'Side-panel counts never cover a button’s name, even at 99+.',
   'Opening a menu while an info card is up closes the card first, so Travel here always works.',
   'The update message only appears when there really is an update (it kept coming back on phones).',
-  'Smoother on phones: the game always runs at a steady 60 frames a second on every iPhone and Android phone (the frame-rate choice is gone; Max made fast screens stutter).',
+  'Much smoother with a decorated home: decorations on the dock no longer slow the game down (a well-decorated home could halve the frame rate on Android).',
+  'Opening and closing a menu no longer shows another water’s scenery for a moment.',
+  'After moving your progress from another device, patch notes you already saw on this phone don’t come back.',
+  'Phones run at their screen’s own rate; the frame-rate choice is gone from Settings.',
   'The frame counter (Settings, Display) shows the frames the game draws, plus your screen’s own rate.',
   'Android: the game is always full screen, like on iPhone: the installed game opens without the bars, and a tap brings full screen back if they appear.']});
 // iPhone test notes (preview builds only; the live game never shows them). Write what the next test build changes here
 // (spoiler-free, one short line per change, curly apostrophes only). The card opens once per device whenever the text changes.
 // Released notes live in notes_release.js.
-const TEST_NOTES={v:'test', label:'Test build · iPhone', name:'60 fps and full screen', items:[
-  'Every phone is locked at 60 frames a second, iPhone and Android alike. The frame-rate choice is gone from Settings.',
-  'Android is always full screen, like iPhone: no Settings option. The installed app opens without the bars, and a tap brings full screen back if they appear.',
-  'Android test app: remove it from the home screen and add it again once, so Android opens it full screen at launch.',
-  'The angler is drawn less often on phones (it was the most expensive part of each frame).',
-  'The frame counter (Settings, Display) shows the frames actually drawn, your screen’s rate and the slowest gap.',
-  'Tester tools (Stats): a Graphics test turns parts of the water off one at a time, so you can see which part slows your phone.',
-  'Tester tools: Unlock everything adds Wisdom Pearls; new buttons for levels, Fish Log, feats, cooler and an 8-hour skip.',
-  'Side-panel counts never cover a button’s name, even at 99+.',
-  'Notices like “Travelled to …” sit below the weather and streak tags.',
-  'Opening a menu over an info card closes the card first, so Travel here always works.',
-  'The update message only appears for real updates.',
-  'Patch notes: 0.4.8.6.2 Fixes lists everything above for players (Settings, Patch notes).']};
+const TEST_NOTES={v:'test', label:'Test build · iPhone', name:'Natural frame rate, Settings fix', items:[
+  'Phones run at their screen’s natural rate again, iPhone and Android alike, with no frame-rate choice in Settings.',
+  'Android stays automatically full screen, like iPhone.',
+  'Opening and closing Settings (or any menu) no longer shows another water’s scenery for a moment.',
+  'Water pictures for the Map are only made while the Map is open, so other menus stay light.',
+  'Much smoother with a decorated home: decorations on the dock are no longer re-lit from scratch every frame (a moved save with many decorations made Android drop to about 25 fps).',
+  'After moving your progress from another device, patch notes you already saw on this phone don’t come back.',
+  'Tester tools (Stats), Graphics test: the angler, pets, home decorations, moving cosmetic effects and oddities now have their own buttons. If a moved save makes the game slow, turn them off one at a time and watch the frame counter.']};
 addTestNotes(TEST_NOTES);
 // =====================================================================
 // 0.4 release QA suite (test builds only: ?test, and build.ps1 leaves this file out of the release build).
