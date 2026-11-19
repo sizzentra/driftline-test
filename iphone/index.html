@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="DL Test iPhone">
 <script>
-window.DL_BUILD='ios'; window.DL_PREVIEW=true; window.DL_VERSION='2026.11.19-0333';
+window.DL_BUILD='ios'; window.DL_PREVIEW=true; window.DL_VERSION='2026.11.19-0342';
 window.addEventListener('beforeinstallprompt',function(e){ e.preventDefault(); window.__dlInstallPrompt=e; });
 </script>
 </head>
@@ -3367,7 +3367,7 @@ function drawPetScene(ax,ay,sc,t,night){ PET_NIGHT=night; const id=S.pet, big=id
   PET_BOX=drawOnePet(id,px,ay,sc,t,night,petT);
   const two=PET_BOX2&&PET_BOX2.k<PET_BOX.k, nb=two?PET_BOX2:PET_BOX, nmId=two?S.pet2:id, k=nb.k;
   if(k>=0&&k<2.2){ const nm=(nmId===id&&S.pet2?'★ ':'')+petName(nmId), cx=(nb.x0+nb.x1)/2; g.font='700 11px system-ui'; g.textAlign='center'; const tw=g.measureText(nm).width; g.globalAlpha=Math.min(1,2.2-k); g.fillStyle='rgba(5,14,20,.7)'; rr(cx-tw/2-7,nb.y0-22,tw+14,17,8); g.fill(); g.fillStyle='#ffc94d'; g.fillText(nm,cx,nb.y0-10); g.globalAlpha=1; }
-  for(let i=hearts.length-1;i>=0;i--){ const h=hearts[i]; h.t+=1/60; if(h.t>1.4){ hearts.splice(i,1); continue; } const hy=h.y-h.t*40, hx=h.x+Math.sin(h.t*5+i)*6; g.globalAlpha=Math.max(0,1-h.t/1.4); g.fillStyle='#ff6a9a'; g.beginPath(); const z=h.s; g.moveTo(hx,hy+z*.4); g.bezierCurveTo(hx-z,hy-z*.3,hx-z*.5,hy-z,hx,hy-z*.4); g.bezierCurveTo(hx+z*.5,hy-z,hx+z,hy-z*.3,hx,hy+z*.4); g.fill(); } g.globalAlpha=1; }
+  for(let i=hearts.length-1;i>=0;i--){ const h=hearts[i]; h.t+=1/60; if(h.t>1.4){ hearts.splice(i,1); continue; } const hy=h.y-h.t*40, hx=h.x+Math.sin(h.t*5+i)*6; g.globalAlpha=Math.max(0,1-h.t/1.4); g.fillStyle='#ff6a9a'; g.beginPath(); const z=h.s; g.moveTo(hx,hy+z*.4); g.bezierCurveTo(hx-z,hy-z*.3,hx-z*.5,hy-z,hx,hy-z*.4); g.bezierCurveTo(hx+z*.5,hy-z,hx+z,hy-z*.3,hx,hy+z*.4); g.fill(); } g.globalAlpha=1; PET_NIGHT=0; /* the night (pets fall asleep) belongs to this scene only: every other pet picture (shop cards, previews) is drawn awake (director, 2026-11-19: the Pets shop showed every pet asleep) */ }
 const inPetBox = (m,b) => b && m.x>=b.x0 && m.x<=b.x1 && m.y>=b.y0 && m.y<=b.y1;
 function petHit(e){ if(!e||!PET_BOX) return false; const m=canvasXY(e); const hit=inPetBox(m,PET_BOX)?S.pet:inPetBox(m,PET_BOX2)?S.pet2:null; if(!hit) return false;
   const now=performance.now(); if(now-lastPetAt<300) return true; lastPetAt=now; const bx=hit===S.pet?PET_BOX:PET_BOX2; if(hit===S.pet) petT=now; else petT2=now;
@@ -3402,7 +3402,7 @@ function petCustomHTML(){ const id=editPet(), lk=petLook(id), p=PETI[id], bl=bon
 function paintPetCustom(){ const c=$('petcv'); if(!c) return; const id=editPet();
   if((id==='lily'||id==='daxniko')&&!paintPetCustom.live){ paintPetCustom.live=true; const step=()=>{ if(!$('petcv')||!['lily','daxniko'].includes(editPet())){ paintPetCustom.live=false; return; } paintPetCustom(); requestAnimationFrame(step); }; requestAnimationFrame(step); } const x=c.getContext('2d'); x.clearRect(0,0,c.width,c.height); const big=id==='horse'||id==='cow'; const now=performance.now(), k=(now-(id===S.pet?petT:petT2))/700;
   x.save(); if(k>=0&&k<1){ const b=Math.sin(k*Math.PI); x.translate(200,250); x.scale(1+.08*b,1-.1*b); x.translate(-200,-250-b*28); }
-  if(V3ON){ x.save(); x.setTransform(1,0,0,1,0,0); v3Pedestal(x,200,250,128,now/1000); x.restore(); } PET_NIGHT=0; drawPetStyled(x,id,200,250,petFitScale(id),now/1000,0,petPreviewLook(id)); x.restore();
+  if(V3ON){ x.save(); x.setTransform(1,0,0,1,0,0); v3Pedestal(x,200,250,128,now/1000); x.restore(); } drawPetStyled(x,id,200,250,petFitScale(id),now/1000,0,petPreviewLook(id)); x.restore();
   if(k>=0&&k<1.6){ for(let i=0;i<4;i++){ const hk=k-i*.12; if(hk<0) continue; const hx=170+i*22+Math.sin(hk*6+i)*10, hy=150-hk*110, z=12; x.globalAlpha=Math.max(0,1-hk/1.4); x.fillStyle='#ff6a9a'; x.beginPath(); x.moveTo(hx,hy+z*.4); x.bezierCurveTo(hx-z,hy-z*.3,hx-z*.5,hy-z,hx,hy-z*.4); x.bezierCurveTo(hx+z*.5,hy-z,hx+z,hy-z*.3,hx,hy+z*.4); x.fill(); } x.globalAlpha=1; requestAnimationFrame(paintPetCustom); }
   c.onclick=()=>{ const pid=editPet(); for(let i=0;i<3;i++) setTimeout(()=>tone(900+i*200,.08,'sine',.04),i*70); if(pid===S.pet) petT=performance.now(); else petT2=performance.now(); petTap(pid); requestAnimationFrame(paintPetCustom); }; }
 // update the bond text without rebuilding the whole tab (so the petting animation keeps playing)
@@ -3552,7 +3552,7 @@ function extraAct2(b){ const k=b.dataset.k, i=+b.dataset.i;
 // the Customize stage fits each pet: measured once (drawn small offscreen), then scaled to fill the stage
 const PET_FIT={};
 function petFitScale(id){ if(PET_FIT[id]) return PET_FIT[id]; const big=id==='horse'||id==='cow'; let s=big?4.2:6.5;
-  try{ const o=document.createElement('canvas'); o.width=240; o.height=200; const x=o.getContext('2d'), k=2; const keepN=PET_NIGHT; PET_NIGHT=0; drawPetStyled(x,id,120,170,k,0,0,Object.assign({},petLook(id),{hat:'none',acc:'none'})); PET_NIGHT=keepN;
+  try{ const o=document.createElement('canvas'); o.width=240; o.height=200; const x=o.getContext('2d'), k=2; drawPetStyled(x,id,120,170,k,0,0,Object.assign({},petLook(id),{hat:'none',acc:'none'}));
     const d=x.getImageData(0,0,o.width,o.height).data; let x0=1e9,y0=1e9,x1=-1,y1=-1; for(let yy=0;yy<o.height;yy++) for(let xx=0;xx<o.width;xx++){ if(d[(yy*o.width+xx)*4+3]>30){ if(xx<x0)x0=xx; if(xx>x1)x1=xx; if(yy<y0)y0=yy; if(yy>y1)y1=yy; } }
     if(x1>x0&&y1>y0){ const w=(x1-x0)/k, h=(y1-y0)/k; s=Math.min(175/h, 300/w, 11); } }catch(e){}
   return PET_FIT[id]=s; }
@@ -3841,8 +3841,8 @@ function aqPvBarHTML(){ if(!AQ_PV) return ''; const p=AQ_PV;
 function paintPrizes(P){ P.querySelectorAll('canvas[data-prize]').forEach(c=>{ const x=c.getContext('2d'), id=c.dataset.prize; x.clearRect(0,0,c.width,c.height); const t=0;
   // pet prizes: drawn awake (the scene's night used to put them to sleep), sized to fit, a balloon smaller so it shows;
   // a colour is shown on a pet whose coat it changes (Dax is black, so a hue shift barely shows on him)
-  const pet=(lk)=>{ let id=S.pet; if(lk.tint&&id==='daxniko') id=['lily','dog','cat','puppy','kitten'].find(p=>S.owned.pets.includes(p))||id; const bal=lk.acc==='balloon', n0=PET_NIGHT; PET_NIGHT=0;
-    try{ drawPetStyled(x,id,bal?42:48,bal?77:67,petFitScale(id)*80/300*(bal?.62:.95),t,0,Object.assign({},typeof _petLook_pair==='function'?_petLook_pair(id):petLook(id),lk)); } finally{ PET_NIGHT=n0; } };
+  const pet=(lk)=>{ let id=S.pet; if(lk.tint&&id==='daxniko') id=['lily','dog','cat','puppy','kitten'].find(p=>S.owned.pets.includes(p))||id; const bal=lk.acc==='balloon';
+    drawPetStyled(x,id,bal?42:48,bal?77:67,petFitScale(id)*80/300*(bal?.62:.95),t,0,Object.assign({},typeof _petLook_pair==='function'?_petLook_pair(id):petLook(id),lk)); };
   if(id==='teddy') drawPet(x,'teddy',48,72,3,t); else if(id==='carousel') drawDecor(x,'carousel',48,74,.55,t); else if(id==='golden'||id==='rainbow') pet({tint:id}); else if(id==='balloon'||id==='partyhat') pet({acc:id});
   else if(id==='sixsevencap'||id==='carnival'||id==='fishbowl') hatPreview(x,96,80,id,S.look.hatCol); else if(id==='spacesuit') drawAngler(x,48,78,1.05,Object.assign({},S.look,{outfit:'spacesuit',hat:'none'}),{});
   else if(id==='crate') drawJunk(x,96,80,'chest'); else if(id==='myth') drawJunk(x,96,80,'goldlure'); else { x.fillStyle='#7fc8a9'; x.beginPath(); for(let i=0;i<6;i++){ const a=i/6*Math.PI*2; x.lineTo(48+Math.cos(a)*22,40+Math.sin(a)*22); } x.fill(); x.fillStyle='#0a161d'; x.font='800 14px system-ui'; x.textAlign='center'; x.fillText('10',48,45); } }); }
@@ -14638,8 +14638,8 @@ function bwDrawWear(x,w,h,it){ if(!it) return; const lk=Object.assign({},S.look,
   if(it.kind==='petacc'||it.kind==='pettint'){
     // shown on your favourite pet, awake; a new colour on a pet whose coat it barely changes (Dax is black) is shown on another of your pets
     let id=S.pet; if(it.kind==='pettint'&&id==='daxniko') id=['lily','dog','cat','puppy','kitten'].find(p=>S.owned.pets.includes(p))||id;
-    const L=Object.assign({},_petLook_pair?_petLook_pair(id):petLook(id),it.kind==='petacc'?{acc:it.id}:{tint:it.id}), n0=PET_NIGHT; PET_NIGHT=0;
-    try{ drawPetStyled(x,id,w/2,h*.83,petFitScale(id)*h/300,0,0,L); } finally{ PET_NIGHT=n0; } return; }
+    const L=Object.assign({},_petLook_pair?_petLook_pair(id):petLook(id),it.kind==='petacc'?{acc:it.id}:{tint:it.id});
+    drawPetStyled(x,id,w/2,h*.83,petFitScale(id)*h/300,0,0,L); return; }
   if(it.kind==='pat'){ lk.pat=it.id; lk.outfit='none'; const s=h/34; return drawAngler(x,w*.46,h*.5+50*s,s,lk,{}); }
   if(it.kind==='out') lk.outfit=it.id;
   drawAngler(x,w/2,h*.95,h/90,lk,{}); }
@@ -18010,6 +18010,7 @@ PATCHES.unshift({v:'0.4.8.7', name:'Lighter and Smoother', items:[
   'In narrow windows (split-screen), the top bar shows Home again and your coins, level and water are readable instead of cut off.']});
 PATCHES.unshift({v:'0.4.9', name:'Work in progress', items:[
   '## Fixes',
+  'Pets in the shop, Wardrobe and previews are awake again at night (only pets on your dock fall asleep).',
   'When a bigger fish swallows your catch, the first fish stays a surprise until you land it.',
   'The top Fish Finder only names fish you have caught before; new ones show as “New” plus their rarity.',
   'Fish shadows under the water are one even tone (no lighter fins or patches).',
@@ -18033,7 +18034,8 @@ PATCHES.unshift({v:'0.4.9', name:'Work in progress', items:[
   'Aquarium coins use the short form for big amounts (like the top bar), so they always fit.']});
 // iPhone test notes (preview builds only; the live game never shows them). One short line per change in the next test build,
 // curly apostrophes only. The card opens once per device whenever the text changes. Released notes live in notes_release.js.
-const TEST_NOTES={v:'test', label:'Test build · iPhone', name:'0.4.9, part 1: fixes (2)', items:[
+const TEST_NOTES={v:'test', label:'Test build · iPhone', name:'0.4.9, part 1: fixes (3)', items:[
+  'Pets in the shop and previews are awake at night (they showed asleep in Pets › Find more).',
   'Menus: the side panel always shows every section (on iPhone it could stop after Quests). Please check Trophy Room, Your home and the Aquarium.',
   'A tab’s name is no longer repeated as the heading under it (Your tank, Your boat).',
   'An empty Trophy Room fills the page with a wall of empty plaques.',
@@ -18169,6 +18171,11 @@ ui(){ QA.sys='UI';
   T('no name twice: the first heading of a page part never repeats the selected tab name',()=>{ const mob=typeof MOB==='function'&&MOB(); if(!mob) return {ok:true,detail:'phones only'}; const bad=[]; const pages=qaAllPages(); for(const t of pages){ openMenu(t); for(const b of [...document.querySelectorAll('#menuov .sect-nav [data-sect]')]){ b.click(); try{ renderPanel(); }catch(e){} const sel=document.querySelector('#menuov .sect-nav [aria-selected="true"]'); if(!sel) continue; const N=typeof tabShownName==='function'?tabShownName(sel):(sel.dataset.sect||'').trim(); if(typeof PHONE_DEDUPE==='function') PHONE_DEDUPE(); /* the phone fix runs right after a draw; run it now so the check sees the finished page */ const body=$('panel').querySelector('.pg08-body')||$('panel'); const h=[...body.querySelectorAll('h2,h3,h4,h5')].find(x=>x.offsetParent!==null); if(h&&N&&h.textContent.trim().startsWith(N)) bad.push(t+' / '+N+': "'+h.textContent.trim().slice(0,30)+'"'); } } closeMenu(); return bad.length?{ok:false,detail:[...new Set(bad)].slice(0,6).join(' | ')}:{ok:true}; });
   T('page bars: numbers never cut or run into each other, even with very large amounts',()=>{ const mob=typeof MOB==='function'&&MOB(); if(!mob) return {ok:true,detail:'phones only'}; const bad=[]; const pages=qaAllPages(); for(const t of pages){ openMenu(t); const bars=[...$('panel').querySelectorAll('.pg08-bar, .aq07-bar, .aq07-bank')]; for(const bar of bars){ const bs=[...bar.querySelectorAll('b')].filter(b=>b.offsetParent!==null&&/\d/.test(b.textContent)); const keep=bs.map(b=>b.textContent); bs.forEach(b=>{ b.textContent=b.classList.contains('coin')?fmtShort(888888888):b.textContent.replace(/\d[\d,.]*/g,m=>'8'+m.replace(/\d/g,'8')); }); /* coins as the game shows big amounts (short form), counts one digit longer (a tank of 24 tested as 88) */ for(const c of [...bar.children].filter(c=>c.offsetParent!==null&&c.querySelector('b'))){ if(c.scrollWidth>c.clientWidth+1) bad.push(t+': number spills out of its cell ('+c.scrollWidth+' > '+c.clientWidth+')'); } const cells=[...bar.children].filter(c=>c.offsetParent!==null).map(c=>c.getBoundingClientRect()); for(let i=1;i<cells.length;i++){ const p=cells[i-1], c=cells[i]; if(Math.abs(p.top-c.top)<4&&p.right>c.left+1) bad.push(t+': cells overlap'); } bs.forEach((b,i)=>b.textContent=keep[i]); } } closeMenu(); return bad.length?{ok:false,detail:[...new Set(bad)].slice(0,6).join(' | ')}:{ok:true}; });
   T('empty pages fill the screen (Trophy Room with no trophies)',()=>{ const mob=typeof MOB==='function'&&MOB(); if(!mob) return {ok:true,detail:'phones only'}; const keep=S.vault; S.vault=[]; let res; try{ openMenu('trophy'); const room=$('panel').querySelector('.tp-room'), body=$('panel').querySelector('.pg08-body')||$('panel'); const rh=room?room.getBoundingClientRect().height:0, bh=body.getBoundingClientRect().height; res=rh>=bh*.7?{ok:true,detail:Math.round(rh)+' of '+Math.round(bh)+' px'}:{ok:false,detail:'empty room '+Math.round(rh)+' of '+Math.round(bh)+' px'}; } finally{ S.vault=keep; closeMenu(); } return res; });
+  T('pets are awake everywhere but the night scene (the scene once left its night behind and the Pets shop showed every pet asleep)',()=>{ if(!S.pet||!PETI[S.pet]) return {ok:true,detail:'no pet'}; const off0=window.__off, _dps=drawPetScene; let seen=-1;
+    drawPetScene=function(ax,ay,sc,t,night){ seen=Math.max(seen,night); return _dps.apply(this,arguments); };
+    try{ const cur=(window.__realNow()/1000%360)/360; window.__off=((.8-cur+1)%1)*360000; draw(performance.now()); } finally{ drawPetScene=_dps; window.__off=off0; }
+    if(seen<.55) return {ok:false,detail:'the test could not make a night scene (night '+seen.toFixed(2)+')'};
+    const m=petMood3('duck'); return m.sleep?{ok:false,detail:'after a night scene (night '+seen.toFixed(2)+') a shop pet is drawn asleep'}:{ok:true,detail:'night '+seen.toFixed(2)+' stayed in the scene'}; });
 T('page tabs: a part hidden by a page tab never stays on screen (a forced style once kept the Events calendar on every tab)',()=>{ const bad=[]; const pages=qaAllPages(); let n=0; for(const t of pages){ openMenu(t); const P=$('panel'); for(const b of [...document.querySelectorAll('#menuov .sect-nav [data-sect], #panel .sect-nav [data-sect]')]){ b.click(); n++; for(const e of P.querySelectorAll('*')){ if(e.style.display==='none'&&getComputedStyle(e).display!=='none') bad.push(t+' / '+b.dataset.sect+': '+((e.className||e.tagName)+'').slice(0,30)); } } } closeMenu(); return bad.length?{ok:false,detail:[...new Set(bad)].slice(0,8).join(' | ')}:{ok:true,detail:n+' page tabs checked'}; });
   T('weekly quests: progress from counters, each pays once, crate once, week rollover and damaged saves rebuild',()=>{ const e=[]; S.weekly=null; const w=ensureWeekly(); if(w.quests.length!==4) e.push('quests '+w.quests.length); for(const q of w.quests){ const m={caught:()=>S.stats.caught+=q.n,shiny:()=>S.stats.shiny+=q.n,earned:()=>S.stats.earned+=q.n,tasks:()=>S.gstats.tasks+=q.n,hot:()=>S.stats.hot+=q.n,chal:()=>S.stats.chalWins=(S.stats.chalWins||0)+q.n,species:()=>{}}; m[q.t](); } const sc0=S.scales; w.quests.forEach((q,i)=>{ if(q.t==='species') q.base-=q.n; act('wqclaim',{i}); act('wqclaim',{i}); }); const want=w.quests.reduce((a,q)=>a+q.scales,0); if(S.scales-sc0!==want) e.push('scales '+(S.scales-sc0)+' want '+want); const big=S.tokens.big; act('wqbonus',{}); act('wqbonus',{}); if(S.tokens.big-big!==1) e.push('crate '+(S.tokens.big-big)); S.weekly.wk='2000-01-03'; if(ensureWeekly().wk!==weekKey()) e.push('rollover'); S.weekly={wk:1,quests:[null]}; if(!Array.isArray(ensureWeekly().quests)||ensureWeekly().quests.length!==4) e.push('rebuild'); return e.length?{ok:false,detail:e.join('; ')}:{ok:true,detail:'claims, crate, rollover and rebuild ok'}; });
   T('weather forecast matches the real weather schedule, in order and in the future',()=>{ const e=[]; const f=wxForecast(6), now=Date.now()/1000; let last=0; for(const x of f){ const t=x.at+now+1, real=(window.__wxTime?__wxTime.kindAt(t):weatherAt(Math.floor(t/WX_LEN))).k; if(real!==x.k) e.push(x.k+' forecast, '+real+' real at +'+Math.round(x.at)+' s'); if(window.__wxTime){ const R=__wxTime.RULE[x.k]; if(R&&(R==='night')!==__wxTime.night(t)) e.push(x.k+' at the wrong time of day'); } if(x.at<=0||x.at<last) e.push('order '+x.at); last=x.at; } if(!f.length) e.push('empty'); return e.length?{ok:false,detail:e.join('; ')}:{ok:true,detail:f.map(x=>x.k).join(', ')}; });
