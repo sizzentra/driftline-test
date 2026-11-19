@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="DL Test iPhone">
 <script>
-window.DL_BUILD='ios'; window.DL_PREVIEW=true; window.DL_VERSION='2026.11.19-0824';
+window.DL_BUILD='ios'; window.DL_PREVIEW=true; window.DL_VERSION='2026.11.19-0829';
 window.addEventListener('beforeinstallprompt',function(e){ e.preventDefault(); window.__dlInstallPrompt=e; });
 </script>
 </head>
@@ -18341,6 +18341,23 @@ if(/[?&]test\b/.test(location.search)) window.__fnTime=(names,fn,n=1)=>{ const T
   const t0=performance.now(); try{ for(let i=0;i<n;i++) fn(); } finally{ for(const k in orig){ try{ eval(k+'=orig["'+k+'"]'); }catch(e){} } } const tot=(performance.now()-t0)/n; const out={total:+tot.toFixed(2)}; for(const k in T) out[k]=+(T[k]/n).toFixed(2); return out; };
 // run a snippet inside the game's own scope (preview + ?test only), for scenario tests: __inGame("endFight('snap'); return S.streak")
 if(/[?&]test\b/.test(location.search)) window.__inGame=(code)=>eval('(()=>{'+code+'})()');
+// fight simulator (test builds only): runs real fights through fight() with a scripted player and reports how long they take.
+// opts: {loc, r (rarity), gear:'max'|'min'|{reel,line,...} level indexes, style:'smart'|'greedy'|'idle', n, perfect, shiny, tides}
+// smart = reels unless the fish runs, jumps, shakes or tension is high; greedy = always reels; idle = never reels.
+if(/[?&]test\b/.test(location.search)) window.__fightSim=(opts={})=>{ const keep=JSON.stringify(S), g0=Object.assign({},G), sv=save, ts=toast, ri=reelInput, vb=window.vib, out=[];
+  save=function(){}; toast=function(){}; if(typeof vib==='function') try{ vib=function(){}; }catch(e){}
+  try{ if(opts.gear==='max') for(const k in GEAR) S.gear[k]=GEAR[k].lv.length-1; else if(opts.gear==='min') for(const k in GEAR) S.gear[k]=0; else if(opts.gear) Object.assign(S.gear,opts.gear);
+    if(opts.tides!=null) S.tides=opts.tides; S.loc=opts.loc||S.loc; const style=opts.style||'smart', dt=1/60;
+    const pool=SP.filter(s=>s.loc===S.loc&&s.r===(opts.r!=null?opts.r:5)); if(!pool.length) return {err:'no fish '+S.loc+' r'+opts.r};
+    const sp=opts.id?SPI[opts.id]:pool.reduce((a,b)=>b.str>a.str?b:a);
+    reelInput=function(){ if(style==='idle') return 0; if(style==='greedy') return 1; return (G.run||G.ev==='jump'||G.ev==='shake'||G.ten>70)?0:1; };
+    for(let i=0;i<(opts.n||20);i++){ const f=rollFish(sp,{noHybrid:true,noPrey:true}); if(opts.shiny!=null){ f.shiny=opts.shiny; if(f.shiny===2) f.pv=PRISM_KEYS[0]; }
+      G.pend=f; G.lastCast=.8; G.waitT=0; G.biteEnd=0; G.forceEat=false; hookIt(); G.eatAt=null; if(opts.perfect!=null) G.perfect=opts.perfect;
+      let t=0, takeT=0, holdT=0, res='timeout'; while(t<240){ const d0=G.d; fight(dt); t+=dt; const r=reelInput(dt); if(r>0){ holdT+=dt; if(G.d>=d0) takeT+=dt; } if(G.st!=='reeling'){ res=G.st==='landing'?'caught':(S.stats&&G.fish===null?'lost':'other'); break; } }
+      if(res!=='caught'&&G.st==='idle') res=G.tenLast>=100?'snap':'lost'; out.push({res, t:+t.toFixed(1), stuck:holdT?+(takeT/holdT).toFixed(2):0, ten:Math.round(G.ten)}); G.st='idle'; G.fish=null; }
+  } finally{ reelInput=ri; save=sv; toast=ts; try{ if(vb) vib=vb; }catch(e){} const o=JSON.parse(keep); for(const k of Object.keys(S)) delete S[k]; Object.assign(S,o); Object.assign(G,g0); G.st='idle'; }
+  const ok=out.filter(x=>x.res==='caught'), ts2=ok.map(x=>x.t).sort((a,b)=>a-b);
+  return {fish:opts.id||'strongest r'+(opts.r!=null?opts.r:5)+' at '+(opts.loc||'here'), caught:ok.length+'/'+out.length, med:ts2.length?ts2[Math.floor(ts2.length/2)]:null, min:ts2[0]||null, max:ts2[ts2.length-1]||null, stuck:+(out.reduce((a,x)=>a+x.stuck,0)/out.length).toFixed(2), lost:out.filter(x=>x.res!=='caught').map(x=>x.res).join(',')}; };
 
 // ---------- loop ----------
 let last=performance.now();
