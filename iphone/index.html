@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="DL Test iPhone">
 <script>
-window.DL_BUILD='ios'; window.DL_PREVIEW=true; window.DL_VERSION='2026.11.19-0303';
+window.DL_BUILD='ios'; window.DL_PREVIEW=true; window.DL_VERSION='2026.11.19-0333';
 window.addEventListener('beforeinstallprompt',function(e){ e.preventDefault(); window.__dlInstallPrompt=e; });
 </script>
 </head>
@@ -13072,7 +13072,7 @@ const DW={
   aq(){ const r=tankRate()*60, n=S.tank.length, left=Math.max(0,3600000-(Date.now()-(S.fedT||0)));
     if(!n&&S.tankBank<1) return dwBox('aq',{icon:'🐠', title:'Aquarium', sum:'0 / h', body:`<div class="meta">Put fish on display and they earn coins while you play, even when you are away.</div><div class="dwacts"><button class="btn alt sm" data-tabgo="aquarium">Open</button></div>`});
     return dwBox('aq',{icon:'🐠', title:'Aquarium', state:S.tankBank>=1?'ready':'', sum:`<span class="coin">${fmtShort(r)}</span> / h`, body:
-      `<div class="dwrow"><span class="meta">${n} / ${aqCap()} fish · waiting</span><b class="dwbig coin" id="tankbank" data-live>${fmt(S.tankBank)}</b></div>
+      `<div class="dwrow"><span class="meta">${n} / ${aqCap()} fish · waiting</span><b class="dwbig coin" id="tankbank" data-live>${fmtShort(S.tankBank)}</b></div>
        <div class="dwacts"><button class="btn sm" id="collectbtn" data-act="collect" ${S.tankBank<1?'disabled':''}>Collect</button>${n?`<button class="btn alt sm" data-act="feed" ${left?'disabled':''} title="Feeding gives +25% aquarium income for 30 minutes">${left?'Fed · '+cd(left,Math.ceil(left/60000)+' min'):'Feed fish'}</button>`:''}<button class="btn alt sm" data-tabgo="aquarium">Open</button></div>`}); },
   event(){ const c=S.chal, lives=liveScheds(), ready=menuDot('events'); let body='', sum='', state='';
     if(c){ const C=CHAL[c.id], left=Math.max(0,c.until-Date.now()), here=S.loc===c.loc; state='ready live';
@@ -15385,7 +15385,7 @@ document.head.insertAdjacentHTML('beforeend',`<style>
 @media (orientation:landscape) and (max-height:560px){
   /* the menu's side panel: the same card as on the water, buttons spread evenly, hide/show at the bottom */
   body.phone-land #menuov .secbar{background:linear-gradient(180deg,#14243a,#0c1626)!important;border:1px solid #ffffff16!important;border-radius:18px!important;padding:7px!important;gap:6px!important;justify-content:flex-start!important;align-items:stretch!important;box-sizing:border-box;max-height:calc(100% - 6px)}
-  body.phone-land #menuov .secbar .secb{flex:1 1 0!important;max-height:46px!important;min-height:32px!important;height:auto!important;box-sizing:border-box}
+  body.phone-land #menuov .secbar .secb{flex:1 1 auto!important; /* content-based (was 1 1 0: when the rail was not stretched, as on the director’s iPhone, its natural height was just its padding and it cut off after Quests, 2026-11-19) */ max-height:46px!important;min-height:32px!important;height:auto!important;box-sizing:border-box}
   body.phone-land #menuov .secbar .cdmini{order:99!important;flex:0 0 28px!important;height:28px!important;min-height:0!important;margin-top:2px!important;border-radius:10px!important;background:#0a1424!important;border:1px solid #ffffff1c!important;color:#9fb2c8!important;display:flex!important;flex-direction:row!important;align-items:center!important;justify-content:center!important;gap:6px!important;font-size:11px!important;line-height:1!important;padding:0 8px!important}
   body.phone-land #menuov .secbar .cdmini svg{width:14px!important;height:14px!important;flex:0 0 auto}
   body.phone-land #catdock .cdb.live::before,body.phone-land #menuov .secbar .secb.live::before{top:5px!important;left:5px!important}
@@ -17467,7 +17467,7 @@ document.head.insertAdjacentHTML('beforeend',`<style>html body.phone-land #fpsbo
 /* TROPHY ROOM fits one screen (director, 2026-11-18): a compact wall, each plaque just the fish and its name (about eight across);
    tap a plaque to see its details in a bar under the wall (rarity, weight, water, date) with To cooler. The intro line steps aside. */
 { const _rp=renderPanel; renderPanel=function(){ const r=_rp.apply(this,arguments); try{ if(!MOB()||S.tab!=='trophy') return r; const P=$('panel'), room=P.querySelector('.tp-room'); if(!room||room.classList.contains('tp8')) return r;
-      room.classList.add('tp8'); const grid=room.querySelector('.tp-grid'); if(!grid) return r;
+      room.classList.add('tp8'); const emp=room.querySelector('.tp-empty'); if(emp&&!emp.querySelector('.tp8-wall')){ const g=emp.querySelector('.tp-ghost'); if(g) g.remove(); emp.insertAdjacentHTML('afterbegin','<div class="tp8-wall" aria-hidden="true"><div class="tp-plaque tp-ghost"></div><div class="tp-plaque tp-ghost"></div><div class="tp-plaque tp-ghost"></div></div>'); } /* empty room (director, 2026-11-19: "super small ui when empty"): a wall of three empty plaques fills the page */ const grid=room.querySelector('.tp-grid'); if(!grid) return r;
       let bar=room.querySelector('.tp8-bar'); if(!bar){ bar=document.createElement('div'); bar.className='tp8-bar'; bar.innerHTML='<span class="meta">Tap a trophy to see it up close.</span>'; grid.after(bar); }
       grid.querySelectorAll('.tp-item').forEach((it,i)=>{ it.tabIndex=0; it.setAttribute('role','button');
         it.addEventListener('click',e=>{ if(e.target.closest('.tp-out')) return; grid.querySelectorAll('.tp-item.sel').forEach(x=>x.classList.remove('sel')); it.classList.add('sel');
@@ -17607,6 +17607,33 @@ document.head.insertAdjacentHTML('beforeend',`<style>html body.phone-land #menuo
 body.phone-app #hint,body.phone-land #hint,body.phone-app #resttog,body.phone-land #resttog{transition:opacity .25s}
 body.dl-reel #hint,body.dl-reel #resttog{opacity:0!important;pointer-events:none!important}
 </style>`); }
+document.head.insertAdjacentHTML('beforeend',`<style>
+#menuov #panel .pg08-body:has(> .tp-room.tp8 .tp-empty){display:flex;flex-direction:column}
+#menuov #panel .tp-room.tp8:has(.tp-empty){flex:1 1 auto;display:flex;flex-direction:column}
+#menuov #panel .tp-room.tp8:has(.tp-empty) .tp-in{flex:1 1 auto;display:flex;flex-direction:column}
+#menuov #panel .tp-room.tp8 .tp-empty{flex:1 1 auto;flex-direction:column;justify-content:center;text-align:center;gap:16px!important;padding:12px 0!important}
+#menuov #panel .tp-room.tp8 .tp-empty p{max-width:52ch;margin:0 auto}
+#menuov #panel .tp8-wall{display:flex;justify-content:center;gap:clamp(10px,3vw,28px);width:100%}
+#menuov #panel .tp8-wall .tp-ghost{flex:0 1 150px;height:92px;margin:0!important}
+</style>`);
+/* No name twice (director, 2026-11-19: "Your tank" and "Your boat" stood as the tab AND as the heading right under it; standard:
+   "No name is shown twice on one screen"). After every page draw and tab switch, the first visible heading of the shown part loses
+   a leading repeat of the selected tab's name ("Your tank · holds 24 fish" → "holds 24 fish"), or hides when nothing else is left. */
+{ const dedupe=()=>{ if(!MOB()) return; const P=$('panel'); if(!P) return; const sel=document.querySelector('#menuov .sect-nav [aria-selected="true"]'); if(!sel) return; const N=tabShownName(sel); if(!N) return;
+    const body=P.querySelector('.pg08-body')||P; const h=[...body.querySelectorAll('h2,h3,h4,h5')].find(x=>x.offsetParent!==null); if(!h||h.dataset.dupDone===N) return;
+    const t=h.textContent.trim(); if(t===N){ h.classList.add('dl-dupname'); h.dataset.dupDone=N; return; }
+    if(t.startsWith(N+' ·')||t.startsWith(N+' -')){ const w=document.createTreeWalker(h,NodeFilter.SHOW_TEXT), texts=[]; let n; while(n=w.nextNode()) if(n.textContent.trim()) texts.push(n); const f=texts[0]; if(!f) return; if(f.textContent.trim()===N){ f.textContent=''; if(texts[1]) texts[1].textContent=texts[1].textContent.replace(/^\s*[·-]\s*/,''); } else f.textContent=f.textContent.replace(N,'').replace(/^\s*[·-]\s*/,''); const g=texts.find(x=>x.textContent.trim()); if(g) g.textContent=g.textContent.replace(/^(\s*)(\S)/,(m,s,c)=>s+c.toUpperCase()); h.dataset.dupDone=N; } };
+  /* after every other renderPanel step (later files wrap it again and add their headings after this one runs) */
+  const _rp=renderPanel; renderPanel=function(){ const r=_rp.apply(this,arguments); queueMicrotask(()=>{ try{ dedupe(); }catch(e){} }); return r; };
+  document.addEventListener('click',e=>{ if(e.target.closest&&e.target.closest('#menuov .sect-nav [data-sect]')) setTimeout(()=>{ try{ dedupe(); }catch(er){} },0); },true);
+  PHONE_DEDUPE=dedupe; document.head.insertAdjacentHTML('beforeend','<style>#menuov #panel .dl-dupname{display:none!important}</style>'); }
+var PHONE_DEDUPE;
+/* Menu rail height (director, 2026-11-19, iPhone screenshots: the rail ended after "Quests"): its height came only from being stretched
+   to its grid row, with buttons sized from 0. Chrome never shows the problem, Safari did. The rail now also asks for the full row
+   height itself, and its buttons size from their content (ui_modern06), so it never depends on one mechanism. */
+document.head.insertAdjacentHTML('beforeend','<style>html body.phone-land #menuov #tabs .secbar{height:100%!important}</style>');
+/* the name a page tab shows (its own text, without a badge); data-sect can differ ("Dock" shows as "Your boat") */
+function tabShownName(b){ return b?([...b.childNodes].filter(n=>n.nodeType===3).map(n=>n.textContent).join('').trim()||b.textContent.trim()):''; }
 // =====================================================================
 // Phones: the SET MEASUREMENTS (director, 2026-11-18: "I want standards and set measurements for each platform going forward,
 // I'm tired of the same mistakes"). The numbers are written down in docs/PLATFORM_DESIGN.md ("Phone frame: set measurements")
@@ -17999,10 +18026,18 @@ PATCHES.unshift({v:'0.4.9', name:'Work in progress', items:[
   'Bounties: a ready weekly quest no longer lights up the Daily tasks tab.',
   'Feats and Pets: each tab shows only its own cards.',
   'Aquarium: big Earning and Ready numbers no longer run into each other.',
-  'In narrow windows the top bar keeps Home and shows your coins, level and water in full.']});
+  'In narrow windows the top bar keeps Home and shows your coins, level and water in full.',
+  'The side panel in menus always shows every section (on some iPhones it stopped after Quests).',
+  'A tab’s name is no longer repeated as the heading right under it (Your tank, Your boat).',
+  'An empty Trophy Room fills the page with a wall of empty plaques instead of a small strip.',
+  'Aquarium coins use the short form for big amounts (like the top bar), so they always fit.']});
 // iPhone test notes (preview builds only; the live game never shows them). One short line per change in the next test build,
 // curly apostrophes only. The card opens once per device whenever the text changes. Released notes live in notes_release.js.
-const TEST_NOTES={v:'test', label:'Test build · iPhone', name:'0.4.9, part 1: fixes', items:[
+const TEST_NOTES={v:'test', label:'Test build · iPhone', name:'0.4.9, part 1: fixes (2)', items:[
+  'Menus: the side panel always shows every section (on iPhone it could stop after Quests). Please check Trophy Room, Your home and the Aquarium.',
+  'A tab’s name is no longer repeated as the heading under it (Your tank, Your boat).',
+  'An empty Trophy Room fills the page with a wall of empty plaques.',
+  'Aquarium coins use the short form for big amounts, so they always fit.',
   'Settings › Patch notes is a short list; tap an update to read it in the same card as when it first arrived (it used to be one long, hard-to-scroll block).',
   'While you reel in a fish, the hint and the Rest button step aside so you can see the fight (new players keep the hint for their first catches).',
   'Search sits at the top and keeps its results above the keyboard.',
@@ -18126,8 +18161,15 @@ ui(){ QA.sys='UI';
         visit(); [...P.querySelectorAll('[data-act]')].filter(b=>sub.includes(b.dataset.act)).map(b=>[b.dataset.act,b.dataset.k]).forEach(([a,k])=>{ try{ act(a,{k}); visit(); }catch(e){} }); [...P.querySelectorAll('[data-sect]')].map(b=>b.dataset.sect).forEach(s=>{ const b=[...P.querySelectorAll('[data-sect]')].find(x=>x.dataset.sect===s); try{ b&&b.click(); visit(); }catch(e){} }); }
       setTab(DASH); return bad.length?{ok:false,detail:bad.slice(0,8).join(' | ')}:{ok:true,detail:n+' real buttons checked'}; });
   T('menu: no Overview; opening the menu shows the last page used and closing returns to fishing',()=>{ const errs=[]; openMenu('rods'); closeMenu(); openMenu(); if(S.tab!=='rods') errs.push('opened '+S.tab); if($('panel').querySelector('.dash')) errs.push('overview rendered'); if(document.querySelector('#menuov .mo-home')) errs.push('overview button'); closeMenu(); if(MENU_OPEN||S.tab!==DASH) errs.push('did not close'); return errs.length?{ok:false,detail:errs.join('; ')}:{ok:true,detail:'Menu opens the last page; no Overview'}; });
-  T('contrast: every button and label on every menu page is readable (ratio 3+)',()=>{ const bad=[]; const pages=[...MENU_SECS.flatMap(s=>s.tabs),...MENU_MORE.tabs]; for(const t of pages){ openMenu(t); for(const c of __contrast()) bad.push(t+': '+c); } closeMenu(); return bad.length?{ok:false,detail:bad.slice(0,8).join(' | ')}:{ok:true,detail:pages.length+' pages readable'}; });
-T('page tabs: a part hidden by a page tab never stays on screen (a forced style once kept the Events calendar on every tab)',()=>{ const bad=[]; const pages=[...MENU_SECS.flatMap(s=>s.tabs),...MENU_MORE.tabs]; let n=0; for(const t of pages){ openMenu(t); const P=$('panel'); for(const b of [...document.querySelectorAll('#menuov .sect-nav [data-sect], #panel .sect-nav [data-sect]')]){ b.click(); n++; for(const e of P.querySelectorAll('*')){ if(e.style.display==='none'&&getComputedStyle(e).display!=='none') bad.push(t+' / '+b.dataset.sect+': '+((e.className||e.tagName)+'').slice(0,30)); } } } closeMenu(); return bad.length?{ok:false,detail:[...new Set(bad)].slice(0,8).join(' | ')}:{ok:true,detail:n+' page tabs checked'}; });
+/* every page a player can open: side-panel sections, More, AND the pages reached from the top bar (Cooler, Aquarium, Home, Fish Log...), which belong to no section on phones (2026-11-19: checks that walked only MENU_SECS never saw the pages in the director's screenshots) */  const qaAllPages=()=>[...new Set([...MENU_SECS.flatMap(s=>s.tabs),...MENU_MORE.tabs,...[...$('tabs').querySelectorAll(':scope > [data-tab]')].map(b=>b.dataset.tab),'trophy','home'])].filter(t=>t&&t!=='dash');
+  T('contrast: every button and label on every menu page is readable (ratio 3+)',()=>{ const bad=[]; const pages=qaAllPages(); for(const t of pages){ openMenu(t); for(const c of __contrast()) bad.push(t+': '+c); } closeMenu(); return bad.length?{ok:false,detail:bad.slice(0,8).join(' | ')}:{ok:true,detail:pages.length+' pages readable'}; });
+  T('side panel: every section button fits in the menu rail, also when the rail is not stretched (as on iPhone)',()=>{ const mob=typeof MOB==='function'&&MOB(); if(!mob) return {ok:true,detail:'phones only'}; const bad=[]; openMenu('cooler'); const bar=document.querySelector('#menuov .secbar'); if(!bar){ closeMenu(); return {ok:false,detail:'no rail'}; }
+    const fits=tag=>{ const r=bar.getBoundingClientRect(); if(bar.scrollHeight>bar.clientHeight+1) bad.push(tag+': rail scrolls ('+bar.scrollHeight+' > '+bar.clientHeight+')'); for(const b of bar.querySelectorAll('.secb')){ const q=b.getBoundingClientRect(); if(q.height&&(q.top<r.top-1||q.bottom>r.bottom+1)) bad.push(tag+': '+b.dataset.sec+' cut'); } };
+    fits('stretched'); bar.style.setProperty('align-self','start','important'); fits('not stretched'); bar.style.removeProperty('align-self'); closeMenu(); return bad.length?{ok:false,detail:[...new Set(bad)].slice(0,6).join(' | ')}:{ok:true,detail:'rail fits both ways'}; });
+  T('no name twice: the first heading of a page part never repeats the selected tab name',()=>{ const mob=typeof MOB==='function'&&MOB(); if(!mob) return {ok:true,detail:'phones only'}; const bad=[]; const pages=qaAllPages(); for(const t of pages){ openMenu(t); for(const b of [...document.querySelectorAll('#menuov .sect-nav [data-sect]')]){ b.click(); try{ renderPanel(); }catch(e){} const sel=document.querySelector('#menuov .sect-nav [aria-selected="true"]'); if(!sel) continue; const N=typeof tabShownName==='function'?tabShownName(sel):(sel.dataset.sect||'').trim(); if(typeof PHONE_DEDUPE==='function') PHONE_DEDUPE(); /* the phone fix runs right after a draw; run it now so the check sees the finished page */ const body=$('panel').querySelector('.pg08-body')||$('panel'); const h=[...body.querySelectorAll('h2,h3,h4,h5')].find(x=>x.offsetParent!==null); if(h&&N&&h.textContent.trim().startsWith(N)) bad.push(t+' / '+N+': "'+h.textContent.trim().slice(0,30)+'"'); } } closeMenu(); return bad.length?{ok:false,detail:[...new Set(bad)].slice(0,6).join(' | ')}:{ok:true}; });
+  T('page bars: numbers never cut or run into each other, even with very large amounts',()=>{ const mob=typeof MOB==='function'&&MOB(); if(!mob) return {ok:true,detail:'phones only'}; const bad=[]; const pages=qaAllPages(); for(const t of pages){ openMenu(t); const bars=[...$('panel').querySelectorAll('.pg08-bar, .aq07-bar, .aq07-bank')]; for(const bar of bars){ const bs=[...bar.querySelectorAll('b')].filter(b=>b.offsetParent!==null&&/\d/.test(b.textContent)); const keep=bs.map(b=>b.textContent); bs.forEach(b=>{ b.textContent=b.classList.contains('coin')?fmtShort(888888888):b.textContent.replace(/\d[\d,.]*/g,m=>'8'+m.replace(/\d/g,'8')); }); /* coins as the game shows big amounts (short form), counts one digit longer (a tank of 24 tested as 88) */ for(const c of [...bar.children].filter(c=>c.offsetParent!==null&&c.querySelector('b'))){ if(c.scrollWidth>c.clientWidth+1) bad.push(t+': number spills out of its cell ('+c.scrollWidth+' > '+c.clientWidth+')'); } const cells=[...bar.children].filter(c=>c.offsetParent!==null).map(c=>c.getBoundingClientRect()); for(let i=1;i<cells.length;i++){ const p=cells[i-1], c=cells[i]; if(Math.abs(p.top-c.top)<4&&p.right>c.left+1) bad.push(t+': cells overlap'); } bs.forEach((b,i)=>b.textContent=keep[i]); } } closeMenu(); return bad.length?{ok:false,detail:[...new Set(bad)].slice(0,6).join(' | ')}:{ok:true}; });
+  T('empty pages fill the screen (Trophy Room with no trophies)',()=>{ const mob=typeof MOB==='function'&&MOB(); if(!mob) return {ok:true,detail:'phones only'}; const keep=S.vault; S.vault=[]; let res; try{ openMenu('trophy'); const room=$('panel').querySelector('.tp-room'), body=$('panel').querySelector('.pg08-body')||$('panel'); const rh=room?room.getBoundingClientRect().height:0, bh=body.getBoundingClientRect().height; res=rh>=bh*.7?{ok:true,detail:Math.round(rh)+' of '+Math.round(bh)+' px'}:{ok:false,detail:'empty room '+Math.round(rh)+' of '+Math.round(bh)+' px'}; } finally{ S.vault=keep; closeMenu(); } return res; });
+T('page tabs: a part hidden by a page tab never stays on screen (a forced style once kept the Events calendar on every tab)',()=>{ const bad=[]; const pages=qaAllPages(); let n=0; for(const t of pages){ openMenu(t); const P=$('panel'); for(const b of [...document.querySelectorAll('#menuov .sect-nav [data-sect], #panel .sect-nav [data-sect]')]){ b.click(); n++; for(const e of P.querySelectorAll('*')){ if(e.style.display==='none'&&getComputedStyle(e).display!=='none') bad.push(t+' / '+b.dataset.sect+': '+((e.className||e.tagName)+'').slice(0,30)); } } } closeMenu(); return bad.length?{ok:false,detail:[...new Set(bad)].slice(0,8).join(' | ')}:{ok:true,detail:n+' page tabs checked'}; });
   T('weekly quests: progress from counters, each pays once, crate once, week rollover and damaged saves rebuild',()=>{ const e=[]; S.weekly=null; const w=ensureWeekly(); if(w.quests.length!==4) e.push('quests '+w.quests.length); for(const q of w.quests){ const m={caught:()=>S.stats.caught+=q.n,shiny:()=>S.stats.shiny+=q.n,earned:()=>S.stats.earned+=q.n,tasks:()=>S.gstats.tasks+=q.n,hot:()=>S.stats.hot+=q.n,chal:()=>S.stats.chalWins=(S.stats.chalWins||0)+q.n,species:()=>{}}; m[q.t](); } const sc0=S.scales; w.quests.forEach((q,i)=>{ if(q.t==='species') q.base-=q.n; act('wqclaim',{i}); act('wqclaim',{i}); }); const want=w.quests.reduce((a,q)=>a+q.scales,0); if(S.scales-sc0!==want) e.push('scales '+(S.scales-sc0)+' want '+want); const big=S.tokens.big; act('wqbonus',{}); act('wqbonus',{}); if(S.tokens.big-big!==1) e.push('crate '+(S.tokens.big-big)); S.weekly.wk='2000-01-03'; if(ensureWeekly().wk!==weekKey()) e.push('rollover'); S.weekly={wk:1,quests:[null]}; if(!Array.isArray(ensureWeekly().quests)||ensureWeekly().quests.length!==4) e.push('rebuild'); return e.length?{ok:false,detail:e.join('; ')}:{ok:true,detail:'claims, crate, rollover and rebuild ok'}; });
   T('weather forecast matches the real weather schedule, in order and in the future',()=>{ const e=[]; const f=wxForecast(6), now=Date.now()/1000; let last=0; for(const x of f){ const t=x.at+now+1, real=(window.__wxTime?__wxTime.kindAt(t):weatherAt(Math.floor(t/WX_LEN))).k; if(real!==x.k) e.push(x.k+' forecast, '+real+' real at +'+Math.round(x.at)+' s'); if(window.__wxTime){ const R=__wxTime.RULE[x.k]; if(R&&(R==='night')!==__wxTime.night(t)) e.push(x.k+' at the wrong time of day'); } if(x.at<=0||x.at<last) e.push('order '+x.at); last=x.at; } if(!f.length) e.push('empty'); return e.length?{ok:false,detail:e.join('; ')}:{ok:true,detail:f.map(x=>x.k).join(', ')}; });
   T('no Menu button: the category bar opens the pages; "Collapse panel" shrinks both side panels and is remembered',()=>{ const e=[]; if($('menubtn')&&$('menubtn').isConnected) e.push('Menu button still on screen'); if(!$('catdock')||!$('catdock').querySelector('.cdb[data-cd]')) e.push('no category bar');
@@ -18339,7 +18381,7 @@ if(/[?&]test\b/.test(location.search)) window.__inGame=(code)=>eval('(()=>{'+cod
 let last=performance.now();
 function frame(now){ const dt=Math.min(.05,(now-last)/1000); last=now; update(dt); draw(now); if(S.tab==='aquarium') drawTank(now); hud(); requestAnimationFrame(frame); }
 let lastBuffN=-1, lastShopSlot=Math.floor(Date.now()/1000/SHOP_LEN);
-setInterval(()=>{ accrue(); const el=$('tankbank'); if(el) el.textContent=fmt(S.tankBank); const cb=$('collectbtn'); if(cb) cb.disabled=S.tankBank<1;
+setInterval(()=>{ accrue(); const el=$('tankbank'); if(el){ const t=fmtShort(S.tankBank); if(el.textContent!==t){ el.textContent=t; el.title=fmt(S.tankBank)+' coins'; } } /* short form like the top bar, so big numbers never overflow (2026-11-19) */ const cb=$('collectbtn'); if(cb) cb.disabled=S.tankBank<1;
   const dl=$('dmleft'); if(dl){ dl.textContent=mmss(wxLeft()); if(wxLeft()>=WX_LEN-1 && S.tab==='cooler') renderPanel(); }
   const t=Date.now(); const ended=S.buffs.filter(b=>b.until<=t); if(ended.length){ S.buffs=S.buffs.filter(b=>b.until>t); toast('Boost ended: '+ended.map(b=>b.src).join(', ')); save(); }
   const bn=activeBuffs().length; if(bn!==lastBuffN){ lastBuffN=bn; lastHud=''; }
@@ -18464,7 +18506,7 @@ function renderAquarium(P){ accrue(); const rate=tankRate(); let AQS=null; const
   const sums={}; for(const f of S.tank) for(const e of aqBuffsOf(f)) sums[e.k]=(sums[e.k]||0)+e.v;
   const chips=Object.entries(sums).map(([k,v])=>`<span class="badge k">${fmtB(k,Math.min(v,BONUS_CAP[k]||9))}</span>`).join('');
   P.innerHTML=`<div class="row spread"><div><h2>Aquarium</h2><p class="sub">Visitors pay to see your fish, even while you're away (up to 8 hours). Every fish gives a boost while on display, and boosts stack. Each fish rolls its own boost when caught: usually one that fits its rarity, now and then a much better (or weaker) one. Heavier fish give more, shiny fish double, and the strangest catches give the most.</p></div>
-  <div class="bank"><div><div class="sub">Earning</div><b class="coin">${fmt(rate*60)}</b><span class="sub"> / hour</span></div><div><div class="sub">Ready to collect</div><b class="coin" id="tankbank">${fmt(S.tankBank)}</b></div>
+  <div class="bank"><div><div class="sub">Earning</div><b class="coin" title="${fmt(rate*60)} coins an hour">${fmtShort(rate*60)}</b><span class="sub"> / hour</span></div><div><div class="sub">Ready to collect</div><b class="coin" id="tankbank" title="${fmt(S.tankBank)} coins">${fmtShort(S.tankBank)}</b></div>
   <button class="btn" id="collectbtn" data-act="collect" ${S.tankBank>=1?'':'disabled'}>Collect</button></div></div>
   <div class="badges" style="justify-content:flex-start;margin-top:8px">${chips||'<span class="sub">No boosts yet. Put a fish on display.</span>'}</div>
   <div class="tank"><canvas id="tankcv"></canvas></div>${S.aq.decor.length?`<p class="sub" style="margin-top:6px">Drag a decoration along the sand to move it.</p>`:""}
