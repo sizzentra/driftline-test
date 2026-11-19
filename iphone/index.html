@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="DL Test iPhone">
 <script>
-window.DL_BUILD='ios'; window.DL_PREVIEW=true; window.DL_VERSION='2026.11.18-2318';
+window.DL_BUILD='ios'; window.DL_PREVIEW=true; window.DL_VERSION='2026.11.18-2320';
 window.addEventListener('beforeinstallprompt',function(e){ e.preventDefault(); window.__dlInstallPrompt=e; });
 </script>
 </head>
@@ -15129,7 +15129,8 @@ function riverWheel(P,t,hz,mx,mb,mw,mh,FX){ const R=mh*.62, xL=mx-mw/2, cx=xL-R*
 // live game ignores them. They carry no version number (the director picks it at release).
 // =====================================================================
 function addTestNotes(n){ try{ if(!window.DL_PREVIEW||!n||!Array.isArray(n.items)||!n.items.length) return; PATCHES.unshift(n);
-    const id='dl-test-notes:'+(window.DL_BUILD||'')+':'+n.name+':'+n.items.length; let seen=''; try{ seen=localStorage.getItem('dl-test-notes')||''; }catch(e){}
+    const txt=n.name+'|'+n.items.join('|'); let hsh=0; for(let i=0;i<txt.length;i++) hsh=(hsh*31+txt.charCodeAt(i))|0; /* any change to the text opens the card again (2026-11-18: lines added to an existing item never re-opened it) */
+    const id='dl-test-notes:'+(window.DL_BUILD||'')+':'+hsh; let seen=''; try{ seen=localStorage.getItem('dl-test-notes')||''; }catch(e){}
     if(seen===id) return; let tries=0;
     const go=()=>{ if(G.st!=='idle'||(typeof MENU_OPEN!=='undefined'&&MENU_OPEN)){ if(++tries<20) setTimeout(go,1500); return; }
       try{ localStorage.setItem('dl-test-notes',id); }catch(e){} try{ showPatchNotes(n); }catch(e){} };
@@ -17801,70 +17802,21 @@ PATCHES.unshift({v:'0.4.8.6.2', name:'Fixes', items:[
   'The frame counter (Settings, Display) shows the frames the game draws, plus your screen’s own rate.',
   'Android: the game is always full screen, like on iPhone: the installed game opens without the bars, and a tap brings full screen back if they appear.']});
 // iPhone test notes (preview builds only; the live game never shows them). Write what the next test build changes here
-// (spoiler-free); it opens once in the iPhone test app. Released notes live in notes_release.js.
-const TEST_NOTES={v:'test', label:'Test build · iPhone', name:'One Look, Easy Aquarium', items:[
-  'NEW in this build (0.4.8.6.1+): every phone locked at 60 fps, no frame-rate choice in Settings; Android is always full screen like iPhone (no Settings option; the app opens full screen, a tap brings it back); Android test app opens full screen right away (remove it from the home screen and add it again once); Graphics test in Stats (turn scene parts off, read the counter); phones redraw the angler at most 30x/s (it cost the most per frame); Android full screen comes back on your next tap (it tried on finger-down, which Android refuses); the frame counter shows frames drawn + the screen rate; 0.4.8.6.2 Fixes patch notes; frame rate defaults to 60 on every phone (Android ran at its screen’s 120 and slowed down); side-panel badges never cover names (even 99+); Tester tools in Stats: pearls, levels, fill Fish Log, finish feats, fill cooler, skip 8 hours; Travel no longer greyed out behind an open card; Android remembers full screen when you close the app and starts in full screen; notices on the water sit below the weather and streak chips; patch notes close (pinned button); Aquarium layout restored; fps counter below the streak chip; search fixed (top bar only, opens the right tab); gear Settings icon; Events without repeats; smaller Feats cards; faster menu switching; Trophy wall on one screen; slimmer Tide Pass and Boardwalk; Waters renamed Map; bait descriptions; Bait page (Switch, Buy bait, Special lures) from the top bar; Tackle = Gear; Oddities/Treasures tabs; Aquarium + Home lessons in Quests; fps counter top corner; Quests (goals, lessons, find, help); Bait in the top bar; Home chip; Cooler rework; Oddities in Collection; coins/level/water in one box; Tasks tabs without repeats; Fish Log only from the top bar; Prestige page (Set sail again + Pearl relics); tidy Waters that opens at your water; Fishing renamed Catch; XP bar on Skills; side-panel counts never cover names; menus use the full width with a slim number strip; Skills categories without badges; Rods tabs fixed + tidy presets; small-iPhone cut-offs fixed; smooth Home live view; tank size + clear tank upgrade in the Aquarium; mountains drawn without stripes; Stats has its own side-panel button (and the Level chip); folded side panel centred; top bar never cuts off settings; Settings no longer repeats Save (gift code and backup tools are in Save); summaries no longer repeat numbers.',
-  'NEW in this build: fish fight shows a tension ring at the fish with the instruction above it; hints are touch only; homes are never called docks; the layout always switches when you turn the phone; smoother storms at Starfall.',
-  'NEW in this build: Compact Goal chip (opens the right page) and a separate Live chip, plus Tasks and Tide Pass in the top bar. Your home shows the real home of every water. Colour choices are round swatches.',
-  'NEW in this build: every menu page works like the aquarium (key numbers and main button first, sections as tabs, one scrolling list, badges where rewards wait). The Wardrobe shows your angler big with the categories in Options. Pages keep your place when they refresh.',
-  'NEW in this build: Your home works like the aquarium (your home on top, Options with Your home and Decorations, tap a card to try it). iPads now use the phone layout scaled up to fill the screen.',
-  'NEW in this build: iPhone plays in landscape only (hold it upright and the game pauses with a "turn your iPhone" screen). Settings now belong to this iPhone and are no longer changed by moving your progress. New Frame rate choice in Settings, Display (30 saves battery). Vibration and Full screen are hidden on iPhone because iPhone browsers cannot do them.',
-  'NEW in this build: menus fit every iPhone (Pro Max, Pro, Air, Plus and the base models from the 15 on): they stay clear of the Dynamic Island, corners and home bar, the same as the fishing screen. The Aquarium opens faster and the first tap no longer pauses while the music loads. Split screen and small windows now use the normal phone layout.',
-  'One look everywhere: every button, tab, badge and label of the same kind has the same size and style on every page; long button labels stay on one line; upright, a long goal no longer pushes the water down; sideways, page-tab badges sit on the corner.',
-  'Menu page tabs (Events, Bounties, Feats...) take every tap and no longer jiggle; section bars no longer slide sideways when stuck to the top; on small phones held sideways the tabs show names only, badges on the corner.',
-  '## Aquarium and Fish Log',
-  'The aquarium tank animates smoothly: it no longer skips frames now and then, and it keeps moving (at a steady pace) while you scroll the list.',
-  'The aquarium tank fills the screen. The Options button under it opens a panel with Your tank and Decorate (under the tank when upright, on the right when sideways); Hide closes it and gives the whole space back to the tank. Your phone remembers which you like.',
-  'Your tank and Add fish are one section now, laid out like Decorate: Boosts, On display, and Add from your Cooler, each with its own heading.',
-  'Fish Log: a Normal / Shiny switch under the fish picture shows what a fish you have caught looks like when it is shiny.',
-  'Menus line up with the water screen: one even top row at the same height as on the water, matching edges, and the same bottom tabs, so nothing jumps when you open or close a menu.',
-  'Taps right after Back always work (a quick tap used to be ignored for a split second).',
-  'Taps on menu buttons always register, even when the button refreshes under your finger; a swipe that starts on a tab no longer opens it.',
-  'A bite says "Tap the water to set the hook" and the catch card says "Tap to keep fishing".',
-  'Held sideways, the side panel in menus is the same height as on the water, and notices are centred over the page.',
-  'Weather news also waits while the catch card is open.',
-  'Your boost timers sit in the top-left corner under the time and weather, so the Rest and Bait buttons no longer cover them.',
-  'Weather news no longer covers the screen: it shows as a small line under the time and weather on the water, and waits while a menu, a card or a catch is open, so it never sits on top of what you are doing.',
-  '## Smoother frames',
-  'Willow Pond no longer stutters: the willow used to redraw its whole curtain every third frame; its work is now spread evenly over every frame.',
-  'Storms are lighter: the darkening and the soft frame around the picture are drawn in one layer instead of up to four, and storm waves on the open sea draw in a handful of shapes instead of hundreds.',
-  'Held sideways, the side panel stays exactly in place when you open a menu (it used to shift a little); Back sits right above it.',
-  'Dawn and dusk are smoother: the light changes in fewer, softer steps, and never while you are casting or have a fish on the line.',
-  'The picture of the water is drawn as one solid layer, so your phone has a little less to blend on every frame.',
-  'If a water or a storm is too heavy for your phone, the picture gets a touch softer sooner and in smaller steps, and each water remembers what suits your phone, so coming back is smooth straight away.',
-  '## Fairer streaks',
-  'Reeling in early, casting by accident or missing a strike never costs you anything: your streak stays. A streak only ends when a fish you have hooked gets away (a snapped line, a fish that slips off or runs out your line).',
-  'On a Roll, fully learned: a lost fish now only halves your streak instead of ending it.',
-  'Steady Hands challenge: a late hook just does not count; only a hooked fish that gets away resets the count.',
-  '## One look everywhere',
-  'Every button, chip, tab and card now shares one style: the same navy, the same corners, the same lettering, and line icons instead of emoji pictures.',
-  'Everything you can tap in the top bar now looks exactly like the Bait and Rest buttons (filled teal). Coins and level are plain text, so you can tell at a glance. A full Cooler shows its count in gold.',
-  'Upright, the water no longer shows its name twice: the top bar has it, the chip on the water shows the time and weather.',
-  'Held sideways, the side panel is slimmer, so the water and the menus get more room.',
-  'Upright, page tabs (Tackle, Rods, Skills, Paths...) always fit on screen with an icon each: no more sideways scrolling to find a page.',
-  'Upright, the Fishing tab lights up gold while you fish, like the side panel does sideways.',
-  '## A new aquarium',
-  'The tank stays on screen while you scroll: upright it sits at the top, sideways it is on the left. Every new fish, water colour and decoration shows the moment you pick it.',
-  'The tank is bigger and always fully drawn (it used to stop short of the bottom). Earnings, Collect and Feed sit right under it.',
-  'Switching between Your tank, Decorate and Add fish is instant, and the tank keeps swimming while you try, place or buy things (it used to blink and restart).',
-  'New Add fish tab: put fish from your Cooler on display without leaving the aquarium.',
-  'Decorating is simpler: tap any card to try it in your tank, and the Buy / Stop bar stays right under the tank. A decoration you try lands in an open spot instead of on top of another one, and keeps that spot if you buy it.',
-  '## Also fixed',
-  'Tapping a top-bar chip (Fishing at, Cooler, Aquarium, Fish Log) works on the first tap every time.',
-  'The live event line in the top bar fits on small phones.',
-  'The collapsed side panel shows neat icon buttons in menus too (they were cut off at the screen edge).',
-  'Messages like Claimed, Bought or Hunting no longer stretch into a big box over the screen: they show as a small note at the bottom.',
-  '## Your angler',
-  'Shoes look like real shoes from the side: a rounded heel, a sole with a heel block, and a toe that slopes down. One foot stands a little ahead of the other.',
-  'Bodies have their real depth: the hips and seat fill out under the jacket, so legs no longer look pinned under a wide body.',
-  'Buttons, zips and seams sit on the front of the clothes (life jacket and spacesuit fixed).',
-  '## Everything comes alive',
-  'The wizard hat glows with a spiral of climbing sparkles, orbiting runes and a pulsing star at its tip.',
-  'Many more items have their own effect: music notes from headphones, petals from the flower crown and kimono, mushroom spores, party confetti, top-hat magic, witch wisps, diving and fishbowl bubbles, lantern moths, angel feathers, butterfly dust, dragon embers, jetpack smoke, guitar notes, glinting medals and lenses, little hearts from heart shades, glowing glow kicks and more.',
-  'The Wardrobe preview is animated now, so you see every effect live while you dress up.',
-  'Smoother: shiny sparkles run at your screen’s full frame rate, and the aquarium tank too.',
-  '## Fixes',
-  'Long water names (Stonebrook River) fit in the header instead of being cut off.']};
+// (spoiler-free, one short line per change, curly apostrophes only). The card opens once per device whenever the text changes.
+// Released notes live in notes_release.js.
+const TEST_NOTES={v:'test', label:'Test build · iPhone', name:'60 fps and full screen', items:[
+  'Every phone is locked at 60 frames a second, iPhone and Android alike. The frame-rate choice is gone from Settings.',
+  'Android is always full screen, like iPhone: no Settings option. The installed app opens without the bars, and a tap brings full screen back if they appear.',
+  'Android test app: remove it from the home screen and add it again once, so Android opens it full screen at launch.',
+  'The angler is drawn less often on phones (it was the most expensive part of each frame).',
+  'The frame counter (Settings, Display) shows the frames actually drawn, your screen’s rate and the slowest gap.',
+  'Tester tools (Stats): a Graphics test turns parts of the water off one at a time, so you can see which part slows your phone.',
+  'Tester tools: Unlock everything adds Wisdom Pearls; new buttons for levels, Fish Log, feats, cooler and an 8-hour skip.',
+  'Side-panel counts never cover a button’s name, even at 99+.',
+  'Notices like “Travelled to …” sit below the weather and streak tags.',
+  'Opening a menu over an info card closes the card first, so Travel here always works.',
+  'The update message only appears for real updates.',
+  'Patch notes: 0.4.8.6.2 Fixes lists everything above for players (Settings, Patch notes).']};
 addTestNotes(TEST_NOTES);
 // =====================================================================
 // 0.4 release QA suite (test builds only: ?test, and build.ps1 leaves this file out of the release build).
