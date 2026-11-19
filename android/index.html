@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="DL Test Android">
 <script>
-window.DL_BUILD='android'; window.DL_PREVIEW=true; window.DL_VERSION='2026.11.18-2238';
+window.DL_BUILD='ios'; window.DL_PREVIEW=true; window.DL_VERSION='2026.11.18-2240';
 window.addEventListener('beforeinstallprompt',function(e){ e.preventDefault(); window.__dlInstallPrompt=e; });
 </script>
 </head>
@@ -14263,6 +14263,11 @@ if(matchMedia('(hover: none)').matches){ const strip=list=>{ for(let i=list.cssR
   body #menuov #tabs.secmode .secb::after{content:"";position:absolute;left:0;right:0;top:-3px;bottom:-3px}
 }
 </style>`); }
+// iPhone: holding a finger on the water (hold to reel) brought up iOS's magnifier loupe over the game. Touches on the game's
+// own drawing surfaces belong to the game: their default action is cancelled at touchstart, so iOS never starts its press-and-hold
+// tools there. The game reads these surfaces through pointer events, which still arrive.
+document.addEventListener('touchstart',e=>{ const t=e.target; if(t&&t.tagName==='CANVAS'&&(t.id==='cv'||t.id==='tankcv'||t.id==='homecv')&&e.cancelable) e.preventDefault(); },{passive:false});
+document.head.insertAdjacentHTML('beforeend',`<style>#cv,#tankcv,#homecv{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent}</style>`);
 
 // Top bar (director, 2026-11-17): every chip that has a page opens it. Fishing at opens Waters (quick water changes), Cooler opens
 // the Cooler, like Aquarium and Fish Log. Bait is not on the top bar any more: it is chosen on the Bait list in Tackle, which shows the
@@ -14454,6 +14459,26 @@ body.pch-on #panel .tile.pet-hid > span.meta{color:#9fb2c8}
 
 
 
+// iPhone Home Screen app (director, 2026-11-17, screenshot): opened sideways, the whole game sat ~55 points too low, below an
+// empty band. iOS can keep the safe-area numbers of the other orientation after launching or turning the phone, so the layout
+// left room for a notch that isn't there (and, the other way round, upright could sit under the notch). Two fixes:
+// 1. Sideways, an iPhone never needs room at the top (the status bar is hidden), so that layout no longer reads the top inset.
+// 2. After a launch or a turn, iOS is made to read the safe areas again (the viewport setting is re-applied and styles refreshed).
+document.head.insertAdjacentHTML('beforeend',`<style>
+html body.phone-land.dl-fish{padding-top:6px!important}
+html body.phone-land #menuov .mo-in{padding-top:5px!important}
+html body.phone-land #menuov > #toast{top:auto!important;bottom:calc(10px + env(safe-area-inset-bottom))!important;height:auto!important} /* top:auto: with both top and bottom set, a one-line note ("Bought Crickets", "Claimed") stretched into a box over the whole menu; it now sits at the bottom like on Android (2026-11-18) */
+html body.phone-land #menuov #panel .wd-prev{height:calc(100dvh - 150px)!important}
+html body.phone-land .dlprev{top:4px!important}
+</style>`);
+{ const ios=/iP(hone|od|ad)/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+  if(ios){ const vp=document.querySelector('meta[name=viewport]'); let q=0;
+    const refresh=()=>{ try{ if(vp){ const c=vp.getAttribute('content'); vp.setAttribute('content',c+' '); vp.setAttribute('content',c); }
+        const r=document.documentElement; r.classList.add('sa-recalc'); void r.offsetHeight; r.classList.remove('sa-recalc'); try{ resize(); }catch(e){} }catch(e){} };
+    const soon=()=>{ clearTimeout(q); [80,400,1000].forEach(ms=>setTimeout(refresh,ms)); };
+    addEventListener('orientationchange',soon); addEventListener('resize',soon); addEventListener('pageshow',soon); document.addEventListener('visibilitychange',()=>{ if(!document.hidden) soon(); });
+    soon(); }
+  document.head.insertAdjacentHTML('beforeend','<style>html.sa-recalc body{padding-bottom:calc(env(safe-area-inset-bottom) + 0.01px)}</style>'); }
 
 // No rainbows at night (director, 2026-11-17: "no nighttime rainbows pls yuck"): the rainbow is drawn only in daylight and fades
 // out fully as dusk falls (it hung on at 15% before). The weather and its bonus stay: a day here lasts 6 minutes and a weather 4,
@@ -17610,7 +17635,7 @@ if(/[?&]test\b/.test(location.search)) window.__spec=()=>{ for(const a of docume
 { const MB_TOUCH=!!(window.matchMedia&&matchMedia('(pointer:coarse)').matches); /* our own check: the core's TOUCH is declared later in the build */
   const _sh=setHint; setHint=function(){ _sh.apply(this,arguments); if(!MB_TOUCH) return; try{ if(G.st==='bite'&&S.settings.hints){ const h=document.getElementById('hint'), t='<b>Now!</b> Tap the water to set the hook.'; if(h&&h.innerHTML!==t) h.innerHTML=t; } }catch(e){} };
   const tap=document.querySelector('#card .tap'); if(tap&&MB_TOUCH) tap.textContent='Tap to keep fishing'; }
-// Android release notes (shown once to returning Android players). Kept exactly as shipped once published.
+// iPhone release notes (shown once to returning iPhone players). Kept exactly as shipped once published.
 PATCHES.unshift({v:'0.4.8', name:'Rewards Worth Chasing', items:[
   '## Rewards and balance',
   'Paths are rethought: no more downsides, and they open much earlier.',
@@ -17657,7 +17682,6 @@ PATCHES.unshift({v:'0.4.8.1', name:'Smoother and Steadier', items:[
   'Your angler’s nearer shoe is drawn in front, the Ocean Sunfish’s fins sit on its body, and the otters swim clear of the rocks.'
 ]});
 PATCHES.unshift({v:'0.4.8.3', name:'One Look, Easy Aquarium', items:[
-  'Full screen stays on: if you left the game in full screen, closing or switching away from the app no longer forgets it; your first tap when you come back puts it back.',
   '## Aquarium and Fish Log',
   'The aquarium tank animates smoothly: it no longer skips frames now and then, and it keeps moving (at a steady pace) while you scroll the list.',
   'The aquarium tank fills the screen. The Options button under it opens a panel with Your tank and Decorate (under the tank when upright, on the right when sideways); Hide closes it and gives the whole space back to the tank. Your phone remembers which you like.',
@@ -17692,6 +17716,7 @@ PATCHES.unshift({v:'0.4.8.3', name:'One Look, Easy Aquarium', items:[
   'Tapping a top-bar chip (Fishing at, Cooler, Aquarium, Fish Log) works on the first tap every time.',
   'The live event line in the top bar fits on small phones.',
   'The collapsed side panel shows neat icon buttons in menus too (they were cut off at the screen edge).',
+  'Messages like Claimed, Bought or Hunting no longer stretch into a big box over the screen: they show as a small note at the bottom.',
   '## Your angler',
   'Shoes look like real shoes from the side: a rounded heel, a sole with a heel block, and a toe that slopes down. One foot stands a little ahead of the other.',
   'Bodies have their real depth: the hips and seat fill out under the jacket, so legs no longer look pinned under a wide body.',
@@ -17715,22 +17740,21 @@ PATCHES.unshift({v:'0.4.8.4', name:'Lined Up', items:[
 PATCHES.unshift({v:'0.4.8.5', name:'Easy Finds', items:[
   '## New',
   'The fish fight is easy to follow: a ring around the fish shows how tight your line is (green, yellow, red), with what to do right above it.',
-  'Hints speak touch only (no keyboard keys), and homes are called homes everywhere, not docks. Save, App shows how to put Driftline on your home screen.',
-  'Driftline now plays in landscape on Android phones: hold your phone sideways (if you hold it upright, the game pauses and shows you how). Tablets keep both ways.',
+  'Hints speak touch only (no keyboard keys), and homes are called homes everywhere, not docks. Save, App shows how to put Driftline on your Home Screen.',
   'The top bar is tidier: a small Goal chip shows your next goal in a few words and opens exactly the right page; live events get their own Live chip; Tasks and Tide Pass sit up there too when there is room.',
   'Your home shows the real home of every water (boat, pier, ice camp, beach, raft, ledge...), live, with only the options that fit it.',
   'Colour choices are small round swatches, with the chosen colour named next to the heading.',
   'Every menu page is now organised like the aquarium: the important numbers and the main button first (Sell all, Reset skills...), the sections as tabs at the top, one list that scrolls. Badges show where a reward is waiting.',
   'The Wardrobe shows your angler big, with the categories in Options. Pages keep your place when something changes, and open faster.',
   'Your home is laid out like the aquarium: your home fills the screen, with Options to open Your home and Decorations. Tap a decoration to try it, tap again to buy or place.',
-  'Tablets now get the full phone layout, scaled up to fill the screen, with bigger buttons.',
-  'Your settings now belong to each device: moving your progress to another phone or computer no longer changes this phone’s sound, controls or display settings.',
-  'Frame rate setting (Settings, Display): 30 to save battery, 60, or Max for the smoothest picture your screen can show.',
+  'Tablets and iPads now get the full phone layout, scaled up to fill the screen, with bigger buttons.',
+  'Driftline now plays in landscape on iPhone: hold your iPhone sideways (if you hold it upright, the game pauses and shows you how).',
+  'Your settings now belong to each device: moving your progress to another phone or computer no longer changes this iPhone’s sound, controls or display settings.',
+  'Frame rate setting (Settings, Display): 30 to save battery, or 60 for the smoothest picture.',
   '## Fixes',
-  'Menus now fit every phone: they stay clear of the camera cutout and rounded corners and match the fishing screen on every model.',
+  'Menus now fit every iPhone: they stay clear of the Dynamic Island, the rounded corners and the home bar, and match the fishing screen on every model (the bigger Pro Max screens were cut off under the camera).',
   'Menus open faster: the Aquarium no longer stalls when you open it, and the very first tap of a session no longer pauses while the music loads.',
-  'On smaller phones held sideways, the top bar no longer cuts off "Aquarium".',
-  'Split screen and pop-up windows now use the normal phone layout instead of an older cramped one.',
+  'Split View and Slide Over windows now use the normal phone layout instead of an older cramped one.',
   'One look everywhere: every button, tab, badge and label of the same kind now has the same size and style on every page (buttons came in nine different heights, badges in four sizes); the bottom tabs keep their size when a menu opens.',
   'Long button labels ("Unlock · 1,200,000") stay on one line instead of making a taller button.',
   'Upright, a long "Next goal" stays one row tall and no longer pushes the water down.',
@@ -17780,19 +17804,18 @@ PATCHES.unshift({v:'0.4.8.6.2', name:'Fixes', items:[
   'Smoother on phones with fast screens: the game runs at 60 frames a second unless you pick Max in Settings, Display.',
   'The frame counter (Settings, Display) shows the frames the game draws, plus your screen’s own rate.',
   'Android: full screen stays on when you close the game, and it is the default (turn it off in Settings).']});
-// Android test notes (preview builds only; the live game never shows them). Write what the next test build changes here
-// (spoiler-free); it opens once in the Android test app. Released notes live in notes_release.js.
-const TEST_NOTES={v:'test', label:'Test build · Android', name:'One Look, Easy Aquarium', items:[
+// iPhone test notes (preview builds only; the live game never shows them). Write what the next test build changes here
+// (spoiler-free); it opens once in the iPhone test app. Released notes live in notes_release.js.
+const TEST_NOTES={v:'test', label:'Test build · iPhone', name:'One Look, Easy Aquarium', items:[
   'NEW in this build (0.4.8.6.1+): Android test app opens full screen right away (remove it from the home screen and add it again once); Graphics test in Stats (turn scene parts off, read the counter); phones redraw the angler at most 30x/s (it cost the most per frame); Android full screen comes back on your next tap (it tried on finger-down, which Android refuses); the frame counter shows frames drawn + the screen rate; 0.4.8.6.2 Fixes patch notes; frame rate defaults to 60 on every phone (Android ran at its screen’s 120 and slowed down); side-panel badges never cover names (even 99+); Tester tools in Stats: pearls, levels, fill Fish Log, finish feats, fill cooler, skip 8 hours; Travel no longer greyed out behind an open card; Android remembers full screen when you close the app and starts in full screen; notices on the water sit below the weather and streak chips; patch notes close (pinned button); Aquarium layout restored; fps counter below the streak chip; search fixed (top bar only, opens the right tab); gear Settings icon; Events without repeats; smaller Feats cards; faster menu switching; Trophy wall on one screen; slimmer Tide Pass and Boardwalk; Waters renamed Map; bait descriptions; Bait page (Switch, Buy bait, Special lures) from the top bar; Tackle = Gear; Oddities/Treasures tabs; Aquarium + Home lessons in Quests; fps counter top corner; Quests (goals, lessons, find, help); Bait in the top bar; Home chip; Cooler rework; Oddities in Collection; coins/level/water in one box; Tasks tabs without repeats; Fish Log only from the top bar; Prestige page (Set sail again + Pearl relics); tidy Waters that opens at your water; Fishing renamed Catch; XP bar on Skills; side-panel counts never cover names; menus use the full width with a slim number strip; Skills categories without badges; Rods tabs fixed + tidy presets; small-iPhone cut-offs fixed; smooth Home live view; tank size + clear tank upgrade in the Aquarium; mountains drawn without stripes; Stats has its own side-panel button (and the Level chip); folded side panel centred; top bar never cuts off settings; Settings no longer repeats Save (gift code and backup tools are in Save); summaries no longer repeat numbers.',
   'NEW in this build: fish fight shows a tension ring at the fish with the instruction above it; hints are touch only; homes are never called docks; the layout always switches when you turn the phone; smoother storms at Starfall.',
-  'NEW in this build: Android phones are landscape only (upright pauses the game). Compact Goal chip (opens the right page) and a separate Live chip, plus Tasks and Tide Pass in the top bar. Your home shows the real home of every water. Colour choices are round swatches.',
+  'NEW in this build: Compact Goal chip (opens the right page) and a separate Live chip, plus Tasks and Tide Pass in the top bar. Your home shows the real home of every water. Colour choices are round swatches.',
   'NEW in this build: every menu page works like the aquarium (key numbers and main button first, sections as tabs, one scrolling list, badges where rewards wait). The Wardrobe shows your angler big with the categories in Options. Pages keep your place when they refresh.',
-  'NEW in this build: Your home works like the aquarium (your home on top, Options with Your home and Decorations, tap a card to try it). Tablets now use the phone layout scaled up to fill the screen.',
-  'NEW in this build: settings now belong to this phone and are no longer changed by moving your progress. New Frame rate choice in Settings, Display (30 saves battery, Max uses your screen’s full speed).',
-  'NEW in this build: menus fit every modern phone and stay clear of the camera cutout and corners, the same as the fishing screen. The Aquarium opens faster and the first tap no longer pauses while the music loads. Split screen and small windows now use the normal phone layout.',
+  'NEW in this build: Your home works like the aquarium (your home on top, Options with Your home and Decorations, tap a card to try it). iPads now use the phone layout scaled up to fill the screen.',
+  'NEW in this build: iPhone plays in landscape only (hold it upright and the game pauses with a "turn your iPhone" screen). Settings now belong to this iPhone and are no longer changed by moving your progress. New Frame rate choice in Settings, Display (30 saves battery). Vibration and Full screen are hidden on iPhone because iPhone browsers cannot do them.',
+  'NEW in this build: menus fit every iPhone (Pro Max, Pro, Air, Plus and the base models from the 15 on): they stay clear of the Dynamic Island, corners and home bar, the same as the fishing screen. The Aquarium opens faster and the first tap no longer pauses while the music loads. Split screen and small windows now use the normal phone layout.',
   'One look everywhere: every button, tab, badge and label of the same kind has the same size and style on every page; long button labels stay on one line; upright, a long goal no longer pushes the water down; sideways, page-tab badges sit on the corner.',
   'Menu page tabs (Events, Bounties, Feats...) take every tap and no longer jiggle; section bars no longer slide sideways when stuck to the top; on small phones held sideways the tabs show names only, badges on the corner.',
-  'Full screen stays on: if you left the game in full screen, closing or switching away from the app no longer forgets it; your first tap when you come back puts it back.',
   '## Aquarium and Fish Log',
   'The aquarium tank animates smoothly: it no longer skips frames now and then, and it keeps moving (at a steady pace) while you scroll the list.',
   'The aquarium tank fills the screen. The Options button under it opens a panel with Your tank and Decorate (under the tank when upright, on the right when sideways); Hide closes it and gives the whole space back to the tank. Your phone remembers which you like.',
@@ -17834,6 +17857,7 @@ const TEST_NOTES={v:'test', label:'Test build · Android', name:'One Look, Easy 
   'Tapping a top-bar chip (Fishing at, Cooler, Aquarium, Fish Log) works on the first tap every time.',
   'The live event line in the top bar fits on small phones.',
   'The collapsed side panel shows neat icon buttons in menus too (they were cut off at the screen edge).',
+  'Messages like Claimed, Bought or Hunting no longer stretch into a big box over the screen: they show as a small note at the bottom.',
   '## Your angler',
   'Shoes look like real shoes from the side: a rounded heel, a sole with a heel block, and a toe that slopes down. One foot stands a little ahead of the other.',
   'Bodies have their real depth: the hips and seat fill out under the jacket, so legs no longer look pinned under a wide body.',
@@ -18529,7 +18553,7 @@ offlineIncome(); fillBounties(); ensureDaily(); accrueSpins(); checkFeats(); ref
 if(!S.stats.caught && !S.savedAt) setTimeout(()=>toast('Hold on the water to cast your first line'),600);
 })();
 </script>
-<style>html body span.dlprev.dlprev{transform:none!important;right:10px!important;left:auto!important;top:auto!important;bottom:calc(env(safe-area-inset-bottom) + 84px)!important}@media (orientation:landscape){html body span.dlprev.dlprev{right:auto!important;left:calc(env(safe-area-inset-left) + 22px)!important;bottom:auto!important;top:calc(env(safe-area-inset-top) + 92px)!important}}</style><span class="dlprev" style="position:fixed!important;z-index:30;display:inline-block!important;width:auto!important;height:auto!important;min-height:0!important;max-height:22px!important;white-space:nowrap!important;background:#2a2048cc;color:#ffd59a;border:1px solid #ffd59a88;border-radius:999px;padding:3px 10px!important;margin:0!important;font:700 11px/14px system-ui,sans-serif!important;pointer-events:none;box-sizing:border-box">test build - Android</span>
+<style>html body span.dlprev.dlprev{transform:none!important;right:10px!important;left:auto!important;top:auto!important;bottom:calc(env(safe-area-inset-bottom) + 84px)!important}@media (orientation:landscape){html body span.dlprev.dlprev{right:auto!important;left:calc(env(safe-area-inset-left) + 22px)!important;bottom:auto!important;top:calc(env(safe-area-inset-top) + 92px)!important}}</style><span class="dlprev" style="position:fixed!important;z-index:30;display:inline-block!important;width:auto!important;height:auto!important;min-height:0!important;max-height:22px!important;white-space:nowrap!important;background:#2a2048cc;color:#ffd59a;border:1px solid #ffd59a88;border-radius:999px;padding:3px 10px!important;margin:0!important;font:700 11px/14px system-ui,sans-serif!important;pointer-events:none;box-sizing:border-box">test build - iPhone</span>
 <div id="updbar" hidden style="position:fixed;left:50%;bottom:16px;transform:translateX(-50%);z-index:65;display:flex;gap:10px;align-items:center;background:#10222b;border:1px solid #ffc94d;color:#e6efe8;padding:8px 10px 8px 16px;border-radius:999px;font:700 14px system-ui,sans-serif;box-shadow:0 10px 30px #0008;max-width:calc(100% - 32px)">
   <span>🎣 A new Driftline update is ready <span style="opacity:.7;font-weight:400">· your progress is safe</span></span>
   <button id="updbtn" type="button" style="background:#ff6a3d;color:#1d0d06;border:0;border-radius:999px;padding:6px 14px;font:inherit;cursor:pointer">Update &amp; see what’s new</button>
