@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="DL Test iPhone">
 <script>
-window.DL_BUILD='ios'; window.DL_PREVIEW=true; window.DL_VERSION='2026.11.18-2220';
+window.DL_BUILD='ios'; window.DL_PREVIEW=true; window.DL_VERSION='2026.11.18-2238';
 window.addEventListener('beforeinstallprompt',function(e){ e.preventDefault(); window.__dlInstallPrompt=e; });
 </script>
 </head>
@@ -7371,8 +7371,14 @@ function drawAngler3(c,x,y,s,lk,o={}){
   if(w*h>5e6){ const r=a3Body(c,x,y,s,lk,o,live); if(o.t!=null&&typeof wearFxDraw==='function') wearFxDraw(c,lk,o.t,p=>p,1); return {x:r.hand.x,y:r.hand.y,back:r.back,fingers:()=>a3Fingers(c,r.hand,r.back,r.ra,s,r.sk,r.skD)}; }
   let O=A3OFF.get(c); if(!O){ O={a:document.createElement('canvas'),b:document.createElement('canvas')}; A3OFF.set(c,O); }
   if(O.a.width!==w||O.a.height!==h){ O.a.width=O.b.width=w; O.a.height=O.b.height=h; }
+  /* phones only (director, 2026-11-18: Android 25-38 fps at 60): the lit picture below costs two offscreen canvases and ~8 blend
+     passes, which Android graphics chips pay for with a flush each. On phones it is redrawn at most every 33 ms and reused in between
+     (with its hand positions, so the rod and line still attach), and at once when the fishing state, look, night or size changes. */
+  const mobKey=(live&&typeof MOB==='function'&&MOB())?[w,h,Math.round((o.night||0)*40),o.rim||'',o.glow||'',o.sit?1:0,(typeof G==='object'&&G)?G.st:''].join('|'):null, nowMs=performance.now();
+  const reuse=!!(mobKey&&O.res&&O.key===mobKey&&nowMs-O.at<33);
+  let res; if(reuse) res=O.res; else {
   const ax=O.a.getContext('2d'); ax.setTransform(1,0,0,1,0,0); ax.clearRect(0,0,w,h);
-  const res=a3Body(ax,BX*ps,BT*ps,ps,lk,o,live);
+  res=a3Body(ax,BX*ps,BT*ps,ps,lk,o,live);
   // rim light: the silhouette minus itself shifted toward the front leaves a thin edge on the back and top
   const night=o.night||0, rim=o.rim||(night>.3?'#a9bcff':'#ffe9c8'), d=clamp(1.15*ps,1,2.4), bx=O.b.getContext('2d');
   bx.setTransform(1,0,0,1,0,0); bx.globalCompositeOperation='copy'; bx.drawImage(O.a,0,0); bx.globalCompositeOperation='source-in'; bx.fillStyle=rim; bx.fillRect(0,0,w,h);
@@ -7386,6 +7392,7 @@ function drawAngler3(c,x,y,s,lk,o={}){
   { const vg=ax.createLinearGradient(0,(BT-62)*ps,0,(BT+6)*ps); vg.addColorStop(0,'rgba(255,248,232,'+(.1*(1-night*.7))+')'); vg.addColorStop(.42,'rgba(0,0,0,0)'); vg.addColorStop(1,'rgba(4,8,20,'+(.2+night*.12)+')'); ax.fillStyle=vg; ax.fillRect(0,0,w,h);
     const hg=ax.createLinearGradient((BX-16)*ps,0,(BX+14)*ps,0); hg.addColorStop(0,'rgba(4,8,20,'+(.14+night*.08)+')'); hg.addColorStop(.6,'rgba(0,0,0,0)'); ax.fillStyle=hg; ax.fillRect(0,0,w,h); }
   ax.globalCompositeOperation='source-over';
+  if(mobKey){ O.res=res; O.key=mobKey; O.at=nowMs; } else O.res=null; }
   if(!o.sit&&!o.noShadow){ c.save(); const sg=c.createRadialGradient(x,y+s,0,x,y+s,15*s); sg.addColorStop(0,'rgba(0,6,16,.3)'); sg.addColorStop(1,'rgba(0,6,16,0)'); c.fillStyle=sg; c.beginPath(); c.ellipse(x,y+s,15*s,3.2*s,0,0,7); c.fill(); c.restore(); }
   c.drawImage(O.a,0,0,w,h,x-BX*s,y-BT*s,w/ps*s,h/ps*s);
   // map the hand positions back into the caller's space
@@ -15873,6 +15880,14 @@ html body.phone-app #panel .mb-shnote,html body.phone-land #panel .mb-shnote{fon
   try{ if(isAndroid&&localStorage.getItem('dl-fs')===null){ localStorage.setItem('dl-fs','1');
       const go=()=>{ ['pointerdown','keydown'].forEach(ev=>document.removeEventListener(ev,go,true)); if(!document.fullscreenElement&&document.documentElement.requestFullscreen&&localStorage.getItem('dl-fs-auto')!=='0'){ try{ const p=document.documentElement.requestFullscreen(); if(p&&p.catch) p.catch(()=>{}); }catch(e){} } };
       ['pointerdown','keydown'].forEach(ev=>document.addEventListener(ev,go,true)); } }catch(e){} }
+// Round 3 (director, 2026-11-18: "the full screen fix still doesn't work"): the three places that put full screen back (an_small04
+// and rounds 1-2 above) all tried on pointerdown/keydown. A browser only allows full screen as the result of a finished tap: on touch
+// screens that is pointerup / touchend / click, never pointerdown, so every automatic attempt was refused without a sound (the
+// Settings button worked because it reacts to click). Now: on any finished tap, if full screen is your choice and the page is not
+// in full screen, it goes back (taps on the Full screen button itself are left to that button).
+{ const want3=()=>{ try{ return localStorage.getItem('dl-fs')==='1'&&localStorage.getItem('dl-fs-auto')!=='0'; }catch(e){ return false; } };
+  const back=e=>{ if(!MOB()||document.fullscreenElement||!document.documentElement.requestFullscreen||!want3()) return; if(e&&e.target&&e.target.closest&&e.target.closest('[data-act="fullscreen"]')) return; try{ const p=document.documentElement.requestFullscreen(); if(p&&p.catch) p.catch(()=>{}); }catch(er){} };
+  ['pointerup','touchend','click','keyup'].forEach(ev=>document.addEventListener(ev,back,true)); }
 // =====================================================================
 // Phones, round 7: your active boosts are never hidden behind the buttons (director, 2026-11-18, screenshots: "the bottom left
 // headers cover the background UI behind it"). The boost timers ("+25% Bite speed  0:26", Settings > Boosts on screen) were drawn
@@ -16020,6 +16035,20 @@ const IS_IPHONE=()=>/iPhone|iPod/.test(navigator.userAgent)||(/[?&]test\b/.test(
 // 30 frames. On phones it now shows drawn frames per second, the screen's rate and the slowest gap between drawn frames.
 const MOB_DRAWN=[]; { const _dw=draw; draw=function(now){ const r=_dw.apply(this,arguments); try{ MOB_DRAWN.push(performance.now()); if(MOB_DRAWN.length>240) MOB_DRAWN.shift(); }catch(e){} return r; }; }
 function mobFpsText(screenFps){ const now=performance.now(), d=MOB_DRAWN.filter(t=>now-t<2000); if(d.length<3) return null; let worst=0; for(let i=1;i<d.length;i++) worst=Math.max(worst,d[i]-d[i-1]); const fps=Math.round((d.length-1)*1000/(d[d.length-1]-d[0])); return fps+' fps · screen '+screenFps+' Hz · slowest '+worst.toFixed(1)+' ms'; }
+
+// ---------- test builds only: Graphics test (director, 2026-11-18: Android holds 30 but drops to 25-38 at 60 = each frame costs
+// the phone ~30 ms). Each button switches one part of the water scene off, so the frame counter shows which part is too heavy on
+// that phone. Nothing here exists in the release build (DL_PREVIEW), and every part comes back with one more tap or a restart.
+const GT_PARTS=[['wx','Weather (rain, snow, fog)',['drawWeatherX']],['water','Water shimmer + reflections',['v3water','v3glitter','drawReflect','v3fishRing']],['glow','Lights and glows',['v3glow']],['mist','Mist',['v3mist']],['you','You, pets, dock',['drawAngler3','drawPetStyled','drawDockItem']],['plants','Trees and plants',['v3tree','v3willow','v3reeds','v3bushes','v3flowers','v3leafTree','v3pine','v3snowPine','v3palm']],['lowres','Low resolution (1x)',[]]];
+const GT_OFF=new Set();
+if(window.DL_PREVIEW){
+  const wrap=(name,key)=>{ try{ const f=eval(name); if(typeof f!=='function') return; eval(name+'=function(){ if(GT_OFF.has("'+key+'")) return; return f.apply(this,arguments); }'); }catch(e){} };
+  for(const [k,,fns] of GT_PARTS) for(const n of fns) wrap(n,k);
+  { const _rd=renderDPR; renderDPR=function(w,h){ return GT_OFF.has('lowres')?1:_rd(w,h); }; }
+  const _th=testerHTML; testerHTML=function(){ const base=_th(); if(!MOB()) return base;
+    return base+`<details class="tile st-test" open><summary><b>Graphics test</b> <span class="meta">· turn parts of the water off, then read the frame counter</span></summary><p class="sub">Switch on the frame counter (Settings, Display), set the frame rate to 60, then tap one part at a time and look at the water. A part that makes the counter jump is the heavy one.</p><div class="row" style="gap:6px;flex-wrap:wrap">${GT_PARTS.map(([k,n])=>`<button class="btn${GT_OFF.has(k)?'':' alt'} sm" data-act="gtest" data-k="${k}">${GT_OFF.has(k)?'OFF: ':''}${n}</button>`).join('')}</div></details>`; };
+  const _xa=extraAct2; extraAct2=function(b){ if(b.dataset.act==='gtest'){ const k=b.dataset.k; if(GT_OFF.has(k)) GT_OFF.delete(k); else GT_OFF.add(k); try{ if(typeof V3CACHE!=='undefined'&&V3CACHE) V3CACHE.key=''; }catch(e){} try{ resize(); }catch(e){} toast((GT_OFF.has(k)?'Off: ':'Back on: ')+GT_PARTS.find(p=>p[0]===k)[1]); return 'render'; } return _xa(b); };
+}
 // =====================================================================
 // Phones, round 8: landscape only, on iPhone AND Android phones (director, 2026-11-18: "iPhone versions should just have landscape
 // available... full forced landscape across the board", then "Also push landscape only on android too").
@@ -17778,7 +17807,7 @@ PATCHES.unshift({v:'0.4.8.6.2', name:'Fixes', items:[
 // iPhone test notes (preview builds only; the live game never shows them). Write what the next test build changes here
 // (spoiler-free); it opens once in the iPhone test app. Released notes live in notes_release.js.
 const TEST_NOTES={v:'test', label:'Test build · iPhone', name:'One Look, Easy Aquarium', items:[
-  'NEW in this build (0.4.8.6.1+): the frame counter shows frames drawn + the screen rate; 0.4.8.6.2 Fixes patch notes; frame rate defaults to 60 on every phone (Android ran at its screen’s 120 and slowed down); side-panel badges never cover names (even 99+); Tester tools in Stats: pearls, levels, fill Fish Log, finish feats, fill cooler, skip 8 hours; Travel no longer greyed out behind an open card; Android remembers full screen when you close the app and starts in full screen; notices on the water sit below the weather and streak chips; patch notes close (pinned button); Aquarium layout restored; fps counter below the streak chip; search fixed (top bar only, opens the right tab); gear Settings icon; Events without repeats; smaller Feats cards; faster menu switching; Trophy wall on one screen; slimmer Tide Pass and Boardwalk; Waters renamed Map; bait descriptions; Bait page (Switch, Buy bait, Special lures) from the top bar; Tackle = Gear; Oddities/Treasures tabs; Aquarium + Home lessons in Quests; fps counter top corner; Quests (goals, lessons, find, help); Bait in the top bar; Home chip; Cooler rework; Oddities in Collection; coins/level/water in one box; Tasks tabs without repeats; Fish Log only from the top bar; Prestige page (Set sail again + Pearl relics); tidy Waters that opens at your water; Fishing renamed Catch; XP bar on Skills; side-panel counts never cover names; menus use the full width with a slim number strip; Skills categories without badges; Rods tabs fixed + tidy presets; small-iPhone cut-offs fixed; smooth Home live view; tank size + clear tank upgrade in the Aquarium; mountains drawn without stripes; Stats has its own side-panel button (and the Level chip); folded side panel centred; top bar never cuts off settings; Settings no longer repeats Save (gift code and backup tools are in Save); summaries no longer repeat numbers.',
+  'NEW in this build (0.4.8.6.1+): Android test app opens full screen right away (remove it from the home screen and add it again once); Graphics test in Stats (turn scene parts off, read the counter); phones redraw the angler at most 30x/s (it cost the most per frame); Android full screen comes back on your next tap (it tried on finger-down, which Android refuses); the frame counter shows frames drawn + the screen rate; 0.4.8.6.2 Fixes patch notes; frame rate defaults to 60 on every phone (Android ran at its screen’s 120 and slowed down); side-panel badges never cover names (even 99+); Tester tools in Stats: pearls, levels, fill Fish Log, finish feats, fill cooler, skip 8 hours; Travel no longer greyed out behind an open card; Android remembers full screen when you close the app and starts in full screen; notices on the water sit below the weather and streak chips; patch notes close (pinned button); Aquarium layout restored; fps counter below the streak chip; search fixed (top bar only, opens the right tab); gear Settings icon; Events without repeats; smaller Feats cards; faster menu switching; Trophy wall on one screen; slimmer Tide Pass and Boardwalk; Waters renamed Map; bait descriptions; Bait page (Switch, Buy bait, Special lures) from the top bar; Tackle = Gear; Oddities/Treasures tabs; Aquarium + Home lessons in Quests; fps counter top corner; Quests (goals, lessons, find, help); Bait in the top bar; Home chip; Cooler rework; Oddities in Collection; coins/level/water in one box; Tasks tabs without repeats; Fish Log only from the top bar; Prestige page (Set sail again + Pearl relics); tidy Waters that opens at your water; Fishing renamed Catch; XP bar on Skills; side-panel counts never cover names; menus use the full width with a slim number strip; Skills categories without badges; Rods tabs fixed + tidy presets; small-iPhone cut-offs fixed; smooth Home live view; tank size + clear tank upgrade in the Aquarium; mountains drawn without stripes; Stats has its own side-panel button (and the Level chip); folded side panel centred; top bar never cuts off settings; Settings no longer repeats Save (gift code and backup tools are in Save); summaries no longer repeat numbers.',
   'NEW in this build: fish fight shows a tension ring at the fish with the instruction above it; hints are touch only; homes are never called docks; the layout always switches when you turn the phone; smoother storms at Starfall.',
   'NEW in this build: Compact Goal chip (opens the right page) and a separate Live chip, plus Tasks and Tide Pass in the top bar. Your home shows the real home of every water. Colour choices are round swatches.',
   'NEW in this build: every menu page works like the aquarium (key numbers and main button first, sections as tabs, one scrolling list, badges where rewards wait). The Wardrobe shows your angler big with the categories in Options. Pages keep your place when they refresh.',
