@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="DL Test Android">
 <script>
-window.DL_BUILD='android'; window.DL_PREVIEW=true; window.DL_VERSION='2026.11.19-0136';
+window.DL_BUILD='android'; window.DL_PREVIEW=true; window.DL_VERSION='2026.11.19-0210';
 window.addEventListener('beforeinstallprompt',function(e){ e.preventDefault(); window.__dlInstallPrompt=e; });
 </script>
 </head>
@@ -2791,7 +2791,7 @@ document.addEventListener('keydown',()=>startAudio(),{once:true});
 // Update 1.5: rods & attachments, pet dress-up / petting / bond,
 // daily tasks & gift, patch notes, safe reset, Boardwalk 2.0, quips
 // =====================================================================
-const GAME_VERSION = '0.4.8.6.2';
+const GAME_VERSION = '0.4.8.7';
 const PATCHES = [
 {v:'0.4.7', name:'Full Screen Fix', items:['## PC','The PC layout now shows in full screen too: the one-row header, the clear water with its strip above, the new Fish Log, Feats, Settings and every other PC page. Full screen used to bring back the old layout with the bar at the bottom.']},
 {v:'0.4.6', name:'Hotfix', items:['## PC','Patch notes are a proper reader: the updates you missed are listed on the left, the one you pick on the right with its sections side by side, and Let’s fish! always at the top.','The header stays at the top in narrower windows and with browser zoom (it went back to the bottom under 900 pixels wide). In small windows it turns compact: icon tabs, short counters.','## Everywhere','The tip line no longer shows as an empty bubble, and it hides while a card is open over the water.']},
@@ -6269,7 +6269,7 @@ function v3willow(P,t,hz){ const DP=Math.min(DPR||1,2), bxw=W*.905, x0=bxw-H*.17
   for(let i=0;i<V3WIL_N;i++){ if(!V3WIL.c[i]) V3WIL.c[i]=document.createElement('canvas'); const C=V3WIL.c[i]; if(C.width!==w||C.height!==h){ C.width=w; C.height=h; V3WIL.k=''; } }
   const paint=i=>{ const c=V3WIL.c[i].getContext('2d'); c.setTransform(1,0,0,1,0,0); c.clearRect(0,0,w,h); c.setTransform(DP,0,0,DP,-x0*DP,-y0*DP); v3willowDraw(c,P,t,hz,i); V3WIL.t[i]=t; };
   if(V3WIL.k!==key){ const fresh=V3WIL.k===""; V3WIL.k=key; if(fresh){ for(let i=0;i<V3WIL_N;i++) paint(i); } else V3WIL.t=V3WIL.t.map(()=>-9); } /* first time or a new size: all at once; a new light level: each slice catches up on its turn (3 frames) */
-  else { const i=V3WIL.turn; V3WIL.turn=(i+1)%V3WIL_N; if(Math.abs(t-V3WIL.t[i])>.03) paint(i); }
+  else { const i=V3WIL.turn; V3WIL.turn=(i+1)%V3WIL_N; if(Math.abs(t-V3WIL.t[i])>((typeof MOB==='function'&&MOB())?.25:.03)) paint(i); } /* phones (director, 2026-11-19: Willow Pond was the one water that dragged Android down): each slice repaints at most every 0.25 s; the strands sway about 1 px a second, so they move under 0.3 px between repaints (invisible), and the tree costs about an eighth of the work per frame. (A bend of a finished picture instead was tried and rejected: it also slides the trunk.) */
   for(let i=0;i<V3WIL_N;i++) g.drawImage(V3WIL.c[i],x0,y0,w/DP,h/DP); }
 function v3willowDraw(c,P,t,hz,part){ /* part: undefined = the whole tree; 0, 1, 2 = a third of it in drawing order (0 includes the trunk, limbs and crown) */
   const ALL=part===undefined, BASE=ALL||part===0;
@@ -15105,6 +15105,73 @@ function riverWheel(P,t,hz,mx,mb,mw,mh,FX){ const R=mh*.62, xL=mx-mw/2, cx=xL-R*
     for(let i=0;i<9;i++){ const u=i/8, al=.3+.3*Math.sin(t*4.5+i*2.1); g.fillStyle=v3rgba(wc,al); g.beginPath(); g.ellipse(cx-R*.95+u*R*1.9,hz+1.5+Math.sin(u*Math.PI)*R*.07,R*.14,R*.05,0,0,7); g.fill(); }
     for(let i=0;i<4;i++){ const k=((t*.9+i/4)%1); g.strokeStyle=v3rgba(wc,.35*(1-k)); g.lineWidth=1; g.beginPath(); g.ellipse(cx-R*.2-k*R*1.4,hz+3+k*R*.12,R*(.25+k*.4),R*(.05+k*.06),0,0,7); g.stroke(); } } }
 // =====================================================================
+// Shared efficiency fixes, every platform (director, 2026-11-19: "Why would we want to just fix this for phones, if it doesn't
+// effect quality negatively?"). Each fix here draws the same picture with less work, so PC, Android and iPhone all get it.
+// They started in src/mobile/polish08.js (phones only) and moved here. Phone-only trade-offs (things that do change the picture a
+// little, like fewer light steps) stay in the phone files.
+// =====================================================================
+const EFF_MOB=()=>typeof MOB==='function'&&MOB();
+
+/* 1) Wrong scenery after opening a menu (director, 2026-11-18: "clicking settings and exiting brought up the wrong map for a bit"):
+   a Map thumbnail for another water reused the live scenery canvases (and the Willow Pond slices), so the real water could show the
+   other water's scenery until the light changed. A thumbnail now always gets fresh canvases; the live ones are never painted over.
+   Thumbnails are only made while the Map page is open (the only place they show): Settings and other menus no longer pay for them. */
+{ const _vt=v3Thumb; v3Thumb=function(id){ if(V3THUMB[id]) return _vt(id); const c=V3CACHE, p=V3PREV; V3CACHE=null; V3PREV=null; const wl={c:V3WIL.c,t:V3WIL.t,k:V3WIL.k,turn:V3WIL.turn}; V3WIL.c=[]; V3WIL.t=[-9,-9,-9]; V3WIL.k="";
+    try{ return _vt(id); } finally{ V3CACHE=c; V3PREV=p; V3WIL.c=wl.c; V3WIL.t=wl.t; V3WIL.k=wl.k; V3WIL.turn=wl.turn; try{ v3palette.k=null; }catch(e){} } }; }
+{ const _tn=thumbNext; thumbNext=function(){ if(S.tab!=='map'){ setTimeout(thumbNext,1500); return; } return _tn.apply(this,arguments); }; }
+
+/* 2) Dock decorations: every decoration went through litDraw (its own offscreen canvas plus several light passes) every frame, even a
+   chair that never changes. Each item is now kept as a finished picture, by WHAT it is (id, size, light level, front/back), drawn
+   wherever the dock or boat carries it. Still items are lit once and reused until the light level changes; moving ones (flags,
+   campfire, wind chime...) are drawn fresh every frame on PC and refreshed 10 times a second on phones. Same box as litDraw uses. */
+{ const _dd=drawDockItem, DC=new Map(), DA={}; /* DA[id]: true = this decoration moves, false = still */ for(const k of ['birdhouse','bunting','campfire','cottage','minilight','mug','plants','radio','shipwheel','tideflag','windchime']) DA[k]=true; /* from the drawing code (cases that use the clock); other items are tested once */
+  drawDockItem=function(c,id,x,y,s,t,night,back){ if(c!==g) return _dd.apply(this,arguments); const mob=EFF_MOB(); if(DA[id]&&!mob) return _dd.apply(this,arguments);
+    const m=c.getTransform(), k=Math.hypot(m.a,m.b); if(m.b||m.c||!(k>0)||!(s>0)) return _dd.apply(this,arguments);
+    const big=id==='cottage', w=(big?46:44)*s, hg=(big?64:96)*s, bx=-w, by=-hg, bw=2*w, bh=hg+6*s, pw=Math.ceil(bw*k), ph=Math.ceil(bh*k);
+    if(!(pw>2&&ph>2)||pw*ph>4e6) return _dd.apply(this,arguments);
+    const key=id+'|'+Math.round(s*200)+'|'+Math.round((night||0)*20)+'|'+(back?1:0)+'|'+pw+'x'+ph, now=performance.now();
+    let e=DC.get(key); if(!e){ e={c:document.createElement('canvas'),at:-1e9,seen:now}; DC.set(key,e); if(DC.size>60){ for(const [kk,v] of DC) if(now-v.seen>3000) DC.delete(kk); } }
+    e.seen=now;
+    const paint=(cv2,tt)=>{ if(cv2.width!==pw||cv2.height!==ph){ cv2.width=pw; cv2.height=ph; } const tx=cv2.getContext('2d'); tx.setTransform(1,0,0,1,0,0); tx.clearRect(0,0,pw,ph); tx.setTransform(k,0,0,k,-bx*k,-by*k); _dd(tx,id,0,0,s,tt,night,back); };
+    if(DA[id]===undefined){ try{ const t2=document.createElement('canvas'); paint(e.c,t||0); paint(t2,(t||0)+.37); const a=e.c.getContext('2d').getImageData(0,0,pw,ph).data, b=t2.getContext('2d').getImageData(0,0,pw,ph).data; let same=true; for(let i=0;i<a.length;i+=16){ if(a[i]!==b[i]||a[i+3]!==b[i+3]){ same=false; break; } } DA[id]=!same; e.at=now; }catch(er){ DA[id]=true; }
+      if(DA[id]&&!mob){ DC.delete(key); return _dd.apply(this,arguments); } }
+    else if(e.at<0||(DA[id]&&now-e.at>=100)){ paint(e.c,t); e.at=now; }
+    c.drawImage(e.c,x+bx,y+by,bw,bh); }; }
+
+/* 3) Glows: v3glow (108 uses: lanterns, lamps, Starfall's star whale, blossoms, sun and moon) built a new radial gradient on every
+   call, over 30 a frame at Starfall. Now a ready-made soft dot per colour (same centre colour, same fade to nothing) is stamped at the
+   same size and strength (256 px on PC for big screens, 128 px on phones). */
+{ const _gl=v3glow, GS=new Map();
+  const parse=col=>{ col=String(col).trim(); let m=/^rgba?\(([^)]+)\)$/i.exec(col); if(m){ const p=m[1].split(',').map(s=>s.trim()); if(p.length<3) return null; const a=p[3]!==undefined?parseFloat(p[3]):1; return isFinite(a)?{rgb:p[0]+','+p[1]+','+p[2],a}:null; }
+    m=/^#([0-9a-f]{6})$/i.exec(col); if(m){ const v=parseInt(m[1],16); return {rgb:((v>>16)&255)+','+((v>>8)&255)+','+(v&255),a:1}; } return null; };
+  v3glow=function(c,x,y,r,col,a){ if(!(r>0)) return _gl.apply(this,arguments); const p=parse(col); if(!p) return _gl.apply(this,arguments);
+    const S2=EFF_MOB()?128:256, H=S2/2, key=p.rgb+'|'+S2;
+    let s=GS.get(key); if(!s){ s=document.createElement('canvas'); s.width=s.height=S2; const sx=s.getContext('2d'), gr=sx.createRadialGradient(H,H,0,H,H,H); gr.addColorStop(0,'rgba('+p.rgb+',1)'); gr.addColorStop(1,'rgba(0,0,0,0)'); sx.fillStyle=gr; sx.fillRect(0,0,S2,S2); if(GS.size>96) GS.clear(); GS.set(key,s); }
+    const ga=a*p.a; if(!(ga>0)) return; c.save(); c.globalAlpha=Math.min(1,ga); c.drawImage(s,x-r,y-r,r*2,r*2); c.restore(); }; }
+
+/* 4) Starfall's sky events: sfEvent counted every event from the start of the session on every call (twice a frame), a little more
+   work the longer you play. It now resumes from where the last call got to (same events, same timing). */
+{ const _sf=sfEvent; let cs=0, cn=0;
+  sfEvent=function(t){ if(!(t>=cs)){ cs=0; cn=0; } let start=cs, n=cn; while(true){ const gap=18+((Math.sin(n*91.7)*43758.5)%1+1)%1*22; if(start+gap>t) break; start+=gap; n++; } cs=start; cn=n;
+    const kind=Math.floor((((Math.sin(n*37.3)*12345.6)%1+1)%1)*5); return {kind,into:t-start,n}; }; }
+
+/* 5) Tinted pets: a canvas colour filter makes every brush stroke of the pet go through the filter separately. The pet is now drawn
+   once without the tint into a picture at screen resolution, then put on the water through the filter in one step. */
+{ const _dp=drawPetStyled; let PC=null;
+  drawPetStyled=function(c,id,x,y,s,t,night,lkOver){ if(c!==g||id==='daxniko') return _dp.apply(this,arguments); /* Dax & Niko tint each dog on its own (never the hearts or z's): left as before */ let lk, f='none'; try{ lk=lkOver||petLook(id); f=tintFilter(lk,t); }catch(e){ return _dp.apply(this,arguments); }
+    if(!f||f==='none') return _dp.apply(this,arguments);
+    const m=c.getTransform(), k=Math.hypot(m.a,m.b); if(m.b||m.c||!(m.a>0)||!(m.d>0)||!(s>0)) return _dp.apply(this,arguments); /* mirrored (facing left) or rotated: as before */
+    const bw=170*s, bh=150*s, bx=-bw/2, by=-bh*.82, pw=Math.ceil(bw*k), ph=Math.ceil(bh*k); if(pw*ph>4e6) return _dp.apply(this,arguments);
+    if(!PC) PC=document.createElement('canvas'); if(PC.width<pw||PC.height<ph){ PC.width=Math.max(PC.width,pw); PC.height=Math.max(PC.height,ph); }
+    const px=PC.getContext('2d'); px.setTransform(1,0,0,1,0,0); px.clearRect(0,0,PC.width,PC.height); px.setTransform(k,0,0,k,-(x+bx)*k,-(y+by)*k);
+    const r=_dp(px,id,x,y,s,t,night,Object.assign({},lk,{tint:undefined}));
+    c.save(); c.setTransform(1,0,0,1,0,0); c.filter=f; c.drawImage(PC,0,0,pw,ph,m.a*(x+bx)+m.e,m.d*(y+by)+m.f,pw,ph); c.restore(); return r; }; }
+
+/* 6) The top bar (hud): it ran every frame (up to 120 times a second), reading the clock, weather, coins and badges and building a
+   comparison key each time, though what it shows changes at most once a second. It now runs at most 10 times a second, and at
+   once whenever something asks for a refresh (lastHud cleared) or the fishing state changes (hints follow the line right away). */
+{ const _hd=hud; let at=0, st=''; hud=function(){ const now=performance.now(); if(lastHud!==''&&G.st===st&&now-at<100) return; at=now; st=G.st; return _hd.apply(this,arguments); }; }
+// =====================================================================
 // Test notes (shared helper). Each platform's own notes file (src/pc, src/android, src/ios) calls addTestNotes(...) with
 // its text. In a preview build the notes go on top of the patch notes list and open once per device and notes text; the
 // live game ignores them. They carry no version number (the director picks it at release).
@@ -15120,7 +15187,11 @@ function addTestNotes(n){ try{ if(!window.DL_PREVIEW||!n||!Array.isArray(n.items
 // Phones (Android + iPhone), round 6 performance (director, 2026-11-18: "Aquarium tab on Android the only screen that
 // experiences lag while scrolling", "reeling in storms on Android has a severely impacted frame rate").
 // =====================================================================
-const MOB=()=>{ const b=document.body.classList; return b.contains('phone-app')||b.contains('phone-land'); };
+/* MOB(): "is the phone layout on?" was re-read from the page's classes on every call, hundreds of times a frame from the per-frame
+   phone paths (2026-11-19, redundancies list C11). It is now a stored answer, refreshed only when the body's classes change. */
+const MOB=(()=>{ let v=null; const upd=()=>{ const b=document.body&&document.body.classList; v=!!b&&(b.contains('phone-app')||b.contains('phone-land')); };
+  try{ if(document.body&&window.MutationObserver) new MutationObserver(upd).observe(document.body,{attributes:true,attributeFilter:['class']}); }catch(e){}
+  return ()=>{ if(v===null) upd(); return v; }; })();
 
 // 1) a menu covers the whole phone screen, so the fishing scene behind it is not drawn (the aquarium tank, the page and its
 //    scrolling get the whole frame). The line waits while a menu is open, so nothing on the water is missed.
@@ -15149,7 +15220,7 @@ let MOB_DPR_CAP=2;
   // there instead of slow again), and the first second after a water change is not counted (one-off loading work).
   const steps=[2,1.75,1.5,1.3,1.15]; let i=0, acc=0, n=0, slow=0, fast=0, last=0, loc='', skipUntil=0; const byLoc={};
   const setStep=k=>{ k=Math.max(0,Math.min(steps.length-1,k)); if(k===i) return; i=k; MOB_DPR_CAP=steps[i]; try{ resize(); }catch(e){} };
-  const tick=t=>{ requestAnimationFrame(tick); if(!MOB()||document.hidden||MENU_OPEN){ last=0; return; }
+  const tick=t=>{ if(!MOB()||document.hidden||MENU_OPEN){ last=0; return; }
     if(S.loc!==loc){ if(loc) byLoc[loc]=i; loc=S.loc; acc=0; n=0; slow=0; fast=0; skipUntil=t+3000; if(byLoc[loc]!=null) setStep(byLoc[loc]); }
     if(t<skipUntil){ last=t; return; }
     if(last){ const dt=t-last; if(dt<200){ acc+=dt; n++; } } last=t;
@@ -15157,7 +15228,7 @@ let MOB_DPR_CAP=2;
       if(avg>slowT){ slow++; fast=0; if(slow>=2){ slow=0; setStep(i+(avg>30?2:1)); byLoc[loc]=i; } }
       else if(avg<fastT){ fast++; slow=0; if(fast>=6){ fast=0; setStep(i-1); byLoc[loc]=i; } }
       else { slow=0; fast=0; } } };
-  requestAnimationFrame(tick);
+  { const _fr=frame; frame=function(now){ try{ tick(now); }catch(e){} return _fr.apply(this,arguments); }; } /* runs inside the game loop (redundancies list B7): it used to keep its own animation-frame loop just to time frames */
   if(/[?&]test\b/.test(location.search)) window.__mobperf=()=>({cap:MOB_DPR_CAP, step:i, byLoc:Object.assign({},byLoc)}); }
 
 // 4) live events never move the game frame (director: "some live events on Android move the game frame as the counter moves
@@ -15986,7 +16057,7 @@ const IS_IPHONE=()=>/iPhone|iPod/.test(navigator.userAgent)||(/[?&]test\b/.test(
 { let dev=null, cur=null; const done=new WeakSet(), _mig=migrate, DEF=fresh().settings||{};
   const read=()=>{ try{ const r=localStorage.getItem(DEV_STORE); return r?JSON.parse(r):null; }catch(e){ return null; } };
   const pick=st=>{ const o={}; if(st) for(const k of DEV_KEYS) if(st[k]!==undefined) o[k]=st[k]; return o; };
-  const write=()=>{ try{ localStorage.setItem(DEV_STORE,JSON.stringify(dev)); }catch(e){} };
+  let lastJ=null; const write=()=>{ try{ const j=JSON.stringify(dev); if(j===lastJ) return; localStorage.setItem(DEV_STORE,j); lastJ=j; }catch(e){} }; /* only when the settings changed (redundancies list B10: every save rewrote them) */
   const apply=s=>{ if(s&&s.settings&&dev){ for(const k of DEV_KEYS){ if(dev[k]!==undefined) s.settings[k]=dev[k]; else if(DEF[k]!==undefined) s.settings[k]=DEF[k]; else delete s.settings[k]; } } return s; };
   /* first run after this update: this device keeps the settings it has now */
   dev=read(); if(!dev||typeof dev!=="object"){ dev=pick(S.settings); write(); } apply(S); cur=S;
@@ -17026,7 +17097,7 @@ html body.phone-app.dl-fish .hud > #mbgoal .mbg-bar{bottom:2px}
   setInterval(tick,500); setTimeout(tick,50); addEventListener('resize',()=>{ last=''; setTimeout(tick,200); }); }
 document.head.insertAdjacentHTML('beforeend',`<style>
 html body.phone-land .hud > #mbgoal,html body.phone-land .hud > #mblive,html body.phone-land .hud > .mb-x{flex:0 1 auto!important}
-html body.phone-app .hud > .mb-x{display:none!important}
+html body.phone-app .hud > .mb-x:not(#mbhome){display:none!important} /* the narrow layout (split-screen windows; phones themselves are landscape-only) hides the extra chips, but never Home: it is the only way into your home on phones (2026-11-19) */
 html body.phone-land .hud > .mb-x[hidden]{display:none!important}
 html body.phone-land .hud > .mb-x.ready{border-color:#ffd36a!important;box-shadow:0 0 0 1px #ffd36a66!important}
 html body.phone-land .hud > .mb-x.ready .lbl{color:#ffd36a!important}
@@ -17090,6 +17161,21 @@ document.head.insertAdjacentHTML('beforeend',`<style>
 html body.phone-land .hud > #mbgoal,html body.phone-app .hud > #mbgoal,html body.phone-land #goalchip,html body.phone-app #goalchip{display:none!important}
 html body.phone-land #baitqk,html body.phone-app #baitqk{display:none!important}
 html body.phone-land .hud > #mbbait > b{max-width:120px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+</style>`);
+/* Narrow layout (split-screen windows; phones themselves are landscape-only), 2026-11-19: the bar was already two rows, but Home was
+   hidden (the only way into your home on phones) and the Coins / Level / Fishing at box was squeezed into two columns, cutting all
+   of its text. Now: the info box takes the whole first row (gear on the right), Cooler, Aquarium, Home and Fish Log share the second
+   row (search on the right), every label readable. */
+document.head.insertAdjacentHTML('beforeend',`<style>
+html body.phone-app.dl-fish .hud{grid-template-columns:repeat(4,minmax(0,1fr)) 32px!important}
+html body.phone-app.dl-fish .hud > .mb-stat8{grid-column:1 / 5!important;grid-row:1!important}
+html body.phone-app.dl-fish .hud > .mb-stat8 > .stat{flex:1 1 0!important}
+html body.phone-app.dl-fish .hud > .st-cool{grid-column:1!important;grid-row:2!important}
+html body.phone-app.dl-fish .hud > .st-aq{grid-column:2!important;grid-row:2!important}
+html body.phone-app.dl-fish .hud > #mbhome{grid-column:3!important;grid-row:2!important}
+html body.phone-app.dl-fish .hud > .st-log{grid-column:4!important;grid-row:2!important}
+html body.phone-app.dl-fish .hud #settingsbtn{grid-column:5!important;grid-row:1!important}
+html body.phone-app.dl-fish .hud #searchbtn{grid-column:5!important;grid-row:2!important}
 </style>`);
 // =====================================================================
 // Phones and tablets, round 8: the fish fight is easy to watch (director, 2026-11-18: "right now the fish fight is too hard to watch on
@@ -17435,48 +17521,8 @@ document.head.insertAdjacentHTML('beforeend',`<style>html body.phone-land #stage
    it clear of "Challenges" (the longest name) on the shortest rail (667x375, 32 px buttons). */
 document.head.insertAdjacentHTML('beforeend',`<style>html body.phone-land #catdock .cdb .cddot[class],html body.phone-land #menuov .secb .secdot[class],html body.phone-app #catdock .cdb .cddot[class],html body.phone-app #menuov .secb .secdot[class]{padding:0 3px!important;letter-spacing:-.4px}html body.phone-land #catdock .cdb .cddot,html body.phone-app #catdock .cdb .cddot{right:-6px!important}</style>`);
 
-/* Wrong scenery after opening a menu (director, 2026-11-18: "clicking settings and exiting brought up the wrong map for a bit"): water
-   thumbnails for the Map page are drawn on the game canvas while any menu is open. v3land then reused the live scenery picture's
-   canvas for the other water (Starfall) and the restore only put the object back, so the real water showed Starfall's scenery until
-   the light changed. Phones: a thumbnail always gets fresh scenery canvases (the live picture is never painted over), and thumbnails
-   are only made while the Map page is open (the only place they show): Settings and other menus no longer pay for them. */
-{ const _vt=v3Thumb; v3Thumb=function(id){ if(!MOB()||V3THUMB[id]) return _vt(id); const c=V3CACHE, p=V3PREV; V3CACHE=null; V3PREV=null; try{ return _vt(id); } finally{ V3CACHE=c; V3PREV=p; try{ v3palette.k=null; }catch(e){} } }; }
-{ const _tn=thumbNext; thumbNext=function(){ if(MOB()&&S.tab!=='map'){ setTimeout(thumbNext,1500); return; } return _tn.apply(this,arguments); }; }
+/* The scenery-thumbnail fix, the dock decoration cache, glow dots, Starfall sky events and tinted pets moved to src/cd_efficiency.js (2026-11-19): they draw the same picture with less work, so every platform gets them. */
 
-/* Saves with home decorations were slow on Android (director, 2026-11-18: a fresh install ran at 60 fps / 15-20 ms; the same phone
-   after loading a PC save ran at 25 fps / 50-60 ms). Every decoration on the dock is drawn through litDraw (ab_decor.js): its own
-   offscreen canvas plus several blend passes for the light, every frame, and Android graphics chips pay a flush per canvas switch.
-   A fresh save has no decorations placed; a well-decorated home multiplies the cost. Phones: a lit item that stays put on the water
-   canvas is kept as a finished picture and reused for up to 66 ms (redrawn ~15 times a second); anything that moves (new position)
-   is drawn as before. PC is untouched. */
-{ const _ld=litDraw, LC=new Map();
-  litDraw=function(c,bx0,by0,bx1,by1,fn,o){ if(!(MOB()&&c===g)) return _ld.apply(this,arguments);
-    const m=c.getTransform(), sc=Math.hypot(m.a,m.b), pw=Math.ceil((bx1-bx0)*sc), ph=Math.ceil((by1-by0)*sc);
-    if(!(pw>2&&ph>2)||pw*ph>6e6||m.b||m.c) return _ld.apply(this,arguments);
-    const key=Math.round(bx0*2)+'|'+Math.round(by0*2)+'|'+pw+'|'+ph+'|'+(o?o.top+o.rim+o.rimA:''), now=performance.now(), dx=m.a*bx0+m.e, dy=m.d*by0+m.f;
-    let e=LC.get(key);
-    if(e&&e.c&&now-e.at<66){ c.save(); c.setTransform(1,0,0,1,0,0); c.drawImage(e.c,dx,dy); c.restore(); e.seen=now; return; }
-    if(!e||now-e.seen>250){ LC.set(key,{c:null,at:0,seen:now}); if(LC.size>80){ for(const [k,v] of LC) if(now-v.seen>2000) LC.delete(k); } return _ld.apply(this,arguments); } /* first sighting: draw as usual */
-    if(!e.c) e.c=document.createElement('canvas'); if(e.c.width!==pw||e.c.height!==ph){ e.c.width=pw; e.c.height=ph; }
-    const tx=e.c.getContext('2d'); tx.setTransform(1,0,0,1,0,0); tx.clearRect(0,0,pw,ph); tx.setTransform(sc,0,0,sc,-bx0*sc,-by0*sc);
-    _ld(tx,bx0,by0,bx1,by1,fn,o); e.at=now; e.seen=now;
-    c.save(); c.setTransform(1,0,0,1,0,0); c.drawImage(e.c,dx,dy); c.restore(); }; }
-
-/* Boats and floating docks (director, 2026-11-19: "anything with open water and a boat or different dock tanked his fps"): there every
-   decoration bobs with the platform, so the position-keyed litDraw cache above never hit and each item was re-lit from scratch every
-   frame. Phones: each dock item is cached by WHAT it is (id, size, night level, front/back), not where it is: its lit picture is
-   refreshed at most every 66 ms (flags, campfires and wind chimes keep moving) and drawn wherever the platform carries it this frame.
-   Same box as litDraw uses, so the picture is identical. PC is untouched. */
-{ const _dd=drawDockItem, DC=new Map();
-  drawDockItem=function(c,id,x,y,s,t,night,back){ if(!(MOB()&&c===g)) return _dd.apply(this,arguments);
-    const m=c.getTransform(), k=Math.hypot(m.a,m.b); if(m.b||m.c||!(k>0)||!(s>0)) return _dd.apply(this,arguments);
-    const big=id==='cottage', w=(big?46:44)*s, hg=(big?64:96)*s, bx=-w, by=-hg, bw=2*w, bh=hg+6*s, pw=Math.ceil(bw*k), ph=Math.ceil(bh*k);
-    if(!(pw>2&&ph>2)||pw*ph>4e6) return _dd.apply(this,arguments);
-    const key=id+'|'+Math.round(s*200)+'|'+Math.round((night||0)*20)+'|'+(back?1:0)+'|'+pw+'x'+ph, now=performance.now();
-    let e=DC.get(key); if(!e){ e={c:document.createElement('canvas'),at:-1e9,seen:now}; DC.set(key,e); if(DC.size>60){ for(const [kk,v] of DC) if(now-v.seen>3000) DC.delete(kk); } }
-    e.seen=now;
-    if(now-e.at>=66){ if(e.c.width!==pw||e.c.height!==ph){ e.c.width=pw; e.c.height=ph; } const tx=e.c.getContext('2d'); tx.setTransform(1,0,0,1,0,0); tx.clearRect(0,0,pw,ph); tx.setTransform(k,0,0,k,-bx*k,-by*k); _dd(tx,id,0,0,s,t,night,back); e.at=now; }
-    c.drawImage(e.c,x+bx,y+by,bw,bh); }; }
 
 /* Light and weather transitions on phones (director, 2026-11-19: drops to 30-40 fps "and keeps fluctuating back up to 60", worst in
    weather). Every light step rebuilds the whole scenery picture (v3land: 10-30 ms on a desktop, several times that on a phone); with
@@ -17485,32 +17531,6 @@ document.head.insertAdjacentHTML('beforeend',`<style>html body.phone-land #catdo
    light still flows smoothly but the scenery is rebuilt about a fifth as often. PC keeps its own steps. */
 { const _st=v3steps, _fd=v3fade; v3steps=function(){ return (MOB()&&!document.body.classList.contains('pch-on'))?[5,3,2]:_st(); }; v3fade=function(){ return (MOB()&&!document.body.classList.contains('pch-on'))?5:_fd(); }; }
 
-/* "Fix it, don't leave it" round (director, 2026-11-19). Phones only; PC is untouched.
-   1) Glows: v3glow (108 uses: lanterns, lamps, Starfall's star whale, blossoms, sun and moon) built a new radial gradient on every
-      call, over 30 a frame at Starfall. Phones stamp a ready-made soft dot per colour (128 px, same centre colour, same fade to
-      nothing) at the same size and strength. */
-{ const _gl=v3glow, GS=new Map();
-  const parse=col=>{ col=String(col).trim(); let m=/^rgba?\(([^)]+)\)$/i.exec(col); if(m){ const p=m[1].split(',').map(s=>s.trim()); if(p.length<3) return null; const a=p[3]!==undefined?parseFloat(p[3]):1; return isFinite(a)?{rgb:p[0]+','+p[1]+','+p[2],a}:null; }
-    m=/^#([0-9a-f]{6})$/i.exec(col); if(m){ const v=parseInt(m[1],16); return {rgb:((v>>16)&255)+','+((v>>8)&255)+','+(v&255),a:1}; } return null; };
-  v3glow=function(c,x,y,r,col,a){ if(!MOB()||!(r>0)) return _gl.apply(this,arguments); const p=parse(col); if(!p) return _gl.apply(this,arguments);
-    let s=GS.get(p.rgb); if(!s){ s=document.createElement('canvas'); s.width=s.height=128; const sx=s.getContext('2d'), gr=sx.createRadialGradient(64,64,0,64,64,64); gr.addColorStop(0,'rgba('+p.rgb+',1)'); gr.addColorStop(1,'rgba(0,0,0,0)'); sx.fillStyle=gr; sx.fillRect(0,0,128,128); if(GS.size>96) GS.clear(); GS.set(p.rgb,s); }
-    const ga=a*p.a; if(!(ga>0)) return; c.save(); c.globalAlpha=Math.min(1,ga); c.drawImage(s,x-r,y-r,r*2,r*2); c.restore(); }; }
-/* 2) Starfall's sky events: sfEvent counted every event from the start of the session on every call (twice a frame), a little more
-      work the longer you play. Phones resume from where the last call got to (same events, same timing). */
-{ const _sf=sfEvent; let cs=0, cn=0;
-  sfEvent=function(t){ if(!MOB()) return _sf(t); if(!(t>=cs)){ cs=0; cn=0; } let start=cs, n=cn; while(true){ const gap=18+((Math.sin(n*91.7)*43758.5)%1+1)%1*22; if(start+gap>t) break; start+=gap; n++; } cs=start; cn=n;
-    const kind=Math.floor((((Math.sin(n*37.3)*12345.6)%1+1)%1)*5); return {kind,into:t-start,n}; }; }
-/* 3) Tinted pets: a canvas colour filter makes every brush stroke of the pet go through the filter separately. Phones draw the pet
-      once without the tint into a small picture, then put it on the water through the filter in one step. */
-{ const _dp=drawPetStyled; let PC=null;
-  drawPetStyled=function(c,id,x,y,s,t,night,lkOver){ if(!MOB()||c!==g||id==='daxniko') return _dp.apply(this,arguments); /* Dax & Niko tint each dog on its own (never the hearts or z's): left as before */ let lk, f='none'; try{ lk=lkOver||petLook(id); f=tintFilter(lk,t); }catch(e){ return _dp.apply(this,arguments); }
-    if(!f||f==='none') return _dp.apply(this,arguments);
-    const m=c.getTransform(), k=Math.hypot(m.a,m.b); if(m.b||m.c||!(m.a>0)||!(m.d>0)||!(s>0)) return _dp.apply(this,arguments); /* mirrored (facing left) or rotated: as before */
-    const bw=170*s, bh=150*s, bx=-bw/2, by=-bh*.82, pw=Math.ceil(bw*k), ph=Math.ceil(bh*k); if(pw*ph>4e6) return _dp.apply(this,arguments);
-    if(!PC) PC=document.createElement('canvas'); if(PC.width<pw||PC.height<ph){ PC.width=Math.max(PC.width,pw); PC.height=Math.max(PC.height,ph); }
-    const px=PC.getContext('2d'); px.setTransform(1,0,0,1,0,0); px.clearRect(0,0,PC.width,PC.height); px.setTransform(k,0,0,k,-(x+bx)*k,-(y+by)*k);
-    const r=_dp(px,id,x,y,s,t,night,Object.assign({},lk,{tint:undefined}));
-    c.save(); c.setTransform(1,0,0,1,0,0); c.filter=f; c.drawImage(PC,0,0,pw,ph,m.a*(x+bx)+m.e,m.d*(y+by)+m.f,pw,ph); c.restore(); return r; }; }
 // =====================================================================
 // Phones: the SET MEASUREMENTS (director, 2026-11-18: "I want standards and set measurements for each platform going forward,
 // I'm tired of the same mistakes"). The numbers are written down in docs/PLATFORM_DESIGN.md ("Phone frame: set measurements")
@@ -17882,6 +17902,10 @@ PATCHES.unshift({v:'0.4.8.6.2', name:'Fixes', items:[
   'Android draws a steady 60 frames a second (also on 120 Hz screens) and iPhone runs at its natural rate; the frame-rate choice is gone from Settings.',
   'The frame counter (Settings, Display) shows the frames the game draws, plus your screen’s own rate.',
   'Android: the game is always full screen, like on iPhone: the installed game opens without the bars, and a tap brings full screen back if they appear.']});
+PATCHES.unshift({v:'0.4.8.7', name:'Lighter and Smoother', items:[
+  'Willow Pond runs much smoother on phones.',
+  'Less work on every frame, everything looks the same: lights and glows, still home decorations, coloured pets, the top bar and Starfall’s sky all cost less to draw.',
+  'In narrow windows (split-screen), the top bar shows Home again and your coins, level and water are readable instead of cut off.']});
 // Android test notes (preview builds only; the live game never shows them). Write what the next test build changes here
 // (spoiler-free, one short line per change, curly apostrophes only). The card opens once per device whenever the text changes.
 // Released notes live in notes_release.js.
@@ -17896,9 +17920,12 @@ const TEST_NOTES={v:'test', label:'Test build · Android', name:'Natural frame r
   'Smoother on boats and floating docks: decorations that bob with the water are no longer re-lit every frame.',
   'Switching waters no longer leaves the game stuck at a lower sharpness: the automatic resolution comes back up once the phone keeps up again (it could not on a 60 Hz screen).',
   'Stardust is now always the best rare bait at Starfall Lake (odds ×2.5 there, was ×2): cheap minnows could beat it by day.',
+  'Willow Pond is much lighter on phones: the big willow repaints far less often (its sway is unchanged), and still home decorations are drawn once instead of 15 times a second.',
   'Lighter on phones everywhere: lanterns, lamps, glows and Starfall’s star whale are drawn with ready-made soft lights (they look the same), and coloured pets no longer slow the game down.',
   'The frame counter also shows the current water sharpness (res 2x = full, lower = the game is easing off).',
   'Smoother dusk, dawn and weather changes: the scenery’s light now changes in fewer, softer steps on phones, so the game rebuilds it far less often.',
+  'The top bar updates 10 times a second instead of every frame (the numbers you see are the same), a little less work every frame.',
+  'In narrow windows (split-screen), the top bar shows Home again (it was hidden there) and your coins, level and water are readable instead of cut off.',
   'Tester tools (Stats), Graphics test: the angler, pets, home decorations, moving cosmetic effects and oddities now have their own buttons. If a moved save makes the game slow, turn them off one at a time and watch the frame counter.']};
 addTestNotes(TEST_NOTES);
 // =====================================================================
@@ -18038,8 +18065,8 @@ ui(){ QA.sys='UI';
     // feats are paused while the games run: a hat won at the duck pond can finish "Hat trick" (2,000 coins), which is the feat paying, not the game
     const cf=checkFeats; checkFeats=function(){}; try{ for(let i=0;i<300;i++){ act('duckagain'); act('duckpick',{i:i%6}); duck=null; act('buyscratch'); act('scratchall'); scratch=null; act('hilostart'); act('hilo',{k:hilo&&hilo.card<=7?'hi':'lo'}); if(hilo&&!hilo.done&&hilo.streak) act('hilocash'); hilo=null; cost+=B*5; } } finally{ checkFeats=cf; }
     if(S.money!==m0-cost) e.push('games paid '+fmt(S.money-(m0-cost))+' coins');
-    const seen=new Set(); let r, guard=0; while((r=bwWearPrize(guard%3===0))&&guard++<2000){ const key=r.wear.kind+':'+r.wear.id; if(seen.has(key)) e.push('duplicate '+key); seen.add(key); if((r.wear.kind==='petacc'&&r.wear.id in PRIZE_ACC)||(r.wear.kind==='pettint'&&r.wear.id in PRIZE_TINT)) e.push('prize-counter item '+key); }
-    if(!seen.size) e.push('no wear prizes at all'); if(bwWearPool().length||bwPool().some(x=>!bwOwned(x))) e.push('pool not empty after drawing everything');
+    const left=bwWearPool().length; /* wear left to win after the games (a save that owns everything has none: then there is nothing to draw) */ const seen=new Set(); let r, guard=0; while((r=bwWearPrize(guard%3===0))&&guard++<2000){ const key=r.wear.kind+':'+r.wear.id; if(seen.has(key)) e.push('duplicate '+key); seen.add(key); if((r.wear.kind==='petacc'&&r.wear.id in PRIZE_ACC)||(r.wear.kind==='pettint'&&r.wear.id in PRIZE_TINT)) e.push('prize-counter item '+key); }
+    if(!seen.size&&left) e.push('no wear prizes at all'); if(bwWearPool().length||bwPool().some(x=>!bwOwned(x))) e.push('pool not empty after drawing everything');
     const t0=S.tickets; wheelPrize(WHEEL.findIndex(w=>w[0]==='JACKPOT')); if(S.tickets!==t0+400) e.push('jackpot with everything owned gave '+(S.tickets-t0)+' tickets');
     for(const k of ['small','big']){ S.tokens[k]=1; crateRes=null; act('crate',{k,free:1}); if(!crateRes||!crateRes.title) e.push(k+' crate gave nothing'); } crateRes=null;
     return e.length?{ok:false,detail:e.slice(0,6).join(' | ')}:{ok:true,detail:seen.size+' wear prizes drawn, all different'}; });
