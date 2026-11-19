@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="DL Test iPhone">
 <script>
-window.DL_BUILD='ios'; window.DL_PREVIEW=true; window.DL_VERSION='2026.11.18-2340';
+window.DL_BUILD='ios'; window.DL_PREVIEW=true; window.DL_VERSION='2026.11.18-2354';
 window.addEventListener('beforeinstallprompt',function(e){ e.preventDefault(); window.__dlInstallPrompt=e; });
 </script>
 </head>
@@ -16013,7 +16013,7 @@ const IS_IPHONE=()=>/iPhone|iPod/.test(navigator.userAgent)||(/[?&]test\b/.test(
 
 // ---------- frame rate: the game's work runs only as often as the chosen rate (the display keeps its own timing) ----------
 { const _fr=frame; let shown=0;
-  const capMs=()=>0; /* phones run naturally at the screen's own rate, iPhone and Android alike, no setting (director, 2026-11-18: "don't do the 60 fps rule, let them run naturally"; it ran fine before); any old saved fpsCap is ignored */
+  const capMs=()=>IS_IPHONE()?0:1000/60; /* Android draws 60 frames a second (on a 120 Hz screen too: director 2026-11-18, "his default was always working perfectly fine"), iPhone runs at its natural rate; no frame-rate setting on either phone, any old saved fpsCap is ignored */
   frame=function(now){ if(DEV_GUARD) DEV_GUARD(); const cap=MOB()?capMs():0; if(cap&&shown&&now>=shown&&now-shown<cap-2){ requestAnimationFrame(frame); return; } shown=(cap&&shown&&now>=shown&&now-shown<cap*2)?shown+cap:now; return _fr.apply(this,arguments); }; }
 
 // ---------- the Settings page on phones ----------
@@ -17837,14 +17837,14 @@ PATCHES.unshift({v:'0.4.8.6.2', name:'Fixes', items:[
   'Much smoother with a decorated home: decorations on the dock no longer slow the game down (a well-decorated home could halve the frame rate on Android).',
   'Opening and closing a menu no longer shows another water’s scenery for a moment.',
   'After moving your progress from another device, patch notes you already saw on this phone don’t come back.',
-  'Phones run at their screen’s own rate; the frame-rate choice is gone from Settings.',
+  'Android draws a steady 60 frames a second (also on 120 Hz screens) and iPhone runs at its natural rate; the frame-rate choice is gone from Settings.',
   'The frame counter (Settings, Display) shows the frames the game draws, plus your screen’s own rate.',
   'Android: the game is always full screen, like on iPhone: the installed game opens without the bars, and a tap brings full screen back if they appear.']});
 // iPhone test notes (preview builds only; the live game never shows them). Write what the next test build changes here
 // (spoiler-free, one short line per change, curly apostrophes only). The card opens once per device whenever the text changes.
 // Released notes live in notes_release.js.
 const TEST_NOTES={v:'test', label:'Test build · iPhone', name:'Natural frame rate, Settings fix', items:[
-  'Phones run at their screen’s natural rate again, iPhone and Android alike, with no frame-rate choice in Settings.',
+  'Android draws a steady 60 frames a second again (also on 120 Hz screens), iPhone runs at its natural rate. No frame-rate choice in Settings.',
   'Android stays automatically full screen, like iPhone.',
   'Opening and closing Settings (or any menu) no longer shows another water’s scenery for a moment.',
   'Water pictures for the Map are only made while the Map is open, so other menus stay light.',
