@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="DL Test Android">
 <script>
-window.DL_BUILD='android'; window.DL_PREVIEW=true; window.DL_VERSION='2026.11.19-0129';
+window.DL_BUILD='android'; window.DL_PREVIEW=true; window.DL_VERSION='2026.11.19-0136';
 window.addEventListener('beforeinstallprompt',function(e){ e.preventDefault(); window.__dlInstallPrompt=e; });
 </script>
 </head>
@@ -859,7 +859,7 @@ const BAIT = {
   berries:{name:'Wild Berries',  speed:1.45,rare:.5,  pack:10, price:600,  loc:'river', locMul:5, note:'Sweet and sticky: odds ×5 at Stonebrook River.'},
   goldchum:{name:'Golden Chum',  speed:2,   rare:1.6, pack:10, price:9000, note:'The good stuff. Fast bites and great odds anywhere.'},
   lavaworm:{name:'Lava Worms',   speed:1.6, rare:1.2, pack:10, price:20000, loc:'ember', note:'Heat-proof worms: odds ×2 at Ember Springs.'},
-  stardust:{name:'Stardust',     speed:1.7, rare:1.4, pack:10, price:40000, loc:'starfall', note:'A pinch of the sky: odds ×2 at Starfall Lake.'},
+  stardust:{name:'Stardust',     speed:1.7, rare:1.4, pack:10, price:40000, loc:'starfall', locMul:2.5, note:'A pinch of the sky: odds ×2.5 at Starfall Lake.'},
   mythbait:{name:'Myth Bait',    speed:1.6, rare:1.5, pack:3,  price:0, scales:25, legend:3, note:'Bought with Scales. Legendary and rarer fish ×3.'},
   spinner:{name:'Spinners',      speed:1.2, rare:.3,  pack:10, price:300,  trophy:.5, note:'A flashy blade: +50% trophy-size chance.'},
   glow:   {name:'Glow Lures',    speed:1.5, rare:.6,  pack:10, price:400,  note:'Much better odds. Even better at night.'},
@@ -17875,6 +17875,7 @@ PATCHES.unshift({v:'0.4.8.6.2', name:'Fixes', items:[
   'The update message only appears when there really is an update (it kept coming back on phones).',
   'Much smoother with a decorated home: decorations on the dock (and on boats and floating docks) no longer slow the game down.',
   'Smoother fights, storms, dusk, dawn and weather changes on phones.',
+  'Stardust is now always the best rare bait at Starfall Lake (odds ×2.5 there).',
   'Lighter on phones: glowing lights (lanterns, lamps, Starfall’s sky) and coloured pets cost far less to draw, and the game no longer stays at a lower sharpness after switching waters.',
   'Opening and closing a menu no longer shows another water’s scenery for a moment.',
   'After moving your progress from another device, patch notes you already saw on this phone don’t come back.',
@@ -17894,6 +17895,7 @@ const TEST_NOTES={v:'test', label:'Test build · Android', name:'Natural frame r
   'Smoother fights and storms on phones: the red danger glow on the fight ring and the rain ripples on the water are much cheaper to draw.',
   'Smoother on boats and floating docks: decorations that bob with the water are no longer re-lit every frame.',
   'Switching waters no longer leaves the game stuck at a lower sharpness: the automatic resolution comes back up once the phone keeps up again (it could not on a 60 Hz screen).',
+  'Stardust is now always the best rare bait at Starfall Lake (odds ×2.5 there, was ×2): cheap minnows could beat it by day.',
   'Lighter on phones everywhere: lanterns, lamps, glows and Starfall’s star whale are drawn with ready-made soft lights (they look the same), and coloured pets no longer slow the game down.',
   'The frame counter also shows the current water sharpness (res 2x = full, lower = the game is easing off).',
   'Smoother dusk, dawn and weather changes: the scenery’s light now changes in fewer, softer steps on phones, so the game rebuilds it far less often.',
