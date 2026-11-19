@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="DL Test iPhone">
 <script>
-window.DL_BUILD='ios'; window.DL_PREVIEW=true; window.DL_VERSION='2026.11.19-1004';
+window.DL_BUILD='ios'; window.DL_PREVIEW=true; window.DL_VERSION='2026.11.19-1025';
 window.addEventListener('beforeinstallprompt',function(e){ e.preventDefault(); window.__dlInstallPrompt=e; });
 </script>
 </head>
@@ -873,7 +873,7 @@ const BAIT = {
   berries:{name:'Wild Berries',  speed:1.45,rare:.5,  pack:10, price:600,  loc:'river', locMul:5, note:'Sweet and sticky: odds ×5 at Stonebrook River.'},
   goldchum:{name:'Golden Chum',  speed:2,   rare:1.6, pack:10, price:9000, note:'The good stuff. Fast bites and great odds anywhere.'},
   lavaworm:{name:'Lava Worms',   speed:1.6, rare:1.2, pack:10, price:20000, loc:'ember', note:'Heat-proof worms: odds ×2 at Ember Springs.'},
-  stardust:{name:'Stardust',     speed:1.7, rare:1.4, pack:10, price:40000, loc:'starfall', locMul:2.8, note:'A pinch of the sky: odds ×2.8 at Starfall Lake.'} /* 0.4.9: 2.5 lost to Live Minnows at Starfall by day on a maxed save (QA) */,
+  stardust:{name:'Stardust',     speed:1.7, rare:1.4, pack:10, price:40000, loc:'starfall', locMul:3, note:'A pinch of the sky: odds ×3 at Starfall Lake.'} /* 0.4.9: 2.5 lost to Live Minnows at Starfall by day on a maxed save (QA) */,
   mythbait:{name:'Myth Bait',    speed:1.6, rare:1.5, pack:3,  price:0, scales:25, legend:3, note:'Bought with Scales. Legendary and rarer fish ×3.'},
   spinner:{name:'Spinners',      speed:1.2, rare:.3,  pack:10, price:300,  trophy:.5, note:'A flashy blade: +50% trophy-size chance.'},
   glow:   {name:'Glow Lures',    speed:1.5, rare:.6,  pack:10, price:400,  note:'Much better odds. Even better at night.'},
@@ -884,6 +884,15 @@ const BAIT = {
   stinky: {name:'Stinky Cheese', speed:2.6, rare:.1,  junk:true, note:'Found as junk. Bites come very fast.'},
   disco:  {name:'Disco Lures',   speed:1.4, rare:.5,  junk:true, shiny:3, note:'Found as junk. Shiny fish ×3.'},
   magnet: {name:'Magnet Lures',  speed:1.2, rare:0,   junk:true, treasure:4, note:'Found as junk. Junk and treasure ×4.'},
+  /* 0.4.9 [12] favourite foods (prices, fans and favourites are worked out in cf_foods.js) */
+  mayfly:  {name:'Mayflies',       speed:1.25, rare:.1,  pack:10, price:100, food:true, meat:false, note:'Light and lively: bites come a little faster.'},
+  leech:   {name:'Leeches',        speed:1.1,  rare:.15, pack:10, price:100, food:true, meat:true, calm:.15, note:'They hold on: tempers rise 15% slower.'},
+  krill:   {name:'Krill',          speed:1.2,  rare:.1,  pack:10, price:100, food:true, meat:null, note:'Everyone eats krill: liked by fish of every kind.'},
+  sardine: {name:'Sardine Chunks', speed:1.15, rare:.2,  pack:10, price:100, food:true, meat:true, trophy:.15, note:'Oily and strong: +15% trophy-size chance.'},
+  frog:    {name:'Frog Lures',     speed:1.1,  rare:.2,  pack:10, price:100, food:true, meat:true, note:'A splashy lure for hunters.'},
+  glowworm:{name:'Glow Worms',     speed:1.15, rare:.15, pack:10, price:100, food:true, meat:false, shiny:1.2, note:'A soft glow: shiny fish ×1.2.'},
+  seaweed: {name:'Seaweed',        speed:1.3,  rare:0,   pack:10, price:100, food:true, meat:false, note:'Cheap greens: bites come faster.'},
+  crab:    {name:'Crab Bits',      speed:1.1,  rare:.25, pack:10, price:100, food:true, meat:true, note:'A rich treat for bottom feeders and hunters.'},
   golden: {name:'Golden Lures',  speed:1.6, rare:2.5, junk:true, note:'Found as junk. Enormous rare odds.'},
 };
 const PERKS = {
@@ -909,6 +918,12 @@ const PERKS = {
   tidewalker:{name:'Tidewalker',    max:10, per:'+6% Tide Pass XP', d:'The tide carries you further.'},
   hybrid:   {name:'Odd Genes',      max:9,  per:'+0.1% hybrid chance', d:'Now and then a fish has the weight of another fish from the same waters. Up to 1%.'},
   dozer:    {name:'Lazy Days',      max:5,  per:'Rest mode bites come sooner', d:'While resting, fish bite in 30 s to 3 min at full rank (3 to 10 min to start).'},
+  /* 0.4.9 [15] (director: "More skills. More ways to get skill points") */
+  grappler: {name:'Grappler',       max:5,  per:'Rare fish hold back 4% less while you reel', d:'Strong hands for the big ones.'},
+  snagwise: {name:'Snag Sense',     max:5,  per:'Oddities strain the line 8% less', d:'You feel a snag before it bites.'},
+  gourmet:  {name:'Gourmet',        max:5,  per:'Favourite foods pull 6% harder', d:'You know exactly what every fish likes.'},
+  nibbler:  {name:'Candy Maker',    max:5,  per:'+4% chance that scrapping gives Nibbles', d:'Nothing goes to waste.'},
+  prismkeeper:{name:'Prism Keeper', max:5,  per:'Titled shinies lift your other fish 2% more', d:'Your titled shinies shine for everyone.'},
 };
 const WEATHERS = [
   {k:'Clear',  w:31, note:'Calm skies. Nothing special.'},
@@ -1469,7 +1484,11 @@ const tempMult = () => Math.max(.25, (1 - .06*pr('softtouch')) * (1 - bonus('cal
 const farAt = () => .8 - .02*pr('caster');
 const hotRate = () => (1 + .1*pr('reader') + .2*S.gear.finder + bonus('hot')) * (relic('compass')?1.4:1);
 const streakCap = () => .5 + .1*pr('streaker');
-const ptsTotal = () => (S.lvl-1) + S.bonusPts;
+/* [15] more ways to earn skill points: +1 for every 25 species in your Fish Log, +2 for every water whose Fish Log is complete (worked out
+   from the Fish Log, so nothing extra is saved and nothing can be lost; cached until the Fish Log changes) */
+let LOGPTS_K=-1, LOGPTS_V=0, LOGPTS_S=null;
+function logPts(){ const n=Object.keys(S.journal||{}).length; if(n!==LOGPTS_K||LOGPTS_S!==S){ LOGPTS_K=n; LOGPTS_S=S; const found=SP.filter(s=>S.journal[s.id]).length, done=LOCS.filter(L=>{ const a=SP.filter(s=>s.loc===L.id); return a.length&&a.every(s=>S.journal[s.id]); }).length; LOGPTS_V=Math.floor(found/25)+2*done; } return LOGPTS_V; }
+const ptsTotal = () => (S.lvl-1) + S.bonusPts + logPts();
 const ptsSpent = () => Object.values(S.perks).reduce((a,b)=>a+b,0);
 const ptsFree = () => ptsTotal() - ptsSpent();
 const activeBuffs = () => { const t=Date.now(); return S.buffs.filter(b=>b.until>t); };
@@ -1846,13 +1865,13 @@ function surgeTick(dt,f){ if(G.surge){ G.surge.t+=dt; const s=G.surge;
     else if(s.phase==='calm'){ G.run=false; G.runT=Math.max(G.runT,.3); if(s.t>=.95){ s.phase='done'; G.ev='jump'; G.evDur=1; G.evT=2.5; splash(G.bob.x,G.bob.y,22); sfx.jump(); if(V3ON) vib([40,30,80]); G.surge=null; } }
     return; }
   const frac=G.d/G.d0, n=G.surgeN||0, at=n===0?.62:.28, max=f.sp.r>=5||f.shiny===2?2:1;
-  if(n<max && frac<at && G.fightT>1.2){ G.surgeN=n+1; G.surge={phase:'run',t:0,dur:rnd(1.8,2.4)}; G.run=true; G.ev=null; splash(G.bob.x,G.bob.y,26); sfx.warn(); setTimeout(()=>sfx.warn(),140); if(V3ON) vib([70,40,70]); } }
+  if(n<max && frac<at && G.fightT>1.2){ G.surgeN=n+1; G.surge={phase:'run',t:0,dur:rnd(1.8,2.4)*(maxed('grappler')?.7:1)}; G.run=true; G.ev=null; splash(G.bob.x,G.bob.y,26); sfx.warn(); setTimeout(()=>sfx.warn(),140); if(V3ON) vib([70,40,70]); } }
 // 0.4.9 (director, 2026-11-19: "Oddities don't fight, they get snagged and by continuing to reel you risk breaking the line"):
 // an oddity or hat comes in as dead weight. Now and then it catches on the bottom ("snag") and gains nothing; reeling without
 // a pause builds tension until the line snaps, so short pulls bring it home.
 function snagFight(dt){ const reel=reelSpeed(), rin=V3ON?reelInput(dt):(G.hold?1:0), rdt=dt*rin, odt=dt*(1-rin); if(!G.fightT) G.evT=rnd(2.2,3.6); G.fightT=(G.fightT||0)+dt; G.run=false;
-  if(G.ev==='snag'){ G.evDur-=dt; if(G.evDur<=0){ G.ev=null; G.evT=rnd(1.6,3.4); } } else { G.ev=null; G.evT-=dt; if(G.evT<=0){ G.ev='snag'; G.evDur=rnd(.6,1.2); sfx.warn(); } }
-  if(rin>0){ if(G.ev!=='snag') G.d -= reel*.6*rdt; G.strain=(G.strain||0)+rdt; G.ten += (G.ev==='snag'?70:12+4*G.strain)*tensionMult()*rdt; G.tickT-=rdt; if(G.tickT<=0){ G.tickT=.07; sfx.tick(); } }
+  if(G.ev==='snag'){ G.evDur-=dt; if(G.evDur<=0){ G.ev=null; G.evT=rnd(1.6,3.4); } } else { G.ev=null; G.evT-=dt; if(G.evT<=0){ G.ev='snag'; G.evDur=rnd(.6,1.2)*(maxed('snagwise')?.5:1); sfx.warn(); } }
+  if(rin>0){ if(G.ev!=='snag') G.d -= reel*.6*rdt; G.strain=(G.strain||0)+rdt; G.ten += (G.ev==='snag'?70:12+4*G.strain)*tensionMult()*(1-rodBonus('snag'))*(1-.08*pr('snagwise'))*rdt; /* [14] Snag Guard, [15] Snag Sense */ G.tickT-=rdt; if(G.tickT<=0){ G.tickT=.07; sfx.tick(); } }
   if(rin<1){ G.ten=Math.max(0,G.ten-60*odt); G.strain=Math.max(0,(G.strain||0)-2*odt); }
   if(G.ten>75 && rin>0){ G.warnT-=dt; if(G.warnT<=0){ G.warnT=.25; sfx.warn(); if(V3ON) vib(15); } }
   const frac=clamp(G.d/G.d0,0,1.6), x0=W*.24, x1=castX(G.lastCast); G.bob.x = x0+(x1-x0)*Math.min(frac,1.25)+(G.ev==='snag'?Math.sin(performance.now()/40)*1.5:0); G.bob.y=waterY(G.bob.x);
@@ -1877,7 +1896,7 @@ function fight(dt){
     // 0.3.2: while the fish runs, reeling only holds the line (none is gained) and strains it much harder
     /* 0.4.9: a fish holds against your reel by rank and voyage, relative to your reel speed: a fresh rare fish keeps you still
        during a run and a fresh legendary or mythic takes line even while you reel; between runs a fresh rare fish slows you */
-    const hold = G.run ? .35-(.1+.09*rk)*Math.sqrt(V)*(.4+.6*G.sta) : 1-.06*rk*Math.sqrt(V)*G.sta;
+    const grip=(1-rodBonus('grip'))*(1-.04*pr('grappler')); /* [14] Fighter's Grip, [15] Grappler */ const hold = G.run ? .35-(.1+.09*rk)*Math.sqrt(V)*(.4+.6*G.sta)*grip : 1-.06*rk*Math.sqrt(V)*G.sta*grip;
     G.d -= reel*reelK*rdt*(B.drag?.75:1)*hold;
     const rr = G.run ? Math.max(ratio, (.2+.12*rk)*V) : ratio; /* reeling into a rare fish's run strains any line, however strong */
     let add = (G.run?95*rr:22*ratio)*tired*(B.heavy?1.35:1);
@@ -1918,14 +1937,14 @@ const PRISM = {rainbow:{n:'Rainbow',c:'#ff7ad8'}, starry:{n:'Starry',c:'#9ab8ff'
    +30%), and every different species + title ever caught adds +1% coins on every voyage (up to +20%). */
 const TITLE_BUFFS = {rainbow:{keys:['shiny','sell','xp'], aura:.06, what:'money'}, starry:{keys:['rare','hot','bite'], aura:.06, what:'catching'}, spectral:{keys:['reel','tension','calm'], aura:.06, what:'fighting'}, ancient:{keys:['tank','trophy','treasure'], aura:.10, what:'collecting'}};
 const TITLE_AURA_CAP=.3, TITLE_COIN=.01, TITLE_COIN_CAP=.2;
-const titleAura = () => { let a=0; for(const f of S.tank) if(f.sh===2&&TITLE_BUFFS[f.pv]) a+=TITLE_BUFFS[f.pv].aura; return Math.min(TITLE_AURA_CAP,a); };
+const titleAura = () => { let a=0; for(const f of S.tank) if(f.sh===2&&TITLE_BUFFS[f.pv]) a+=TITLE_BUFFS[f.pv].aura+.02*pr('prismkeeper'); return Math.min(TITLE_AURA_CAP+(maxed('prismkeeper')?.1:0),a); };
 const titleLegacy = () => Math.min(TITLE_COIN_CAP, TITLE_COIN*Object.keys(S.titled||{}).length);
 const PRISM_KEYS = Object.keys(PRISM);
 const PRISM_SHARE = .06;        // share of shiny rolls that come up prismatic instead
 const PRISM_VALUE = 15;         // value multiplier (shiny is ×4)
 const HYBRID_IN_RANGE = [2,2.5,3,3.5,4,5]; // [23] a hybrid inside its own normal weight range: value and aquarium income ×, by rarity
 const HYBRID_BASE = .001;       // 0.1%, up to 1% with the Odd Genes skill
-const hybridChance = () => HYBRID_BASE*(1+pr('hybrid'))*(pr('hybrid')>=9?2:1);
+const hybridChance = () => HYBRID_BASE*(1+pr('hybrid'))*(pr('hybrid')>=9?2:1)*(1+rodBonus('hybrid')); /* [14] Twin Hook */
 const PRED_RX = /pike|musky|muskie|bass|gar|barracuda|shark|tuna|grouper|cod|walleye|zander|trout|salmon|snakehead|catfish|wolf|viper|angler|marlin|swordfish|wahoo|kingfish|mackerel|eel|moray|piranha|perch|char|taimen|arapaima|dragon|fang|leviathan|maw/;
 function isPredator(sp){ return sp.r>=1 && (sp.aggr>=.55 || sp.shape==='s' || PRED_RX.test(sp.id)); }
 function preyPool(pred,pool){ return pool.filter(s=>s.id!==pred.id && s.max<=Math.max(pred.min*.7,pred.max*.2) && s.r<=Math.max(1,pred.r)); }
@@ -3331,6 +3350,12 @@ const ATTS = [
  ['magnet','Magnet Tip','treasure',[.2,.4,.7],'Junk and treasure stick to it.'],
  ['feather','Feather Fly','trophy',[.1,.2,.35],'Big fish can’t resist a fancy feather.'],
  ['whistle','Calm Whistle','calm',[.08,.15,.25],'A soothing little tune. Tempers cool.'],
+ /* 0.4.9 [14] (director: "a few more rod attachments that represent some of the newer fishing systems") */
+ ['snagguard','Snag Guard','snag',[.15,.3,.5],'Oddities snag and strain the line less.'],
+ ['scentbead','Scent Bead','fav',[.1,.2,.35],'A fish’s favourite food pulls even harder.'],
+ ['twinhook','Twin Hook','hybrid',[.15,.3,.5],'More hybrids bite.'],
+ ['nibpouch','Nibble Pouch','nib',[.05,.1,.15],'Scrapping a fish gives Nibbles more often.'],
+ ['grip','Fighter’s Grip','grip',[.08,.15,.25],'Rare fish hold back less while you reel.'],
 ].map(a=>({id:a[0],name:a[1],k:a[2],v:a[3],d:a[4]}));
 const ATT_I = Object.fromEntries(ATTS.map(a=>[a.id,a]));
 const ATT_COST = [[1500,0],[12000,10],[60000,60]];
@@ -3794,6 +3819,11 @@ const MASTERY_FX = {
   petpal:'Petting sometimes earns a little gift from your pet (once an hour).',
   streaker:'A lost fish only halves your streak instead of ending it.',
   nightowl:'Night fish also bite at dawn.',
+  grappler:'Legendary and mythic surges are 30% shorter.',
+  snagwise:'Snags last half as long.',
+  gourmet:'Every Fish Log favourite food is shown.',
+  nibbler:'+1 Nibble from every successful scrap.',
+  prismkeeper:'The titled lift can reach +40% instead of +30%.',
 };
 const offlineCap = () => maxed('keeper') ? 16*60 : OFFLINE_CAP_MIN;
 function renderSkills2(P){ const free=ptsFree(), cost=50*S.lvl;
@@ -3801,7 +3831,7 @@ function renderSkills2(P){ const free=ptsFree(), cost=50*S.lvl;
     return `<div class="tile ${cur?'done':''}" style="${locked?'opacity:.55':''}"><div class="row spread"><h4>${T.name} <span class="meta">· level ${T.lvl}</span></h4>${cur?`<span class="badge g">${SPEC_TIERS[ti].opts.find(o=>o[0]===cur)[1]}</span>`:locked?'<span class="meta">Locked</span>':'<span class="badge">Choose one</span>'}</div>
      <div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(180px,1fr));margin-top:6px">${T.opts.map(o=>{ const on=cur===o[0];
        return `<button class="spec ${on?'on':''}" data-act="spec" data-k="${ti}:${o[0]}" ${locked||on||(cur&&S.money<specFee(ti))?'disabled':''}><b>${o[1]}</b><span class="up">▲ ${o[2]}</span><span class="down">▼ ${o[3]}</span>${cur&&!on&&!locked?`<span class="meta">Switch · ${fmt(specFee(ti))} coins</span>`:''}</button>`; }).join('')}</div></div>`; };
-  P.innerHTML=`<div class="row spread"><div><h2>Skills</h2><p class="sub">Two kinds of growth. <b>Paths</b> are big specialties, one per tier. <b>Skills</b> are small steady gains, and each one unlocks a special effect when fully learned.</p></div>
+  P.innerHTML=`<div class="row spread"><div><h2>Skills</h2><p class="sub">Two kinds of growth. <b>Paths</b> are big specialties, one per tier. <b>Skills</b> are small steady gains, and each one unlocks a special effect when fully learned. Skill points come from levels, feats and your Fish Log (1 for every 25 species, 2 for every water you complete).</p></div>
    <div class="row"><div style="text-align:right"><div class="pts">${free}</div><div class="sub">skill points</div></div><button class="btn alt" data-act="respec" ${ptsSpent()&&S.money>=cost?'':'disabled'}>Reset skills · <span class="coin">${fmt(cost)}</span></button></div></div>
    <div class="grid">`+Object.entries(PERKS).map(([k,p])=>{ const r=pr(k), mx=r>=p.max;
     return `<div class="tile ${mx?'done':''}"><div class="row spread"><h4>${p.name}</h4><span class="meta">Rank ${r} / ${p.max}</span></div>
@@ -10508,7 +10538,7 @@ applySections = function(){ _applySections_0(); const P=$('panel'); if(!P) retur
     more.addEventListener('click',e=>{ e.stopPropagation(); featsAll=true; apply(); }); grid.after(more); P.querySelector('.sect-nav')&&P.querySelector('.sect-nav').addEventListener('click',()=>setTimeout(apply,0)); apply(); } };
 document.head.insertAdjacentHTML('beforeend',`<style>.tint-dot{display:inline-block;width:11px;height:11px;border-radius:50%;margin-right:6px;vertical-align:-1px;box-shadow:inset 0 0 0 1px #0004}</style>`);
 // ---------- Skills in sections, Save tidied into sections, one Settings entry (the button at the top) ----------
-const PERK_GROUPS=[['Catching',['patience','caster','reader','nightowl','weatherwise']],['Rare finds',['lucky','trophy','hybrid','scavenger']],['Fighting',['steady','strong','softtouch','reflex']],['Coins & XP',['haggler','streaker','naturalist','tidewalker','derbypro']],['Aquarium & pets',['keeper','aquarist','petpal','dozer']]];
+const PERK_GROUPS=[['Catching',['patience','caster','reader','nightowl','weatherwise']],['Rare finds',['lucky','trophy','hybrid','scavenger','gourmet']],['Fighting',['steady','strong','softtouch','reflex','grappler','snagwise']],['Coins & XP',['haggler','streaker','naturalist','tidewalker','derbypro']],['Aquarium & pets',['keeper','aquarist','petpal','dozer','nibbler','prismkeeper']]];
 const _applySections_1 = applySections;
 applySections = function(){ _applySections_1(); const P=$('panel'); if(!P) return;
   if(S.tab==='skills'){ const grid=[...P.children].find(c=>c.classList.contains('grid')); if(!grid) return; const T=[...grid.children]; const idOf=t=>{ const b=t.querySelector('[data-act="perk"]'); return b?b.dataset.k:''; };
@@ -15162,7 +15192,7 @@ function riverWheel(P,t,hz,mx,mb,mw,mh,FX){ const R=mh*.62, xL=mx-mw/2, cx=xL-R*
 // =====================================================================
 const NIB_ODDS=[1,1,.5,1/3,.25,.25], NIB_KEEP=.5, NIB_MAX_BUFFS=5, NIB_STEP=10, NIB_BIG=30, NIB_ADD=.1, NIB_ADD_BIG=.5, NIB_BOOST=.15;
 const nibOf = id => (S.nib&&S.nib[id])||0;
-const nibOdds = f => { const sp=SPI[f.id]; return sp?NIB_ODDS[Math.min(5,sp.r)]:0; };
+const nibOdds = f => { const sp=SPI[f.id]; return sp?Math.min(1,NIB_ODDS[Math.min(5,sp.r)]+rodBonus('nib')+.04*pr('nibbler')):0; }; /* [14] Nibble Pouch adds to the chance */
 const nibAmount = f => 1+(f.sh?2:0)+(f.hy?2:0)+(f.sh===2?2:0);
 const nibIncome = fed => 1+.08*Math.pow(fed||0,.8);
 const nibBuffCount = f => (f.ab?1:0)+(f.ab2?1:0)+((f.abx&&f.abx.length)||0);
@@ -15179,7 +15209,7 @@ const NIB_WORD = n => n+' Nibble'+(n===1?'':'s');
 let NIB_ANIM=null;
 function nibScrap(i){ const f=S.cooler[i]; if(!f||!SPI[f.id]) return 'skip'; const sp=SPI[f.id], ok=Math.random()<nibOdds(f); S.cooler.splice(i,1);
   S.stats.scrapped=(S.stats.scrapped||0)+1;
-  if(ok){ const n=nibAmount(f); S.nib=S.nib||{}; S.nib[sp.id]=nibOf(sp.id)+n; sfx.coin(); toast('Scrapped: +'+NIB_WORD(n)+' for '+sp.name+'. Feed them to a '+sp.name+' in your Aquarium.'); }
+  if(ok){ const n=nibAmount(f)+(maxed('nibbler')?1:0); S.nib=S.nib||{}; S.nib[sp.id]=nibOf(sp.id)+n; sfx.coin(); toast('Scrapped: +'+NIB_WORD(n)+' for '+sp.name+'. Feed them to a '+sp.name+' in your Aquarium.'); }
   else toast('Scrapped the '+sp.name+', but no Nibbles this time.');
   return 'render'; }
 function nibFeed(i){ const f=S.tank[i]; if(!f||!SPI[f.id]||nibOf(f.id)<1) return 'skip'; const sp=SPI[f.id]; accrue();
@@ -15205,6 +15235,37 @@ function nibScrapBtn(f,i){ const p=Math.round(nibOdds(f)*100), n=nibAmount(f), s
 function nibFeedBtn(f,i){ const n=nibOf(f.id); if(!n&&!f.fed) return ''; return `<button class="btn ${n?'':'alt '}sm nibbtn" data-act="nibfeed" data-i="${i}" ${n?'':'disabled'} title="${n?'Feed it a Nibble: more coins per hour. Every '+NIB_STEP+' Nibbles its bonuses grow.':'Scrap '+esc(SPI[f.id].name)+' fish in the Cooler to get Nibbles'}">Feed · ${n}</button>`; }
 const nibFedTxt = f => f&&f.fed ? ' · ate '+NIB_WORD(f.fed) : '';
 document.head.insertAdjacentHTML('beforeend','<style>#panel .nibbtn{white-space:nowrap}</style>');
+// =====================================================================
+// 0.4.9 [12] Favourite foods (director, 2026-11-19: "make a whole new section of baits. Fish have a favourite and least favourite bait,
+// these do have minor fishing buffs as a whole. Bait types that are good for attracting rarer fish ... slightly more expensive depending
+// on the overall average rarity of the fish that like it the most. Epic fish and above do not have their favourite baits listed in the
+// fish log until you catch them with it."). Shared by every platform.
+//  - 8 foods, each with a small effect of its own. Every species has one favourite and one least favourite food, chosen from what it
+//    eats (predators like meat, the others insects and plants), the same for every player.
+//  - With a fish's favourite on the hook it bites 1.6× as often; with its least favourite, half as often.
+//  - A food's price follows how rare its fans are. Epic and rarer fish keep their favourite hidden in the Fish Log until caught with it.
+// =====================================================================
+const FOOD_FAV=1.6, FOOD_HATE=.5; /* 1.8 let Leeches beat Stardust at Starfall for rare odds (each water's own bait stays the best there: QA) */
+const FOOD_KEYS=Object.keys(BAIT).filter(k=>BAIT[k].food); /* the 8 foods live in b_data.js (so a save using one keeps it on reload) */
+// favourites: from the species' diet, then a stable pick by name (the same for every player, never stored in saves)
+const FISH_FAV={}, FISH_HATE={};
+for(const s of SP){ const pred=isPredator(s), like=FOOD_KEYS.filter(k=>BAIT[k].meat===pred||BAIT[k].meat===null), dis=FOOD_KEYS.filter(k=>BAIT[k].meat===!pred);
+  const h=hashStr('food|'+s.id); FISH_FAV[s.id]=like[h%like.length]; FISH_HATE[s.id]=dis[(h>>>5)%dis.length]; }
+// prices: a pack of 10 costs more the rarer its fans are (100 coins for an all-common following, ~2,500 for a legendary one)
+for(const k of FOOD_KEYS){ const fans=SP.filter(s=>FISH_FAV[s.id]===k), avg=fans.length?fans.reduce((a,s)=>a+Math.pow(s.r,1.5),0)/fans.length:0;
+  BAIT[k].price=niceNum(100*Math.pow(1+avg,2.2)); }
+for(const k in BAIT) BAIT[k].id=k;
+// order: everyday baits, water baits, favourite foods, then special lures (junk)
+{ const keys=Object.keys(BAIT), junk=keys.filter(k=>BAIT[k].junk), food=keys.filter(k=>BAIT[k].food), rest=keys.filter(k=>!junk.includes(k)&&!food.includes(k)), copy={};
+  for(const k of keys){ copy[k]=BAIT[k]; delete BAIT[k]; } for(const k of [...rest,...food,...junk]) BAIT[k]=copy[k]; }
+try{ S.bait=Object.assign(baitZero(),S.bait||{}); }catch(e){}
+// a favourite pulls, a least favourite puts off
+{ const _cw=catchW; catchW=function(s,pool,rare,b){ const w=_cw.apply(this,arguments); if(!b||!b.food) return w; return FISH_FAV[s.id]===b.id ? w*FOOD_FAV*(1+rodBonus('fav'))*(1+.06*pr('gourmet')) : FISH_HATE[s.id]===b.id ? w*FOOD_HATE : w; }; }
+// catching a fish on its favourite reveals it in the Fish Log (epic and rarer keep it hidden until then)
+{ const _ja=journalAdd; journalAdd=function(f){ const had=f&&f.sp&&S.journal[f.sp.id]&&S.journal[f.sp.id].fav; const r=_ja.apply(this,arguments); try{ if(had&&S.journal[f.sp.id]) S.journal[f.sp.id].fav=1; if(f&&f.sp&&BAIT[S.baitSel]&&BAIT[S.baitSel].food&&FISH_FAV[f.sp.id]===S.baitSel&&S.journal[f.sp.id]) S.journal[f.sp.id].fav=1; }catch(e){} return r; }; }
+const foodKnown = (sp,j) => sp.r<3 || !!(j&&j.fav) || maxed('gourmet');
+function foodLine(sp,j){ const fv=FISH_FAV[sp.id], ht=FISH_HATE[sp.id]; if(!fv) return ''; return `<div><span>Favourite food</span> ${foodKnown(sp,j)?esc(BAIT[fv].name):'??? <small>(catch it on its favourite)</small>'}</div><div><span>Least favourite</span> ${esc(BAIT[ht].name)}</div>`; }
+const foodFans = k => SP.filter(s=>FISH_FAV[s.id]===k);
 // =====================================================================
 // Test notes (shared helper). Each platform's own notes file (src/pc, src/android, src/ios) calls addTestNotes(...) with
 // its text. In a preview build the notes go on top of the patch notes list and open once per device and notes text; the
@@ -15326,7 +15387,9 @@ body.phone-app #menuov .tile,body.phone-land #menuov .tile{background:linear-gra
 // "Bait in use" row wraps instead of cutting its words ----------
 { const _rp=renderPanel; renderPanel=function(){ const r=_rp.apply(this,arguments); try{ if(!MOB()) return r; const P=$('panel'); const cards=[...P.querySelectorAll('.tk-row')]; if(!cards.length||P.querySelector('.mb-sec')) return r;
     const water=new Set(Object.values(BAIT).filter(b=>b.loc&&!b.junk).map(b=>b.name)), isW=c=>{ const b=c.querySelector('.tk-main b'); return !!b&&water.has(b.textContent.trim()); };
-    const fw=cards.find(isW), fe=cards.find(c=>!isW(c)&&!!c.querySelector('.tk-main b')); if(!fw||!fe) return r;
+    const food=new Set(Object.values(BAIT).filter(b=>b.food).map(b=>b.name)), isF=c=>{ const b=c.querySelector('.tk-main b'); return !!b&&food.has(b.textContent.trim()); };
+    const fw=cards.find(isW), ff=cards.find(isF), fe=cards.find(c=>!isW(c)&&!isF(c)&&!!c.querySelector('.tk-main b')); if(!fw||!fe) return r;
+    if(ff) ff.insertAdjacentHTML('beforebegin','<h3 class="mb-sec">Favourite foods<span>Every fish loves one and dislikes one: see the Fish Log</span></h3>');
     fe.insertAdjacentHTML('beforebegin','<h3 class="mb-sec">Everyday bait<span>Works at every water</span></h3>'); fw.insertAdjacentHTML('beforebegin','<h3 class="mb-sec">Water baits<span>Each one is best at its own water</span></h3>'); }catch(e){ console.error(e); } return r; }; }
 document.head.insertAdjacentHTML('beforeend',`<style>
 body.phone-app #panel .mb-sec,body.phone-land #panel .mb-sec{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 8px;margin:14px 2px 6px;font:800 15px var(--display,system-ui);color:#fff}
@@ -17679,6 +17742,10 @@ html body.phone-app #menuov .secbar .secb{flex:1 1 0!important;min-width:0!impor
 html body.phone-app #menuov .secbar .secb .secl,html body.phone-app #menuov .secbar .secb .seclive{display:none!important}
 html body.phone-app #menuov .secbar .secb .secdot[class],html body.phone-app #catdock .cdb .cddot[class]{top:2px!important;right:2px!important;transform:none!important}
 </style>`);
+/* Top bar with a long bait (2026-11-19, QA at 667 wide with "Glitter Jigs · 238"): every chip keeps its full width (frame07), so a
+   long bait name pushed Search and Settings off the screen once Tasks and Live had already stepped aside. The Bait chip is the one
+   that gives way: it shortens its name with "…" only when the bar runs out of room. */
+document.head.insertAdjacentHTML('beforeend','<style>html body.phone-land .hud > #mbbait.stat,html body.phone-app .hud > #mbbait.stat{min-width:0!important;flex:0 1 auto!important}html body.phone-land .hud > #mbbait.stat > b,html body.phone-app .hud > #mbbait.stat > b{display:block;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}</style>');
 // =====================================================================
 // Phones: the SET MEASUREMENTS (director, 2026-11-18: "I want standards and set measurements for each platform going forward,
 // I'm tired of the same mistakes"). The numbers are written down in docs/PLATFORM_DESIGN.md ("Phone frame: set measurements")
@@ -18101,6 +18168,10 @@ PATCHES.unshift({v:'0.4.8.9', name:'The Fight', items:[
   'Stardust works better at Starfall Lake (odds ×2.8).']});
 PATCHES.unshift({v:'0.4.8.9.1', name:'Hotfix', items:[
   'Hooking an oddity or a hat no longer makes your angler, the dock and the fight panel disappear.']});
+PATCHES.unshift({v:'0.4.8.9.2', name:'Hotfix', items:[
+  'Stardust works better at Starfall Lake (odds ×3), so it is always the best bait there.',
+  'Aquarium: each fish’s coins per hour now always add up exactly to the total shown.',
+  'Small phones: a long bait name no longer pushes Search and Settings off the top bar (the bait name shortens instead).']});
 PATCHES.unshift({v:'0.4.9', name:'Work in progress', items:[
   '## Fish Nibbles',
   'Scrap a fish in the Cooler for Fish Nibbles of its species: always for common fish, less often for rarer ones, and more for shiny, hybrid and titled fish.',
@@ -18110,10 +18181,18 @@ PATCHES.unshift({v:'0.4.9', name:'Work in progress', items:[
   'The next water opens after catching 10 fish at the one before during this voyage, 10 more every voyage, up to 50.',
   'Rods cost Scales as well as coins, more for better rods.',
   'A hybrid that still lands inside its own size range is worth ×2 (common) up to ×5 (mythic), in coins and aquarium income.',
-  'Titled shinies are special: each title brings three bonuses of its own in your aquarium, lifts every other fish’s bonuses, and every new species and title you catch adds 1% coins on every voyage (up to 20%).']});
+  'Titled shinies are special: each title brings three bonuses of its own in your aquarium, lifts every other fish’s bonuses, and every new species and title you catch adds 1% coins on every voyage (up to 20%).',
+  '## Bait, rods and skills',
+  'Favourite foods: a new group of eight baits. Every fish loves one food and dislikes another (the Fish Log shows which; epic and rarer fish keep their favourite secret until you catch one on it). Foods loved by rarer fish cost more.',
+  'Five new rod attachments for the newer systems: Snag Guard, Scent Bead, Twin Hook, Nibble Pouch and Fighter’s Grip.',
+  'Five new skills: Grappler, Snag Sense, Gourmet, Candy Maker and Prism Keeper, each with its own max-rank effect.',
+  'More skill points: 1 for every 25 species in your Fish Log and 2 for every water you complete.']});
 // iPhone test notes (preview builds only; the live game never shows them). One short line per change in the next test build,
 // curly apostrophes only. The card opens once per device whenever the text changes. Released notes live in notes_release.js.
-const TEST_NOTES={v:'test', label:'Test build · iPhone', name:'0.4.9 big patch, part 1: progression', items:[
+const TEST_NOTES={v:'test', label:'Test build · iPhone', name:'0.4.9 big patch, part 2: progression', items:[
+  'Favourite foods (Tackle › Bait, new group): every fish loves one and dislikes one; see the Fish Log details. Epic+ favourites stay ??? until caught on it.',
+  'Rods › Attachments: 5 new (Snag Guard, Scent Bead, Twin Hook, Nibble Pouch, Fighter’s Grip).',
+  'Skills: 5 new (Grappler, Snag Sense, Gourmet, Candy Maker, Prism Keeper). More skill points from the Fish Log (1 per 25 species, 2 per complete water).',
   'Fish Nibbles: Scrap in the Cooler, Feed in the Aquarium (watch the fish swim up to eat), Nibbles in the Fish Log details. Half expire on a new voyage.',
   'Next water: 10 catches at the previous water this voyage (+10 per voyage, max 50). Old saves count the fish already caught.',
   'Rods cost Scales too (5 to 800).',
@@ -18334,6 +18413,31 @@ ui(){ QA.sys='UI';
       S.tab='aquarium'; Math.random=R; act('nibfeed',{i:'0'}); try{ const cv=document.createElement('canvas'); cv.id='tankcv'; cv.style.cssText='position:fixed;left:0;top:0;width:300px;height:200px'; const had=$('tankcv'); if(!had) document.body.appendChild(cv); for(const dt of [100,900,1700,2600,3600]){ NIB_ANIM&&(NIB_ANIM.t0=performance.now()-dt); drawTank(performance.now()); } if(!had) cv.remove(); }catch(x){ e.push('tank drawing threw '+x.message); }
     } finally{ Math.random=R; NIB_ANIM=null; }
     return e.length?{ok:false,detail:e.join(' | ')}:{ok:true,detail:'odds, amounts 1/3/3/5/7, feeding, bonuses, halving, save'}; });
+  T('[12] favourite foods: every fish has a favourite and a least favourite, a favourite bites 1.6× as often, rarer fans cost more, epic+ hidden until caught on it, the shop groups them, a save keeps the food in use',()=>{ const e=[];
+    for(const s of SP){ const fv=FISH_FAV[s.id], ht=FISH_HATE[s.id]; if(!fv||!ht||fv===ht||!BAIT[fv].food||!BAIT[ht].food){ e.push('bad foods for '+s.id); break; } }
+    const avgR=k=>{ const f=foodFans(k); return f.reduce((a,s)=>a+Math.pow(s.r,1.5),0)/Math.max(1,f.length); }; const ks=FOOD_KEYS.slice().sort((a,b)=>avgR(a)-avgR(b)); for(let i=1;i<ks.length;i++) if(BAIT[ks[i]].price<BAIT[ks[i-1]].price) e.push(ks[i]+' cheaper than '+ks[i-1]+' with rarer fans');
+    const L=S.loc, pool=SP.filter(s=>s.loc===L); const fan=pool.find(s=>FISH_FAV[s.id]); if(fan){ const k=FISH_FAV[fan.id], o0=catchOdds({bait:'worm'}).shares, o1=catchOdds({bait:k}).shares; const sh=(o,id)=>(o.find(x=>x[0].id===id)||[0,0])[1]; const others=o1.filter(x=>FISH_FAV[x[0].id]!==k&&FISH_HATE[x[0].id]!==k).map(x=>x[0].id); const ref=others[0];
+      if(ref){ const r0=sh(o0,fan.id)/sh(o0,ref), r1=sh(o1,fan.id)/sh(o1,ref); if(Math.abs(r1/r0-FOOD_FAV)>.05) e.push('favourite pull ×'+(r1/r0).toFixed(2)); } }
+    const ep=SP.find(s=>s.r>=3); S.journal[ep.id]={n:1,best:1}; if(foodKnown(ep,S.journal[ep.id])) e.push('epic favourite shown before catching it on it');
+    const keep=S.baitSel; S.baitSel=FISH_FAV[ep.id]; journalAdd(rollFish(ep,{noHybrid:true,noPrey:true})); if(!foodKnown(ep,S.journal[ep.id])) e.push('not revealed after catching it on its favourite'); S.baitSel='worm'; journalAdd(rollFish(ep,{noHybrid:true,noPrey:true})); if(!foodKnown(ep,S.journal[ep.id])) e.push('forgotten after a later catch'); S.baitSel=keep;
+    const o=JSON.parse(JSON.stringify(S)); o.baitSel='krill'; o.bait=Object.assign({},o.bait,{krill:4}); const m=migrate(o); if(m.baitSel!=='krill'||m.bait.krill!==4) e.push('save lost the food in use');
+    S.tab='bait'; openMenu('bait'); const t=$('panel').textContent; if(!/Favourite foods/.test(t)) e.push('no Favourite foods group in the bait shop'); closeMenu();
+    return e.length?{ok:false,detail:e.join(' | ')}:{ok:true,detail:FOOD_KEYS.length+' foods, '+FOOD_KEYS.map(k=>BAIT[k].price).join('/')}; });
+  T('[14] [15] new attachments and skills work, every skill has a max-rank effect and a group, skill points come from the Fish Log too',()=>{ const e=[]; const rb=rodBonus;
+    for(const id of ['snagguard','scentbead','twinhook','nibpouch','grip']){ const a=ATT_I[id]; if(!a) { e.push('no attachment '+id); continue; } if(!(a.v[0]<a.v[1]&&a.v[1]<a.v[2])) e.push(id+' tiers do not grow'); }
+    try{ const sp=SP.find(s=>s.r===2)||SP[0], fav=FISH_FAV[sp.id];
+      const h0=hybridChance(), n0=nibOdds({id:sp.id}), w0=catchW(sp,[sp],0,BAIT[fav]); rodBonus=k=>({hybrid:.5,nib:.1,fav:.35}[k]||0);
+      if(!(hybridChance()>h0*1.49)) e.push('Twin Hook'); if(!(nibOdds({id:sp.id})>n0+.09||nibOdds({id:sp.id})===1)) e.push('Nibble Pouch'); if(!(catchW(sp,[sp],0,BAIT[fav])>w0*1.34)) e.push('Scent Bead'); rodBonus=rb;
+      S.perks=Object.assign({},S.perks,{gourmet:5,nibbler:5}); if(!(catchW(sp,[sp],0,BAIT[fav])>w0*1.29)) e.push('Gourmet'); if(!(nibOdds({id:sp.id})>=Math.min(1,n0+.19))) e.push('Candy Maker'); const ep=SP.find(s=>s.r>=3); if(!foodKnown(ep,{n:1})) e.push('Gourmet max does not show favourites');
+      S.tank=Array(10).fill(0).map(()=>({id:sp.id,kg:sp.min,value:1,sh:2,pv:'ancient'})); S.perks.prismkeeper=5; if(Math.abs(titleAura()-(TITLE_AURA_CAP+.1))>1e-9) e.push('Prism Keeper cap '+titleAura());
+    } finally{ rodBonus=rb; }
+    for(const k of ['grappler','snagwise','gourmet','nibbler','prismkeeper']){ if(!PERKS[k]) e.push('no skill '+k); if(!MASTERY_FX[k]) e.push(k+' has no max-rank effect'); if(!PERK_GROUPS.some(g=>g[1].includes(k))) e.push(k+' in no group'); }
+    for(const [k] of Object.entries(PERKS)) if(!PERK_GROUPS.some(g=>g[1].includes(k))) e.push('skill '+k+' missing from the Skills tabs');
+    const keep=S.journal; S.journal={}; const p0=ptsTotal(); const L=LOCS[0], all=SP.filter(s=>s.loc===L.id); all.forEach(s=>S.journal[s.id]={n:1,best:1}); const gain=ptsTotal()-p0, want=Math.floor(all.length/25)+2; S.journal=keep; if(gain!==want) e.push('Fish Log points '+gain+', want '+want);
+    return e.length?{ok:false,detail:e.join(' | ')}:{ok:true,detail:'5 attachments, 5 skills, Fish Log points'}; });
+  T('top bar fits with the longest bait name and a big count (a long bait pushed Search and Settings off the screen)',()=>{ const mob=typeof MOB==='function'&&MOB(); if(!mob) return {ok:true,detail:'phones only'}; const e=[]; const ks=Object.keys(BAIT).filter(k=>k!=='worm'), long=ks.reduce((a,b)=>BAIT[b].name.length>BAIT[a].name.length?b:a), k0=S.baitSel, n0=S.bait[long];
+    S.baitSel=long; S.bait[long]=999; closeMenu(); try{ const bb=document.querySelector('#mbbait > b'); if(bb) bb.textContent=BAIT[long].name+' · 999'; for(const q of ['#settingsbtn','.hud > .st-log','#mbbait']){ const el=document.querySelector(q); if(!el||!el.offsetParent) continue; const r=el.getBoundingClientRect(); if(r.right>innerWidth+.5) e.push(q+' off screen ('+Math.round(r.right)+' > '+innerWidth+')'); } }
+    finally{ S.baitSel=k0; S.bait[long]=n0; } return e.length?{ok:false,detail:e.join(' | ')}:{ok:true,detail:BAIT[long].name+' · 999 fits at '+innerWidth}; });
   T('badges: no count circle is cut by the box around it, on the fishing screen and every page, also with "99+" (PC full screen cut the top of the orange circle)',()=>{ const bad=[]; const SEL='.cddot,.secdot,.subdot,.sdot,.q8-dot,.od-dot,.dot'; const forced=[];
     const check=tag=>{ for(const d of document.querySelectorAll(SEL)){ if(d.hidden&&d.matches('.cddot,.secdot,.subdot')&&d.closest('button')&&d.closest('button').offsetParent!==null){ forced.push([d,d.textContent]); d.hidden=false; d.textContent='99+'; } if(d.offsetParent===null) continue; const r=d.getBoundingClientRect(); if(r.width<4) continue; const own=d.closest('button,[role="tab"],a')||d.parentElement, o=own.getBoundingClientRect();
         for(let p=own.parentElement;p&&p!==document.documentElement;p=p.parentElement){ const cs=getComputedStyle(p); if(cs.overflowX==='visible'&&cs.overflowY==='visible') continue; const q=p.getBoundingClientRect(); const ownIn=o.top>=q.top-.5&&o.bottom<=q.bottom+.5&&o.left>=q.left-.5&&o.right<=q.right+.5; if(!ownIn) break; const cut=Math.max(q.top-r.top,r.bottom-q.bottom,q.left-r.left,r.right-q.right); if(cut>.5) bad.push(tag+': '+d.className+' cut '+cut.toFixed(1)+' px by '+((p.id&&'#'+p.id)||String(p.className).split(' ')[0])); } }
@@ -18715,7 +18819,7 @@ function renderJournal(P){
       det=`<div class="tile detail" style="margin-top:10px"><canvas width="440" height="220" data-fish="${sel.id}" data-known="${j?1:0}" data-sh="${j&&j.sh?1:0}"></canvas><div>
       <div class="rar" style="color:${RAR[sel.r].c}">${RAR[sel.r].k}${j&&j.pr?' · <span class="sh">✦✦ prismatic caught</span>':j&&j.sh?' · <span class="sh">✦ shiny caught</span>':''}${j&&j.tr?' · trophy caught':''}</div>
       <h2>${j?sel.name:'Not caught yet'}</h2><p class="sub">${j?sel.note:'Keep fishing '+L.name+(sel.time!=='any'?' at '+(sel.time==='night'?'night':'day'):'')+'.'}</p>
-      <div class="kv" style="margin-top:8px">${j?`<div><span>Fish Nibbles</span> ${nibOf(sel.id)}</div>`:''}<div><span>Heaviest</span> ${j&&j.best?kgStr(j.best):'—'}</div><div><span>Smallest</span> ${j&&j.min!=null?kgStr(j.min):'—'}</div>${j&&j.hb!=null?`<div><span>Hybrid heaviest</span> <span class="sh">${kgStr(j.hb)}</span></div><div><span>Hybrid lightest</span> <span class="sh">${kgStr(j.hs)}</span></div>`:''}<div><span>Best sale value</span> ${j&&j.bv?'<span class="coin">'+fmt(j.bv)+'</span>':'—'}</div><div><span>Times caught</span> ${j?fmt(j.n):0}</div>
+      <div class="kv" style="margin-top:8px">${j?`<div><span>Fish Nibbles</span> ${nibOf(sel.id)}</div>`:''}${foodLine(sel,j)}<div><span>Heaviest</span> ${j&&j.best?kgStr(j.best):'—'}</div><div><span>Smallest</span> ${j&&j.min!=null?kgStr(j.min):'—'}</div>${j&&j.hb!=null?`<div><span>Hybrid heaviest</span> <span class="sh">${kgStr(j.hb)}</span></div><div><span>Hybrid lightest</span> <span class="sh">${kgStr(j.hs)}</span></div>`:''}<div><span>Best sale value</span> ${j&&j.bv?'<span class="coin">'+fmt(j.bv)+'</span>':'—'}</div><div><span>Times caught</span> ${j?fmt(j.n):0}</div>
       <div><span>Size range</span> ${kgStr(sel.min)}–${kgStr(sel.max)}</div><div><span>Active</span> ${sel.time==='any'?'Day and night':sel.time==='night'?'Night only':'Day only'}</div><div><span>Strength</span> ${strTxt(fishPull(sel))}${fishPull(sel)>anglerStr()?' · heavy for you':''}</div>
       <div><span>Mastery</span> <span class="sh">${starStr(mastery(sel.id))}</span> +${mastery(sel.id)*10}%${mastery(sel.id)<4?` · next at ${MASTERY[mastery(sel.id)]}`:''}</div>
       <div><span>Fights like a</span> ${B.n.toLowerCase()}</div><div><span>Temper</span> ${'●'.repeat(Math.round(sel.aggr*5))+'○'.repeat(5-Math.round(sel.aggr*5))}</div><div><span>In the aquarium</span> ${ae?fmtB(ae.k,ae.v):'—'}</div>
