@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="DL Test Android">
 <script>
-window.DL_BUILD='android'; window.DL_PREVIEW=true; window.DL_VERSION='2026.11.18-1956';
+window.DL_BUILD='android'; window.DL_PREVIEW=true; window.DL_VERSION='2026.11.18-2003';
 window.addEventListener('beforeinstallprompt',function(e){ e.preventDefault(); window.__dlInstallPrompt=e; });
 </script>
 </head>
@@ -16303,6 +16303,40 @@ html body.phone-land #menuov #panel.pg08[data-pg-tab="journal"] .sc-arrow,html b
 html body.phone-land #menuov #panel.pg08[data-pg-tab="journal"] .chips > .chipb,html body.phone-app #menuov #panel.pg08[data-pg-tab="journal"] .chips > .chipb{flex:0 0 auto!important}
 </style>`);
 document.head.insertAdjacentHTML('beforeend',`<style>html body.phone-land #menuov #panel.pg08[data-pg-tab="oddities"] .od8 > h2,html body.phone-app #menuov #panel.pg08[data-pg-tab="oddities"] .od8 > h2{display:none!important} #menuov #panel .od8 > .meta{margin:0 0 8px!important}</style>`); /* the tab names each part */
+/* BAIT: its own page, opened only from Bait in the top bar (director, 2026-11-18: "Bait shouldn't appear in upgrades side panel tab
+   either. It needs its own only openable from the top panel. Bring special lures with it and organize it appropriately. Add easier
+   access to switching bait too"). Three tabs:
+   - Switch (opens first): the bait in use, auto-restock, and every bait and lure you own as big tap-to-use buttons with how many are left
+   - Buy bait: the everyday and better baits, as in Tackle before
+   - Special lures: the lures found in junk
+   Tackle (Upgrades) keeps its Gear. */
+{ const T=$('tabs'); if(T&&!T.querySelector(':scope > [data-tab="bait"]')){ const b=document.createElement('button'); b.setAttribute('role','tab'); b.type='button'; b.dataset.tab='bait'; b.dataset.label='🪱 Bait'; b.setAttribute('aria-selected','false'); b.hidden=true; b.textContent='🪱 Bait'; const sb=T.querySelector('.secbar'); if(sb) T.insertBefore(b,sb); else T.appendChild(b); }
+  try{ SEARCH_IDX.forEach(e=>{ if(e[1]==='shop'&&Array.isArray(e[2])&&e[2][1]==='bait'){ e[0]='Bait'; e[1]='bait'; e[2]='Buy bait'; } else if(e[1]==='shop'&&Array.isArray(e[2])&&e[2][1]==='lures'){ e[0]='Bait: special lures'; e[1]='bait'; e[2]='Special lures'; } }); SEARCH_IDX.push(['Switch bait','bait','Switch','switch change bait use bait lure']); }catch(e){}
+  try{ PAGE_DESC.bait='Switch bait, buy more, and use the special lures you found'; }catch(e){}
+  const isLure=k=>!!(BAIT[k]&&('junk' in BAIT[k]));
+  const take=(P,view,keep)=>{ const was=tackleView; tackleView=view; try{ renderShop(P); }finally{ tackleView=was; } const f=document.createDocumentFragment(); [...P.children].filter(keep).forEach(c=>f.appendChild(c)); return f; };
+  const _rc=renderCooler; renderCooler=function(P){ if(!(MOB()&&S.tab==='bait'&&P)) return _rc.apply(this,arguments);
+    const buy=take(P,'bait',c=>c.classList.contains('tk-list')), cur=take(P,'bait',c=>c.classList.contains('tk-cur')), lures=take(P,'lures',c=>c.classList.contains('tk-list')||(c.tagName==='P'&&c.classList.contains('sub')&&/bought|junk/i.test(c.textContent)));
+    const own=Object.keys(BAIT).filter(k=>k==='worm'||(S.bait[k]||0)>0);
+    const btn=k=>{ const B=BAIT[k], n=S.bait[k]||0, on=S.baitSel===k; return `<button type="button" class="bt8-b${on?' on':''}${isLure(k)?' lure':''}" data-act="usebait" data-k="${k}" aria-pressed="${on}"><b>${esc(B.name)}</b><span>${k==='worm'?'Endless':'× '+n}${isLure(k)?' · lure':''}</span></button>`; };
+    P.innerHTML=`<div class="row spread"><div><h2 class="dl-dup">Bait</h2><p class="sub">Better bait brings rarer fish; one bait is used each time you set the hook. Worms never run out.</p></div></div>`+
+      `<div class="jsec bt8" data-bt8="Switch"><h2>Switch</h2><div class="bt8-cur"></div><h5>Your bait</h5><div class="bt8-grid">${own.filter(k=>!isLure(k)).map(btn).join('')}</div>${own.some(isLure)?`<h5>Your special lures</h5><div class="bt8-grid">${own.filter(isLure).map(btn).join('')}</div>`:''}</div>`+
+      `<div class="jsec bt8" data-bt8="Buy bait"><h2>Buy bait</h2></div><div class="jsec bt8" data-bt8="Special lures"><h2>Special lures</h2></div>`;
+    P.querySelector('.bt8-cur').appendChild(cur); P.querySelector('[data-bt8="Buy bait"]').appendChild(buy); P.querySelector('[data-bt8="Special lures"]').appendChild(lures); };
+  /* Tackle on phones: Gear only (bait and lures live on the Bait page) */
+  const _rp=renderPanel; renderPanel=function(){ if(MOB()&&S.tab==='shop'){ try{ tackleView='gear'; }catch(e){} } const r=_rp.apply(this,arguments); try{ if(MOB()&&S.tab==='shop'){ const P=$('panel'); P.querySelectorAll('[data-act="tackleview"]').forEach(b=>{ if(b.dataset.k!=='gear') b.remove(); }); P.querySelectorAll(':scope > .bwx-nav').forEach(n=>{ if(n.querySelectorAll('button').length<2) n.remove(); }); } }catch(e){ console.error(e); } return r; }; }
+document.head.insertAdjacentHTML('beforeend',`<style>
+html body.phone-land #menuov #panel.pg08[data-pg-tab="bait"] .bt8 > h2,html body.phone-app #menuov #panel.pg08[data-pg-tab="bait"] .bt8 > h2{display:none!important}
+#menuov #panel .bt8-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:6px;margin:0 0 6px}
+#menuov #panel .bt8-b{display:flex;flex-direction:column;align-items:flex-start;gap:2px;min-height:48px;padding:7px 11px;border-radius:12px;border:1px solid #ffffff1c;background:linear-gradient(180deg,#16263d,#111e31);color:#e8f1fb;text-align:left;cursor:pointer;font:inherit}
+#menuov #panel .bt8-b b{font:800 13.5px var(--display,system-ui);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+#menuov #panel .bt8-b span{font-size:11.5px;color:#9fb3c8}
+#menuov #panel .bt8-b.lure span{color:#c9a6ff}
+#menuov #panel .bt8-b.on{background:linear-gradient(180deg,#ffd36a,#f0b43c);border-color:#ffd36a;color:#2a1a04}
+#menuov #panel .bt8-b.on span{color:#5a3a08}
+#menuov #panel .bt8-b:active{transform:translateY(1px)}
+#menuov #panel .bt8-cur > .tile{margin:0 0 8px!important}
+</style>`);
 // =====================================================================
 // Phones and tablets, round 8: QUESTS (director, 2026-11-18: "goal shouldn't be on the top header ... rework goal into its own side
 // panel tab called Quests which should feature objectives, tutorials, and help to the fisher. Organize that part flawlessly, make sure
@@ -16330,11 +16364,11 @@ const Q8_LESSONS=[
  ['bite','Fishing basics','Bites and the hook','Wait for the splash, then tap','Watch the bobber. Small twitches are only nibbles: <b>wait for the big splash</b>, then tap to set the hook. Miss the moment and the fish swims off. The <b>Hook</b> upgrade in Tackle gives you a longer window.',['shop',['tackleview','gear']]],
  ['reel','Fishing basics','Reeling and the line','Hold to reel, let go when it fights','<b>Hold</b> to reel, or draw circles to crank. <b>Let go</b> when the fish runs, jumps, shakes its head or gets angry. The ring around the fish is your line: green is safe, yellow means careful, red means it is about to snap. <b>Line</b> upgrades take more strain, <b>Reel</b> upgrades wind faster.',['shop',['tackleview','gear']]],
  ['rest','Fishing basics','Rest mode','Fish slowly while you do other things','<b>Rest</b> (bottom left of the water) sits your angler down to fish by themselves while the game is open, even while you browse the menus. A bite comes every few minutes and the fish goes straight into your cooler. You cannot fish yourself while resting, and the cooler needs room.',null],
- ['bait','Better catches','Bait','Better bait, rarer fish','Better bait brings rarer fish. One bait is used each time you set the hook; <b>Worms never run out</b>. Change bait with <b>Bait</b> in the top bar, and buy more in Tackle, Bait.',['shop',['tackleview','bait']]],
+ ['bait','Better catches','Bait','Better bait, rarer fish','Better bait brings rarer fish. One bait is used each time you set the hook; <b>Worms never run out</b>. Tap <b>Bait</b> in the top bar: <b>Switch</b> shows every bait and lure you own, one tap to use it; <b>Buy bait</b> sells more.',['bait','Switch']],
  ['weather','Better catches','Weather and time of day','Every weather changes the odds','The chip on the water shows the time, the weather and how long it lasts. <b>Rain</b>: bites +35%. <b>Storm</b>: rarer fish. <b>Fog</b>: night fish by day. <b>Gilded</b>: shiny ×3. <b>Rainbow</b>: shiny ×2 and XP +30%. <b>Aurora</b>: XP ×2. <b>Spawning Run</b>: bites ×2.5. Some fish only bite by day, others only at night. The forecast is in Events.',['events',null]],
  ['hot','Better catches','Hotspots','Ripples mean rarer fish','A <b>hotspot</b> ripples on the water now and then: cast right into it for rarer fish. The <b>Fish Finder</b> upgrade finds more hotspots and tells you more about a bite before you strike.',['shop',['tackleview','gear']]],
  ['shiny','Better catches','Shiny and prismatic fish','Rare colours worth far more','A <b>shiny</b> fish (✦) is a rare colour of a species and worth much more; <b>prismatic</b> (✦✦) is rarer still. Gilded and Rainbow weather raise the chance. Sell all leaves shinies alone unless you switch on Shinies in the Cooler.',['cooler',null]],
- ['lures','Better catches','Special lures','Lures for junk and treasure','Special lures change what bites: some pull up junk and treasure instead of fish. They live in Tackle, Special lures.',['shop',['tackleview','lures']]],
+ ['lures','Better catches','Special lures','Lures for junk and treasure','Special lures change what bites: some pull up junk and treasure instead of fish. You cannot buy them: they come out of junk you fish up. They are on the Bait page (top bar), Special lures.',['bait','Special lures']],
  ['cooler','Your fish','The Cooler','Where every catch goes','Every fish you land goes into the <b>Cooler</b> (top bar). Sell one, <b>Sell all</b> with a filter (rarity, a max price, shinies), put one on display in the Aquarium, or Keep it in the Trophy Room. When the cooler is full you cannot fish until you make room. The <b>Cooler</b> upgrade in Tackle adds space.',['cooler',null]],
  ['monger','Your fish','The fishmonger','Double pay for one species','The fishmonger wants one species at a time and <b>pays double</b> for it until the weather changes. Their wish is at the top of the Cooler.',['cooler',null]],
  ['aquarium','Aquarium','Getting around the Aquarium','Where everything is','Tap <b>Aquarium</b> in the top bar. Your tank fills the left side; the strip under it shows what you <b>earn</b> per hour, the coins <b>ready</b> to collect, and how full the <b>tank</b> is, with <b>Collect</b> and <b>Feed fish</b>. The panel on the right has two tabs: <b>Your tank</b> (fish, boosts, a bigger tank) and <b>Decorate</b>. <b>Hide</b> folds the panel away to watch the whole tank.',['aquarium',null]],
@@ -16344,7 +16378,7 @@ const Q8_LESSONS=[
  ['aq-room','Aquarium','A bigger tank and decorations','More room, more boosts','On Your tank, the <b>Room for … fish</b> button shows how many more fish the next tank holds and its price. <b>Decorate</b> places decorations in the tank: drag one along the sand to move it. <b>Advice:</b> fill every spot before buying more room, and swap in better fish as you catch them.',['aquarium','Your tank']],
  ['trophy','Your fish','The Trophy Room','Keep a fish forever','<b>Keep</b> mounts a fish in the Trophy Room for good: it earns nothing and gives no boost, but it is never lost, not even when you set sail again.',['trophy',null]],
  ['log','Your fish','The Fish Log and mastery','Every species, and stars for each','The <b>Fish Log</b> (top bar) lists every species at every water. Catch a species 3, 10, 30 and 100 times for its <b>mastery stars</b>: each star adds +10% to that fish\'s value, and every 8 stars is a new Angler Rank with coins and a free Mystery Crate.',['journal',null]],
- ['odd','Your fish','Oddities','Junk, odd finds and treasure','Not everything that bites is a fish. Junk, odd junk and rare finds go in <b>Oddities</b> (Collection), with <b>Treasures</b> in their own tab beside them: some pay, some boost your fishing, some come with a pet or a hat. Special lures in Tackle pull up more of them.',['oddities',null]],
+ ['odd','Your fish','Oddities','Junk, odd finds and treasure','Not everything that bites is a fish. Junk, odd junk and rare finds go in <b>Oddities</b> (Collection), with <b>Treasures</b> in their own tab beside them: some pay, some boost your fishing, some come with a pet or a hat. Special lures (Bait, in the top bar) pull up more of them.',['oddities',null]],
  ['waters','Getting stronger','New waters','How to open the next water','Each water has 52 fish of its own and is tougher than the last. Find <b>8 species</b> at a water and you can open the next one with coins in Waters. Your goal (Quests) always says how close you are.',['map',null]],
  ['tackle','Getting stronger','Tackle upgrades','Rod length, reel, line, hook, cooler, finder','In Tackle, Gear: <b>Rod length</b> casts farther with better far-cast odds, <b>Reel</b> winds faster, <b>Line</b> takes more tension, <b>Hook</b> gives a longer window, <b>Cooler</b> holds more fish and the <b>Fish Finder</b> reads bites and finds hotspots.',['shop',['tackleview','gear']]],
  ['rods','Getting stronger','Rods, Scales and attachments','Collect rods, upgrade them, fit parts','Your rod shapes every cast. Collect rods in the Rod rack, upgrade them with coins and <b>Scales</b> (Scales come from Rare and better fish) and fit <b>attachments</b>: each has three tiers and fits any rod once you own it. Save a rod and its parts as a <b>preset</b> to switch in one tap.',['rods','Your rod']],
@@ -16368,13 +16402,13 @@ const Q8_LESSONS=[
 ];
 /* where everything lives on a phone: [place, label, tab, section] */
 const Q8_FIND=()=>{ const out=[], lbl=t=>{ try{ return menuTabLabel(t)[1]; }catch(e){ return t; } };
-  out.push(['Top bar','Cooler','cooler',null],['Top bar','Aquarium','aquarium',null],['Top bar','Home','home',null],['Top bar','Fish Log','journal',null],['Top bar','Bait (in Tackle)','shop',['tackleview','bait']],['Top bar','Tasks (daily, weekly, bounties)','bounties',null],['Top bar · settings button','Settings','settings',null],['Top bar · settings button','Save and save codes','save',null]);
+  out.push(['Top bar','Cooler','cooler',null],['Top bar','Aquarium','aquarium',null],['Top bar','Home','home',null],['Top bar','Fish Log','journal',null],['Top bar','Bait: switch, buy, special lures','bait',null],['Top bar','Tasks (daily, weekly, bounties)','bounties',null],['Top bar · settings button','Settings','settings',null],['Top bar · settings button','Save and save codes','save',null]);
   for(const s of MENU_SECS){ if(s.id==='quests') continue; for(const t of s.tabs) out.push(['Side panel · '+s.short,lbl(t),t,null]); }
   out.push(['Side panel · Prestige','Set sail again','prestige','Set sail again'],['Side panel · Prestige','Pearl relics','prestige','Pearl relics']);
   return out; };
 const Q8_HELP=[
  ['My line keeps snapping','Let go of the screen when the fish runs, jumps or shakes its head, and watch the ring around it: red means let go now. A stronger <b>Line</b> in Tackle takes more strain.',['shop',['tackleview','gear']],'Tackle'],
- ['How do I catch rarer fish?','Better bait, far casts, hotspots, Storm weather and the rare-odds skills all help. Your Wisdom Pearls raise rare odds too.',['shop',['tackleview','bait']],'Bait'],
+ ['How do I catch rarer fish?','Better bait, far casts, hotspots, Storm weather and the rare-odds skills all help. Your Wisdom Pearls raise rare odds too.',['bait','Buy bait'],'Bait'],
  ['My cooler is full','Open the Cooler and Sell all (with a filter if you want to keep some), put fish in the Aquarium, or Keep the best ones in the Trophy Room. A bigger Cooler is in Tackle.',['cooler',null],'Cooler'],
  ['How do I earn more coins?','Sell bigger and rarer fish, fill the fishmonger\'s wish (double pay), keep the Aquarium full, finish bounties and tasks, and raise your sale bonus with skills and mastery stars.',['bounties','Bounties'],'Bounties'],
  ['Where do Scales come from?','Rare and better fish. You spend them on rod upgrades.',['rods','Your rod'],'Rods'],
@@ -16465,7 +16499,7 @@ html body.phone-land #menuov #panel.pg08[data-pg-tab="quests"] .q8-sec > h2,html
 </style>`);
 /* line icons for the new pages' tabs at the top of the menu (the theme masks an icon per page; a page without one showed a square) */
 { const ico=d=>'url("data:image/svg+xml,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+d+'</svg>')+'")';
-  const I8={ quests:'<circle cx="12" cy="12" r="8.5"/><path d="m15.5 8.5-2.2 4.8-4.8 2.2 2.2-4.8z"/>', oddities:'<path d="M8 3h6v8l5 3.5V20H6.5L5 18v-4.5L8 11z"/><path d="M8 7h6M5.5 16h13"/>', prestige:'<circle cx="12" cy="13" r="6.5"/><path d="M9.2 10.6a3.4 3.4 0 0 1 3-1.8"/><path d="M12 3.5v2M6.2 5.6l1.3 1.5M17.8 5.6l-1.3 1.5"/>' };
+  const I8={ bait:'<path d="M12 3v9a4 4 0 1 1-8 0v-1"/><path d="M12 3h3"/><path d="M4 11l-2 2"/><path d="M15 14c2-1 4 0 5 2"/>', quests:'<circle cx="12" cy="12" r="8.5"/><path d="m15.5 8.5-2.2 4.8-4.8 2.2 2.2-4.8z"/>', oddities:'<path d="M8 3h6v8l5 3.5V20H6.5L5 18v-4.5L8 11z"/><path d="M8 7h6M5.5 16h13"/>', prestige:'<circle cx="12" cy="13" r="6.5"/><path d="M9.2 10.6a3.4 3.4 0 0 1 3-1.8"/><path d="M12 3.5v2M6.2 5.6l1.3 1.5M17.8 5.6l-1.3 1.5"/>' };
   document.head.insertAdjacentHTML('beforeend','<style>'+Object.keys(I8).map(k=>`html body.phone-app #menuov .subbar .subp[data-sub="${k}"] .subi,html body.phone-land #menuov .subbar .subp[data-sub="${k}"] .subi{-webkit-mask:${ico(I8[k])} center/contain no-repeat;mask:${ico(I8[k])} center/contain no-repeat}`).join('\n')+'</style>'); }
 /* Collection holds the Trophy Room and Oddities: the Aquarium opens from its own chip in the top bar (director, 2026-11-18) */
 { const c=MENU_SECS.find(s=>s.id==='coll'); if(c) c.tabs=c.tabs.filter(t=>t!=='aquarium'); }
@@ -16496,6 +16530,7 @@ html body.phone-land #menuov #panel.pg08[data-pg-tab="quests"] .q8-sec > h2,html
     prestige:{ note:()=>'', cells:()=>[['Wisdom Pearls',String(S.pearls||0)],['Voyage',String((S.tides||0)+1)],['Pearl bonus','+'+Math.round((coinMult()-1)*100)+'% coins & XP']], groups:K=>{ const j=K.filter(c=>c.classList.contains('jsec')); const nm=c=>{ const h=c.querySelector('h2'); return h?h.textContent.trim():''; }; return j.map(c=>({name:nm(c),nodes:[c]})); } }, /* round 8: waters08.js */
     quests:{ note:()=>'', cells:()=>{ let g=null; try{ g=_nextGoal_036(); }catch(e){ try{ g=nextGoal(); }catch(e2){} } const pc=g&&g.p!=null?Math.round(Math.max(0,Math.min(1,g.p))*100)+'%':(g&&g.ready?'Ready':'—'); const r=Array.isArray(S.settings.q8read)?S.settings.q8read.filter(id=>Q8_LESSONS.some(l=>l[0]===id)).length:0; return [g&&(g.ready||g.p!=null)?['Next goal',g.ready?'Ready':pc]:null,['Lessons read',r+' / '+Q8_LESSONS.length]]; }, groups:K=>K.filter(c=>c.dataset&&c.dataset.q8sec).map(c=>({name:c.dataset.q8sec,nodes:[c]})) }, /* round 8: quests08.js */
     oddities:{ note:()=>'', cells:()=>{ const od=JUNK.filter(J=>J.t<3), tr=JUNK.filter(J=>J.t>=3), f=a=>a.filter(J=>S.junk[J.id]).length; return [['Oddities',f(od)+' / '+od.length],['Treasures',f(tr)+' / '+tr.length]]; }, groups:K=>K.filter(c=>c.dataset&&c.dataset.od8).map(c=>({name:c.dataset.od8,nodes:[c]})) }, /* round 8: waters08.js */
+    bait:{ note:()=>'', cells:()=>{ const B=BAIT[S.baitSel]||BAIT.worm, own=Object.keys(BAIT).filter(k=>k==='worm'||(S.bait[k]||0)>0).length; return [['In use',B.name+(S.baitSel!=='worm'?' · '+(S.bait[S.baitSel]||0):'')],['Kinds you have',String(own)]]; }, groups:K=>K.filter(c=>c.dataset&&c.dataset.bt8).map(c=>({name:c.dataset.bt8,nodes:[c]})) }, /* round 8: waters08.js */
     shop:{ cells:()=>{ let a=0,b=0; try{ for(const k in GEAR){ a+=(S.gear[k]|0); b+=GEAR[k].lv.length-1; } }catch(e){} return [['Gear upgrades',a+' / '+b],['Fishing at',locName()]]; } },
     rods:{ cells:(P,hd)=>[['Rod in use',txt(P.querySelector('.rp-card.on b'))||'—'],['Scales',txt(hd&&hd.querySelector('.pts'))||'0']] },
     skills:{ cells:(P,hd)=>[['Skill points',txt(hd&&hd.querySelector('.pts'))||'0'],['Level',String(S.lvl)]], acts:P=>[P.querySelector('[data-act="respec"]')] },
@@ -16901,8 +16936,8 @@ document.head.insertAdjacentHTML('beforeend',`<style>html body.phone-land .hud >
    button on the water (next to Rest) is gone. */
 { const lbl=()=>{ const b=BAIT[S.baitSel]||BAIT.worm; return b.name+(S.baitSel!=='worm'?' · '+(S.bait[S.baitSel]||0):''); };
   const ensure=()=>{ if(!MOB()) return; const hud=document.querySelector('.hud'); if(!hud) return; let c=document.getElementById('mbbait');
-    if(!c){ c=document.createElement('button'); c.type='button'; c.id='mbbait'; c.className='stat hudx mb-x mb-bait'; c.innerHTML='<span class="lbl">Bait</span><b></b>'; c.title='The bait you fish with. Tap to change it or buy more.';
-      c.addEventListener('pointerdown',e=>e.stopPropagation()); c.addEventListener('click',e=>{ e.stopPropagation(); e.preventDefault(); try{ startAudio(); }catch(er){} try{ tackleView='bait'; }catch(er){} openMenu('shop'); }); }
+    if(!c){ c=document.createElement('button'); c.type='button'; c.id='mbbait'; c.className='stat hudx mb-x mb-bait'; c.innerHTML='<span class="lbl">Bait</span><b></b>'; c.title='The bait you fish with. Tap to switch bait, buy more or use a special lure.';
+      c.addEventListener('pointerdown',e=>e.stopPropagation()); c.addEventListener('click',e=>{ e.stopPropagation(); e.preventDefault(); try{ startAudio(); }catch(er){} openMenu('bait'); }); }
     const after=document.getElementById('mbtasks')||document.getElementById('mblive'), cool=hud.querySelector('.st-cool');
     if(cool&&c.nextElementSibling!==cool) cool.before(c); else if(!cool&&after&&c.previousElementSibling!==after) after.after(c);
     const t=lbl(), b=c.querySelector('b'); if(b.textContent!==t) b.textContent=t; };
@@ -17467,12 +17502,13 @@ PATCHES.unshift({v:'0.4.8.6', name:'Tidy Up', items:[
   'Oddities has its own page in Collection, and the Fish Log lists its waters in neat rows instead of a sideways strip.',
   'Oddities and Treasures are separate tabs, Collection holds the Trophy Room and Oddities (the Aquarium has its own top-bar button), and every menu tab has its icon.',
   'Quests teaches the Aquarium and your home step by step: where every button is, how earning and cozy bonuses work, and tips.',
-  'The frame-rate counter sits in the top corner of the water, clear of the fishing tips.']});
+  'The frame-rate counter sits in the top corner of the water, clear of the fishing tips.',
+  'Bait has its own page, opened from Bait in the top bar: Switch shows every bait and lure you own as big buttons (one tap to use), plus Buy bait and Special lures. Tackle keeps your gear upgrades.']});
 
 // Android test notes (preview builds only; the live game never shows them). Write what the next test build changes here
 // (spoiler-free); it opens once in the Android test app. Released notes live in notes_release.js.
 const TEST_NOTES={v:'test', label:'Test build · Android', name:'One Look, Easy Aquarium', items:[
-  'NEW in this build (0.4.8.6): Oddities/Treasures tabs; Aquarium + Home lessons in Quests; fps counter top corner; Quests (goals, lessons, find, help); Bait in the top bar; Home chip; Cooler rework; Oddities in Collection; coins/level/water in one box; Tasks tabs without repeats; Fish Log only from the top bar; Prestige page (Set sail again + Pearl relics); tidy Waters that opens at your water; Fishing renamed Catch; XP bar on Skills; side-panel counts never cover names; menus use the full width with a slim number strip; Skills categories without badges; Rods tabs fixed + tidy presets; small-iPhone cut-offs fixed; smooth Home live view; tank size + clear tank upgrade in the Aquarium; mountains drawn without stripes; Stats has its own side-panel button (and the Level chip); folded side panel centred; top bar never cuts off settings; Settings no longer repeats Save (gift code and backup tools are in Save); summaries no longer repeat numbers.',
+  'NEW in this build (0.4.8.6): Bait page (Switch, Buy bait, Special lures) from the top bar; Tackle = Gear; Oddities/Treasures tabs; Aquarium + Home lessons in Quests; fps counter top corner; Quests (goals, lessons, find, help); Bait in the top bar; Home chip; Cooler rework; Oddities in Collection; coins/level/water in one box; Tasks tabs without repeats; Fish Log only from the top bar; Prestige page (Set sail again + Pearl relics); tidy Waters that opens at your water; Fishing renamed Catch; XP bar on Skills; side-panel counts never cover names; menus use the full width with a slim number strip; Skills categories without badges; Rods tabs fixed + tidy presets; small-iPhone cut-offs fixed; smooth Home live view; tank size + clear tank upgrade in the Aquarium; mountains drawn without stripes; Stats has its own side-panel button (and the Level chip); folded side panel centred; top bar never cuts off settings; Settings no longer repeats Save (gift code and backup tools are in Save); summaries no longer repeat numbers.',
   'NEW in this build: fish fight shows a tension ring at the fish with the instruction above it; hints are touch only; homes are never called docks; the layout always switches when you turn the phone; smoother storms at Starfall.',
   'NEW in this build: Android phones are landscape only (upright pauses the game). Compact Goal chip (opens the right page) and a separate Live chip, plus Tasks and Tide Pass in the top bar. Your home shows the real home of every water. Colour choices are round swatches.',
   'NEW in this build: every menu page works like the aquarium (key numbers and main button first, sections as tabs, one scrolling list, badges where rewards wait). The Wardrobe shows your angler big with the categories in Options. Pages keep your place when they refresh.',
