@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="DL Test Android">
 <script>
-window.DL_BUILD='android'; window.DL_PREVIEW=true; window.DL_VERSION='2026.11.19-0342';
+window.DL_BUILD='android'; window.DL_PREVIEW=true; window.DL_VERSION='2026.11.19-0358';
 window.addEventListener('beforeinstallprompt',function(e){ e.preventDefault(); window.__dlInstallPrompt=e; });
 </script>
 </head>
@@ -17572,8 +17572,9 @@ body.phone-app #searchov .sv-in,body.phone-land #searchov .sv-in{max-height:calc
 body.phone-app #searchres,body.phone-land #searchres{max-height:none!important;flex:1 1 auto;min-height:0}
 </style>`); }
 /* Aquarium bank (director, 2026-11-19, Android: "Earning and Ready Coins value run underneath each other when numbers get too big"): the
-   number columns had a fixed width (62 px), so 12,345,678 spilled into the next cell. They now take their content's width. */
-document.head.insertAdjacentHTML('beforeend',`<style>html body.phone-land #menuov #panel .aq07-bank:has(#tankbank),html body.phone-app #menuov #panel .aq07-bank:has(#tankbank){grid-template-columns:max-content max-content max-content auto auto!important}</style>`);
+   number columns had a fixed width (62 px), so 12,345,678 spilled into the next cell. Every cell now takes its content's width, and
+   when the row is too narrow for very large amounts the buttons move to a second line instead of spilling out (checked by __qa). */
+document.head.insertAdjacentHTML('beforeend',`<style>html body.phone-land #menuov #panel .aq07-bank:has(#tankbank),html body.phone-app #menuov #panel .aq07-bank:has(#tankbank){display:flex!important;flex-wrap:wrap!important;align-items:center;column-gap:6px!important;row-gap:4px!important}html body.phone-land #menuov #panel .aq07-bank:has(#tankbank) > *,html body.phone-app #menuov #panel .aq07-bank:has(#tankbank) > *{flex:0 0 auto!important}</style>`);
 /* Reeling on phones (director, 2026-11-19: "when you're reeling in fish, too much ui covers the screen"): during a fight the bottom
    hint repeats what the fight banner already says, and Rest does nothing mid-fight, so both fade away while a fish is on the line and
    come back when it ends. The hint stays for the first 5 catches, while a new player is still learning the controls. */
@@ -17609,6 +17610,23 @@ var PHONE_DEDUPE;
 document.head.insertAdjacentHTML('beforeend','<style>html body.phone-land #menuov #tabs .secbar{height:100%!important}</style>');
 /* the name a page tab shows (its own text, without a badge); data-sect can differ ("Dock" shows as "Your boat") */
 function tabShownName(b){ return b?([...b.childNodes].filter(n=>n.nodeType===3).map(n=>n.textContent).join('').trim()||b.textContent.trim()):''; }
+/* Doubled Settings (director, 2026-11-19, iPhone screenshot): inside Settings the gear button lit up gold next to the gold Settings
+   tab, two lit "Settings" in one row. The gear only takes you to this section, so while you are in it the gear steps aside; the
+   tabs (Settings, Save) say where you are. */
+document.head.insertAdjacentHTML('beforeend','<style>body.phone-app #menuov .mo-tools [data-mo="settings"].on,body.phone-land #menuov .mo-tools [data-mo="settings"].on{display:none!important}</style>');
+/* Narrow windows (split-screen; phones themselves are landscape-only), 2026-11-19, the director: "test what is best yourself and execute
+   it": the side panel becomes a bottom bar of 8 buttons about 41 px wide. Measured at 360 px: even 8 px text (too small to read) cut
+   "Challenges" and "Customize", so the bar shows icons only there; every button keeps its name as its label (title / aria-label),
+   and the section you are in stays gold. */
+document.head.insertAdjacentHTML('beforeend','<style>html body.phone-app #catdock .cdb .cdl{display:none!important}html body.phone-app #catdock .cdb{justify-content:center!important;align-items:center!important}html body.phone-app #catdock .cdb svg{width:22px!important;height:22px!important}</style>');
+/* the menu's bar matches the bar on the water in narrow windows: all 8 sections visible without sideways scrolling, icons only, and
+   count badges sit inside the button's top right corner (they poked into the next button and were clipped by the bar) */
+document.head.insertAdjacentHTML('beforeend',`<style>
+html body.phone-app #menuov #tabs .secbar{display:flex!important;flex-wrap:nowrap!important;overflow:visible!important}
+html body.phone-app #menuov .secbar .secb{flex:1 1 0!important;min-width:0!important;width:auto!important;justify-content:center!important;padding:0!important}
+html body.phone-app #menuov .secbar .secb .secl,html body.phone-app #menuov .secbar .secb .seclive{display:none!important}
+html body.phone-app #menuov .secbar .secb .secdot[class],html body.phone-app #catdock .cdb .cddot[class]{top:2px!important;right:2px!important;transform:none!important}
+</style>`);
 // =====================================================================
 // Phones: the SET MEASUREMENTS (director, 2026-11-18: "I want standards and set measurements for each platform going forward,
 // I'm tired of the same mistakes"). The numbers are written down in docs/PLATFORM_DESIGN.md ("Phone frame: set measurements")
@@ -17622,7 +17640,7 @@ function tabShownName(b){ return b?([...b.childNodes].filter(n=>n.nodeType===3).
 // Also here: tapping right after Back works (the old guard blocked the whole screen for 0.45 s; now only where your finger was).
 // Android + iPhone only.
 // =====================================================================
-const MB_FRAME={ up:{edge:8, row1Top:6, row1H:36, row2Top:46, row2H:30, stageTop:84, barH:58, barPad:3, barBtnH:50, barBottom:6},
+const MB_FRAME={ up:{edge:8, row1Top:6, row1H:36, row2Top:46, row2H:36, stageTop:90, /* row 2 holds the two-line chips (Cooler, Aquarium, Home, Fish Log) since 2026-11-19 */ barH:58, barPad:3, barBtnH:50, barBottom:6},
                  land:{edge:8, row1Top:6, row1H:38, contentTop:49, bottom:6, railW:124, railWMini:56, railGap:6, railBtnH:40, railBtnGap:5} };
 // ONE look per kind of control (director, 2026-11-18: "cross reference everything that's connected, we need this to stop being so
 // inconsistent"). Measured across every page: buttons came in 9 heights, section tabs in 3 styles, badges in 4 sizes, descriptions in
@@ -18007,10 +18025,14 @@ PATCHES.unshift({v:'0.4.9', name:'Work in progress', items:[
   'The side panel in menus always shows every section (on some iPhones it stopped after Quests).',
   'A tab’s name is no longer repeated as the heading right under it (Your tank, Your boat).',
   'An empty Trophy Room fills the page with a wall of empty plaques instead of a small strip.',
-  'Aquarium coins use the short form for big amounts (like the top bar), so they always fit.']});
+  'Aquarium coins use the short form for big amounts (like the top bar), so they always fit.',
+  'Inside Settings only the Settings tab lights up (the gear next to it no longer lights up too).',
+  'In narrow windows the side panel shows its icons, so every section fits without scrolling.']});
 // Android test notes (preview builds only; the live game never shows them). One short line per change in the next test build,
 // curly apostrophes only. The card opens once per device whenever the text changes. Released notes live in notes_release.js.
-const TEST_NOTES={v:'test', label:'Test build · Android', name:'0.4.9, part 1: fixes (3)', items:[
+const TEST_NOTES={v:'test', label:'Test build · Android', name:'0.4.9, part 1: fixes (4)', items:[
+  'Settings: only the Settings tab lights up (the gear no longer lights up next to it).',
+  'Narrow windows (split-screen): the side panel shows icons only, so all sections fit.',
   'Pets in the shop and previews are awake at night (they showed asleep in Pets › Find more).',
   'Menus: the side panel always shows every section (on iPhone it could stop after Quests). Please check Trophy Room, Your home and the Aquarium.',
   'A tab’s name is no longer repeated as the heading under it (Your tank, Your boat).',
@@ -18153,6 +18175,7 @@ ui(){ QA.sys='UI';
     try{ const cur=(window.__realNow()/1000%360)/360; window.__off=((.8-cur+1)%1)*360000; draw(performance.now()); } finally{ drawPetScene=_dps; window.__off=off0; }
     if(seen<.55) return {ok:false,detail:'the test could not make a night scene (night '+seen.toFixed(2)+')'};
     const m=petMood3('duck'); return m.sleep?{ok:false,detail:'after a night scene (night '+seen.toFixed(2)+') a shop pet is drawn asleep'}:{ok:true,detail:'night '+seen.toFixed(2)+' stayed in the scene'}; });
+  T('menu top row: only one thing is lit at a time (the gear and the Settings tab were both gold)',()=>{ const mob=typeof MOB==='function'&&MOB(); if(!mob) return {ok:true,detail:'phones only'}; const bad=[]; for(const t of qaAllPages()){ openMenu(t); const top=[...document.querySelectorAll('#menuov .mo-tools *, #menuov .subbar *')].filter(e=>e.offsetParent!==null&&(e.matches('button,[role="tab"]'))&&(e.classList.contains('on')||e.getAttribute('aria-selected')==='true'||e.getAttribute('aria-pressed')==='true')); if(top.length>1) bad.push(t+': '+top.map(e=>(e.getAttribute('aria-label')||e.textContent).trim().slice(0,18)).join(' + ')); } closeMenu(); return bad.length?{ok:false,detail:[...new Set(bad)].slice(0,6).join(' | ')}:{ok:true}; });
 T('page tabs: a part hidden by a page tab never stays on screen (a forced style once kept the Events calendar on every tab)',()=>{ const bad=[]; const pages=qaAllPages(); let n=0; for(const t of pages){ openMenu(t); const P=$('panel'); for(const b of [...document.querySelectorAll('#menuov .sect-nav [data-sect], #panel .sect-nav [data-sect]')]){ b.click(); n++; for(const e of P.querySelectorAll('*')){ if(e.style.display==='none'&&getComputedStyle(e).display!=='none') bad.push(t+' / '+b.dataset.sect+': '+((e.className||e.tagName)+'').slice(0,30)); } } } closeMenu(); return bad.length?{ok:false,detail:[...new Set(bad)].slice(0,8).join(' | ')}:{ok:true,detail:n+' page tabs checked'}; });
   T('weekly quests: progress from counters, each pays once, crate once, week rollover and damaged saves rebuild',()=>{ const e=[]; S.weekly=null; const w=ensureWeekly(); if(w.quests.length!==4) e.push('quests '+w.quests.length); for(const q of w.quests){ const m={caught:()=>S.stats.caught+=q.n,shiny:()=>S.stats.shiny+=q.n,earned:()=>S.stats.earned+=q.n,tasks:()=>S.gstats.tasks+=q.n,hot:()=>S.stats.hot+=q.n,chal:()=>S.stats.chalWins=(S.stats.chalWins||0)+q.n,species:()=>{}}; m[q.t](); } const sc0=S.scales; w.quests.forEach((q,i)=>{ if(q.t==='species') q.base-=q.n; act('wqclaim',{i}); act('wqclaim',{i}); }); const want=w.quests.reduce((a,q)=>a+q.scales,0); if(S.scales-sc0!==want) e.push('scales '+(S.scales-sc0)+' want '+want); const big=S.tokens.big; act('wqbonus',{}); act('wqbonus',{}); if(S.tokens.big-big!==1) e.push('crate '+(S.tokens.big-big)); S.weekly.wk='2000-01-03'; if(ensureWeekly().wk!==weekKey()) e.push('rollover'); S.weekly={wk:1,quests:[null]}; if(!Array.isArray(ensureWeekly().quests)||ensureWeekly().quests.length!==4) e.push('rebuild'); return e.length?{ok:false,detail:e.join('; ')}:{ok:true,detail:'claims, crate, rollover and rebuild ok'}; });
   T('weather forecast matches the real weather schedule, in order and in the future',()=>{ const e=[]; const f=wxForecast(6), now=Date.now()/1000; let last=0; for(const x of f){ const t=x.at+now+1, real=(window.__wxTime?__wxTime.kindAt(t):weatherAt(Math.floor(t/WX_LEN))).k; if(real!==x.k) e.push(x.k+' forecast, '+real+' real at +'+Math.round(x.at)+' s'); if(window.__wxTime){ const R=__wxTime.RULE[x.k]; if(R&&(R==='night')!==__wxTime.night(t)) e.push(x.k+' at the wrong time of day'); } if(x.at<=0||x.at<last) e.push('order '+x.at); last=x.at; } if(!f.length) e.push('empty'); return e.length?{ok:false,detail:e.join('; ')}:{ok:true,detail:f.map(x=>x.k).join(', ')}; });
