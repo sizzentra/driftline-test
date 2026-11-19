@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="DL Test Android">
 <script>
-window.DL_BUILD='android'; window.DL_PREVIEW=true; window.DL_VERSION='2026.11.19-0358';
+window.DL_BUILD='android'; window.DL_PREVIEW=true; window.DL_VERSION='2026.11.19-0422';
 window.addEventListener('beforeinstallprompt',function(e){ e.preventDefault(); window.__dlInstallPrompt=e; });
 </script>
 </head>
@@ -2618,7 +2618,6 @@ function drawFrenzyHUD(t){ const fz=G.fz; if(!fz) return; const left=Math.max(0,
 
 // ---------- boardwalk: wheel, crates, coin flip, scratch card ----------
 const WHEEL = [['Coins ×2',22,'#3a6f9a'],['Seashell',16,'#6a7680'],['Lure pack',14,'#4f8a4a'],['Coins ×6',12,'#7a4a9a'],['Lucky boost',12,'#2a8aa8'],['Small crate',10,'#c8553a'],['Big crate',4,'#d87aa0'],['JACKPOT ×40',2,'#d8a020']];
-const WHEEL_FREE_MS = 4*3600*1000;
 const wheelCost = () => Math.round(bestLoot()*3);
 const crateCost = k => Math.round(bestLoot()*({small:5,big:25,legend:120}[k]));
 let WH={angle:0, spinning:false, result:''}, crateRes=null, flipRes=null, scratch=null;
@@ -2661,29 +2660,6 @@ function newScratch(){ const sym=['🐟','🦀','🐚','💎','👑'], prize=[2,
   const cells=[]; if(win) cells.push(w,w,w); const cnt=[0,0,0,0,0]; if(win) cnt[w]=3; while(cells.length<9){ const s=Math.floor(Math.random()*5); if(s===w || cnt[s]>=2) continue; cnt[s]++; cells.push(s); }
   for(let i=cells.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [cells[i],cells[j]]=[cells[j],cells[i]]; }
   scratch={cells, open:Array(9).fill(false), win:w, prize:w>=0?Math.round(bestLoot()*prize[w]*coinMult()):0, done:false, sym}; }
-function renderGames(P){ const free=Date.now()-S.wheelT>=WHEEL_FREE_MS, wait=Math.ceil((WHEEL_FREE_MS-(Date.now()-S.wheelT))/1000); const tk=S.tokens; const base=bestLoot();
-  const crateRow=(k,name,desc)=>`<div class="row spread" style="padding:6px 0;border-bottom:1px solid var(--line)"><div style="min-width:0"><b>${name}</b>${tk[k]?` <span class="badge g">${tk[k]} free</span>`:''}<div class="meta">${desc}</div></div>
-    ${tk[k]?`<button class="btn sm" data-act="crate" data-k="${k}" data-free="1">Open free</button>`:`<button class="btn sm" data-act="crate" data-k="${k}" ${S.money>=crateCost(k)?'':'disabled'}>Open · <span class="coin">${fmt(crateCost(k))}</span></button>`}</div>`;
-  const betBtn=f=>{ const amt=Math.min(Math.floor(S.money*f), base*60); return `<button class="btn alt sm" data-act="flip" data-k="${f}" ${amt>=10?'':'disabled'}>Bet ${Math.round(f*100)}% · <span class="coin">${fmt(Math.max(0,amt))}</span></button>`; };
-  P.innerHTML=`<h2>Boardwalk</h2><p class="sub">Games of chance on the pier, for coins only. Prices grow with the best water you’ve unlocked. Angler ranks hand out free crates.</p>
-  <div class="grid">
-   <div class="tile"><h4>Lucky wheel</h4><div class="wheelwrap"><canvas id="wheelcv" width="520" height="520"></canvas>
-     ${free?`<button class="btn" data-act="spin" data-k="free" ${WH.spinning?'disabled':''}>Free spin!</button>`:`<button class="btn" data-act="spin" ${WH.spinning||S.money<wheelCost()?'disabled':''}>Spin · <span class="coin">${fmt(wheelCost())}</span></button><span class="meta">Next free spin in ${Math.floor(wait/3600)?Math.floor(wait/3600)+' h ':''}${Math.ceil(wait%3600/60)} min</span>`}
-     ${WH.result?`<div class="val" style="text-align:center">${esc(WH.result)}</div>`:''}</div></div>
-   <div class="tile"><h4>Mystery crates</h4><div class="meta">Coins, lures, clothes, aquarium decor, and pets you can’t get anywhere else.</div>
-     ${crateRow('small','Small crate','Mostly coins and lures. Sometimes a pet.')}${crateRow('big','Big crate','Clothes, decor, and the rarer pets.')}${crateRow('legend','Legendary crate','Dragons, unicorns, crystal caves.')}
-     ${crateRes?`<div class="reveal" style="text-align:center;margin-top:8px"><canvas width="240" height="180" id="crateprev"></canvas><div class="val">${esc(crateRes.title)}</div></div>`:''}</div>
-   <div class="tile"><h4>Coin flip with the Fishmonger</h4><div class="meta">Heads you double it, tails he keeps it. A fair coin, he swears.</div>
-     <div class="row">${betBtn(.1)}${betBtn(.25)}${betBtn(.5)}</div>${flipRes?`<div class="val" style="font-size:18px;color:${flipRes.win?'var(--gold)':'var(--muted)'}">${esc(flipRes.txt)}</div>`:''}
-     <div class="meta">${S.gstats.flips} flips · ${S.gstats.flipWins} won</div></div>
-   <div class="tile"><h4>Scratch card</h4><div class="meta">Find three of the same: 🐟 ×2 · 🦀 ×4 · 🐚 ×8 · 💎 ×20 · 👑 ×60 (times ${fmt(base)} coins).</div>
-     ${scratch&&!scratch.done?`<div class="scratch">${scratch.cells.map((s,i)=>`<button data-act="scratch" data-i="${i}" class="${scratch.open[i]?'open':''}" aria-label="Scratch box ${i+1}">${scratch.open[i]?scratch.sym[s]:''}</button>`).join('')}</div><div class="row" style="justify-content:center"><button class="btn alt sm" data-act="scratchall">Reveal all</button></div>`
-      :`${scratch&&scratch.done?`<div class="scratch">${scratch.cells.map(s=>`<button class="open" disabled>${scratch.sym[s]}</button>`).join('')}</div><div class="val" style="text-align:center;color:${scratch.win>=0?'var(--gold)':'var(--muted)'}">${scratch.win>=0?'Winner! +'+fmt(scratch.prize)+' coins':'No match this time.'}</div>`:''}
-      <button class="btn" data-act="buyscratch" ${S.money>=base*2?'':'disabled'}>Buy a card · <span class="coin">${fmt(base*2)}</span></button>`}</div>
-  </div>`;
-  drawWheel(); const cp=$('crateprev'); if(cp&&crateRes){ const x=cp.getContext('2d'); const k=crateRes.kind;
-    if(k==='pet') drawPet(x,crateRes.id,120,160,crateRes.id==='unicorn'?3.4:5,0); else if(k==='decor') drawDecor(x,crateRes.id,120,170,1.6,0); else if(k==='hat') hatPreview(x,240,180,crateRes.id,S.look.hatCol,true);
-    else if(k==='col'){ x.fillStyle=crateRes.id; x.beginPath(); x.arc(120,90,50,0,7); x.fill(); } else drawJunk(x,240,180,k==='lure'?'goldlure':'chest'); } }
 function settleScratch(){ if(!scratch||scratch.done) return; scratch.done=true; S.gstats.scratch++; if(scratch.win>=0){ bwEarn(scratch.prize); S.gstats.scratchWins++; sfx.catch(scratch.win>=3?4:2); } else sfx.lost(); }
 
 // ---------- settings ----------
@@ -3822,7 +3798,6 @@ function extraAct3(b){ const k=b.dataset.k;
 // more shirt patterns
 // =====================================================================
 let PREVIEW=null, PET_PV=null, AQ_PV=null; // what's being tried on right now (never saved)
-const PV_KIND_NAME = {col:'colour', pat:'fabric', hat:'hat', out:'outfit', gls:'glasses', shoe:'shoes', neck:'neckwear', back:'back piece'};
 function previewLook(){ const lk=Object.assign({},S.look); if(!PREVIEW) return lk; const {kind,id}=PREVIEW;
   if(kind==='col') lk.shirt=id; else if(kind==='pat') lk.pat=id; else if(kind==='hat') lk.hat=id; else if(kind==='out') lk.outfit=id; else if(kind==='gls') lk.glasses=id; else if(kind==='shoe') lk.shoes=id; else if(kind==='neck') lk.neck=id; else if(kind==='back') lk.back=id; return lk; }
 function previewBarHTML(){ if(!PREVIEW) return ''; const p=PREVIEW;
@@ -6561,29 +6536,6 @@ m33wrap('river','live',function(P,t,hz){ const lc=['#d8a03a','#c8603a','#8aa84a'
     g.save(); g.translate(x,y); g.rotate(r); g.fillStyle=mix(lc[i%3],P.wMid,.2+P.night*.5); g.beginPath(); g.moveTo(-s*1.4,0); g.quadraticCurveTo(0,-s,s*1.4,0); g.quadraticCurveTo(0,s,-s*1.4,0); g.fill(); g.strokeStyle=v3rgba('#000000',.2); g.lineWidth=.6; g.beginPath(); g.moveTo(-s*1.2,0); g.lineTo(s*1.2,0); g.stroke(); g.restore();
     g.strokeStyle=v3rgba(mix(P.wTop,'#ffffff',.5),.25); g.lineWidth=.8; g.beginPath(); g.ellipse(x,y+1,s*2.2,s*.5,0,0,7); g.stroke(); } });
 
-// ---------------------------------------------------------------------
-// Brine Shelf dolphins, redone: each one shows first as a shadow just under the surface, breaks the water
-// (only the part above the waterline is drawn), follows its arc nose-first, and re-enters with a splash;
-// rings spread where it left and where it went back in. Nothing appears out of thin air.
-// ---------------------------------------------------------------------
-function m33dolphin(c,s,col,belly){ c.fillStyle=col; c.beginPath(); c.moveTo(-s*3.5,0); c.quadraticCurveTo(-s*1,-s*1.8,s*2.6,-s*.4); c.lineTo(s*3.8,-s*.2); c.lineTo(s*2.6,s*.3); c.quadraticCurveTo(0,s*1.2,-s*3.5,0); c.fill();
-  c.beginPath(); c.moveTo(-s*.4,-s*1.1); c.lineTo(-s*1.4,-s*2.4); c.lineTo(s*.6,-s*1.2); c.fill(); c.beginPath(); c.moveTo(-s*3.3,0); c.lineTo(-s*4.6,-s*1); c.lineTo(-s*4.2,0); c.lineTo(-s*4.6,s*1); c.closePath(); c.fill();
-  c.fillStyle=belly; c.beginPath(); c.moveTo(-s*2.5,s*.3); c.quadraticCurveTo(0,s*1.1,s*2.4,s*.3); c.quadraticCurveTo(0,s*.5,-s*2.5,s*.3); c.fill(); }
-function m33dolphins(P,t,hz,foam,night){ const per=16, k=(t%per)/per, FX=S.settings.effects; if(k>.5) return;
-  const col=mix('#6a7a8a',P.wMid,night*.5), belly=mix('#d8dce0',P.wMid,night*.5);
-  for(let i=0;i<2;i++){ const base=hz+H*(.24+i*.05), s=H*.012, x0=W*(.44+i*.05), x1=x0+W*.16, span=x1-x0, lead=.12+i*.08;
-    // phase: approach under water (shadow) -> leap -> re-enter -> rings
-    const q=(k-i*.05)/.5; if(q<0||q>1) continue;
-    if(q<lead){ const e=q/lead, a=Math.sin(e*Math.PI)*.22; g.save(); g.globalAlpha=a; g.translate(x0-W*.05+e*W*.05,base+s*1.6); g.scale(1,.45); m33dolphin(g,s,mix(P.wBot,'#000000',.2),mix(P.wBot,'#000000',.2)); g.restore(); continue; }
-    const lq=(q-lead)/(.62-lead); // 0..1 through the leap
-    if(lq<=1){ const x=x0+span*lq, arc=Math.sin(lq*Math.PI), y=base-arc*H*.055, slope=-Math.cos(lq*Math.PI)*H*.055*Math.PI/span, ang=Math.atan(slope);
-      g.save(); g.beginPath(); g.rect(0,0,W,base+1); g.clip(); g.translate(x,y); g.rotate(ang); m33dolphin(g,s,col,belly); g.restore();
-      // a soft darker band where the body passes through the surface
-      if(arc<.35){ g.fillStyle=v3rgba(P.wBot,.25); g.beginPath(); g.ellipse(lq<.5?x0:x1,base+1,s*2.6,s*.5,0,0,7); g.fill(); }
-      if(FX&&(lq<.16||lq>.84)){ const sx=lq<.5?x0:x1, e=lq<.5?lq/.16:(1-lq)/.16, pw=1-e; for(let j=0;j<7;j++){ const a=-Math.PI/2+(j-3)*.32, rr=s*(1.4+pw*2.4); g.fillStyle=v3rgba(foam,.75*(1-pw*.4)); g.beginPath(); g.arc(sx+Math.cos(a)*rr,base+Math.sin(a)*rr*1.3,Math.max(1,s*.18),0,7); g.fill(); } } }
-    // rings spreading from both splash points
-    for(const [sx,st] of [[x0,lead],[x1,.62]]){ const rq=(q-st)/.3; if(rq>0&&rq<1){ g.strokeStyle=v3rgba(foam,.5*(1-rq)); g.lineWidth=1.2; g.beginPath(); g.ellipse(sx,base+1,s*(1.5+rq*5),s*(.35+rq*1.1),0,0,7); g.stroke(); } } } }
-
 // ---------- Starfall waterfalls: a ribbon that widens and shimmers as it falls, then lands properly in the cloud sea
 // with billowing mist, droplets arcing out, spreading rings and a few glints
 function m33fall(t,fx,fy,w,hz){ const FX=S.settings.effects, by=hz+H*.012, /* lands on the lake itself, in front of the cloud bank */ L=by-fy, w0=Math.max(1.4,w*.05), w1=w0*2.6;
@@ -6664,7 +6616,6 @@ m33wrap('starfall','live',function(P,t,hz){ const F=M33.falls; if(!F) return; fo
 // Everything is multiplied by WXA (the weather's fade in/out, 0..1), so it builds up and dies away
 // smoothly; nothing switches on or off in one frame.
 // =====================================================================
-const WX3={};
 function wx3sun(hz){ const p=phase(), sa=((p+.05)%1), up=sa<.55, k=up?sa/.55:(sa-.55)/.45; return {x:W*(.1+.8*k), y:hz-Math.sin(k*Math.PI)*hz*.8+10, up}; }
 // where the rainbow stands, shared by the sky arc and its reflection: like a real one it is on the side away from the
 // sun and sinks lower as the sun climbs, so it never rings the sun (it used to sit right around it; 2026-11-17)
@@ -6864,7 +6815,6 @@ m33wrap('starfall','live',function(P,t,hz){ if(!S.settings.effects) return; for(
 // glowing seams, lava pulses running down its veins, and the hills get scrub, dead trees and rock outcrops.
 // =====================================================================
 V3SCENES.ember.noClouds=true;
-const EMB={ vx:()=>W*.62, vw:()=>W*.26, vh:()=>H*.22 };
 function embCone(x,hz){ const vx=W*.62, vb=hz+1, vw=W*.26, vh=H*.22, cw=vw*.16, ty=vb-vh; x.beginPath(); x.moveTo(vx-vw,vb); x.quadraticCurveTo(vx-vw*.4,vb-vh*.35,vx-cw,ty); x.lineTo(vx-cw*.4,ty+vh*.03); x.lineTo(vx+cw*.3,ty+vh*.015); x.lineTo(vx+cw,ty); x.quadraticCurveTo(vx+vw*.45,vb-vh*.4,vx+vw,vb); x.closePath(); }
 m33wrap('ember','sky',function(P,t,hz){ const vx=W*.62, ty=hz+1-H*.22, night=P.night;
   // ash plumes: long soft streams leaving the crater and drifting downwind, built from overlapping feathered puffs
@@ -7016,7 +6966,6 @@ drawWeatherX0 = function(t,wx,hz){ _drawWeatherX0_fog(t,wx,hz);
 // swimming slowly across the sky, a comet that crosses now and then, lanterns drifting up off the lake, and
 // star-blossoms that open on the water. Everything eases in and out; nothing pops.
 // =====================================================================
-const SF3={};
 m33wrap('starfall','sky',function(P,t,hz){ const night=P.night, vis=.35+night*.65;
   // nebula clouds: soft colour pools that breathe slowly
   g.save(); g.globalCompositeOperation='lighter';
@@ -7345,7 +7294,6 @@ function a3TorsoPath(c,f){ c.beginPath(); const bb=A3BELLY*2.6;
   c.closePath(); }
 // a longer coat silhouette reaching hemY, flaring slightly
 function a3CoatPath(c,f,hemY){ c.beginPath(); c.moveTo(f?-7.4:-7.9,-45.8); c.quadraticCurveTo(f?-8.2:-9.1,-36,-8.8,-26); c.lineTo(-9.8,hemY); c.quadraticCurveTo(0,hemY+1.6,9.8,hemY); c.lineTo(9+A3BELLY*1.6,-26); c.quadraticCurveTo((f?9:9.5)+A3BELLY*2.4,-34,f?7.7:8.1,-45.8); c.quadraticCurveTo(0,-48.6,f?-7.4:-7.9,-45.8); c.closePath(); }
-function a3Shade(c,pathFn,D){ c.save(); pathFn(); c.clip(); const sg=c.createLinearGradient(-9,0,9,0); sg.addColorStop(0,'rgba(10,8,20,.28)'); sg.addColorStop(.45,'rgba(10,8,20,0)'); sg.addColorStop(.85,'rgba(255,230,190,0)'); sg.addColorStop(1,'rgba(255,225,185,.32)'); c.fillStyle=sg; c.fillRect(-11,-50,22,40); c.restore(); }
 // an outfit's own colour: the player's pick, or the outfit's default when the save still holds the shared default gold
 // (0.3.6: sleeves and trousers used the gold literally, so a navy captain's coat had gold sleeves)
 function a3OC(lk,def){ return lk.outCol&&lk.outCol!=='#d8a020'?lk.outCol:def; }
@@ -7440,7 +7388,7 @@ function a3Fingers(c,h1,h2,ra,s,sk,skD){ c.save();
 var A3FXP={}; // where the hat, chest and neck are this frame (read by cb_wearfx06.js)
 function a3Body(c,x,y,s,lk,o,live){ A3FXP={};
   const night=o.night||0, D=cl=>night?mix(cl,'#0a1018',night*.45):cl, t=o.t||0, f=lk.g==='f';
-  const skin=SKINS[lk.skin]||SKINS[1], sk=D(skin), skD=D(mix(skin,'#5a2a1a',.24)), hairC=HAIRS[lk.hair]||HAIRS[1], hair=D(hairC), shirt=D(lk.shirt); A3SKIN=[sk,skD];
+  const skin=SKINS[lk.skin]||SKINS[1], sk=D(skin), skD=D(mix(skin,'#5a2a1a',.24)), hairC=HAIRS[lk.hair]||HAIRS[1], hair=D(hairC), shirt=D(lk.shirt);
   const hs = !lk.hairStyle||lk.hairStyle==='auto' ? (f?'long':'short') : lk.hairStyle;
   const st=o.forceSt||(live?G.st:'idle');
   const mood = !live&&!o.forceSt ? 'calm' : st==='bite' ? 'surprised' : st==='reeling' ? 'focus' : (st==='landing'||(live&&G.lastCatchT&&performance.now()-G.lastCatchT<1800)) ? 'happy' : 'calm';
@@ -9930,41 +9878,6 @@ function a3Deltoid(c,sh,el,w,col,fabs){ const r=w*.6, cx=sh.x-.1, cy=sh.y-.15, a
   if(fabs&&fabs.length){ c.save(); path(); c.clip(); for(const f of fabs) drawFabric(c,f,null,cx-r*1.4,cy-r*1.4,r*2.8,r*2.8); c.restore(); }
   c.save(); path(); c.clip(); c.strokeStyle='rgba(255,244,226,.28)'; c.lineWidth=.6; c.beginPath(); c.arc(cx,cy,r*.82,Math.PI*1.1,Math.PI*1.7); c.stroke(); c.restore(); }
 
-// ---------- curly hair (0.3.3, from the director's reference): a full round mass with a bumpy outline of small curls,
-// packed with spiral curls shaded darker underneath and lit on top; it frames the face, falls to the jaw behind,
-// and the ear stays visible in front of it. Head centre (0,-56), radius 7.5, face to the right.
-var A3SKIN=null;
-function curlMass(c){ c.beginPath(); c.moveTo(6.8,-60.2); c.bezierCurveTo(8.6,-64.4,6.4,-69.4,0,-69.6); c.bezierCurveTo(-6.4,-69.8,-9.8,-65.4,-9.8,-59.6); c.bezierCurveTo(-9.8,-54.6,-8.6,-50.8,-6,-49.4); c.bezierCurveTo(-3.6,-49.6,-1.6,-50.6,-.6,-52.6); c.bezierCurveTo(.2,-55,0,-57,1.2,-58.4); c.bezierCurveTo(2.8,-59.8,4.8,-59.6,6.8,-60.2); c.closePath(); }
-// curl positions inside the mass: an irregular scatter (sizes, spacing and spiral angles vary, like real curls)
-const CURL_CELLS=(()=>{ const out=[]; let s=7; const rnd=()=>{ s=(s*16807)%2147483647; return s/2147483647; }; for(let y=-68.8;y<=-50;y+=2.05) for(let x=-9.6;x<=7.6;x+=2.15){ if(rnd()<.12) continue; out.push([x+(rnd()-.5)*1.5,y+(rnd()-.5)*1.3,1.0+rnd()*.7,rnd()*Math.PI*2]); } return out; })();
-// points along the outline, for the little curls that make its edge bumpy
-const CURL_EDGE=(()=>{ const pts=[], ctrl=[[6.8,-60.2],[7.9,-62.6],[7.6,-65.4],[5.6,-67.9],[2.8,-69.3],[0,-69.6],[-3,-69.4],[-5.8,-68.3],[-8,-66.2],[-9.4,-63.2],[-9.8,-59.6],[-9.6,-56.2],[-9,-53.2],[-7.8,-50.8],[-6,-49.4],[-3.8,-49.6]]; for(let i=0;i<ctrl.length-1;i++){ const [x0,y0]=ctrl[i],[x1,y1]=ctrl[i+1], n=Math.max(1,Math.round(Math.hypot(x1-x0,y1-y0)/1.5)); for(let k=0;k<n;k++){ const u=k/n; pts.push([x0+(x1-x0)*u,y0+(y1-y0)*u]); } } return pts; })();
-function a3EarOver(){ if(!A3SKIN) return null; return A3SKIN; }
-function drawEar3(c){ const s=a3EarOver(); if(!s) return; const [sk,skD]=s; c.fillStyle=sk; c.beginPath(); c.ellipse(-1.8,-55.4,1.8,2.3,0,0,7); c.fill(); c.fillStyle=skD; c.beginPath(); c.ellipse(-1.6,-55.3,.85,1.25,0,0,7); c.fill(); c.fillStyle='rgba(255,240,225,.3)'; c.beginPath(); c.ellipse(-2.4,-56.2,.5,.9,0,0,7); c.fill(); }
-
-// ---------- CURLY (director's reference, right-hand image): loose tousled curls. A full mass whose edge breaks into
-// curled, pointed flicks, with swooping crescent locks inside, a curl dropping over the temple, falling to the jaw behind.
-const CURLY_TIPS=(()=>{ const out=[], E=CURL_EDGE; for(let i=0;i<E.length;i+=1){ const p=E[i], q=E[Math.min(E.length-1,i+1)], o=E[Math.max(0,i-1)], tx=q[0]-o[0], ty=q[1]-o[1], L=Math.hypot(tx,ty)||1; out.push([p[0],p[1],-ty/L,tx/L,1.3+((i*7)%4)*.32,(i%3)?1:-1]); /* outward normal */ } return out; })();
-// loose locks inside the curly mass: fewer and bigger than the coil grid, kept inside the outline
-const CURLY_LOCKS=(()=>{ const cv=document.createElement('canvas'), x=cv.getContext('2d'), out=[]; let s=5; const rnd=()=>{ s=(s*16807)%2147483647; return s/2147483647; }; curlMass(x);
-  for(let y=-68.6;y<=-51;y+=2.6) for(let X=-9.2;X<=6.8;X+=2.8){ const px=X+(rnd()-.5)*1.4, py=y+(rnd()-.5)*1.2; if(x.isPointInPath(px,py)) out.push([px,py,1.1+rnd()*.5,rnd()*6.28]); } return out; })();
-// ---------- COILS (director's reference, left-hand image): tight round coils. Every curl is its own round coil with a
-// spiral in it and a dark outline, piled into a dome that falls to the jaw behind.
-const COIL_BLOBS=(()=>{ const out=[]; let s=11; const rnd=()=>{ s=(s*16807)%2147483647; return s/2147483647; };
-  for(const [x,y] of CURL_EDGE) out.push([x,y,1.55+rnd()*.5,rnd()*6.28]);
-  const cv=document.createElement('canvas'), cx=cv.getContext('2d'); curlMass(cx); for(let y=-68.4;y<=-50.6;y+=2.3) for(let x=-8.8;x<=6.6;x+=2.4){ if(rnd()<.06) continue; const px=x+(rnd()-.5)*1.1, py=y+(rnd()-.5)*1; if(cx.isPointInPath(px,py)) out.push([px,py,1.45+rnd()*.55,rnd()*6.28]); } /* only inside the hair outline */
-  return out.sort((a,b)=>b[1]-a[1]); })(); // lowest first, so the upper coils overlap the ones below
-function drawCoils3(c,hair,hairC,D,t){ const base=D(hairC), dk=D(mix(hairC,'#000000',.48)), dk2=D(mix(hairC,'#000000',.25)), lt=D(mix(hairC,'#ffffff',.3)), lt2=D(mix(hairC,'#ffffff',.55));
-  // a dark backing so gaps between coils read as depth, not scalp
-  c.fillStyle=dk2; curlMass(c); c.fill(); c.lineCap='round';
-  for(const [x,y,r,a] of COIL_BLOBS){
-    const g2=c.createRadialGradient(x-r*.35,y-r*.4,r*.1,x,y,r); g2.addColorStop(0,y<-61?lt:D(mix(hairC,'#ffffff',.15))); g2.addColorStop(.7,base); g2.addColorStop(1,D(mix(hairC,'#000000',.18)));
-    c.fillStyle=g2; c.beginPath(); c.arc(x,y,r,0,7); c.fill(); c.strokeStyle=dk; c.lineWidth=.32; c.stroke();
-    // the spiral: an outer sweep and an inner turn
-    c.strokeStyle=v3rgba(dk,.85); c.lineWidth=.38; c.beginPath(); c.arc(x,y,r*.72,a,a+Math.PI*1.45); c.stroke(); c.beginPath(); c.arc(x+Math.cos(a)*r*.18,y+Math.sin(a)*r*.18,r*.38,a+Math.PI,a+Math.PI*2.5); c.stroke();
-    c.strokeStyle=v3rgba(y<-61?lt2:lt,.75); c.lineWidth=.32; c.beginPath(); c.arc(x,y,r*.82,Math.PI*1.15,Math.PI*1.65); c.stroke(); }
-  drawEar3(c); }
-
 // ---------- CURLY (0.3.3 redesign, per the director's brief): modern, medium-length, slightly messy curls that follow the
 // skull. About eleven soft curl clusters (C, S and loose spiral shapes) at irregular sizes and angles, moderate volume on
 // top, a couple of curls falling toward the forehead, small tight curls at the temple, a compact back tapering to the
@@ -10176,7 +10089,6 @@ function prizeInfo(p){ const id=p[0], nm=p[1].replace(/\s*\(.*\)\s*$/,''), tag=(
   if(id==='crate') return {cat:'Mystery crate', d:'Opens into clothes, lures, decor and now and then a pet.'};
   if(id==='myth') return {cat:'Bait', d:'Three Myth Bait: legendary fish are far more likely to bite.'};
   return {cat:'Prize', d:p[1]}; }
-const BW_GAMES = [['wheel','🎡','#ff8a5c'],['crates','🎁','#b9a2ff'],['duck','🦆','#5ad8e8'],['hilo','🃏','#7fe3c4'],['flip','🪙','#ffd36a'],['scratch','🎫','#ff9ac0'],['claw','🧸','#ff7ab0']];
 function bwCard(icon,col,title,meta,body,foot){ return `<div class="bwx-card" style="--c:${col}"><div class="bwx-ch"><span class="bwx-ic">${icon}</span><div><h4>${title}</h4><div class="meta">${meta}</div></div></div><div class="bwx-cb">${body}</div>${foot?`<div class="bwx-cf">${foot}</div>`:''}</div>`; }
 function bwGamesHTML(){ const tk=S.tokens, base=bestLoot(), nextIn=Math.max(0,Math.ceil((SPIN_EVERY-(Date.now()-S.wheelT))/60000));
   const crateRow=(k,name,desc)=>`<div class="bwx-row"><div style="min-width:0"><b>${name}</b>${tk[k]?` <span class="badge g">${tk[k]} free</span>`:''}<div class="meta">${desc}</div></div>${tk[k]?`<button class="btn sm" data-act="crate" data-k="${k}" data-free="1">Open free</button>`:`<button class="btn sm" data-act="crate" data-k="${k}" ${S.money>=crateCost(k)?'':'disabled'}>Open · <span class="coin">${fmtShort(crateCost(k))}</span></button>`}</div>`;
@@ -10336,7 +10248,6 @@ document.head.insertAdjacentHTML('beforeend',`<style>#panel .pass-next{display:f
 // premium piece, then a set mix (hats, shoes, back pieces, neckwear, an outfit, glasses, a pattern,
 // a colour), never something you already own.
 // =====================================================================
-const SHOP_LEN2 = 1200;
 shopOffers = function(){ const slot=Math.floor(Date.now()/1000/SHOP_LEN); let h=hashStr('shop2'+slot); const rnd2=()=>{ h=Math.imul(h^(h>>>13),1597334677)>>>0; return h/4294967296; };
   const all={ col:SHOP_COLS.map(c=>({kind:'col',id:c[0],name:c[1],price:c[2]})), pat:PATTERNS.filter(p=>p[2]).map(p=>({kind:'pat',id:p[0],name:p[1]+' fabric',price:p[2]})), hat:HATS.filter(x=>x.src==='shop').map(x=>({kind:'hat',id:x.id,name:x.name,price:x.price})),
     out:OUTFITS.filter(o=>o[3]==='shop').map(o=>({kind:'out',id:o[0],name:o[1],price:o[2]})), gls:GLASSES.filter(g2=>g2[2]).map(g2=>({kind:'gls',id:g2[0],name:g2[1],price:g2[2]})),
@@ -11257,7 +11168,6 @@ document.head.insertAdjacentHTML('beforeend',`<style>
 
 // ---------- Sell all filters: by rarity, by price, or both ----------
 const SELL_RAR=[['all','Any rarity'],['0','Common only'],['1','Up to Uncommon'],['2','Up to Rare'],['3','Up to Epic'],['4','Up to Legendary']];
-const SELL_PRICE=[[0,'Any price'],[50,'Under 50'],[200,'Under 200'],[1000,'Under 1k'],[5000,'Under 5k'],[20000,'Under 20k'],[100000,'Under 100k']];
 function sellFilterOn(){ const s=S.settings; return (s.sellR&&s.sellR!=='all')||(+s.sellP>0); }
 // a fish stays in the cooler when it is protected (Protect rare fish setting) or does not match the filter
 // shinies: the "Sell shinies too" box decides on its own (it starts as before: off while Protect rare fish is on)
@@ -12599,7 +12509,7 @@ SEARCH_IDX.push(
   res.addEventListener('click',e=>{ const b=e.target.closest('.sv-p'); if(!b) return; e.stopPropagation(); ov.hidden=true; setTab(b.dataset.tab); try{ menuSync(); }catch(er){} },true);
   q.placeholder='Search, or pick a page below'; })();
 // badges say what is waiting
-setInterval(()=>{ const T=$('tabs'); if(!T) return; T.querySelectorAll('.secb').forEach(b=>{ const sec=MENU_SECS.find(s=>s.id===b.dataset.sec); if(!sec) return; const parts=sec.tabs.map(t=>[t,menuDot(t)]).filter(x=>x[1]).map(([t,n])=>n+' in '+menuTabLabel(t)[1]);
+setInterval(()=>{ if(!MENU_OPEN) return; /* tooltips only matter while the menu is open */ const T=$('tabs'); if(!T) return; T.querySelectorAll('.secb').forEach(b=>{ const sec=MENU_SECS.find(s=>s.id===b.dataset.sec); if(!sec) return; const parts=sec.tabs.map(t=>[t,menuDot(t)]).filter(x=>x[1]).map(([t,n])=>n+' in '+menuTabLabel(t)[1]);
     const tip=parts.length?sec.name+': '+parts.join(', '):sec.name; if(b.title!==tip) b.title=tip; });
   T.querySelectorAll('.subp').forEach(p=>{ const t=p.dataset.sub, n=menuDot(t), tip=(menuTabLabel(t)[1]||'')+(PAGE_DESC[t]?': '+PAGE_DESC[t]:'')+(n?' ('+n+' waiting)':''); if(p.title!==tip) p.title=tip; }); },1500);
 document.head.insertAdjacentHTML('beforeend',`<style>
@@ -12990,7 +12900,6 @@ function menuEls(){ return {T:$('tabs'), P:$('panel'), toast:$('toast'), stage:$
 const MO=document.createElement('div'); MO.id='menuov'; MO.hidden=true; MO.setAttribute('role','dialog'); MO.setAttribute('aria-modal','true'); MO.setAttribute('aria-label','Menu');
 MO.innerHTML=`<div class="mo-in"><div class="mo-top">
   <button type="button" class="mo-back" data-mo="close" aria-label="Back to fishing (Esc)" title="Back to fishing (Esc)"><svg class="mo-bi" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${SEC_ICONS.fish}</svg><span class="mo-bl">Back to fishing</span></button>
-  <button type="button" class="mo-home" data-mo="home" aria-label="Overview" title="Overview: your cooler, bounties, aquarium, events and more"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="3.5" width="7" height="7" rx="1.6"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.6"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.6"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.6"/></svg><span class="mo-hl">Overview</span><span class="mo-hdot" hidden></span></button>
   <div class="mo-title" aria-live="polite"></div>
   <div class="mo-tools"><span class="mo-pause" hidden title="Your line waits while a menu is open">⏸ <span>Line waiting</span></span><span class="mo-coin" title="Your coins"><span class="coin" id="mocoin">0</span></span><button type="button" class="mo-tb" data-mo="search" aria-label="Search the menus" title="Search (/)">🔍</button><button type="button" class="mo-tb" data-mo="settings" aria-label="Settings, stats and save" title="Settings, stats and save">⚙</button></div>
   </div><div class="mo-nav"></div><div class="mo-body"></div></div>`;
@@ -13017,19 +12926,9 @@ function toggleMenu(){ if(MENU_OPEN) closeMenu(); else openMenu(DASH); }
 { const _st=setTab; setTab=function(t){ if(!t) t=DASH; if(t!==DASH) MENU_WANT=true; menuMode(); _st(t); menuHead(); }; }
 function menuHead(){ if(!MENU_OPEN) return; const sec=menuSecOf(S.tab), t=MO.querySelector('.mo-title'), nm=S.tab===DASH?'Overview':sec?(sec.id==='more'?'Settings':(sec.short||sec.name)):'';
   if(t.textContent!==nm) t.textContent=nm; const pz=MO.querySelector('.mo-pause'), busy=!['idle','rest','result','event'].includes(G.st); if(pz.hidden===busy) pz.hidden=!busy;
-  const h=MO.querySelector('.mo-home'); if(h){ const on=S.tab===DASH; h.classList.toggle('on',on); h.setAttribute('aria-pressed',on?'true':'false'); } }
+  }
 MO.addEventListener('click',e=>{ const b=e.target.closest('[data-mo]'); if(!b) return; e.stopPropagation(); const m=b.dataset.mo;
   if(m==='close') closeMenu(); else if(m==='home'){ if(S.tab!==DASH){ setTab(DASH); save(); } } else if(m==='search'){ const s=$('searchbtn'); if(s) s.click(); } else if(m==='settings'){ const mt=MENU_MORE.tabs, last=menuLast().more; setTab(S.tab!=='settings'&&mt.includes(last)&&menuSecOf(S.tab)!==MENU_MORE?last:'settings'); save(); } });
-// ---------- the Menu button on the water (fishing mode) ----------
-const MB=document.createElement('button'); MB.id='menubtn'; MB.type='button'; MB.setAttribute('aria-label','Open the menu (M)'); MB.title='Menu (M)';
-MB.innerHTML='<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="3.5" width="7" height="7" rx="1.6"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.6"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.6"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.6"/></svg><span class="mbl">Menu</span><span class="mbdot" hidden></span>';
-$('stage').appendChild(MB); ['pointerdown','touchstart','mousedown'].forEach(ev=>MB.addEventListener(ev,e=>e.stopPropagation(),{passive:true}));
-MB.addEventListener('click',e=>{ e.stopPropagation(); try{ startAudio(); }catch(er){} openMenu(DASH); });
-// what is waiting: the menu badges plus the Overview's ready cards (a full cooler, a finished bounty, coins in the aquarium)
-// how many things are waiting (a page with something new counts once, however big its own number is)
-function waitingCount(){ let n=0; try{ for(const s of MENU_SECS) for(const t of s.tabs) if(menuDot(t)) n++; if(S.cooler.length>=gv('cooler')) n++; if(S.tankBank>=1&&S.tank.length) n++; }catch(e){} return n; }
-setInterval(()=>{ const n=waitingCount(), d=MB.querySelector('.mbdot'), t=n>99?'99+':String(n); const al='Open the menu (M)'+(n?', '+n+' thing'+(n===1?'':'s')+' waiting':''); if(MB.getAttribute('aria-label')!==al){ MB.setAttribute('aria-label',al); MB.title=al; } if(n){ if(d.textContent!==t) d.textContent=t; d.hidden=false; } else d.hidden=true;
-  const hd=MO.querySelector('.mo-hdot'); if(hd){ const r=(S.cooler.length>=gv('cooler')?1:0)+(S.tankBank>=1&&S.tank.length?1:0)+S.bounties.filter(bDone).length; if(r){ hd.textContent=r; hd.hidden=false; } else hd.hidden=true; } },1000);
 // M opens and closes the menu (it used to fold the side menus away)
 addEventListener('keydown',e=>{ if((e.key!=='m'&&e.key!=='M')||e.ctrlKey||e.metaKey||e.altKey) return; const t=(document.activeElement&&document.activeElement.tagName)||''; if(/INPUT|TEXTAREA|SELECT/.test(t)) return; const sov=$('searchov'); if(sov&&!sov.hidden) return; e.preventDefault(); e.stopImmediatePropagation(); toggleMenu(); },true);
 // Esc closes the menu (the search box, a confirmation or a card handle Esc themselves first)
@@ -13298,29 +13197,13 @@ body.phone-app.dl-fish .hud > .stat.loc,body.phone-app.dl-fish .hud > #buffchip,
   body.dl-fish .hud > #buffchip,body.dl-fish .hud > .hudbtns{display:none!important}
 }
 /* ---------- the Menu button ---------- */
-#menubtn{position:absolute;right:12px;bottom:12px;z-index:6;display:inline-flex;align-items:center;gap:8px;min-height:48px;padding:0 18px 0 14px;border-radius:15px;border:1px solid #ffd36a99;background:linear-gradient(180deg,#24395cee,#15233ef2);color:#fff3cf;font:800 15px var(--display,system-ui);letter-spacing:.01em;cursor:pointer;box-shadow:0 8px 22px #02060fcc,0 0 18px #ffd36a2a;transition:transform .12s,box-shadow .18s,border-color .18s;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
-#menubtn:hover{border-color:var(--gold,#ffd36a);box-shadow:0 8px 22px #02060fcc,0 0 26px #ffd36a55;transform:translateY(-1px)}
-#menubtn:active{transform:scale(.97)}
-#menubtn:focus-visible{outline:2px solid var(--gold,#ffd36a);outline-offset:3px}
-#menubtn .mbdot{position:absolute;top:-8px;right:-7px;min-width:21px;height:21px;padding:0 6px;box-sizing:border-box;border-radius:999px;background:linear-gradient(180deg,#ffb36a,#ff7a4a);color:#2a1206;font:800 12px/21px var(--display,system-ui);text-align:center;box-shadow:0 0 10px #ff8a5c88,0 2px 6px #0008}
-#menubtn .mbdot[hidden]{display:none}
-body.card-open #menubtn{opacity:0;pointer-events:none}
-@media (max-height:560px){#menubtn{min-height:42px;right:10px;bottom:10px;font-size:14px;padding:0 15px 0 12px}}
-@media (max-width:420px){#menubtn{right:10px;bottom:10px}}
 .dlprev{right:auto!important;left:50%!important;bottom:4px!important;transform:translateX(-50%);opacity:.8}
 /* ---------- the full-screen menu: no pinned bars, every part is a row of one screen-tall grid (works under Safari's toolbars) ---------- */
 #menuov{inset:auto!important;top:0!important;left:0!important;right:0!important;height:100vh;height:100dvh}
 #menuov .mo-in{grid-template-columns:auto auto minmax(0,1fr) auto!important;grid-template-rows:auto auto minmax(0,1fr)!important;grid-template-areas:"back home secs tools" "sub sub sub sub" "body body body body"!important}
 #menuov .mo-title{display:none!important}
-#menuov .mo-home{grid-area:home;align-self:center;position:relative;display:inline-flex;align-items:center;gap:7px;min-height:46px;padding:0 14px;border-radius:14px;border:1px solid var(--line,#26385180);background:var(--glass,#111c2e);color:#bcd0e4;font:800 14px var(--display,system-ui);cursor:pointer;transition:background .15s,border-color .15s,color .15s}
-#menuov .mo-home:hover{border-color:#5a7ea8aa;color:#eef3f8}
-#menuov .mo-home.on{background:linear-gradient(180deg,#ffe08a,#f2b84e);border-color:#ffe7a6;color:#2a1806}
-#menuov .mo-home:focus-visible{outline:2px solid var(--gold,#ffd36a);outline-offset:2px}
-#menuov .mo-hdot{position:absolute;top:-7px;right:-6px;min-width:19px;height:19px;padding:0 5px;box-sizing:border-box;border-radius:999px;background:linear-gradient(180deg,#ffb36a,#ff7a4a);color:#2a1206;font:800 11px/19px var(--display,system-ui);text-align:center}
-#menuov .mo-hdot[hidden]{display:none}
 @media (max-width:1100px){#menuov .mo-in{grid-template-rows:auto auto auto minmax(0,1fr)!important;grid-template-areas:"back home . tools" "secs secs secs secs" "sub sub sub sub" "body body body body"!important}}
-@media (max-width:640px){#menuov .mo-home{min-height:42px;padding:0 11px}#menuov .mo-home .mo-hl{font-size:13px}}
-@media (max-width:460px){#menuov .mo-home .mo-hl{display:none}#menuov .mo-home{padding:0 11px}#menuov .mo-tools{gap:6px}#menuov .mo-tb{width:38px;height:38px}#menuov .mo-coin{padding:0 9px}}
+@media (max-width:460px){#menuov .mo-tools{gap:6px}#menuov .mo-tb{width:38px;height:38px}#menuov .mo-coin{padding:0 9px}}
 #menuov .mo-in{overflow:hidden}
 /* phones held upright: the categories are the bottom row of the same grid (thumb reach), never a pinned bar */
 @media (max-width:700px) and (orientation:portrait){
@@ -13328,7 +13211,7 @@ body.card-open #menubtn{opacity:0;pointer-events:none}
   body #menuov #tabs.secmode .secbar{position:static!important;top:auto!important;bottom:auto!important;left:auto!important;right:auto!important;transform:none!important;margin:0 calc(-1 * max(10px,env(safe-area-inset-right))) 0 calc(-1 * max(10px,env(safe-area-inset-left)));padding:6px max(8px,env(safe-area-inset-right)) calc(6px + env(safe-area-inset-bottom)) max(8px,env(safe-area-inset-left))!important}
   body #menuov #panel{padding-bottom:16px!important}
 }
-@media (orientation:landscape) and (max-height:560px){#menuov .mo-in{grid-template-rows:auto auto minmax(0,1fr)!important;grid-template-areas:"back home secs tools" "sub sub sub sub" "body body body body"!important}#menuov .mo-home{min-height:38px;padding:0 10px}#menuov .mo-home .mo-hl{display:none}}
+@media (orientation:landscape) and (max-height:560px){#menuov .mo-in{grid-template-rows:auto auto minmax(0,1fr)!important;grid-template-areas:"back home secs tools" "sub sub sub sub" "body body body body"!important}}
 /* the Overview inside the menu: cards across the full width */
 #menuov #panel .dash{grid-template-columns:repeat(auto-fill,minmax(min(100%,300px),1fr))}
 @container (min-width:640px){#menuov #panel .dash .dw.wide{grid-column:span 2}}
@@ -13428,8 +13311,7 @@ body.dl-fish .hud .xpbar{min-width:0!important;width:auto!important;max-width:10
 document.head.insertAdjacentHTML('beforeend',`<style>
 @media (orientation:landscape) and (max-height:560px){
   #menuov .mo-in{grid-template-columns:clamp(132px,18vw,176px) minmax(0,1fr) auto!important;grid-template-rows:auto auto minmax(0,1fr)!important;grid-template-areas:"back sub tools" "home body body" "secs body body"!important;column-gap:12px!important;row-gap:5px!important;padding-top:max(6px,env(safe-area-inset-top))!important}
-  #menuov .mo-back,#menuov .mo-home{width:100%;box-sizing:border-box;justify-content:flex-start;min-height:36px!important;padding:0 10px!important;border-radius:12px;align-self:start}
-  #menuov .mo-home .mo-hl{display:inline!important;font-size:13px}
+  #menuov .mo-back{width:100%;box-sizing:border-box;justify-content:flex-start;min-height:36px!important;padding:0 10px!important;border-radius:12px;align-self:start}
   body #menuov #tabs.secmode .secbar{grid-area:secs;display:flex!important;flex-direction:column;align-self:stretch;gap:4px;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:none;padding:2px 0 10px!important;margin:0!important;min-height:0;background:none!important;border:0!important;box-shadow:none!important}
   body #menuov #tabs.secmode .secbar::-webkit-scrollbar{display:none}
   body #menuov #tabs.secmode .secb{flex:0 0 auto;flex-direction:row!important;justify-content:flex-start;gap:9px!important;min-height:36px!important;padding:0 10px!important;font-size:13px!important;border-radius:12px!important}
@@ -13509,7 +13391,7 @@ document.head.insertAdjacentHTML('beforeend',`<style>
 @media (orientation:landscape) and (max-height:560px) and (max-width:820px){
   body #menuov #tabs.secmode .secb{gap:7px!important;padding:0 8px!important;font-size:12.5px!important}
   body #menuov #tabs.secmode .secb .secfull{display:none!important}body #menuov #tabs.secmode .secb .secshort{display:inline!important}
-  #menuov .mo-back,#menuov .mo-home{padding:0 8px!important}
+  #menuov .mo-back{padding:0 8px!important}
 }
 </style>`);
 document.head.insertAdjacentHTML('beforeend',`<style>
@@ -13600,16 +13482,14 @@ document.head.insertAdjacentHTML('beforeend',`<style>
 /* the smallest sideways phones: an icon rail (names on long-press / hover), so pages get the width */
 @media (orientation:landscape) and (max-height:560px){
   #menuov .mo-in{grid-template-columns:52px minmax(0,1fr) auto!important;column-gap:10px!important}
-  #menuov .mo-back,#menuov .mo-home{justify-content:center;padding:0!important;font-size:0!important}
+  #menuov .mo-back{justify-content:center;padding:0!important;font-size:0!important}
   #menuov .mo-back::after{content:none!important}
   #menuov .mo-back svg:not(.mo-bi){display:none!important}
-  #menuov .mo-home .mo-hl{display:none!important}
   body #menuov #tabs.secmode .secb{justify-content:center;padding:0!important;position:relative}
   body #menuov #tabs.secmode .secb .secl{display:none!important}
   body #menuov #tabs.secmode .secb .seci svg{width:20px;height:20px}
   body #menuov #tabs.secmode .secb .secdot{position:absolute!important;top:-4px!important;right:-4px!important;left:auto!important;transform:none!important;min-width:17px;height:17px;font-size:10px;line-height:17px;margin:0!important}
   body #menuov #tabs.secmode .secb .seclive{position:absolute!important;top:3px!important;left:4px!important;right:auto!important;margin:0!important}
-  #menuov .mo-hdot{top:-5px!important;right:-5px!important}
 }
 </style>`);
 document.head.insertAdjacentHTML('beforeend',`<style>
@@ -13635,37 +13515,35 @@ document.head.insertAdjacentHTML('beforeend',`<style>@container (max-width:520px
 // =====================================================================
 const CD=document.createElement('nav'); CD.id='catdock'; CD.setAttribute('aria-label','Menu categories');
 CD.innerHTML=MENU_SECS.map(s=>`<button type="button" class="cdb" data-cd="${s.id}" title="${esc(s.name)}" aria-label="${esc(s.name)}"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${s.icon}</svg><span class="cdl">${s.short}</span><span class="cddot" hidden></span></button>`).join('');
-$('stage').appendChild(CD); CD.prepend(MB); MB.querySelector('svg').setAttribute('width','20');
+$('stage').appendChild(CD);
 ['pointerdown','touchstart','mousedown'].forEach(ev=>CD.addEventListener(ev,e=>e.stopPropagation(),{passive:true}));
 CD.addEventListener('click',e=>{ const b=e.target.closest('[data-cd]'); if(!b) return; e.stopPropagation(); try{ startAudio(); }catch(er){} const sec=MENU_SECS.find(s=>s.id===b.dataset.cd); if(!sec) return; const list=menuTabsIn(sec), last=menuLast()[sec.id]; openMenu(list.includes(last)?last:list[0]); });
 setInterval(()=>{ if(MENU_OPEN) return; for(const b of CD.querySelectorAll('.cdb')){ const sec=MENU_SECS.find(s=>s.id===b.dataset.cd), n=sec.tabs.reduce((a,t)=>a+menuDot(t),0), d=b.querySelector('.cddot'), t=n>99?'99+':String(n); if(n){ if(d.textContent!==t) d.textContent=t; d.hidden=false; } else d.hidden=true;
   if(sec.id==='chal'){ const live=!!(S.chal||liveScheds().length); b.classList.toggle('live',live); } } },1000);
 document.head.insertAdjacentHTML('beforeend',`<style>
 #catdock{position:absolute;z-index:6;left:50%;bottom:10px;transform:translateX(-50%);display:flex;gap:3px;padding:4px;border-radius:17px;background:linear-gradient(180deg,#152540e0,#0c1628ec);border:1px solid #ffffff1c;box-shadow:0 10px 26px #02060fb3;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
-#catdock .cdb,#catdock #menubtn{position:relative!important;inset:auto!important;transform:none;display:flex!important;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-width:64px;height:48px!important;min-height:0!important;padding:0 6px!important;margin:0;border-radius:13px;border:1px solid transparent;background:transparent;color:#c9d7e8;font:800 11px/1.1 var(--display,system-ui);letter-spacing:.01em;cursor:pointer;box-shadow:none!important;touch-action:manipulation;-webkit-tap-highlight-color:transparent;transition:background .15s,color .15s,border-color .15s}
+#catdock .cdb{position:relative!important;inset:auto!important;transform:none;display:flex!important;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-width:64px;height:48px!important;min-height:0!important;padding:0 6px!important;margin:0;border-radius:13px;border:1px solid transparent;background:transparent;color:#c9d7e8;font:800 11px/1.1 var(--display,system-ui);letter-spacing:.01em;cursor:pointer;box-shadow:none!important;touch-action:manipulation;-webkit-tap-highlight-color:transparent;transition:background .15s,color .15s,border-color .15s}
 #catdock .cdb:hover{background:#ffffff10;color:#fff}
-#catdock .cdb:active,#catdock #menubtn:active{transform:scale(.95)}
-#catdock #menubtn{border-color:#ffd36a77;background:linear-gradient(180deg,#2a3f63,#1a2a48);color:#fff1c8}
-#catdock #menubtn:hover{border-color:var(--gold,#ffd36a)}
-#catdock .cdb:focus-visible,#catdock #menubtn:focus-visible{outline:2px solid var(--gold,#ffd36a);outline-offset:1px}
+#catdock .cdb:active{transform:scale(.95)}
+#catdock .cdb:focus-visible{outline:2px solid var(--gold,#ffd36a);outline-offset:1px}
 #catdock .cdl,#catdock .mbl{white-space:nowrap}
-#catdock .cddot,#catdock .mbdot{position:absolute!important;top:-6px!important;right:calc(50% - 25px)!important;left:auto!important;min-width:18px!important;height:18px!important;padding:0 5px!important;box-sizing:border-box;border-radius:999px;background:linear-gradient(180deg,#ffb36a,#ff7a4a);color:#2a1206;font:800 10.5px/18px var(--display,system-ui)!important;text-align:center;box-shadow:0 0 8px #ff8a5c88}
-#catdock .cddot[hidden],#catdock .mbdot[hidden]{display:none!important}
+#catdock .cddot{position:absolute!important;top:-6px!important;right:calc(50% - 25px)!important;left:auto!important;min-width:18px!important;height:18px!important;padding:0 5px!important;box-sizing:border-box;border-radius:999px;background:linear-gradient(180deg,#ffb36a,#ff7a4a);color:#2a1206;font:800 10.5px/18px var(--display,system-ui)!important;text-align:center;box-shadow:0 0 8px #ff8a5c88}
+#catdock .cddot[hidden]{display:none!important}
 #catdock .cdb.live::before{content:"";position:absolute;top:5px;left:calc(50% - 21px);width:8px;height:8px;border-radius:50%;background:#ff5a6a;box-shadow:0 0 8px #ff5a6a;animation:livepulse 1.6s ease-in-out infinite}
 body.card-open #catdock{opacity:0;pointer-events:none}
 /* the tip line and the Rest button sit clear of the bar */
 body.dl-fish .wrap > #hint,body.dl-fish #stage > #hint{bottom:70px!important}
 /* PC and tablets: icon and name side by side */
 @media (min-width:701px) and (min-height:561px){
-  #catdock .cdb,#catdock #menubtn{flex-direction:row;gap:7px;height:42px!important;padding:0 12px!important;font-size:13px;min-width:0}
-  #catdock .cddot,#catdock .mbdot{top:-7px!important;right:-6px!important}
+  #catdock .cdb{flex-direction:row;gap:7px;height:42px!important;padding:0 12px!important;font-size:13px;min-width:0}
+  #catdock .cddot{top:-7px!important;right:-6px!important}
   #catdock .cdb.live::before{top:4px;left:4px}
   body.dl-fish .wrap > #hint,body.dl-fish #stage > #hint{bottom:66px!important}
 }
 /* phones held upright: the bar spans the bottom of the water, Rest sits just above it */
 @media (max-width:700px) and (orientation:portrait){
   #catdock{left:6px;right:6px;bottom:6px;transform:none;justify-content:space-between;gap:2px;padding:3px;border-radius:15px}
-  #catdock .cdb,#catdock #menubtn{flex:1 1 0;min-width:0;padding:0 1px!important;height:50px!important;font-size:10.5px}
+  #catdock .cdb{flex:1 1 0;min-width:0;padding:0 1px!important;height:50px!important;font-size:10.5px}
   #catdock .cdl,#catdock .mbl{overflow:hidden;text-overflow:ellipsis;max-width:100%}
   body.dl-fish .resttog{bottom:66px!important;left:8px!important}
   body.dl-fish .wrap > #hint,body.dl-fish #stage > #hint{bottom:104px!important}
@@ -13673,15 +13551,15 @@ body.dl-fish .wrap > #hint,body.dl-fish #stage > #hint{bottom:70px!important}
 /* phones held sideways: a compact bar in the bottom middle, Rest on the left of the same row */
 @media (orientation:landscape) and (max-height:560px){
   #catdock{bottom:6px;padding:3px;gap:2px;border-radius:14px}
-  #catdock .cdb,#catdock #menubtn{min-width:58px;height:42px!important;font-size:10px;padding:0 4px!important}
+  #catdock .cdb{min-width:58px;height:42px!important;font-size:10px;padding:0 4px!important}
   #catdock svg{width:18px;height:18px}
   body.dl-fish .resttog{bottom:12px!important}
   body.dl-fish .wrap > #hint,body.dl-fish #stage > #hint{bottom:56px!important}
 }
-@media (max-width:360px) and (orientation:portrait){ #catdock .cdb,#catdock #menubtn{font-size:9.5px} }
+@media (max-width:360px) and (orientation:portrait){ #catdock .cdb{font-size:9.5px} }
 </style>`);
 document.head.insertAdjacentHTML('beforeend',`<style>
-@media (max-width:700px) and (orientation:portrait){ #catdock .cdb,#catdock #menubtn{font-size:9.5px;letter-spacing:0} #catdock svg{width:21px;height:21px} }
+@media (max-width:700px) and (orientation:portrait){ #catdock .cdb{font-size:9.5px;letter-spacing:0} #catdock svg{width:21px;height:21px} }
 /* the preview badge (preview builds only) sits at the top middle of the water, clear of the bar */
 .dlprev{top:calc(env(safe-area-inset-top) + 4px)!important;bottom:auto!important;left:50%!important;right:auto!important;transform:translateX(-50%)!important;opacity:.7}
 </style>`);
@@ -13712,12 +13590,12 @@ body.dl-fish .wrap > #hint,body.dl-fish #stage > #hint{bottom:72px!important}
 @media (min-width:701px) and (min-height:561px){ body.dl-fish .wrap > #hint,body.dl-fish #stage > #hint{bottom:70px!important} }
 @media (max-width:700px) and (orientation:portrait){ body.dl-fish .wrap > #hint,body.dl-fish #stage > #hint{bottom:114px!important} }
 @media (orientation:landscape) and (max-height:560px){ body.dl-fish .wrap > #hint,body.dl-fish #stage > #hint{bottom:64px!important} }
-@media (max-width:379px) and (orientation:portrait){ #catdock{left:4px;right:4px;gap:1px;padding:3px 2px} #catdock .cdb,#catdock #menubtn{font-size:9px!important;letter-spacing:-.15px!important} }
+@media (max-width:379px) and (orientation:portrait){ #catdock{left:4px;right:4px;gap:1px;padding:3px 2px} #catdock .cdb{font-size:9px!important;letter-spacing:-.15px!important} }
 </style>`);
 document.head.insertAdjacentHTML('beforeend',`<style>
 @media (min-width:701px) and (max-width:1099px) and (min-height:561px){
-  #catdock .cdb,#catdock #menubtn{flex-direction:column;gap:2px;height:48px!important;padding:0 6px!important;font-size:11px;min-width:64px}
-  #catdock .cddot,#catdock .mbdot{top:-6px!important;right:calc(50% - 25px)!important}
+  #catdock .cdb{flex-direction:column;gap:2px;height:48px!important;padding:0 6px!important;font-size:11px;min-width:64px}
+  #catdock .cddot{top:-6px!important;right:calc(50% - 25px)!important}
   #catdock .cdb.live::before{top:5px;left:calc(50% - 21px)}
 }
 </style>`);
@@ -13748,9 +13626,9 @@ document.head.insertAdjacentHTML('beforeend',`<style>
 @media (orientation:landscape) and (max-height:560px){
   /* on the water: a slim rail down the right edge, growing up from the bottom corner */
   #catdock{left:auto!important;right:6px!important;top:auto!important;bottom:6px!important;transform:none!important;flex-direction:column;gap:2px;padding:3px;border-radius:14px}
-  #catdock .cdb,#catdock #menubtn{flex-direction:row!important;justify-content:flex-start;gap:7px!important;width:112px;min-width:0!important;height:31px!important;padding:0 9px!important;font-size:11px!important;border-radius:10px}
+  #catdock .cdb{flex-direction:row!important;justify-content:flex-start;gap:7px!important;width:112px;min-width:0!important;height:31px!important;padding:0 9px!important;font-size:11px!important;border-radius:10px}
   #catdock svg{width:17px!important;height:17px!important;flex:0 0 auto}
-  #catdock .cddot,#catdock .mbdot{top:50%!important;right:6px!important;transform:translateY(-50%);min-width:17px!important;height:17px!important;line-height:17px!important;font-size:10px!important}
+  #catdock .cddot{top:50%!important;right:6px!important;transform:translateY(-50%);min-width:17px!important;height:17px!important;line-height:17px!important;font-size:10px!important}
   #catdock .cdb.live::before{top:4px!important;left:4px!important;width:7px;height:7px}
   body.dl-fish .wrap > #hint,body.dl-fish #stage > #hint{bottom:10px!important;left:calc(50% - 62px)!important;max-width:calc(100% - 330px)!important}
   body.dl-fish .resttog{bottom:8px!important}
@@ -13762,7 +13640,7 @@ document.head.insertAdjacentHTML('beforeend',`<style>
 </style>`);
 document.head.insertAdjacentHTML('beforeend',`<style>
 @media (orientation:landscape) and (max-height:560px){
-  #catdock .cdb,#catdock #menubtn{width:134px;padding:0 28px 0 9px!important}
+  #catdock .cdb{width:134px;padding:0 28px 0 9px!important}
   body.dl-fish .wrap > #hint,body.dl-fish #stage > #hint{left:calc(50% - 72px)!important;max-width:calc(100% - 350px)!important}
   .dlprev{right:calc(160px + env(safe-area-inset-right))!important}
 }
@@ -13797,7 +13675,7 @@ document.head.insertAdjacentHTML('beforeend',`<style>
   body #menuov #tabs.secmode .subp{min-height:32px!important;padding:0 11px!important;font-size:12.5px!important}
   #menuov .mo-tb{width:34px!important;height:34px!important}
   #menuov .mo-coin{min-height:32px!important;padding:0 9px!important}
-  #menuov .mo-back,#menuov .mo-home,body #menuov #tabs.secmode .secb{min-height:34px!important;height:34px}
+  #menuov .mo-back,body #menuov #tabs.secmode .secb{min-height:34px!important;height:34px}
   #menuov .mo-in{row-gap:4px!important;padding-top:max(5px,env(safe-area-inset-top))!important}
 }
 </style>`);
@@ -13928,10 +13806,8 @@ document.head.insertAdjacentHTML('beforeend',`<style>
 document.head.insertAdjacentHTML('beforeend',`<style>
 @media (orientation:landscape) and (max-height:560px){
   #menuov .mo-in{grid-template-columns:auto minmax(0,1fr) 136px!important}
-  #menuov .mo-back,#menuov .mo-home{justify-content:flex-start!important;gap:7px!important;padding:0 9px!important;font-size:12px!important}
+  #menuov .mo-back{justify-content:flex-start!important;gap:7px!important;padding:0 9px!important;font-size:12px!important}
   #menuov .mo-back::after{content:"Back"!important;font-size:12px!important}
-  #menuov .mo-home .mo-hl{display:inline!important;font-size:12px!important}
-  #menuov .mo-hdot{top:50%!important;right:6px!important;transform:translateY(-50%)}
   body #menuov #tabs.secmode .secb{justify-content:flex-start!important;gap:7px!important;padding:0 28px 0 9px!important;font-size:12px!important}
   body #menuov #tabs.secmode .secb .secl{display:inline!important;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   body #menuov #tabs.secmode .secb .secfull{display:none!important}body #menuov #tabs.secmode .secb .secshort{display:inline!important}
@@ -13949,9 +13825,6 @@ document.head.insertAdjacentHTML('beforeend',`<style>
 function menuLastPage(){ const ok=t=>!!t&&t!==DASH&&(MENU_SECS.some(s=>s.tabs.includes(t))||MENU_MORE.tabs.includes(t)); const l=S.settings&&S.settings.lastPage; return ok(l)?l:'cooler'; }
 { const _st05=setTab; setTab=function(t){ if(t&&t!==DASH){ try{ S.settings.lastPage=t; }catch(e){} } return _st05.apply(this,arguments); }; }
 openMenu=function(t){ if(!t||t===DASH) t=menuLastPage(); MENU_WANT=true; setTab(t); save(); };
-{ const h=MO.querySelector('.mo-home'); if(h) h.remove(); }
-MB.setAttribute('aria-label','Open the menu (M)'); MB.title='Menu (M): opens the page you used last';
-document.head.insertAdjacentHTML('beforeend','<style>#menuov .mo-home{display:none!important}</style>');
 
 // =====================================================================
 // QC pass fixes (2026-11-17, round 2)
@@ -14073,7 +13946,6 @@ body.dl-fish #stage > #hint,body.dl-fish .wrap > #hint{bottom:56px!important;lef
 // The landscape side panels fold to icons and back (one setting for the water's panel and the menu's rail).
 // Page tabs (Wardrobe tabs, section tabs) stay pinned while a page scrolls.
 // =====================================================================
-MB.remove();
 { const mini=()=>!!(S.settings&&S.settings.dockMini); const apply=()=>{ document.body.classList.toggle('dock-mini',mini()); document.querySelectorAll('.cdmini').forEach(b=>{ b.setAttribute('aria-pressed',String(mini())); const t=mini()?'Expand panel':'Collapse panel'; b.title=t; b.setAttribute('aria-label',t); const l=b.querySelector('.cdml'); if(l&&l.textContent!==t) l.textContent=t; }); };
   const mk=()=>{ const b=document.createElement('button'); b.type='button'; b.className='cdmini'; b.innerHTML='<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg><span class="cdml">Collapse panel</span>';
     ['pointerdown','touchstart','mousedown'].forEach(ev=>b.addEventListener(ev,e=>e.stopPropagation(),{passive:true})); b.addEventListener('click',e=>{ e.stopPropagation(); S.settings.dockMini=!mini(); apply(); save(); dispatchEvent(new Event('resize')); }); return b; };
@@ -14260,7 +14132,7 @@ if(matchMedia('(hover: none)').matches){ const strip=list=>{ for(let i=list.cssR
   new MutationObserver(ms=>{ if(ms.some(m=>[...m.addedNodes].some(n=>n.tagName==='STYLE'||n.tagName==='LINK'))) all(); }).observe(document.head,{childList:true}); }
 // Menu navigation on touch screens acts when the finger lifts (if it stayed put), instead of waiting for the phone to decide
 // the touch was a click; that decision sometimes failed on iPhone and needed a second tap. The phone's own click that follows is ignored.
-{ const NAV='#menuov [data-sec],#menuov [data-sub],#menuov .sect-nav button,#menuov .mo-back,#menuov .mo-home,.hud > .hud-link,.hud > .hudx,.hud #goalchip,.hud .hudbtns > button'; // top-bar chips too (director 2026-11-18: tapping Fishing at sometimes did nothing on iPhone)
+{ const NAV='#menuov [data-sec],#menuov [data-sub],#menuov .sect-nav button,#menuov .mo-back,.hud > .hud-link,.hud > .hudx,.hud #goalchip,.hud .hudbtns > button'; // top-bar chips too (director 2026-11-18: tapping Fishing at sometimes did nothing on iPhone)
   // Every finger is tracked on its own (fast taps with two thumbs overlap). While touch is in use, menu buttons are driven only by
   // finger lifts: the phone's own clicks on them are ignored, so a late click can never undo a newer tap. The one exception is a
   // touch that didn't act (the phone cancelled it, or the finger slid): its click is honoured, since nothing else acted for it.
@@ -14272,7 +14144,7 @@ if(matchMedia('(hover: none)').matches){ const strip=list=>{ for(let i=list.cssR
     // the button was redrawn while the finger was down (live countdowns, a page refresh): tap the button that is under the finger now
     if(!d.el.isConnected){ const n=document.elementFromPoint(e.clientX,e.clientY), el2=n&&n.closest&&n.closest(NAV); if(!el2||el2.disabled){ unacted(d.el); return; } d.el=el2; }
     // Back / Overview close the menu: what lay under the finger (a bait picker, a button on the water) must not get the phone's follow-up tap
-    if(d.el.matches('.mo-back,.mo-home')){ const sh=document.createElement('div'); sh.style.cssText='position:fixed;inset:0;z-index:2147483647;background:transparent;touch-action:none'; const eat=ev=>{ ev.preventDefault(); ev.stopPropagation(); };
+    if(d.el.matches('.mo-back')){ const sh=document.createElement('div'); sh.style.cssText='position:fixed;inset:0;z-index:2147483647;background:transparent;touch-action:none'; const eat=ev=>{ ev.preventDefault(); ev.stopPropagation(); };
       ['pointerdown','pointerup','mousedown','mouseup','click','touchstart','touchend','contextmenu'].forEach(k=>sh.addEventListener(k,eat,{passive:false})); document.body.appendChild(sh); setTimeout(()=>sh.remove(),450); }
     synth=true; try{ d.el.click(); }finally{ synth=false; } },true);
   document.addEventListener('click',e=>{ if(synth) return; const now=performance.now(); if(now-lastTouch>1000) return; // mouse and keyboard keep normal clicks
@@ -14282,7 +14154,7 @@ if(matchMedia('(hover: none)').matches){ const strip=list=>{ for(let i=list.cssR
   document.head.insertAdjacentHTML('beforeend',`<style>
 /* bigger side buttons on short landscape screens, and no dead gap between them: each button's tap area reaches halfway into the gap */
 @media (orientation:landscape) and (max-height:560px){
-  body #menuov #tabs.secmode .secb,#menuov .mo-back,#menuov .mo-home{min-height:40px!important}
+  body #menuov #tabs.secmode .secb,#menuov .mo-back{min-height:40px!important}
   body #menuov #tabs.secmode .secb::after{content:"";position:absolute;left:0;right:0;top:-3px;bottom:-3px}
 }
 </style>`); }
@@ -14857,7 +14729,6 @@ const SFX_PAL={shiny:{a:'#fff3c4',b:'#ffcf5a',dust:'#ffe7a0'}, mythic:{a:'#ffb0e
 const SFX_STYLES=['glint','glitter','shimmer','flare'];
 function sfxHash(a,b){ let h=Math.imul(a|0,374761393)^Math.imul(b|0,668265263); h=Math.imul(h^(h>>>13),1274126177); return ((h^(h>>>16))>>>0)/4294967296; }
 function sfxRgba(hex,a){ const n=parseInt(hex.slice(1),16); return 'rgba('+(n>>16)+','+((n>>8)&255)+','+(n&255)+','+Math.max(0,Math.min(1,a)).toFixed(3)+')'; }
-function sfxCol(P,i,t,which){ return P.hue?'hsl('+Math.round((t*90+i*61)%360)+',100%,'+(which?72:82)+'%)':(which?P.b:P.a); }
 function sfxColA(P,i,t,which,a){ if(!P.hue) return sfxRgba(which?P.b:P.a,a); return 'hsla('+Math.round((t*90+i*61)%360)+',100%,'+(which?72:82)+'%,'+a.toFixed(3)+')'; }
 // one flare: a hot white core, a coloured halo, 2 long rays and 2 short ones, all tapering to nothing
 function sfxFlare(c,x,y,s,P,i,t,a,rot,long){ if(a<=.01||s<.4) return;
@@ -18027,10 +17898,13 @@ PATCHES.unshift({v:'0.4.9', name:'Work in progress', items:[
   'An empty Trophy Room fills the page with a wall of empty plaques instead of a small strip.',
   'Aquarium coins use the short form for big amounts (like the top bar), so they always fit.',
   'Inside Settings only the Settings tab lights up (the gear next to it no longer lights up too).',
-  'In narrow windows the side panel shows its icons, so every section fits without scrolling.']});
+  'In narrow windows the side panel shows its icons, so every section fits without scrolling.',
+  '## Behind the scenes',
+  'Old unused parts of the game were cleared out (a retired menu button, an old hairstyle, old dolphin and Boardwalk drawings), so it starts with a little less work and has less to keep running every second.']});
 // Android test notes (preview builds only; the live game never shows them). One short line per change in the next test build,
 // curly apostrophes only. The card opens once per device whenever the text changes. Released notes live in notes_release.js.
-const TEST_NOTES={v:'test', label:'Test build · Android', name:'0.4.9, part 1: fixes (4)', items:[
+const TEST_NOTES={v:'test', label:'Test build · Android', name:'0.4.9, part 1: fixes (5)', items:[
+  'Clean-up: unused old parts removed (retired Menu and Overview buttons, an old hairstyle, old dolphins and Boardwalk drawings). Nothing should look different; tell me if anything does.',
   'Settings: only the Settings tab lights up (the gear no longer lights up next to it).',
   'Narrow windows (split-screen): the side panel shows icons only, so all sections fit.',
   'Pets in the shop and previews are awake at night (they showed asleep in Pets › Find more).',
@@ -18499,15 +18373,6 @@ function renderShop(P){
   P.innerHTML=`<h2>Tackle shop</h2><p class="sub">Heavier fish need stronger line and a faster reel. Better bait brings rarer fish; one bait is used each time you set the hook.</p>
   <div class="grid">${gearTiles}</div><h2 style="margin-top:18px">Bait</h2><div class="grid">${shopBait.map(baitTile).join('')}</div>
   <h2 style="margin-top:18px">Special lures</h2><p class="sub">Can’t be bought. They come out of junk you fish up: cheese, disco balls, magnets, gold.</p><div class="grid">${junkBait.map(baitTile).join('')}</div>`;
-}
-function renderSkills(P){ const free=ptsFree(), cost=50*S.lvl;
-  P.innerHTML=`<div class="row spread"><div><h2>Skills</h2><p class="sub">You get 1 skill point per angler level, plus bonus points from feats. ${ptsSpent()} of ${Object.values(PERKS).reduce((a,p)=>a+p.max,0)} ranks learned.</p></div>
-  <div class="row"><div style="text-align:right"><div class="pts">${free}</div><div class="sub">points to spend</div></div>
-  <button class="btn alt" data-act="respec" ${ptsSpent()&&S.money>=cost?'':'disabled'}>Reset skills · <span class="coin">${fmt(cost)}</span></button></div></div>
-  <div class="grid">`+Object.entries(PERKS).map(([k,p])=>{ const r=pr(k); return `<div class="tile ${r>=p.max?'done':''}"><div class="row spread"><h4>${p.name}</h4><span class="meta">Rank ${r} / ${p.max}</span></div>
-    <div class="pips">${Array.from({length:p.max},(_,i)=>`<i class="${i<r?'on':''}"></i>`).join('')}</div>
-    <div class="meta">${p.d}</div><div class="val" style="font-size:14px">Each rank: ${p.per}</div>
-    <button class="btn" data-act="perk" data-k="${k}" ${free>0&&r<p.max?'':'disabled'}>${r>=p.max?'Maxed':'Learn rank '+(r+1)}</button></div>`; }).join('')+'</div>';
 }
 function renderAquarium(P){ accrue(); const rate=tankRate(); let AQS=null; const next=TANK_COST[S.tankSlots];
   const sums={}; for(const f of S.tank) for(const e of aqBuffsOf(f)) sums[e.k]=(sums[e.k]||0)+e.v;
