@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="DL Test Android">
 <script>
-window.DL_BUILD='android'; window.DL_PREVIEW=true; window.DL_VERSION='2026.11.19-1532';
+window.DL_BUILD='android'; window.DL_PREVIEW=true; window.DL_VERSION='2026.11.19-1708';
 window.addEventListener('beforeinstallprompt',function(e){ e.preventDefault(); window.__dlInstallPrompt=e; });
 </script>
 </head>
@@ -1692,7 +1692,6 @@ const sellMult = () => (1 + .03*(S.lvl-1) + .04*pr('haggler') + bonus('sell') + 
 const xpMult = () => (1 + bonus('xp') + cozyBonus()*.01) * (coinMult() + .01*(pshopLv('xp')-pshopLv('gold')));
 function earn(n){ n=Math.floor(n); S.money+=n; S.stats.earned+=n; S.stats.runEarned+=n; return n; }
 const pearlsFor = () => { const n=Math.floor(Math.pow(S.stats.runEarned/PEARL_DIV,1/PEARL_EXP)*voyagePearlMult()*pathMul('pearl')); return n>0 ? n+(relic("pearlseeker")?1:0) : 0; }; /* 0.3.6: experienced sailors find more pearls */
-function demandSp(){ const pool=SP.filter(s=>S.unlocked.includes(s.loc)&&s.r<=3); const slot=Math.floor(Date.now()/1000/WX_LEN); return pool[(Math.imul(slot+17,40503)>>>0)%pool.length]; }
 const salePrice = f => Math.round(f.value*sellMult()*(demandSp().id===f.id?(maxed('haggler')?3:2):1));
 const hookWin = () => gv('hook') + .05*pr('reflex') + rodHook() + (relic('goldhook')?.15:0);
 const reelSpeed = () => gv('reel') * (1 + .04*pr('strong')) * (1 + bonus('reel'));
@@ -1733,13 +1732,9 @@ function timeOk(sp,p){ if(sp.time==='any') return true; if(sp.time==='night') re
 function nextFlip(){ const p=phase(); const target = isNight(p) ? .95 : .45; let d = target - p; if(d<0) d+=1; return {label: isNight(p)?'Day in':'Dusk in', s: Math.round(d*CYCLE)}; }
 function weatherAt(slot){ const h = (Math.imul(slot ^ 0x9e3779b9, 2654435761) >>> 0) % 10000 / 100; let x=h; for(const w of WEATHERS){ x-=w.w; if(x<0) return w; } return WEATHERS[0]; }
 const WX_NAME={Fog:'Heavy fog'}; function wxName(k){ return WX_NAME[k]||k; }
-function weather(){ return weatherAt(Math.floor(Date.now()/1000/WX_LEN)); }
 // how strongly the current weather shows (0..1): it builds up over the first half minute and fades out over the
 // last one when the next slot brings different weather (looks only; the gameplay effect is the whole slot)
 const WX_FADE=32;
-function wxAmt(){ const s=Date.now()/1000/WX_LEN, slot=Math.floor(s), into=(s-slot)*WX_LEN, cur=weatherAt(slot).k; let a=1;
-  if(weatherAt(slot-1).k!==cur) a=Math.min(a,into/WX_FADE); if(weatherAt(slot+1).k!==cur) a=Math.min(a,(WX_LEN-into)/WX_FADE); a=clamp(a,0,1); return a*a*(3-2*a); }
-function wxLeft(){ return Math.ceil(WX_LEN - (Date.now()/1000 % WX_LEN)); }
 const mmss = s => Math.floor(s/60)+':'+String(Math.max(0,s)%60).padStart(2,'0');
 
 // ---------- audio ----------
@@ -2098,7 +2093,8 @@ function snagFight(dt){ const reel=reelSpeed(), rin=V3ON?reelInput(dt):(G.hold?1
 const FIGHT_T=[2.6,4.2,7,11,18,30], FIGHT_LANDK=.75, FIGHT_TEN_FLOOR=.62;
 function fightTireT(f,rk,V){ const pr2=clamp(Math.pow(anglerStr()/Math.max(.1,fishPull(f)),.5),.45,1.3); return FIGHT_T[clamp(rk|0,0,5)]*(1+.5*(V-1))/pr2; }
 function fight(dt){
-  if(G.fish && G.fish.kind!=='fish'){ snagFight(dt); return; }
+  if(!G.fish){ G.st='idle'; return; } /* nothing on the line: never crash the frame loop */
+  if(G.fish.kind!=='fish'){ snagFight(dt); return; }
   maybeEatEvent(dt); eatTick(dt);
   if(G.fish.shiny===2){ G.behT=(G.behT||0)-dt; if(G.behT<=0){ G.behT=rnd(2.2,3.6); const ks=Object.keys(BEH); G.fish.beh=ks[Math.floor(Math.random()*ks.length)]; } }
   const f=G.fish, B=BEH[f.beh]||BEH.calm, line=gv('line'), reel=reelSpeed(); const ratio=clamp(f.str/line,.05,4);
@@ -2480,19 +2476,6 @@ function drawHat(c,id,col,t=0){
     default: drawHatX(c,id,col,t,{dk,lt,el,ci,poly,dome});
   }
 }
-function drawPattern(c,pat,base,x,y,w,h){
-  switch(pat){
-    case 'stripes': c.fillStyle='rgba(255,255,255,.75)'; for(let yy=y+2;yy<y+h;yy+=4.5) c.fillRect(x,yy,w,1.6); break;
-    case 'flannel': c.fillStyle='rgba(0,0,0,.28)'; for(let xx=x;xx<x+w;xx+=5) c.fillRect(xx,y,2,h); for(let yy=y;yy<y+h;yy+=5) c.fillRect(x,yy,w,2); c.fillStyle='rgba(255,255,255,.18)'; for(let xx=x+3;xx<x+w;xx+=10) c.fillRect(xx,y,1,h); break;
-    case 'polka': c.fillStyle='rgba(255,255,255,.85)'; for(let yy=y+2;yy<y+h;yy+=5) for(let xx=x+((yy/5|0)%2?2:4.5);xx<x+w;xx+=5){ c.beginPath(); c.arc(xx,yy,1.1,0,7); c.fill(); } break;
-    case 'camo': [['#4a5a2a',3,4],['#7a6a3a',12,10],['#2a3a1a',6,18],['#5a6a3a',14,22],['#3a2a1a',2,12]].forEach(([cl,dx,dy])=>{ c.fillStyle=cl; c.beginPath(); c.ellipse(x+dx,y+dy,4,2.6,dx,0,7); c.fill(); }); break;
-    case 'hawaii': for(let i=0;i<7;i++){ const xx=x+((i*37)%100)/100*w, yy=y+((i*53)%100)/100*h; c.fillStyle='#3a8a4a'; c.beginPath(); c.ellipse(xx+2,yy+1,2.4,1,.6,0,7); c.fill(); c.fillStyle=['#ff6a8a','#ffd84a','#ffffff'][i%3]; c.beginPath(); c.arc(xx,yy,1.6,0,7); c.fill(); } break;
-    case 'fishprint': for(let i=0;i<6;i++){ const xx=x+2+((i*41)%90)/100*w, yy=y+3+((i*57)%85)/100*h; drawFish(c,xx,yy,6,'rgba(255,255,255,.8)','rgba(255,255,255,.8)',.4,0,i%2===1,{}); } break;
-    case 'flames': c.fillStyle='#ff7a1a'; c.beginPath(); c.moveTo(x,y+h); for(let i=0;i<=6;i++){ const xx=x+i*w/6; c.lineTo(xx-1.5,y+h-9-((i*5)%5)); c.lineTo(xx+1.5,y+h-3); } c.lineTo(x+w,y+h); c.fill(); c.fillStyle='#ffd84a'; c.beginPath(); c.moveTo(x,y+h); for(let i=0;i<=6;i++){ const xx=x+i*w/6; c.lineTo(xx,y+h-5-((i*3)%3)); c.lineTo(xx+1.5,y+h-1); } c.lineTo(x+w,y+h); c.fill(); break;
-    default: drawPatternX(c,pat,base,x,y,w,h); break;
-    case 'tux': c.fillStyle='#f4f4f2'; c.beginPath(); c.moveTo(x+w/2-3.5,y); c.lineTo(x+w/2+3.5,y); c.lineTo(x+w/2+1.5,y+h); c.lineTo(x+w/2-1.5,y+h); c.fill(); c.fillStyle='#c8303a'; c.beginPath(); c.moveTo(x+w/2-3,y+1); c.lineTo(x+w/2+3,y+3.5); c.lineTo(x+w/2+3,y+1); c.lineTo(x+w/2-3,y+3.5); c.fill(); break;
-  }
-}
 function drawAngler(c,x,y,s,lk,o={}){ if(V3ON) return drawAngler3(c,x,y,s,lk,o);
   const night=o.night||0, D=cl=>night?mix(cl,'#0a1018',night*.45):cl; const sk=D(SKINS[lk.skin]||SKINS[1]), hair=D(HAIRS[lk.hair]||HAIRS[1]), shirt=D(lk.shirt);
   c.save(); c.translate(x,y); c.scale(s,s); c.lineCap='round';
@@ -2543,10 +2526,6 @@ function drawPet(c,id,x,y,s,t,night=0,lk=null){ if(V3ON && id!=='lily' && id!=='
   if(lk) drawPetGear(c,id,lk,t);
   c.restore();
 }
-function hatPreview(c,w,h,id,col,big){ const s=h/(big?44:40); c.save(); c.translate(w/2,h*.64); c.scale(s,s); const lk=S.look;
-  c.fillStyle=SKINS[lk.skin]||SKINS[1]; c.beginPath(); c.arc(0,0,7.5,0,7); c.fill(); c.fillStyle=HAIRS[lk.hair]||HAIRS[1]; c.beginPath(); c.arc(0,-1,7.9,Math.PI,Math.PI*2); c.fill();
-  c.fillStyle='#1a1410'; c.beginPath(); c.arc(4.2,-1,1.1,0,7); c.fill(); c.fillStyle=lk.shirt; c.fillRect(-8,8,16,6);
-  drawHat(c,id,HATI[id]&&HATI[id].fixed?'#888888':col,performance.now()/1000); c.restore(); if(big) sparkles(c,w,h,5); }
 
 // ---------- drawing: the scene ----------
 let stars=null, drops=null, flakes=null, WXA=1;
@@ -2756,15 +2735,6 @@ function drawFightHUD(t){
   g.fillStyle='#8aa5a2'; g.fillText(BEH[G.fish.beh]?BEH[G.fish.beh].n:'', px+10, py+56); g.fillText('Temper', px+pw*.5, py+56); g.fillStyle='#0a161d'; rr(px+pw*.5+44,py+48,bw,7,3); g.fill(); g.fillStyle=G.temper>1.7?'#ff5468':'#c38bff'; rr(px+pw*.5+44,py+48,bw*clamp(G.temper/3,0,1),7,3); g.fill();
   const lim = clamp(G.d/G.maxOut,0,1); g.fillStyle='#0a161d'; rr(px+10,py+63,pw-20,4,2); g.fill(); g.fillStyle = lim>.8?'#ff5468':'#5aa9ff'; rr(px+10,py+63,(pw-20)*lim,4,2); g.fill();
 }
-function drawTank(now){ const cnv=$('tankcv'); if(!cnv) return; const r=cnv.getBoundingClientRect(); const w=r.width, h=r.height; if(!w||h<20) return;
-  if(cnv.width!==Math.round(w*DPR)||cnv.height!==Math.round(h*DPR)){ cnv.width=Math.round(w*DPR); cnv.height=Math.round(h*DPR); } /* 0.3.5.1: also when only the height changes (turning the phone) */
-  const c=cnv.getContext('2d'); c.setTransform(DPR,0,0,DPR,0,0); const t=now/1000;
-  drawTankBack(c,w,h,t);
-  S.tank.forEach((f,i)=>{ const sp=SPI[f.id]; const rel=clamp((f.kg-sp.min)/(sp.max-sp.min),0,1); const L=.82*Math.max(14,Math.min(h*.3,w*.22,(22+11*Math.log10(1+(+f.kg||.1)*4))*(.9+.25*rel)*clamp(h/240,.8,1.9))); /* 0.3.2: real weight sets the size (a heavier fish is a bigger fish), a log scale so whales still fit */ const M=tankMove(f,sp,i,t,w,h,L); nibMove(f,M,t,w,h);
-    drawCreature(c,sp,M.x,M.y,L,{shiny:f.sh||0,pv:f.pv,seedAdd:i,wag:t*M.wag+i,flip:!M.dir}); });
-  c.fillStyle='rgba(220,245,255,.35)'; for(let i=0;i<12;i++){ const x=(i*73)%w+Math.sin(t+i)*4, y=h-((t*30+i*40)%h); c.beginPath(); c.arc(x,y,1.5+(i%3),0,7); c.fill(); }
-  nibDraw(c,t,w,h); drawTankFront(c,w,h,t);
-}
 
 // =====================================================================
 // Extras: mastery & angler rank, aquarium decor, events & mini-games,
@@ -2799,7 +2769,6 @@ const DECOR = [['kelp','Kelp Patch',800,.01],['duck','Floating Duck',1000,.02],[
   ['jellylamp','Jellyfish Lamp',14000,.05],['wreckcar','Sunken Car',18000,.06],['treasurepile','Gold Coin Pile',30000,.07],['carousel','Carousel',0,.08]].map(a=>({id:a[0],name:a[1],price:a[2],b:a[3]}));
 const DECORI = Object.fromEntries(DECOR.map(d=>[d.id,d]));
 const aqSlots = () => 6 + Math.floor(S.tankSlots/2) + (spec('curator')?2:0);
-function decorBonus(){ let s=0; for(const id of (S.aq&&S.aq.decor)||[]) if(DECORI[id]) s+=DECORI[id].b; return s; }
 let feedAnim=0;
 function drawTankBack(c,w,h,t){ if(V3ON && v3TankBack(c,w,h,t)) return; const V=aqView(); const th=THEMES.find(x=>x[0]===V.theme)||THEMES[0], sd=SANDS.find(x=>x[0]===V.sand)||SANDS[0];
   const bg=c.createLinearGradient(0,0,0,h); bg.addColorStop(0,th[3]); bg.addColorStop(1,th[4]); c.fillStyle=bg; c.fillRect(0,0,w,h);
@@ -2870,13 +2839,8 @@ function drawPetX(c,id,t,h){ const {el,ci,rc,ln,eye,blink}=h;
   }
 }
 
-// ---------- scene chip (time & weather, shown on narrow screens) ----------
-function drawSceneChip(p,wx){ if(W>=700) return; const nf=nextFlip(); const txt=tod(p)+' · '+wxName(wx.k)+' · '+mmss(wxLeft()); g.font='700 11px system-ui'; const tw=g.measureText(txt).width; g.fillStyle='rgba(5,14,20,.6)'; rr(10,10,tw+16,20,10); g.fill(); g.fillStyle=wx.k==='Gilded'?'#ffc94d':'#e6efe8'; g.textAlign='left'; g.fillText(txt,18,24); }
-
 // ---------- random events & mini-games ----------
 let pendingEvent=null, catchesSinceEvent=0;
-function afterCard(){ catchesSinceEvent++; if(pendingEvent){ const ev=pendingEvent; pendingEvent=null; openEvent(ev); return; }
-  if(S.stats.caught>=5 && catchesSinceEvent>=6 && Math.random()<.12){ catchesSinceEvent=0; openEvent(Math.random()<.55?'frenzy':'chests'); } }
 function openEvent(kind){ const box=$('evin'); G.st='event';
   if(kind==='frenzy'){ box.innerHTML=`<div class="rar" style="color:var(--gold)">Mini-game</div><h3>Fish frenzy!</h3><p class="sub">A shoal is leaping out of the water. Tap as many fish as you can in 10 seconds. Every fish is worth coins.</p><div class="row" style="justify-content:center;margin-top:12px"><button class="btn" data-ev="frenzy">Let’s go!</button><button class="btn alt" data-ev="skip">Not now</button></div>`; }
   else { box.innerHTML=`<div class="rar" style="color:var(--gold)">Mini-game</div><h3>Three chests washed up</h3><p class="sub">Only one holds the big prize. Pick one.</p><div class="chests">${[0,1,2].map(i=>`<button data-ev="chest" data-i="${i}" aria-label="Chest ${i+1}"><canvas width="192" height="144" data-chest></canvas></button>`).join('')}</div><div class="row" style="justify-content:center"><button class="btn alt" data-ev="skip">Leave them</button></div>`;
@@ -2937,34 +2901,6 @@ function spinWheel(paid){ if(WH.spinning) return; const tot=WHEEL.reduce((a,s)=>
   const step=()=>{ const k=Math.min(1,(performance.now()-t0)/dur), e=1-Math.pow(1-k,3.4); WH.angle=from+(to-from)*e; drawWheel(); const seg=Math.floor(WH.angle/(Math.PI/6)); if(seg!==lastTick){ lastTick=seg; tone(1500,.02,'square',.02); }
     if(k<1) (window.requestAnimationFrame||setTimeout)(step,16); else { WH.spinning=false; WH.angle%=Math.PI*2; WH.result=wheelPrize(idx); S.gstats.spins++; checkFeats(); save(); lastHud=''; if(S.tab==='games') renderPanel(); } };
   step(); }
-function wheelPrize(i){ const base=bestLoot(); sfx.coin();
-  switch(i){
-    case 0: return '+'+fmt(bwEarn(base*2*coinMult()))+' coins';
-    case 1: addTickets(10); return quip('seashell')+' (+10 tickets)';
-    case 2: { const opts=Object.keys(BAIT).filter(k=>k!=='worm'&&!BAIT[k].junk); const k=pick(opts); S.bait[k]+=8; renderBait(); return '8 '+BAIT[k].name; }
-    case 3: return '+'+fmt(bwEarn(base*6*coinMult()))+' coins';
-    case 4: { const fo=pick(FORTUNES); addBuff(fo[1],fo[2],15,'Lucky wheel'); return 'Boost: '+fmtB(fo[1],fo[2])+' for 15 min'; }
-    case 5: S.tokens.small++; return 'A small Mystery Crate (open it below)';
-    case 6: S.tokens.big++; return 'A BIG Mystery Crate (open it below)';
-    default: sfx.shiny(); return 'JACKPOT! +'+fmt(bwEarn(base*40*coinMult()))+' coins';
-  } }
-function openCrate(k){ const base=bestLoot(); const r=Math.random(); let res={title:'',draw:null};
-  const petPool=tier=>PETS.filter(p=>p.src==='crate' && p.price<=tier && !S.owned.pets.includes(p.id));
-  const cosmetic=()=>{ const pool=[...SHOP_COLS.filter(c=>!S.owned.cols.includes(c[0])).map(c=>['col',c[0],c[1]]), ...PATTERNS.filter(p=>p[2]&&!S.owned.pats.includes(p[0])).map(p=>['pat',p[0],p[1]+' fabric']), ...HATS.filter(h=>h.src==='shop'&&!S.owned.hats.includes(h.id)).map(h=>['hat',h.id,h.name])]; if(!pool.length) return null;
-    const it=pick(pool); if(it[0]==='col') S.owned.cols.push(it[1]); else if(it[0]==='pat') S.owned.pats.push(it[1]); else S.owned.hats.push(it[1]); return {title:'New '+(it[0]==='hat'?'hat':'clothing')+': '+it[2], kind:it[0], id:it[1]}; };
-  const decor=(rare)=>{ const pool=DECOR.filter(d=>!S.aq.owned.includes(d.id) && (rare ? true : d.price>0)); if(!pool.length) return null; const d=rare && pool.some(x=>!x.price) && Math.random()<.6 ? pick(pool.filter(x=>!x.price)) : pick(pool); S.aq.owned.push(d.id); return {title:'Aquarium decor: '+d.name+' (+'+Math.round(d.b*100)+'% income)', kind:'decor', id:d.id}; };
-  const pet=(tier,legendBias)=>{ let pool=petPool(tier); if(legendBias){ const top=pool.filter(p=>p.price===3); if(top.length && Math.random()<.35) pool=top; } if(!pool.length) return null; const p=pick(pool); S.owned.pets.push(p.id); return {title:'New pet: '+p.name+'!', kind:'pet', id:p.id}; };
-  const coins=(a,b)=>({title:'+'+fmt(earn(base*rnd(a,b)*coinMult()))+' coins', kind:'coins'});
-  const lure=()=>{ const opts=Object.keys(BAIT).filter(x=>x!=='worm'); const kk=pick(opts); const n=BAIT[kk].junk?4:10; S.bait[kk]+=n; renderBait(); return {title:n+' '+BAIT[kk].name, kind:'lure'}; };
-  if(k==='small') res = r<.4?coins(2,9) : r<.62?lure() : r<.8?(cosmetic()||coins(3,8)) : r<.92?(decor(false)||coins(3,8)) : (pet(1)||coins(6,12));
-  else if(k==='big') res = r<.25?coins(15,45) : r<.45?(cosmetic()||coins(15,40)) : r<.65?(decor(false)||coins(15,40)) : r<.92?(pet(2)||coins(25,50)) : (decor(true)||coins(25,50));
-  else res = (r<.1 && grantRod('golden')) || (r<.45?(pet(3,true)||coins(150,300)) : r<.75?(decor(true)||coins(150,300)) : coins(100,300));
-  S.gstats.crates++; sfx.catch(k==='legend'?4:k==='big'?3:2); if(res.kind==='pet'||res.kind==='decor') sfx.shiny(); crateRes=Object.assign({crate:k},res); }
-function newScratch(){ const sym=['🐟','🦀','🐚','💎','👑'], prize=[2,4,8,20,60], ws=[50,25,15,8,2]; const win=Math.random()<.35; let w=-1; if(win){ let x=Math.random()*100; w=0; for(let i=0;i<5;i++){ x-=ws[i]; if(x<=0){ w=i; break; } } }
-  const cells=[]; if(win) cells.push(w,w,w); const cnt=[0,0,0,0,0]; if(win) cnt[w]=3; while(cells.length<9){ const s=Math.floor(Math.random()*5); if(s===w || cnt[s]>=2) continue; cnt[s]++; cells.push(s); }
-  for(let i=cells.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [cells[i],cells[j]]=[cells[j],cells[i]]; }
-  scratch={cells, open:Array(9).fill(false), win:w, prize:w>=0?Math.round(bestLoot()*prize[w]*coinMult()):0, done:false, sym}; }
-function settleScratch(){ if(!scratch||scratch.done) return; scratch.done=true; S.gstats.scratch++; if(scratch.win>=0){ bwEarn(scratch.prize); S.gstats.scratchWins++; sfx.catch(scratch.win>=3?4:2); } else sfx.lost(); }
 
 // ---------- settings ----------
 function renderSettings(P){ const s=S.settings; const sl=(k,label)=>`<div class="setrow"><label for="set_${k}">${label}</label><input id="set_${k}" type="range" min="0" max="100" value="${Math.round(s[k]*100)}" data-set="${k}"><span class="meta" id="setv_${k}">${Math.round(s[k]*100)}%</span></div>`;
@@ -3026,7 +2962,6 @@ function aqCustomHTML(){ const fedLeft=Math.max(0,3600000-(Date.now()-S.fedT));
    <h5>Decorations · ${S.aq.decor.length} of ${aqSlots()} spots used${(S.aq.hid||[]).length?' · '+S.aq.hid.length+' hidden':''}${[['income',decorBonus()],['boost',decorBoost()],['show',decorShow()]].filter(p=>p[1]>0).map(p=>' · +'+Math.round(p[1]*100)+'% '+DECOR_KIND_NAME[p[0]]).join('')}</h5><div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(150px,1fr))">${DECOR.map(d=>{ const own=S.aq.owned.includes(d.id), placed=S.aq.decor.includes(d.id), hidden=placed&&(S.aq.hid||[]).includes(d.id);
      return `<div class="tile ${placed?'done':''}${hidden?' dhid':''}" style="position:relative;align-items:center;text-align:center;gap:4px">${placed?`<button type="button" class="dhide" data-act="decorhide" data-k="${d.id}" aria-pressed="${hidden}" title="${hidden?'Hidden from your tank, its bonus still counts. Show it again':'Hide it from your tank and keep its bonus'}">${hidden?'Hidden':'Hide'}</button>`:''}<canvas width="160" height="120" data-decor="${d.id}" data-own="${own?1:0}" style="width:80px;height:60px;cursor:default"></canvas><b style="font-size:14px">${own||d.price?d.name:'???'}</b><span class="meta">+${Math.round(d.b*100)}% income</span>
      ${own?`<button class="btn ${placed?'alt':''} sm" data-act="decor" data-k="${d.id}">${placed?'Remove':'Place'}</button>`:d.price?`<div class="row" style="justify-content:center;gap:4px"><button class="btn alt sm" data-act="aqpv" data-k="decor:${d.id}">Preview</button><button class="btn sm" data-act="decor" data-k="${d.id}" ${S.money>=d.price?'':'disabled'}>Buy · <span class="coin">${fmt(d.price)}</span></button></div>`:'<span class="meta">Mystery crates or prizes only</span>'}</div>`; }).join('')}</div></div>`; }
-function paintDecor(P){ P.querySelectorAll('canvas[data-decor]').forEach(c=>{ const x=c.getContext('2d'); x.clearRect(0,0,c.width,c.height); if(c.dataset.own!=='1'&&!DECORI[c.dataset.decor].price) mysteryThumb(x,c.width,c.height,c.dataset.decor); else drawDecor(x,c.dataset.decor,80,c.dataset.decor==='duck'?70:112,1,0); }); }
 /* hide a placed decoration from view, keep its bonus (director, 2026-11-19): a small switch in the card's corner */
 document.head.insertAdjacentHTML('beforeend','<style>#panel .dhide{position:absolute;top:34px;right:6px;z-index:2;min-height:32px;padding:0 11px;border-radius:999px;border:1px solid #ffffff2a;background:#0c1626e6;color:#cfe0f0;font:800 11.5px var(--display,system-ui);cursor:pointer}#panel .dhide[aria-pressed="true"]{background:linear-gradient(180deg,#ffe08a,#f3b94e);color:#2a1c05;border-color:#ffe6a3}#panel .tile.dhid canvas[data-decor]{opacity:.45}</style>');
 
@@ -3772,46 +3707,10 @@ const PRIZES = [
 ];
 function addTickets(n){ n=Math.max(0,Math.round(n)); S.tickets+=n; return n; }
 let duck=null, hilo=null;
-function newDuck(){ const prizes=[]; for(let i=0;i<6;i++){ const r=Math.random(); prizes.push(r<.04?{k:'crate',t:'a small crate!'}:r<.2?{k:'coins',m:rnd(2,4)}:r<.5?{k:'tix',n:rint(20,45)}:{k:'tix',n:rint(5,15)}); } duck={prizes, pick:-1}; }
 function newHilo(){ hilo={card:rint(1,13), streak:0, pot:Math.round(bestLoot()*2), done:false, msg:'Higher or lower than '+0+'?'}; }
 const CARD_FISH = ['','Minnow','Perch','Trout','Bass','Carp','Pike','Salmon','Tuna','Shark','Marlin','Kraken','Leviathan','Legend'];
 function boardwalkBanner(){ return `<div class="bw-banner"><div class="bw-lights">${Array.from({length:18},(_,i)=>`<i style="animation-delay:${(i%6)*.25}s"></i>`).join('')}</div><h2>The Boardwalk</h2><p class="sub">Games of chance on the pier. Coins only, no real money, and the gulls are watching.</p>
   <div class="row" style="justify-content:center;gap:18px;margin-top:6px"><span><b class="coin">${fmtShort(S.money)}</b></span><span><b>🎟 ${fmt(S.tickets)}</b> <span class="meta">tickets</span></span><span><b style="color:var(--kelp)">${fmt(S.scales)}</b> <span class="meta">Scales</span></span></div></div>`; }
-function renderBoardwalk(P){ accrueSpins(); const tk=S.tokens, base=bestLoot(); const nextIn=Math.max(0,Math.ceil((spinEvery()-(Date.now()-S.wheelT))/60000));
-  const crateRow=(k,name,desc)=>`<div class="row spread" style="padding:6px 0;border-bottom:1px solid var(--line)"><div style="min-width:0"><b>${name}</b>${tk[k]?` <span class="badge g">${tk[k]} free</span>`:''}<div class="meta">${desc}</div></div>
-    ${tk[k]?`<button class="btn sm" data-act="crate" data-k="${k}" data-free="1">Open free</button>`:`<button class="btn sm" data-act="crate" data-k="${k}" ${S.money>=crateCost(k)?'':'disabled'}>Open · <span class="coin">${fmt(crateCost(k))}</span></button>`}</div>`;
-  const betBtn=f=>{ const amt=Math.min(Math.floor(S.money*f), base*60); return `<button class="btn alt sm" data-act="flip" data-k="${f}" ${amt>=10?'':'disabled'}>Bet ${Math.round(f*100)}% · <span class="coin">${fmt(Math.max(0,amt))}</span></button>`; };
-  const ducks = duck ? duck.prizes.map((p,i)=>{ const open=duck.pick>=0; const lab=p.k==='crate'?'📦':p.k==='coins'?'🪙':'🎟'+p.n; return `<button class="duckb ${open?(i===duck.pick?'picked':'open'):''}" data-act="duckpick" data-i="${i}" ${open?'disabled':''} aria-label="Duck ${i+1}" style="animation-delay:${i*.3}s">${open?`<span>${lab}</span>`:'🦆'}</button>`; }).join('') : '';
-  P.innerHTML=boardwalkBanner()+`<div class="grid bw">
-   <div class="tile bwt" style="--c:#c8553a"><h4>Lucky wheel</h4><div class="wheelwrap"><div class="wheelring"><canvas id="wheelcv" width="520" height="520"></canvas></div>
-     ${S.freeSpins>0?`<button class="btn" data-act="spin" data-k="free" ${WH.spinning?'disabled':''}>Free spin! (${S.freeSpins} left)</button>`:`<button class="btn" data-act="spin" ${WH.spinning||S.money<wheelCost()?'disabled':''}>Spin · <span class="coin">${fmt(wheelCost())}</span></button>`}
-     <span class="meta">A free spin every hour, up to ${SPIN_BANK} saved.${S.freeSpins<SPIN_BANK?' Next in '+nextIn+' min.':''}</span>
-     ${WH.result?`<div class="val" style="text-align:center">${esc(WH.result)}</div>`:''}</div></div>
-   <div class="tile bwt" style="--c:#7a4a9a"><h4>Mystery crates</h4><div class="meta">Coins, lures, clothes, decor, rods, and pets you can’t get anywhere else.</div>
-     ${crateRow('small','Small crate','Mostly coins and lures. Sometimes a pet.')}${crateRow('big','Big crate','Clothes, decor, and the rarer pets.')}${crateRow('legend','Legendary crate','The really good stuff.')}
-     ${crateRes?`<div class="reveal" style="text-align:center;margin-top:8px"><canvas width="240" height="180" id="crateprev"></canvas><div class="val">${esc(crateRes.title)}</div></div>`:''}</div>
-   <div class="tile bwt" style="--c:#2a8aa8"><h4>Duck pond</h4><div class="meta">Pick a rubber duck. Every duck wins something. Mostly tickets. Sometimes…</div>
-     ${duck?`<div class="ducks">${ducks}</div>${duck.pick>=0?`<div class="val" style="text-align:center">${esc(duck.msg||'')}</div><button class="btn alt sm" data-act="duckagain" ${S.money>=base?'':'disabled'}>Play again · <span class="coin">${fmt(base)}</span></button>`:''}`:`<button class="btn" data-act="duckagain" ${S.money>=base?'':'disabled'}>Play · <span class="coin">${fmt(base)}</span></button>`}</div>
-   <div class="tile bwt" style="--c:#4f8a4a"><h4>Higher or lower</h4><div class="meta">Guess if the next fish card is higher or lower. Every right guess grows the pot by half. Cash out any time.</div>
-     ${hilo&&!hilo.done?`<div class="hilocard"><b>${hilo.card}</b><span>${CARD_FISH[hilo.card]}</span></div><div class="val" style="text-align:center">Pot: <span class="coin">${fmt(hilo.pot)}</span> · streak ${hilo.streak}</div>
-       <div class="row" style="justify-content:center"><button class="btn sm" data-act="hilo" data-k="hi">Higher ▲</button><button class="btn sm" data-act="hilo" data-k="lo">Lower ▼</button><button class="btn alt sm" data-act="hilocash" ${hilo.streak?'':'disabled'}>Cash out</button></div>`
-      :`${hilo&&hilo.done?`<div class="val" style="text-align:center">${esc(hilo.msg)}</div>`:''}<button class="btn" data-act="hilostart" ${S.money>=base*2?'':'disabled'}>Deal · <span class="coin">${fmt(base*2)}</span></button>`}</div>
-   <div class="tile bwt" style="--c:#d8a020"><h4>Coin flip with the Fishmonger</h4><div class="meta">Heads you double it, tails he keeps it. A fair coin, he swears on his best haddock.</div>
-     <div class="row">${betBtn(.1)}${betBtn(.25)}${betBtn(.5)}</div>${flipRes?`<div class="val" style="font-size:18px;color:${flipRes.win?'var(--gold)':'var(--muted)'}">${esc(flipRes.txt)}</div>`:''}<div class="meta">${S.gstats.flips} flips · ${S.gstats.flipWins} won</div></div>
-   <div class="tile bwt" style="--c:#d87aa0"><h4>Scratch card</h4><div class="meta">Find three of the same: 🐟 ×2 · 🦀 ×4 · 🐚 ×8 · 💎 ×20 · 👑 ×60 (times ${fmt(base)} coins).</div>
-     ${scratch&&!scratch.done?`<div class="scratch">${scratch.cells.map((s,i)=>`<button data-act="scratch" data-i="${i}" class="${scratch.open[i]?'open':''}" aria-label="Scratch box ${i+1}">${scratch.open[i]?scratch.sym[s]:''}</button>`).join('')}</div><div class="row" style="justify-content:center"><button class="btn alt sm" data-act="scratchall">Reveal all</button></div>`
-      :`${scratch&&scratch.done?`<div class="scratch">${scratch.cells.map(s=>`<button class="open" disabled>${scratch.sym[s]}</button>`).join('')}</div><div class="val" style="text-align:center;color:${scratch.win>=0?'var(--gold)':'var(--muted)'}">${scratch.win>=0?'Winner! +'+fmt(scratch.prize)+' coins':'No match this time.'}</div>`:''}
-      <button class="btn" data-act="buyscratch" ${S.money>=base*2?'':'disabled'}>Buy a card · <span class="coin">${fmt(base*2)}</span></button>`}</div>
-   ${clawHTML()}
-  </div>
-  <div class="tile bwt" style="--c:#ffc94d;margin-top:12px"><div class="row spread"><div><h4>Prize counter</h4><div class="meta">Every Boardwalk game hands out tickets. Trade them here for things you can’t get anywhere else.</div></div><b>🎟 ${fmt(S.tickets)}</b></div>
-   <div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(200px,1fr))">${PRIZES.map(p=>{ const owned=p[4]&&p[4](); return `<div class="row spread prize"><span class="row" style="gap:8px;flex-wrap:nowrap"><canvas width="96" height="80" data-prize="${p[0]}" style="width:48px;height:40px;cursor:default;flex:0 0 auto"></canvas><span>${esc(p[1])}</span></span>
-     <span class="row" style="gap:4px">${!owned&&PRIZE_PV[p[0]]?`<button class="btn alt sm" data-act="prizepv" data-k="${p[0]}">Preview</button>`:''}${owned?'<span class="badge g">Owned</span>':`<button class="btn sm" data-act="prize" data-k="${p[0]}" ${S.tickets>=p[2]?'':'disabled'}>🎟 ${p[2]}</button>`}</span></div>`; }).join('')}</div></div>`;
-  paintPrizes(P); paintClaw();
-  drawWheel(); const cp=$('crateprev'); if(cp&&crateRes){ const x=cp.getContext('2d'); const k=crateRes.kind;
-    if(k==='pet') drawPetStyled(x,crateRes.id,120,160,crateRes.id==='unicorn'?3.4:5,0); else if(k==='decor') drawDecor(x,crateRes.id,120,170,1.6,0); else if(k==='hat') hatPreview(x,240,180,crateRes.id,S.look.hatCol,true);
-    else if(k==='rod'){ x.strokeStyle=ROD_I[crateRes.id].col; x.lineWidth=8; x.lineCap='round'; x.beginPath(); x.moveTo(30,160); x.quadraticCurveTo(120,150,215,30); x.stroke(); }
-    else if(k==='col'){ x.fillStyle=crateRes.id; x.beginPath(); x.arc(120,90,50,0,7); x.fill(); } else drawJunk(x,240,180,k==='lure'?'goldlure':'chest'); } }
 
 // ---------- actions for this update ----------
 function extraAct2(b){ const k=b.dataset.k, i=+b.dataset.i;
@@ -4076,9 +3975,6 @@ const RELICS = [
 ].map(a=>({id:a[0],name:a[1],cost:a[2],d:a[3]}));
 const relic = id => S.relics && S.relics.includes(id);
 const locCost = L => Math.round(L.cost*(relic('charts')?.7:1));
-function relicHTML(){ return `<div class="jsec"><h2>Pearl relics</h2><p class="sub">Spend Wisdom Pearls on permanent relics. Every pearl you spend gives up its +25% coins and XP and its rare-odds boost, so choose what matters to you. You have <b>${S.pearls}</b> pearl${S.pearls===1?'':'s'}.</p>
-  <div class="grid">${RELICS.map(r=>{ const own=relic(r.id); return `<div class="tile ${own?'done':''}"><div class="row spread"><h4>${r.name}</h4><span class="meta">${r.cost} pearl${r.cost>1?'s':''}</span></div><div class="meta">${r.d}</div>
-   ${own?'<span class="badge g">Owned forever</span>':`<button class="btn sm" data-act="relic" data-k="${r.id}" ${S.pearls>=r.cost?'':'disabled'}>Trade ${r.cost} pearl${r.cost>1?'s':''}</button>`}</div>`; }).join('')}</div></div>`; }
 
 // ---------- rare weathers ----------
 let fishRain=null;
@@ -4123,9 +4019,6 @@ function extraAct3(b){ const k=b.dataset.k;
 let PREVIEW=null, PET_PV=null, AQ_PV=null; // what's being tried on right now (never saved)
 function previewLook(){ const lk=Object.assign({},S.look); if(!PREVIEW) return lk; const {kind,id}=PREVIEW;
   if(kind==='col') lk.shirt=id; else if(kind==='pat') lk.pat=id; else if(kind==='hat') lk.hat=id; else if(kind==='out') lk.outfit=id; else if(kind==='gls') lk.glasses=id; else if(kind==='shoe') lk.shoes=id; else if(kind==='neck') lk.neck=id; else if(kind==='back') lk.back=id; return lk; }
-function previewBarHTML(){ if(!PREVIEW) return ''; const p=PREVIEW;
-  const buy = p.prize ? `<button class="btn sm" data-act="prize" data-k="${p.prize}" ${S.tickets>=p.price?'':'disabled'}>Get · 🎟 ${p.price}</button>` : `<button class="btn sm" data-act="buyoffer" data-k="${p.kind}:${p.id}" ${S.money>=p.price?'':'disabled'}>Buy · <span class="coin">${fmt(p.price)}</span></button>`;
-  return `<div class="pvbar"><span>Trying on: <b>${esc(p.name)}</b></span><span class="row">${buy}<button class="btn alt sm" data-act="tryoff">Take off</button></span></div>`; }
 function petPreviewLook(id=editPet()){ const lk=Object.assign({},petLook(id)); if(PET_PV) lk[PET_PV.kind]=PET_PV.id; return lk; }
 function petPvBarHTML(){ if(!PET_PV) return ''; const p=PET_PV;
   const buy = p.prize ? `<button class="btn sm" data-act="prize" data-k="${p.prize}" ${S.tickets>=p.price?'':'disabled'}>Get · 🎟 ${p.price}</button>` : `<button class="btn sm" data-act="${p.kind==='tint'?'pettint':'petacc'}" data-k="${p.id}" ${S.money>=p.price?'':'disabled'}>Buy · <span class="coin">${fmt(p.price)}</span></button>`;
@@ -4187,14 +4080,6 @@ function extraAct4(b){ const k=b.dataset.k;
 // Driftline 2.0: Paths tab, Home (dock customization & cozy), Tide Pass,
 // Fishing Derby, richer scenery for every water, two new waters' looks
 // =====================================================================
-
-// ---------- Paths (specialisations get their own tab) ----------
-function renderPaths(P){ const specRow=(T,ti)=>{ const cur=S.specs[ti], locked=S.lvl<T.lvl;
-    return `<div class="tile ${cur?'done':''}" style="${locked?'opacity:.55':''}"><div class="row spread"><h4>${T.name} <span class="meta">· unlocks at level ${T.lvl}</span></h4>${cur?`<span class="badge g">${T.opts.find(o=>o[0]===cur)[1]}</span>`:locked?`<span class="meta">Level ${S.lvl} / ${T.lvl}</span>`:'<span class="badge">Choose one</span>'}</div>
-     <div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(190px,1fr));margin-top:6px">${T.opts.map(o=>{ const on=cur===o[0];
-       return `<button class="spec ${on?'on':''}" data-act="spec" data-k="${ti}:${o[0]}" ${locked||on||(cur&&S.money<specFee(ti))?'disabled':''}><b>${o[1]}</b><span class="up">▲ ${o[2]}</span>${o[3]?`<span class="down">▼ ${o[3]}</span>`:''}${cur&&!on&&!locked?`<span class="meta">Switch · ${fmt(specFee(ti))} coins</span>`:''}</button>`; }).join('')}</div></div>`; };
-  P.innerHTML=`<h2>Paths</h2><p class="sub">Five forks on your angler’s road. Each one is a specialty: pick the one that fits how you like to fish. You can switch later for a fee.</p>
-   <div style="display:flex;flex-direction:column;gap:10px;margin-top:12px">${SPEC_TIERS.map(specRow).join('')}</div>`; }
 
 // ---------- Home: dock style, decorations, cozy ----------
 const DOCK_WOODS = [['oak','Oak',0,'#6b4a2e'],['birch','Birch',1500,'#c8a878'],['walnut','Walnut',2500,'#3e2a1c'],['driftwood','Driftwood',2000,'#8a7a6a'],['white','Painted white',3000,'#e4e0d6'],
@@ -4285,16 +4170,7 @@ const PASS_SPECIAL = {3:['dock','tideflag','Tide Flag','Dock decoration: a flag 
   25:['wood','pearl','Pearl dock wood','Dock wood: pale, pearly planks for any of your docks.'], 30:['out','tidecoat','Tide Coat','Outfit: a long coat with a glowing wave hem.'],
   35:['back','shellpack','Seashell Pack','On your back: a backpack made from a giant scallop shell.'], 40:['dock','minilight','Tiny Lighthouse','Dock decoration: its beam sweeps the water at night.'],
   45:['crate2','legend','2 Legendary Crates','Two Legendary Mystery Crates, the best crates there are.'], 50:['back','tidewings','Tide Wings','On your back: wings of living water. The rarest thing in the Pass.']};
-// regular levels cycle through these, every amount shown before you claim it
-function passPlain(L){ const base=bestLoot(); if(L>PASS_MAX) return {k:'bonus', name:'Coins and 20 Scales', d:fmt(Math.round(base*12*coinMult()))+' coins and 20 Scales.'};
-  return [{k:'big', name:'Big Mystery Crate', d:'Clothes, Boardwalk-only wear, decor and the rarer pets.'},{k:'coins', name:fmt(Math.round(base*10*coinMult()))+' coins', d:'Straight to your purse.'},{k:'scales', name:'15 Scales', d:'Level up rods, buy attachments and special bait.'},{k:'tix', name:'100 tickets', d:'Spend them at the Boardwalk prize counter.'},{k:'small', name:'Small Mystery Crate', d:'Mostly clothes and lures, sometimes decor or a pet.'}][L%5]; }
 function passReward(L){ const sp=PASS_SPECIAL[L]; return sp?sp[2]:passPlain(L).name; }
-function grantPass(L){ const sp=PASS_SPECIAL[L], base=bestLoot(); if(L%10===0 && maxed('tidewalker')) S.tokens.big++;
-  if(sp){ const [k,id]=sp; if(k==='dock'&&!S.dock.owned.includes(id)) S.dock.owned.push(id); if(k==='tint'&&!S.petTints.includes(id)) S.petTints.push(id); if(k==='hat'&&!S.owned.hats.includes(id)) S.owned.hats.push(id);
-    if(k==='wood'&&!S.dock.owned.includes(id)) S.dock.owned.push(id); if(k==='out'&&!S.owned.outfits.includes(id)) S.owned.outfits.push(id); if(k==='crate2') S.tokens.legend+=2; if(k==='bait') S.bait[id]=(S.bait[id]||0)+6;
-    if(k==='shoe'&&!S.owned.shoes.includes(id)) S.owned.shoes.push(id); if(k==='neck'&&!S.owned.necks.includes(id)) S.owned.necks.push(id); if(k==='back'&&!S.owned.backs.includes(id)) S.owned.backs.push(id); return sp[2]; }
-  if(L>PASS_MAX){ earn(base*12*coinMult()); S.scales+=20; return 'Coins and 20 Scales'; }
-  const p=passPlain(L); switch(p.k){ case 'big': S.tokens.big++; break; case 'coins': earn(base*10*coinMult()); break; case 'scales': S.scales+=15; break; case 'tix': S.tickets+=100; break; case 'small': S.tokens.small++; break; } return p.name; }
 function addPassXP(n){ S.pass.xp+=Math.round(n*(1+.06*pr('tidewalker'))*(relic('tidecaller')?1.3:1)); let ups=0; while(S.pass.xp>=passNeed(S.pass.lvl+1)){ S.pass.xp-=passNeed(S.pass.lvl+1); S.pass.lvl++; ups++; } if(ups){ setTimeout(()=>toast('Tide Pass level '+S.pass.lvl+'! Rewards are waiting in the Pass tab.'),1300); } }
 function passArt(x,w,h,L){ const sp=PASS_SPECIAL[L]; x.clearRect(0,0,w,h); const cx=w/2, s=w/120;
   if(sp){ const [k,id]=sp; if(k==='dock') dockThumb(x,id,w,h); else if(k==='hat') hatPreview(x,w,h,id,S.look.hatCol); else if(k==='out') drawAngler(x,cx,h*.96,h/80,Object.assign({},S.look,{outfit:id,hat:'none'}),{});
@@ -6538,18 +6414,6 @@ function v3TankGlass(c,w,h,t){ c.fillStyle='rgba(220,250,255,.18)'; c.fillRect(0
 
 // ---------- Waters tab: a painted thumbnail of every area (rendered once, from the real scene code) ----------
 const V3THUMB={};
-function v3Thumb(id){ if(V3THUMB[id]) return V3THUMB[id]; const SC=V3SCENES[id]; if(!SC) return null;
-  const tw=420, th=140, TS=2, oW=W, oH=H, oD=DPR, c=document.createElement('canvas'); c.width=tw*TS; c.height=th*TS; const x=c.getContext('2d'); x.setTransform(TS,0,0,TS,0,0);  try{ W=tw; H=th; DPR=TS; const P=v3palette(id,0,0,0), hz=th*.7; const sg=x.createLinearGradient(0,0,0,hz); sg.addColorStop(0,P.top); sg.addColorStop(.55,P.mid); sg.addColorStop(1,P.bot); x.fillStyle=sg; x.fillRect(0,0,tw,hz+1);
-    v3glow(x,tw*.62,hz*.45,th*.5,v3rgba(P.glow,.9),.5);
-    if(id==='starfall'){ const r=v3rng(4); x.fillStyle='#ffffff'; for(let i=0;i<60;i++){ x.globalAlpha=.4+r()*.5; x.fillRect(r()*tw,r()*hz*.8,1,1); } x.globalAlpha=1; const px=tw*.2, py=hz*.38, R=th*.13; x.save(); x.translate(px,py); x.rotate(-.3); x.strokeStyle=v3rgba(P.ring,.7); x.lineWidth=R*.2; x.beginPath(); x.ellipse(0,0,R*2,R*.45,0,Math.PI,0); x.stroke(); x.fillStyle=P.planet; x.beginPath(); x.arc(0,0,R,0,7); x.fill(); x.beginPath(); x.ellipse(0,0,R*2,R*.45,0,0,Math.PI); x.stroke(); x.restore(); }
-    if(id==='deep'){ for(let b=0;b<3;b++){ const y0=hz*(.06+b*.24), bh=hz*.18, bg=x.createLinearGradient(0,y0,0,y0+bh); bg.addColorStop(0,v3rgba(b%2?P.cl1:P.cl2,0)); bg.addColorStop(.5,v3rgba(b%2?P.cl1:P.cl2,.85)); bg.addColorStop(1,v3rgba(b%2?P.cl1:P.cl2,0)); x.fillStyle=bg; x.beginPath(); x.moveTo(0,y0+bh); for(let i=0;i<=12;i++){ const X=tw*i/12; x.lineTo(X,y0+bh*.2+Math.sin(i*1.7+b)*bh*.15); } x.lineTo(tw,y0+bh); x.closePath(); x.fill(); } x.strokeStyle='rgba(240,245,255,.9)'; x.lineWidth=1.6; x.beginPath(); x.moveTo(tw*.66,hz*.1); x.lineTo(tw*.63,hz*.4); x.lineTo(tw*.67,hz*.45); x.lineTo(tw*.62,hz*.85); x.stroke(); v3glow(x,tw*.64,hz*.4,th*.4,'rgba(220,230,255,.8)',.4); }
-    SC.land(x,P,hz,c);
-    if(id==='shelf'){ const sx=tw*.7, sy=hz, s=th*.012; x.fillStyle=P.ship; x.fillRect(sx-s*12,sy-s*3,s*24,s*3); x.fillStyle=P.sail; for(const mx of [-7,0,7]) for(let k=0;k<3;k++) x.fillRect(sx+mx*s-s*(4-k),sy-s*(8+k*5),s*(8-k*2),s*4); x.fillStyle=P.buoy; x.beginPath(); x.moveTo(tw*.45-4,hz+th*.12); x.lineTo(tw*.45+4,hz+th*.12); x.lineTo(tw*.45,hz+th*.12-10); x.fill(); }
-    V3THUMB[id]=c.toDataURL('image/jpeg',.86); }
-  catch(e){ V3THUMB[id]=null; console.warn('thumb '+id,e); }
-  finally{ W=oW; H=oH; DPR=oD; v3palette.k=null; }
-  return V3THUMB[id]; }
-function v3WaterThumbs(P){ P.querySelectorAll('.loc .sw2').forEach((el,i)=>{ const L=LOCS[i]; if(!L) return; const u=v3Thumb(L.id); if(u){ el.style.background='url('+u+') center/cover'; el.classList.add('v3th'); } }); }
 { const _rm=renderMap; renderMap=function(P){ _rm(P); if(V3ON) v3WaterThumbs(P); }; }
 
 // =====================================================================
@@ -7238,7 +7102,7 @@ m33wrap('ember','land',function(x,P,hz){ const x0=W*.79, rock=mix(P.rock,'#2a242
 // =====================================================================
 var THUMB_CLEAR=false;
 const _wx3k_th = wx3k; wx3k = function(){ return THUMB_CLEAR?'Clear':_wx3k_th(); };
-v3Thumb = function(id){ if(V3THUMB[id]) return V3THUMB[id]; const L=LOCS.find(l=>l.id===id); if(!L||!V3SCENES[id]||!(W>40&&H>40)) return null;
+function v3Thumb(id){ if(V3THUMB[id]) return V3THUMB[id]; const L=LOCS.find(l=>l.id===id); if(!L||!V3SCENES[id]||!(W>40&&H>40)) return null;
   const oWXA=WXA; try{ THUMB_CLEAR=true; WXA=0; v3palette.k=null; const hz=HZ(), t=(function(){ let tt=42; if(typeof sfEvent==="function") while(sfEvent(tt).into<=SF_DUR+1) tt+=1.7; return tt; })(), p=.3, /* a calm moment between events */ gloom=id==='deep'?.1:0;
     g.save(); g.setTransform(DPR,0,0,DPR,0,0); g.clearRect(0,0,W,H);
     v3Scene(L,t,p,0,0,gloom,hz,{k:'Clear'}); v3Platform(L,t,0,H*.6,0); v3Fore(L,t,0); g.restore();
@@ -7255,7 +7119,7 @@ const THUMB_FAIL={};
 function thumbNext(){ const id=LOCS.map(l=>l.id).find(id=>V3SCENES[id]&&!V3THUMB[id]&&(THUMB_FAIL[id]||0)<2); if(!id){ THUMB_Q.busy=false; return; } THUMB_Q.busy=true;
   thumbIdle(()=>{ if((G.st!=='idle'&&G.st!=='waiting')||!MENU_OPEN){ setTimeout(thumbNext,1500); return; } /* only while a menu is open (thumbnails are only seen there): never a hitch while fishing */ v3Thumb(id); if(!V3THUMB[id]) THUMB_FAIL[id]=(THUMB_FAIL[id]||0)+1; const i=LOCS.findIndex(l=>l.id===id), el=document.querySelectorAll('.loc .sw2')[i]; if(el&&V3THUMB[id]){ el.style.background='url('+V3THUMB[id]+') center/cover'; el.classList.add('v3th'); el.animate&&el.animate([{opacity:.3},{opacity:1}],{duration:400}); } setTimeout(thumbNext,60); }); }
 setTimeout(thumbNext,3000);
-v3WaterThumbs = function(P){ P.querySelectorAll('.loc .sw2').forEach((el,i)=>{ const L=LOCS[i]; if(!L) return; const u=V3THUMB[L.id]; if(u){ el.style.background='url('+u+') center/cover'; el.classList.add('v3th'); } }); if(!THUMB_Q.busy) thumbNext(); };
+function v3WaterThumbs(P){ P.querySelectorAll('.loc .sw2').forEach((el,i)=>{ const L=LOCS[i]; if(!L) return; const u=V3THUMB[L.id]; if(u){ el.style.background='url('+u+') center/cover'; el.classList.add('v3th'); } }); if(!THUMB_Q.busy) thumbNext(); };
 // =====================================================================
 // 0.3.3 depth and heavy weather.
 // Depth on every water: atmospheric haze where the land meets the horizon (far things recede), soft out-of-focus
@@ -9631,7 +9495,7 @@ function wItemCard(it,feat){ const own=wOwned(it.kind,it.id), trying=PREVIEW&&PR
 function wChips(k,list,cur,label){ return `<div class="chips">${list.map(([v,n])=>`<button class="chipb" data-act="look" data-k="${k}" data-v="${v}" aria-pressed="${String(cur)===String(v)}">${esc(n)}</button>`).join('')}</div>`; }
 function wSw(k,list,cur){ return `<div class="chips">${list.map(([v,cl,n])=>`<button class="sw" data-act="look" data-k="${k}" data-v="${v}" aria-pressed="${String(cur)===String(v)}" style="background:${cl}" title="${esc(n||cl)}"></button>`).join('')}</div>`; }
 function wThumbGrid(k,kind,items,cur){ return `<div class="wd-thumbs">${items.map(([id,n])=>`<button class="wd-th" data-act="look" data-k="${k}" data-v="${id}" aria-pressed="${cur===id}"><canvas width="96" height="96" data-wthumb="${kind}:${id}"></canvas><span>${esc(n)}</span></button>`).join('')}</div>`; }
-renderStyle = function(P){ const lk=S.look, cols=[...FREE_COLS,...S.owned.cols].map(c=>[c,c]);
+function renderStyle(P){ const lk=S.look, cols=[...FREE_COLS,...S.owned.cols].map(c=>[c,c]);
   const secs=[['body','Body','👤'],['clothes','Clothes','👕'],['hats','Hats','🎩'],['glasses','Glasses','👓'],['shoes','Shoes','👟'],['neckback','Neck & back','🧣'],['tidepass','Tide Pass','🌊'],['shop','Shop','🛍️']];
   let body='';
   if(wSec==='body') body=`<h5>Body</h5>${wChips('g',[['m','Man'],['f','Woman']],lk.g)}<h5>Build</h5>${wChips('build',BUILDS.map(b=>[b[0],b[1]]),lk.build||'average')}
@@ -9659,7 +9523,7 @@ renderStyle = function(P){ const lk=S.look, cols=[...FREE_COLS,...S.owned.cols].
   drawLookPreview();
   P.querySelectorAll('canvas[data-hat]').forEach(c=>{ const cx=c.getContext('2d'); cx.clearRect(0,0,c.width,c.height); hatPreview(cx,c.width,c.height,c.dataset.hat,lk.hatCol); });
   P.querySelectorAll('canvas[data-wthumb]').forEach(c=>{ const [kind,id]=c.dataset.wthumb.split(':'); if(id==='none'){ const cx=c.getContext('2d'); cx.clearRect(0,0,c.width,c.height); cx.fillStyle='rgba(200,220,240,.4)'; cx.font='700 '+Math.round(c.height*.3)+'px system-ui'; cx.textAlign='center'; cx.fillText('—',c.width/2,c.height*.6); return; } wThumb(c.getContext('2d'),kind,id,c.width,c.height); }); };
-previewBarHTML = function(){ if(!PREVIEW) return ''; const p=PREVIEW;
+function previewBarHTML(){ if(!PREVIEW) return ''; const p=PREVIEW;
   const buy = p.prize ? `<button class="btn sm" data-act="prize" data-k="${p.prize}" ${S.tickets>=p.price?'':'disabled'}>Get · 🎟 ${p.price}</button>` : `<button class="btn sm" data-act="wbuy" data-k="${p.kind}:${p.id}" ${S.money>=p.price?'':'disabled'}>Buy · <span class="coin">${fmt(p.price)}</span></button>`;
   return `<div class="pvbar"><span>Trying on: <b>${esc(p.name)}</b></span><span class="row">${buy}<button class="btn alt sm" data-act="tryoff">Take off</button></span></div>`; };
 const _extraAct2_3 = extraAct2;
@@ -9758,7 +9622,7 @@ function drawFabric(c,id,base,x,y,w,h){ const D=a=>'rgba(0,0,0,'+a+')', L=a=>'rg
     case 'sequin': for(let yy=y+.5,r=0;yy<y+h;yy+=1.1,r++) for(let xx=x+(r%2)*.55;xx<x+w;xx+=1.1){ const v=R(); c.fillStyle=v>.85?L(.9):v>.5?L(.3):D(.12); c.beginPath(); c.arc(xx,yy,.42,0,7); c.fill(); } break;
   } }
 // every place that drew a pattern now draws a fabric
-drawPattern = function(c,pat,base,x,y,w,h){ drawFabric(c,pat,base,x,y,w,h); };
+function drawPattern(c,pat,base,x,y,w,h){ drawFabric(c,pat,base,x,y,w,h); };
 if(typeof drawPatternX==='function') drawPatternX = function(c,pat,base,x,y,w,h){ drawFabric(c,pat,base,x,y,w,h); };
 // two-tone: the second colour on part of the shirt (drawn before the fabric, inside the torso clip)
 function drawTwoTone(c,lk,D,x,y,w,h){ const t=lk.tone; if(!t||t==='none'||t==='sleeves'||!lk.shirt2) return; c.fillStyle=D(lk.shirt2);
@@ -10143,7 +10007,7 @@ var SHOE_TOPY={boots:5.2,sneakers:4.3,glowkicks:4.3,loafers:3.4,brogues:3.4,clog
 
 // ---------- hat previews (shop, Wardrobe, Boardwalk, Tide Pass): the real angler's head wearing the hat ----------
 const HATPV=new Map();
-hatPreview = function(c,w,h,id,col,big){ const fixed=HATI[id]&&HATI[id].fixed, hc=fixed?'#888888':col, L=S.look;
+function hatPreview(c,w,h,id,col,big){ const fixed=HATI[id]&&HATI[id].fixed, hc=fixed?'#888888':col, L=S.look;
   const key=[id,hc,w,h,L.skin,L.hair,L.hairStyle,L.g,L.eye|0,L.nose,L.brows,L.mouth,L.blush,L.beard,big?1:0].join('|');
   let cv=HATPV.get(key);
   if(!cv){ cv=document.createElement('canvas'); cv.width=w*2; cv.height=h*2; const x=cv.getContext('2d'); x.scale(2,2);
@@ -10435,7 +10299,7 @@ function bwHero(cv){ if(!cv) return; const r=cv.getBoundingClientRect(), DP=Math
   for(const [sx,c1,c2] of [[w*.45,'#ff8a5c','#ffe6d0'],[w*.66,'#7fe3c4','#e8fff6']]){ x.fillStyle='#24142a'; x.fillRect(sx,wy-h*.2,w*.12,h*.15); for(let k=0;k<6;k++){ x.fillStyle=k%2?c1:c2; x.beginPath(); x.moveTo(sx+k*w*.02,wy-h*.2); x.lineTo(sx+(k+1)*w*.02,wy-h*.2); x.lineTo(sx+(k+.5)*w*.02,wy-h*.15); x.closePath(); x.fill(); } v3glow(x,sx+w*.06,wy-h*.11,h*.12,'rgba(255,210,140,.7)',.5); }
   // reflections
   x.save(); x.globalAlpha=.25; for(let i=0;i<24;i++){ const a=i/24*Math.PI*2, px=fx+Math.cos(a)*fr; x.fillStyle=cols[i%6]; x.fillRect(px-2,wy+h*.04+Math.abs(Math.sin(a))*h*.08,4,1.5); } for(const X of posts){ x.fillStyle='#ffd08a'; x.fillRect(X-6,wy+h*.06,12,1.5); x.fillRect(X-4,wy+h*.1,8,1.5); } x.restore(); }
-renderBoardwalk = function(P){ accrueSpins();
+function renderBoardwalk(P){ accrueSpins();
   P.innerHTML=`<div class="bwx"><div class="bwx-hero"><canvas id="bwhero"></canvas><div class="bwx-ht"><h2>The Boardwalk</h2><p>Games, prizes and treasures on the old pier. Coins and tickets only.</p></div></div>
    <div class="bwx-wallet"><span><b class="coin">${fmtShort(S.money)}</b></span><span><b>🎟 ${fmt(S.tickets)}</b> tickets</span><span><b style="color:var(--kelp)">${fmt(S.scales)}</b> Scales</span>${S.freeSpins>0?`<span class="badge g">${S.freeSpins} free spin${S.freeSpins>1?'s':''}</span>`:''}</div>
    <div class="bwx-nav" role="tablist">${[['games','Games'],['prizes','Prize counter'],['specials','Counter specials']].map(([k,n])=>`<button role="tab" data-act="bwview" data-k="${k}" aria-selected="${bwView===k}">${n}</button>`).join('')}</div>
@@ -10506,7 +10370,7 @@ function baitRow([k,b]){ const using=S.baitSel===k;
   return `<div class="tk-row ${using?'on':''}"><div class="tk-main"><div class="row" style="gap:8px;align-items:baseline"><b>${b.name}</b><span class="meta">You have ${S.bait[k]||0}</span>${using?'<span class="badge g">In use</span>':''}</div>
     <div class="meta">${esc(b.note)}</div><div class="badges" style="justify-content:flex-start;margin-top:4px">${baitChips(b)}</div></div>
     <div class="tk-acts">${buy}<button class="btn alt sm" data-act="usebait" data-k="${k}" ${S.bait[k]>0&&!using?'':'disabled'}>${using?'In use':'Use'}</button></div></div>`; }
-renderShop = function(P){ const shopBait=Object.entries(BAIT).filter(([k,b])=>k!=='worm'&&!b.junk), junkBait=Object.entries(BAIT).filter(([k,b])=>b.junk), cur=BAIT[S.baitSel]||BAIT.worm;
+function renderShop(P){ const shopBait=Object.entries(BAIT).filter(([k,b])=>k!=='worm'&&!b.junk), junkBait=Object.entries(BAIT).filter(([k,b])=>b.junk), cur=BAIT[S.baitSel]||BAIT.worm;
   const gearTiles = Object.entries(GEAR).map(([k,G2])=>{ const lv=S.gear[k], max=G2.lv.length-1, next=lv<max?G2.cost[lv+1]:0;
     return `<div class="tile"><div class="row spread"><h4>${G2.name}</h4><span class="meta">Level ${lv+1} / ${max+1}</span></div><div class="pips">${G2.lv.map((_,i)=>`<i class="${i<=lv?'on':''}"></i>`).join('')}</div>
     <div class="meta">${G2.what}</div><div class="val">${G2.fmt(G2.lv[lv])}${lv<max?` <span class="meta">→ ${G2.fmt(G2.lv[lv+1])}</span>`:''}</div>
@@ -10539,7 +10403,7 @@ document.head.insertAdjacentHTML('beforeend',`<style>#panel .pass-next{display:f
 // premium piece, then a set mix (hats, shoes, back pieces, neckwear, an outfit, glasses, a pattern,
 // a colour), never something you already own.
 // =====================================================================
-shopOffers = function(){ const slot=Math.floor(Date.now()/1000/SHOP_LEN); let h=hashStr('shop2'+slot); const rnd2=()=>{ h=Math.imul(h^(h>>>13),1597334677)>>>0; return h/4294967296; };
+function shopOffers(){ const slot=Math.floor(Date.now()/1000/SHOP_LEN); let h=hashStr('shop2'+slot); const rnd2=()=>{ h=Math.imul(h^(h>>>13),1597334677)>>>0; return h/4294967296; };
   const all={ col:SHOP_COLS.map(c=>({kind:'col',id:c[0],name:c[1],price:c[2]})), pat:PATTERNS.filter(p=>p[2]).map(p=>({kind:'pat',id:p[0],name:p[1]+' fabric',price:p[2]})), hat:HATS.filter(x=>x.src==='shop').map(x=>({kind:'hat',id:x.id,name:x.name,price:x.price})),
     out:OUTFITS.filter(o=>o[3]==='shop').map(o=>({kind:'out',id:o[0],name:o[1],price:o[2]})), gls:GLASSES.filter(g2=>g2[2]).map(g2=>({kind:'gls',id:g2[0],name:g2[1],price:g2[2]})),
     shoe:SHOES.filter(x=>x[3]==='shop').map(x=>({kind:'shoe',id:x[0],name:x[1],price:x[2]})), neck:NECKS.filter(x=>x[3]==='shop').map(x=>({kind:'neck',id:x[0],name:x[1],price:x[2]})), back:BACKS.filter(x=>x[3]==='shop').map(x=>({kind:'back',id:x[0],name:x[1],price:x[2]}))};
@@ -10574,7 +10438,7 @@ for(const L of [DECOR,DOCK_DECOR]) L.sort((a,b)=>String(a.name).localeCompare(St
 // =====================================================================
 const MG_NEW = ['knot','memory','skip'];
 let MG=null;
-afterCard = function(){ catchesSinceEvent++; if(pendingEvent){ const ev=pendingEvent; pendingEvent=null; openEvent(ev); return; }
+function afterCard(){ catchesSinceEvent++; if(pendingEvent){ const ev=pendingEvent; pendingEvent=null; openEvent(ev); return; }
   if(S.settings.minigames===false) return;
   if(S.stats.caught>=5 && catchesSinceEvent>=6 && Math.random()<.12){ catchesSinceEvent=0; openEvent(pick(['frenzy','chests','frenzy','chests',...MG_NEW])); } };
 const _openEvent0 = openEvent;
@@ -10769,7 +10633,7 @@ function passPickItem(L,pool){ if(!pool.length) return null; const decor=pool[0]
     let i=hashStr('tide'+l)%pool.length, n=0; while(used.has(pool[i].kind+pool[i].id)&&n<pool.length){ i=(i+1)%pool.length; n++; } pick=pool[i]; used.add(pick.kind+pick.id); }
   return pick; }
 function passPlainIndex(L){ let n=0; for(let i=1;i<=L;i++) if(!PASS_SPECIAL[i]) n++; return n; }
-passPlain = function(L){ if(S.pass.got&&S.pass.got[L]&&L<=S.pass.claimed) return {k:'got', name:S.pass.got[L], d:'Claimed.'}; if(L<=S.pass.claimed) return {k:'got', name:'Claimed', d:'Already claimed.'}; const slot=[0,1,2,3,4][(passPlainIndex(L)-1)%5];
+function passPlain(L){ if(S.pass.got&&S.pass.got[L]&&L<=S.pass.claimed) return {k:'got', name:S.pass.got[L], d:'Claimed.'}; if(L<=S.pass.claimed) return {k:'got', name:'Claimed', d:'Already claimed.'}; const slot=[0,1,2,3,4][(passPlainIndex(L)-1)%5];
   if(slot===0||slot===2){ const it=passPickItem(L,passWearPool()); if(it) return {k:'wear', it, name:it.name, d:it.cat+': yours to wear, only a claim away.'};  return slot===0?PASS_FB_SCALES:PASS_FB_TIX; }
   if(slot===3){ const it=passPickItem(L,passDecorPool()); if(it) return {k:'decor', it, name:it.name, d:it.cat+' for your '+(it.kind==='dock'?'dock':'tank')+'.'};  return PASS_FB_SCALES; }
   if(slot===1) return {k:'big', name:'Big Mystery Crate', d:'Clothes, Boardwalk-only wear, decor and the rarer pets.'};
@@ -10784,7 +10648,7 @@ const grantPass_ = function(L){ const sp=PASS_SPECIAL[L]; if(L%10===0 && maxed('
   if(p.k==='big'){ S.tokens.big++; return p.name; }
   if(p.k==='scales'){ S.scales+=50; return p.name; } if(p.k==='tickets'){ S.tickets+=300; return p.name; }
   S.scales+=25; S.tickets+=150; return p.name; };
-grantPass = function(L){ const r=grantPass_(L); S.pass.got=S.pass.got||{}; S.pass.got[L]=r; return r; };
+function grantPass(L){ const r=grantPass_(L); S.pass.got=S.pass.got||{}; S.pass.got[L]=r; return r; };
 const _passArt_0 = passArt;
 passArt = function(x,w,h,L){ if(PASS_SPECIAL[L]) return _passArt_0(x,w,h,L); const p=passPlain(L); x.clearRect(0,0,w,h); if(p.k==='got'){ x.fillStyle='#7fe3c4'; x.font='700 '+Math.round(h*.4)+'px system-ui'; x.textAlign='center'; x.fillText('✓',w/2,h*.64); return; }
   if(p.k==='wear'){ const it=p.it; if(it.kind==='hat') hatPreview(x,w,h,it.id,S.look.hatCol); else if(it.kind==='out') drawAngler(x,w/2,h*.96,h/80,Object.assign({},S.look,{outfit:it.id,hat:'none'}),{}); else if(it.kind==='gls'){ const s=h/24; drawAngler(x,w*.42,h*.5+56*s,s,Object.assign({},S.look,{glasses:it.id,hat:'none'}),{}); }
@@ -11052,7 +10916,7 @@ const DECOR_KIND_SHORT={ income:'Income', boost:'Fish buffs', show:'Showpiece' }
 const decorKind = id => DECOR_KIND[id]||'income';
 const decorVal = d => d.b*DECOR_K[decorKind(d.id)];
 function decorSumKind(kind){ let s=0; for(const id of (S.aq&&S.aq.decor)||[]){ const d=DECORI[id]; if(d&&decorKind(id)===kind) s+=decorVal(d); } return s; }
-decorBonus = function(){ return decorSumKind('income'); };
+function decorBonus(){ return decorSumKind('income'); };
 const decorBoost = () => decorSumKind('boost'), decorShow = () => decorSumKind('show');
 // fish buffs: every aquarium buff a little stronger (the caps on each bonus still apply)
 const _aqBuffsOf_04 = aqBuffsOf;
@@ -11280,10 +11144,6 @@ document.head.insertAdjacentHTML('beforeend',`<style>li.pn-h{list-style:none;mar
 // =====================================================================
 // 0.3 Events: a tab for timed events (the fishing derby lives here now, and future events will too).
 // =====================================================================
-function renderEvents(P){ const base=bestLoot(), row=(icon,m,label)=>`<div class="row spread ev-rw"><span>${icon} <b>${label}</b></span><span class="meta">${m?`<span class="coin">${fmt(Math.round(base*25*m*coinMult()))}</span> · ${Math.round(30*m)} Scales · ${Math.round(150*m)} tickets · ${Math.round(300*m)} Tide Pass XP`:'20 tickets for taking part'}</span></div>`;
-  P.innerHTML=`<h2>Events</h2><p class="sub">Timed events with their own rewards. Join one whenever you like.</p>${derbyHTML()}
-  <div class="tile"><h4>Derby rewards</h4><div class="meta" style="margin-bottom:6px">Four minutes, one water: the heaviest total catch wins. Rewards grow with the waters you have unlocked.</div>
-   ${row('🥇',1,'First place')}${row('🥈',.5,'Second place')}${row('🥉',.25,'Third place')}${row('🎣',0,'Fourth place')}</div>`; }
 const _renderPanel_ev = renderPanel;
 renderPanel = function(){ if(S.tab==='events'){ const P=$('panel'); if(P){ renderEvents(P); return; } } _renderPanel_ev(); };
 { const anchor=document.querySelector('#tabs [data-tab="games"]'); if(anchor&&!document.querySelector('#tabs [data-tab="events"]')){ anchor.insertAdjacentHTML('beforebegin','<button role="tab" data-tab="events" aria-selected="false" data-label="🎏 Events"></button>'); const nb=document.querySelector('#tabs [data-tab="events"]'); nb.innerHTML=tabHTML(nb.dataset.label); } }
@@ -11498,7 +11358,7 @@ renderCooler = function(P){ _renderCooler_034b(P); P.querySelectorAll('.fishrow'
 
 // ---------- the fishmonger asks for a fish from the water you are on 80% of the time ----------
 const DEMAND={slot:-1,id:null};
-demandSp = function(){ const slot=Math.floor(Date.now()/1000/WX_LEN); if(DEMAND.slot!==slot||!SPI[DEMAND.id]){ const h=hashStr('dm'+slot), local=SP.filter(s=>s.loc===S.loc&&s.r<=3), any=SP.filter(s=>S.unlocked.includes(s.loc)&&s.r<=3), pool=(h%10<8&&local.length)?local:any; DEMAND.slot=slot; DEMAND.id=pool[(h>>>4)%pool.length].id; } return SPI[DEMAND.id]; };
+function demandSp(){ const slot=Math.floor(Date.now()/1000/WX_LEN); if(DEMAND.slot!==slot||!SPI[DEMAND.id]){ const h=hashStr('dm'+slot), local=SP.filter(s=>s.loc===S.loc&&s.r<=3), any=SP.filter(s=>S.unlocked.includes(s.loc)&&s.r<=3), pool=(h%10<8&&local.length)?local:any; DEMAND.slot=slot; DEMAND.id=pool[(h>>>4)%pool.length].id; } return SPI[DEMAND.id]; };
 
 // ---------- Bounties opens on the board of the water you are fishing ----------
 let lastTab034=null; const _renderPanel_034=renderPanel;
@@ -11509,9 +11369,6 @@ const _fight_034 = fight;
 fight = function(dt){ const was=G.run; _fight_034(dt); if(G.st==='reeling'&&G.run&&!was){ try{ tone(520,.14,'triangle',.035,-160); tone(380,.18,'sine',.025,-90,.06); }catch(e){} if(typeof vib==='function') vib(12); } };
 
 // ---------- shiny fish pictures twinkle (cooler, aquarium, fish log, catch card) ----------
-function shineDecorate(root){ (root||document).querySelectorAll('canvas[data-sh="1"],canvas[data-sh="2"],#cardfish.shiny').forEach(cv=>{ const p=cv.parentElement; if(!p||p.querySelector(':scope > .shine')) return; if(getComputedStyle(p).position==='static') p.style.position='relative';
-  const r=cv.getBoundingClientRect(), pr=p.getBoundingClientRect(), s=document.createElement('span'); s.className='shine'+(cv.dataset.sh==='2'?' prism':''); s.style.cssText=`left:${r.left-pr.left}px;top:${r.top-pr.top}px;width:${r.width}px;height:${r.height}px`;
-  for(let i=0;i<5;i++){ const d=document.createElement('i'); d.style.left=(12+((i*37)%76))+'%'; d.style.top=(15+((i*53)%60))+'%'; d.style.animationDelay=(i*.37)+'s'; s.appendChild(d); } p.appendChild(s); }); }
 const _renderPanel_034b=renderPanel; renderPanel=function(){ const r=_renderPanel_034b.apply(this,arguments); try{ requestAnimationFrame(()=>shineDecorate($('panel'))); }catch(e){} return r; };
 const _showCard_034b=showCard; showCard=function(o){ const ce=G.lastEntry; _showCard_034b(o); try{ const cv=$('cardfish'); const old=$('cardin').querySelector('.shine'); if(old) old.remove(); const f=ce&&{shiny:ce.sh}; if(cv&&f&&f.shiny){ cv.classList.add('shiny'); cv.dataset.sh=String(f.shiny); requestAnimationFrame(()=>shineDecorate($('cardin'))); } else if(cv){ cv.classList.remove('shiny'); delete cv.dataset.sh; } }catch(e){} };
 
@@ -12403,21 +12260,6 @@ document.addEventListener('click',e=>{ const b=e.target.closest&&e.target.closes
     setTimeout(()=>toast((moved?moved+' aquarium fish '+(moved===1?'was':'were')+' mounted in your Trophy Room. ':'')+(ms?'New voyage milestone: '+ms.name+'!':'Legacy is now +'+Math.round(voyageLegacy()*100)+'%.')),900);
   },0); },true);
 
-// the voyage panel, rebuilt around the new rewards
-renderVoyage=function(){ const n=pearlsFor(), ok=canRetire(), v=S.tides||0, leg=Math.round(voyageLegacy()*100), legNext=Math.round((voyageLegacy()+(v>=10?.05:.10))*100), pm=voyagePearlMult(), full=vaultList().length+S.tank.length>VAULT_MAX;
-  const box = confirmBox==='retire' ? `<div class="tile voy-confirm"><h4>Set sail again?</h4>
-    <div class="meta">You lose your coins, tackle, bait, cooler fish, bounties and every water except Willow Pond${voyMs(2)?' (and the waters your milestones keep)':''}. Your aquarium fish are mounted in your Trophy Room${full?' (as many as fit; the rest stay on display)':''}, kept forever. You keep your level, skills, Fish Log, feats, Trophy Room, pets, hats, clothes, relics and Wisdom Pearls.</div>
-    <div class="meta" style="margin-top:6px;color:var(--kelp)">After this voyage: Legacy +${legNext}%${VOYAGE_MS.find(m=>m.n===v+1)?' and a new milestone: '+VOYAGE_MS.find(m=>m.n===v+1).name:''}.</div>
-    <div class="row" style="margin-top:8px"><button class="btn" data-act="retireok">Set sail with +${n} pearl${n===1?'':'s'}</button><button class="btn alt" data-act="cancel">Keep fishing</button></div></div>` : '';
-  const msRows=VOYAGE_MS.map(m=>{ const got=v>=m.n; return `<div class="voy-ms ${got?'got':''}"><span class="voy-n">${got?'✓':m.n}</span><div><b>${m.name}</b><div class="meta">${m.d}</div></div><span class="meta">${got?'Unlocked':'after '+m.n+' voyage'+(m.n>1?'s':'')}</span></div>`; }).join('');
-  return `<div class="jsec"><h2>Set sail again</h2><p class="sub">Once you reach Hollow Trench you can start over from Willow Pond. You earn Wisdom Pearls (each one +25% coins and XP, and better rare odds, forever), your Legacy grows with every voyage, and milestones unlock permanent perks.</p>
-  <div class="grid"><div class="tile"><div class="row spread"><h4>Voyage ${v+1}</h4><span class="meta">${S.pearls} pearl${S.pearls===1?'':'s'} · +${Math.round((coinMult()-1)*100)}% coins and XP</span></div>
-  <div class="voy-stats"><div><span class="meta">Legacy</span><b>+${leg}%</b><span class="meta">from ${v} voyage${v===1?'':'s'}</span></div><div><span class="meta">Pearl finder</span><b>×${pm.toFixed(2)}</b><span class="meta">more pearls each voyage</span></div><div><span class="meta">This voyage</span><b class="coin">${fmtShort(S.stats.runEarned)}</b><span class="meta">coins earned</span></div></div>
-  <div class="meta">Next pearl at <span class="coin">${fmt(Math.ceil(Math.pow((Math.floor(Math.sqrt(S.stats.runEarned/PEARL_DIV)*pm)+1)/pm,2)*PEARL_DIV))}</span> coins earned. Boardwalk winnings count for at most a quarter of it.</div>
-  <div class="val">Setting sail now gives +${n} pearl${n===1?'':'s'}</div>
-  <button class="btn" data-act="retire" ${ok&&!confirmBox?'':'disabled'}>${S.unlocked.includes('trench')?(n?'Set sail again':'Earn more coins first'):'Reach Hollow Trench first'}</button></div>${box}
-  <div class="tile"><h4>Voyage milestones</h4><div class="voy-list">${msRows}</div></div></div></div>`; };
-
 document.head.insertAdjacentHTML('beforeend',`<style>
 .voy-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:8px 0}
 .voy-stats>div{display:flex;flex-direction:column;align-items:flex-start;padding:8px 10px;border-radius:12px;border:1px solid var(--line,#26385180);background:#0e1828}
@@ -12731,8 +12573,6 @@ function nextGoal(){ if(!S.stats.caught) return {t:'Catch your first fish', sub:
 // the water as one chip with what the weather actually does, on every screen (it was cut off on mid-size PCs).
 // ---------------------------------------------------------------------
 const WX_TAG={Rain:'bites +35%', Storm:'rarer fish', Fog:'night fish', Gilded:'shiny ×3', Rainbow:'shiny ×2, XP +30%', Aurora:'XP ×2', 'Spawning Run':'bites ×2.5'};
-drawSceneChip=function(p,wx){ const tag=WX_TAG[wx.k]; const txt=tod(p)+' · '+wxName(wx.k)+(tag?' ('+tag+')':'')+' · '+mmss(wxLeft()); const big=W>=700; g.font='700 '+(big?12:11)+'px system-ui'; const tw=g.measureText(txt).width, h=big?22:20;
-  g.fillStyle='rgba(5,14,20,.62)'; rr(10,10,tw+(big?20:16),h,h/2); g.fill(); g.fillStyle=wx.k==='Gilded'?'#ffc94d':tag?'#bfe8ff':'#e6efe8'; g.textAlign='left'; g.fillText(txt,big?20:18,big?25:24); };
 document.head.insertAdjacentHTML('beforeend',`<style>
 .hud .stat.opt,.hud #wxchip{display:none!important}
 #goalchip{position:absolute;left:10px;top:38px;z-index:4;display:grid;grid-template-columns:auto;gap:1px;max-width:min(340px,calc(100% - 20px));padding:6px 11px 7px;border-radius:12px;border:1px solid #ffffff1c;background:#08121ed0;color:#e6efe8;text-align:left;font:inherit;cursor:pointer;box-shadow:0 4px 14px #0006;-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px)}
@@ -12951,7 +12791,7 @@ function schedCal(){ const items=SCHED.map(e=>({e, live:schedLeft(e), next:sched
   return `<div class="tile ev-cal"><h4>Event calendar</h4><div class="meta" style="margin-bottom:6px">These run on the clock at every water. Nothing to join: just be fishing.</div>
    ${items.map(({e,live,next})=>`<div class="ev-cal-row ${live?'on':''}" style="--c:${e.col}"><span class="ev-cal-ic">${e.icon}</span><div class="ev-cal-txt"><b>${esc(e.name)}</b><span class="meta">${esc(e.what)} · ${e.len} min, every ${e.every} min</span></div>
      <span class="badge ${live?'g':''}">${live?'Live · <span data-evleft="'+e.id+'">'+mmss(Math.ceil(live/1000))+'</span> left':'In <span data-evleft="'+e.id+'">'+mmss(Math.ceil(next/1000))+'</span>'}</span></div>`).join('')}</div>`; }
-renderEvents=function(P){ const o=catchOdds(), c=S.chal;
+function renderEvents(P){ const o=catchOdds(), c=S.chal;
   const active=c?(()=>{ const C=CHAL[c.id], left=Math.max(0,Math.ceil((c.until-Date.now())/1000)), pct=C.ranked?Math.min(1,c.best/Math.max(...c.rivals.map(r=>r[1]))):c.prog/c.need;
     return `<div class="tile ev-active"><div class="row spread"><div><span class="rar" style="color:var(--gold)">Your challenge · ${esc(LOCS[locIdx(c.loc)].name)}</span><h4>${C.icon} ${esc(C.name)}</h4></div><span class="badge g"><span data-evleft="chal">${mmss(left)}</span> left</span></div>
       <div class="meta">${esc(C.rule(c))}${C.ranked?'':': <b>'+c.prog+' / '+c.need+'</b>'}${S.loc!==c.loc?' · <b style="color:#ff9a8a">Only catches at '+esc(LOCS[locIdx(c.loc)].name)+' count</b>':''}</div>
@@ -13214,7 +13054,6 @@ function menuUnmount(){ const {T,P,toast,stage}=menuEls(); const [a,b]=holdTab; 
 let MENU_WANT=false;
 function menuMode(){ const open=MENU_WANT; if(open===MENU_OPEN) return; MENU_OPEN=open; if(open) menuMount(); else { menuUnmount(); if(menuHist){ menuHist=false; try{ history.back(); }catch(e){} } } }
 addEventListener('popstate',()=>{ if(menuHist){ menuHist=false; if(MENU_OPEN) closeMenu(); } });
-function openMenu(t){ MENU_WANT=true; setTab(t||DASH); save(); }
 function closeMenu(){ if(!MENU_OPEN&&!MENU_WANT) return; MENU_WANT=false; setTab(DASH); save(); }
 function toggleMenu(){ if(MENU_OPEN) closeMenu(); else openMenu(DASH); }
 { const _st=setTab; setTab=function(t){ if(!t) t=DASH; if(t!==DASH) MENU_WANT=true; menuMode(); _st(t); menuHead(); }; }
@@ -13324,7 +13163,7 @@ setInterval(()=>{ if(MENU_OPEN){ const c=$('mocoin'), v=fmtShort(S.money); if(c&
 // start in fishing mode; the last page opens again from its category
 { if(S.tab&&S.tab!==DASH) S.settings.pageLast=S.tab; S.tab=DASH; }
 
-if(/[?&]test\b/.test(location.search)) window.__ui={open:openMenu, close:closeMenu, isOpen:()=>MENU_OPEN, dash:()=>[...document.querySelectorAll('#panel .dash > [data-w]')].map(e=>e.dataset.w), dockSync, dockSummary};
+if(/[?&]test\b/.test(location.search)) window.__ui={open:(...a)=>openMenu(...a), close:(...a)=>closeMenu(...a), isOpen:()=>MENU_OPEN, dash:()=>[...document.querySelectorAll('#panel .dash > [data-w]')].map(e=>e.dataset.w), dockSync, dockSummary};
 
 document.head.insertAdjacentHTML('beforeend',`<style>
 body.chal-live .secb[data-sec="chal"] .secdot{display:none!important}
@@ -13461,7 +13300,7 @@ addEventListener('orientationchange',()=>setTimeout(()=>{ try{ resize(); }catch(
 if(window.visualViewport) visualViewport.addEventListener('resize',()=>{ clearTimeout(window.__dlvv); window.__dlvv=setTimeout(()=>{ try{ resize(); }catch(e){} },120); });
 // the water's chip says where you are too (the top bar on phones has no room for the name of the water)
 // phones held upright: two lines (the water, then time · weather · effect · time left) so it never runs into the streak chip
-drawSceneChip=function(p,wx){ const tag=WX_TAG[wx.k], nm=curLoc().name; const big=W>=700; const bc=document.body.classList, phone=bc.contains('phone-app')||bc.contains('phone-land');
+function drawSceneChip(p,wx){ const tag=WX_TAG[wx.k], nm=curLoc().name; const big=W>=700; const bc=document.body.classList, phone=bc.contains('phone-app')||bc.contains('phone-land');
   const rest=tod(p)+' · '+wxName(wx.k)+(tag?' ('+tag+')':'')+' · '+mmss(wxLeft()); const col=wx.k==='Gilded'?'#ffc94d':tag?'#bfe8ff':'#e6efe8'; g.textAlign='left';
   if(bc.contains('phone-app')){ g.font='800 11.5px system-ui'; const t1=g.measureText(nm).width; g.font='700 11px system-ui'; const t2=g.measureText(rest).width; g.fillStyle='rgba(5,14,20,.62)'; rr(10,10,Math.max(t1,t2)+18,36,11); g.fill();
     g.fillStyle='#ffffff'; g.font='800 11.5px system-ui'; g.fillText(nm,19,24); g.fillStyle=col; g.font='700 11px system-ui'; g.fillText(rest,19,39); return; }
@@ -14118,7 +13957,7 @@ document.head.insertAdjacentHTML('beforeend',`<style>
 // =====================================================================
 function menuLastPage(){ const ok=t=>!!t&&t!==DASH&&(MENU_SECS.some(s=>s.tabs.includes(t))||MENU_MORE.tabs.includes(t)); const l=S.settings&&S.settings.lastPage; return ok(l)?l:'cooler'; }
 { const _st05=setTab; setTab=function(t){ if(t&&t!==DASH){ try{ S.settings.lastPage=t; }catch(e){} } return _st05.apply(this,arguments); }; }
-openMenu=function(t){ if(!t||t===DASH) t=menuLastPage(); MENU_WANT=true; setTab(t); save(); };
+function openMenu(t){ if(!t||t===DASH) t=menuLastPage(); MENU_WANT=true; setTab(t); save(); };
 
 // =====================================================================
 // QC pass fixes (2026-11-17, round 2)
@@ -14386,6 +14225,7 @@ document.addEventListener('click',e=>{ const P=document.querySelector('#menuov #
     if(e.clientY>=pr.top&&e.clientY<=r.bottom+10){ e.preventDefault(); e.stopPropagation(); return; } } },true);
 // Menu pictures that never change (fish in the Fish Log and aquarium lists, dock decorations) are drawn once and reused.
 // Redrawing dozens of them on every page switch made tapping between pages slow on phones.
+let paintFish, paintDecor; // set just below (pictures drawn once and reused)
 { const KEEP=new Map(), keep=(k,w,h,paint)=>{ let o=KEEP.get(k); if(!o){ o=document.createElement('canvas'); o.width=w; o.height=h; paint(o); if(KEEP.size>800) KEEP.clear(); KEEP.set(k,o); } return o; };
   paintFish=function(P){ P.querySelectorAll('canvas[data-fish]').forEach(c=>{ const sp=SPI[c.dataset.fish]; if(!sp) return; const known=c.dataset.known!=='0', sh=+c.dataset.sh||0, pv=c.dataset.pv||null;
     const o=keep(['f',sp.id,known?1:0,sh,pv,c.width,c.height,V3ON?1:0].join('|'),c.width,c.height,o=>fishCanvas(o,sp,known,sh,pv)); const x=c.getContext('2d'); x.clearRect(0,0,c.width,c.height); x.drawImage(o,0,0); }); };
@@ -14658,6 +14498,7 @@ body.pch-on #panel .tile.pet-hid > span.meta{color:#9fb2c8}
 // see, its bonus, its countdown, its fade in and out and the forecast always agree. These spells now only run for part of their
 // slot, so they are drawn twice as often, which keeps their share of the day about the same.
 // =====================================================================
+let weather, wxLeft, wxAmt, wxForecast; // set just below (weather that fits the time of day)
 { const RULE={'Rainbow':'day','Gilded':'day','Aurora':'night','Blood Moon':'night'};
   const W=k=>WEATHERS.find(w=>w.k===k), CLEAR=W('Clear');
   // twice the draws for the time-bound spells, taken from Clear (the weights still add up to 100)
@@ -14730,7 +14571,6 @@ if(typeof ACT_OK==='object'){ ACT_OK.wqclaim=(k,i)=>Number.isInteger(i)&&i>=0&&i
 
 // ---------- 2. weather forecast ----------
 const WX_SPECIAL=new Set(['Rainbow','Gilded','Aurora','Blood Moon','Spawning Run']);
-function wxForecast(n=6){ const now=Date.now()/1000, cur=Math.floor(now/WX_LEN), out=[]; for(let i=1;out.length<n&&i<60;i++){ const w=weatherAt(cur+i), prev=out[out.length-1]; if(prev&&prev.k===w.k){ prev.len+=WX_LEN; continue; } if(!prev&&w.k===weatherAt(cur).k) continue; out.push({k:w.k, note:w.note, at:(cur+i)*WX_LEN-now, len:WX_LEN}); } return out; }
 function forecastHTML(){ const now=weather(), f=wxForecast(5), tag=k=>(typeof WX_TAG==='object'&&WX_TAG[k])||'';
   return `<div class="tile wxf" style="margin-top:10px"><h4>Weather forecast</h4><div class="meta">The weather turns every few minutes at every water. Plan your fishing around it.</div>
    <div class="wxf-row on"><b>Now: ${esc(wxName(now.k))}</b><span class="meta">${esc(tag(now.k)||now.note)}</span><span class="badge g" data-wxl>${mmss(wxLeft())} left</span></div>
@@ -14788,7 +14628,7 @@ const bwTix=(n,why)=>({title:'+'+addTickets(n)+' tickets'+(why?' ('+why+')':''),
 
 // the wheel: tickets, lures, a boost, crates, a wear prize, a small coin slice, and a Boardwalk-only jackpot
 WHEEL.length=0; WHEEL.push(['25 tickets',22,'#3a6f9a'],['Lure pack',13,'#4f8a4a'],['60 tickets',14,'#7a4a9a'],['Lucky boost',12,'#2a8aa8'],['Small crate',12,'#c8553a'],['Coins ×3',10,'#6a7680'],['Big crate',6,'#d87aa0'],['Wear prize',8,'#2f9a7a'],['JACKPOT',3,'#d8a020']);
-wheelPrize=function(i){ const lab=(WHEEL[i]||WHEEL[0])[0]; try{ sfx.coin(); }catch(e){}
+function wheelPrize(i){ const lab=(WHEEL[i]||WHEEL[0])[0]; try{ sfx.coin(); }catch(e){}
   if(lab==='25 tickets') return '+'+addTickets(25)+' tickets';
   if(lab==='60 tickets') return '+'+addTickets(60)+' tickets';
   if(lab==='Lure pack'){ const opts=Object.keys(BAIT).filter(k=>k!=='worm'&&!BAIT[k].junk); const k=pick(opts); S.bait[k]+=8; renderBait(); return '8 '+BAIT[k].name; }
@@ -14800,7 +14640,7 @@ wheelPrize=function(i){ const lab=(WHEEL[i]||WHEEL[0])[0]; try{ sfx.coin(); }cat
   try{ sfx.shiny(); }catch(e){} const r=bwWearPrize(true); return 'JACKPOT! '+(r?r.title:'+'+addTickets(400)+' tickets'); };
 
 // crates: mostly things to wear and place; tickets (not coins) when you already own everything a roll could give
-openCrate=function(k){ const r=Math.random(); let res;
+function openCrate(k){ const r=Math.random(); let res;
   const petPool=tier=>PETS.filter(p=>p.src==='crate'&&p.price<=tier&&!S.owned.pets.includes(p.id));
   const decor=rare=>{ const pool=DECOR.filter(d=>!S.aq.owned.includes(d.id)&&(rare?true:d.price>0)); if(!pool.length) return null; const d=rare&&pool.some(x=>!x.price)&&Math.random()<.6?pick(pool.filter(x=>!x.price)):pick(pool); S.aq.owned.push(d.id); return {title:'Aquarium decor: '+d.name+' (+'+Math.round(d.b*100)+'% income)', kind:'decor', id:d.id}; };
   const pet=(tier,legendBias)=>{ let pool=petPool(tier); if(legendBias){ const top=pool.filter(p=>p.price===3); if(top.length&&Math.random()<.35) pool=top; } if(!pool.length) return null; const p=pick(pool); S.owned.pets.push(p.id); return {title:'New pet: '+p.name+'!', kind:'pet', id:p.id}; };
@@ -14813,14 +14653,14 @@ openCrate=function(k){ const r=Math.random(); let res;
   S.gstats.crates++; try{ sfx.catch(k==='legend'?4:k==='big'?3:2); if(res.kind==='pet'||res.kind==='decor'||res.kind==='wear') sfx.shiny(); }catch(e){} crateRes=Object.assign({crate:k},res); };
 
 // duck pond: every duck wins tickets; a few hide a crate or something to wear
-newDuck=function(){ const prizes=[]; for(let i=0;i<6;i++){ const r=Math.random(); prizes.push(r<.05?{k:'crate'}:r<.08?{k:'wear'}:r<.3?{k:'tix',n:rint(40,70)}:r<.6?{k:'tix',n:rint(20,40)}:{k:'tix',n:rint(8,16)}); } duck={prizes, pick:-1}; };
+function newDuck(){ const prizes=[]; for(let i=0;i<6;i++){ const r=Math.random(); prizes.push(r<.05?{k:'crate'}:r<.08?{k:'wear'}:r<.3?{k:'tix',n:rint(40,70)}:r<.6?{k:'tix',n:rint(20,40)}:{k:'tix',n:rint(8,16)}); } duck={prizes, pick:-1}; };
 // scratch card: tickets, a crate, or a Boardwalk-only piece
 const SCRATCH_PAY=[30,60,120];
-newScratch=function(){ const sym=['🐟','🦀','🐚','💎','👑'], ws=[50,25,15,8,2]; const win=Math.random()<.35; let w=-1; if(win){ let x=Math.random()*100; w=0; for(let i=0;i<5;i++){ x-=ws[i]; if(x<=0){ w=i; break; } } }
+function newScratch(){ const sym=['🐟','🦀','🐚','💎','👑'], ws=[50,25,15,8,2]; const win=Math.random()<.35; let w=-1; if(win){ let x=Math.random()*100; w=0; for(let i=0;i<5;i++){ x-=ws[i]; if(x<=0){ w=i; break; } } }
   const cells=[]; if(win) cells.push(w,w,w); const cnt=[0,0,0,0,0]; if(win) cnt[w]=3; while(cells.length<9){ const s=Math.floor(Math.random()*5); if(s===w||cnt[s]>=2) continue; cnt[s]++; cells.push(s); }
   for(let i=cells.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [cells[i],cells[j]]=[cells[j],cells[i]]; }
   scratch={cells, open:Array(9).fill(false), win:w, prize:0, txt:'', done:false, sym}; };
-settleScratch=function(){ if(!scratch||scratch.done) return; scratch.done=true; S.gstats.scratch++;
+function settleScratch(){ if(!scratch||scratch.done) return; scratch.done=true; S.gstats.scratch++;
   if(scratch.win>=0){ const w=scratch.win; let t; if(w<3) t='+'+addTickets(SCRATCH_PAY[w])+' tickets'; else if(w===3){ S.tokens.small++; t='a small Mystery Crate and +'+addTickets(100)+' tickets'; } else { const r=bwWearPrize(true); t=r?r.title:'+'+addTickets(500)+' tickets'; }
     scratch.txt=t; S.gstats.scratchWins++; try{ sfx.catch(w>=3?4:2); }catch(e){} } else { try{ sfx.lost(); }catch(e){} } };
 // higher or lower: the pot is tickets now; a right guess grows it by half, eight in a row pays it out
@@ -15017,7 +14857,7 @@ document.head.insertAdjacentHTML('beforeend',`<style>
 // Cost: pictures animate only while on screen, 30 times a second; positions come from the fish's own pixels (worked out once
 // per species and size); no per-frame allocations beyond a few gradients.
 // =====================================================================
-shineDecorate=function(){};
+function shineDecorate(){};
 const SFX_PAL={shiny:{a:'#fff3c4',b:'#ffcf5a',dust:'#ffe7a0'}, mythic:{a:'#ffb0e8',b:'#8affea',dust:'#ffd6f4'}, rainbow:{a:'#ffffff',b:'#ffffff',dust:'#ffffff',hue:true},
   starry:{a:'#e4f3ff',b:'#8fc4ff',dust:'#ffffff'}, spectral:{a:'#ecd8ff',b:'#9ef0ff',dust:'#c9a8ff'}, ancient:{a:'#fff0c4',b:'#e8b04a',dust:'#f2c464'}};
 const SFX_STYLES=['glint','glitter','shimmer','flare'];
@@ -15550,7 +15390,7 @@ function pathCard(ti){ const T=SPEC_TIERS[ti], cur=S.specs[ti], locked=S.lvl<T.l
    <div class="grid pathgrid" style="grid-template-columns:repeat(auto-fill,minmax(190px,1fr));margin-top:6px">${T.opts.map(o=>{ const on=cur===o[0], rk=pathRank(o[0]), n=(S.pathXP&&S.pathXP[o[0]])||0;
      return `<button class="spec ${on?'on':''}" data-act="spec" data-k="${ti}:${o[0]}" ${locked||on||(cur&&poor)?'disabled':''}><b>${esc(o[1])}</b><span class="up">▲ ${esc(o[2])}</span>${rk||on?`<span class="meta">Rank ${rk?PATH_RN[rk]:'0'}${rk<5?' · '+fmt(n)+' / '+fmt(PATH_RANKS[rk])+' fish':' · max'}</span>`:''}${cur&&!on&&!locked?`<span class="meta">Switch · ${fmt(fee)} coins</span>`:''}</button>`; }).join('')}</div>
    ${cur?`<div class="row spread" style="margin-top:6px"><span class="meta">Switch or remove: <b>${fmt(fee)}</b> coins</span><button class="btn alt sm" data-act="specrm" data-i="${ti}" ${poor?'disabled':''}>Remove</button></div>`:locked?'':`<div class="meta" style="margin-top:6px">Free to choose. Switching or removing later costs ${fmt(fee)} coins.</div>`}</div>`; }
-renderPaths=function(P){ const open=SPEC_TIERS.filter(T=>S.lvl>=T.lvl).length, chosen=pathChosen().length;
+function renderPaths(P){ const open=SPEC_TIERS.filter(T=>S.lvl>=T.lvl).length, chosen=pathChosen().length;
   P.innerHTML=`<h2>Paths</h2><p class="sub path-intro">${SPEC_TIERS.length} forks open from level 5 to 75. Pick one specialty per fork: it ranks up from I to V as you fish with it.<br>Switching or removing a path costs the fee shown on its fork.</p>
    <div class="meta" style="margin-top:4px">${chosen} chosen · ${open} of ${SPEC_TIERS.length} open at level ${S.lvl}</div>
    <div class="path-list">${PATH_ORDER.map(pathCard).join('')}</div>`; };
@@ -15678,7 +15518,7 @@ let voyAll=false;
 if(typeof ACT_OK==='object'){ ACT_OK.pshop=k=>k==='gold'||k==='xp'; ACT_OK.boon=k=>!!BOONI[k]; ACT_OK.voyall=()=>true; }
 // ---------- the Prestige page ----------
 function nextPearlAt(){ const pm=voyagePearlMult()*pathMul('pearl'), n=Math.floor(Math.pow((S.stats.runEarned||0)/PEARL_DIV,1/PEARL_EXP)*pm); return Math.ceil(Math.pow((n+1)/pm,PEARL_EXP)*PEARL_DIV); }
-renderVoyage=function(){ const n=pearlsFor(), ok=canRetire(), v=S.tides||0, leg=Math.round(voyageLegacy()*100), full=vaultList().length+S.tank.length>VAULT_MAX, nextMs=VOYAGE_MS.find(m=>m.n>v), np=boonPtsFor(v+1)+(nextMs&&nextMs.n===v+1&&nextMs.fx&&nextMs.fx.pts||0);
+function renderVoyage(){ const n=pearlsFor(), ok=canRetire(), v=S.tides||0, leg=Math.round(voyageLegacy()*100), full=vaultList().length+S.tank.length>VAULT_MAX, nextMs=VOYAGE_MS.find(m=>m.n>v), np=boonPtsFor(v+1)+(nextMs&&nextMs.n===v+1&&nextMs.fx&&nextMs.fx.pts||0);
   const box = confirmBox==='retire' ? `<div class="tile voy-confirm"><h4>Set sail again?</h4>
     <div class="meta">You lose your coins, tackle, bait, cooler fish, bounties and every water except Willow Pond (and the waters your milestones keep). Your aquarium fish are mounted in your Trophy Room${full?' (as many as fit; the rest stay on display)':''}. You keep your level, skills, Paths, Fish Log, feats, Trophy Room, pets, clothes, relics, Boons, Pearl shop levels and Wisdom Pearls.</div>
     <div class="meta" style="margin-top:6px;color:var(--kelp)">You get +${n} pearl${n===1?'':'s'} and +${np} Boon points${nextMs&&nextMs.n===v+1?', and a new milestone: '+esc(nextMs.name):''}.</div>
@@ -15698,7 +15538,7 @@ renderVoyage=function(){ const n=pearlsFor(), ok=canRetire(), v=S.tides||0, leg=
   <div class="tile"><h4>Pearl shop</h4><div class="meta">Spend pearls on bonuses that never reset.</div>${pRow('gold','Coins from everything')}${pRow('xp','XP from everything')}</div>
   <div class="tile voy-boons"><div class="row spread"><h4>Boons</h4><span class="meta">${S.boonPts||0} point${S.boonPts===1?'':'s'}</span></div><div class="meta">Lasting upgrades, earned by setting sail: ${boonPtsFor(v+1)} points next voyage. A rank costs its number in points.</div><div class="voy-list">${boonRows}</div></div>
   <div class="tile"><div class="row spread"><h4>Voyage milestones</h4><span class="meta">${got} / ${VOYAGE_MS.length}</span></div><div class="voy-list">${msRows||'<div class="meta">Every milestone unlocked.</div>'}</div><button class="btn alt sm" data-act="voyall" style="margin-top:6px">${voyAll?'Show the next few':'Show all '+VOYAGE_MS.length}</button></div></div></div>`; };
-relicHTML=function(){ const own=RELICS.filter(r=>relic(r.id)).length, list=RELICS.slice().sort((a,b)=>a.cost-b.cost);
+function relicHTML(){ const own=RELICS.filter(r=>relic(r.id)).length, list=RELICS.slice().sort((a,b)=>a.cost-b.cost);
   return `<div class="jsec"><h2>Pearl relics</h2><p class="sub">Spend Wisdom Pearls on relics: each is bought once and kept forever, through every voyage. You have <b>${S.pearls}</b> pearl${S.pearls===1?'':'s'} · ${own} / ${RELICS.length} relics owned.</p>
   <div class="grid">${list.map(r=>{ const o=relic(r.id); return `<div class="tile ${o?'done':''}"><div class="row spread"><h4>${esc(r.name)}</h4><span class="meta">${r.cost} pearl${r.cost>1?'s':''}</span></div><div class="meta">${esc(r.d)}</div>
    ${o?'<span class="badge g">Owned forever</span>':`<button class="btn sm" data-act="relic" data-k="${r.id}" ${S.pearls>=r.cost?'':'disabled'}>Trade ${r.cost} pearl${r.cost>1?'s':''}</button>`}</div>`; }).join('')}</div></div>`; };
@@ -16678,12 +16518,16 @@ function oddDecor(c,J,a,b,R,E,Ci){ let h=0; for(let i=0;i<J.id.length;i++) h=(h*
 function tankLen(f,h,w){ const kg=Math.max(.005,+f.kg||.1), cap=Math.min(h*.46,w*.34), raw=h*.115*Math.cbrt(kg); return Math.max(9,cap*Math.tanh(raw/cap)); }
 function tankDepth(f,i){ const s=hashStr((f.id||'')+'|'+(f.kg||0)+'|'+i); return (s%1000)/1000; }
 const tankPace = f => clamp(1.3-.22*Math.log10(1+Math.max(0,+f.kg||0)*4),.5,1.3);
-drawTank=function(now){ const cnv=$('tankcv'); if(!cnv) return; const r=cnv.getBoundingClientRect(); const w=r.width, h=r.height; if(!w||h<20) return;
+// the draw order (far fish first), depth and pace only change when the tank's fish change, so they are worked out once, not every frame
+let tankOrd=null, tankOrdOf=[];
+function tankOrder(){ const T=S.tank; let ok=tankOrd&&tankOrdOf.length===T.length; for(let i=0;ok&&i<T.length;i++) ok=tankOrdOf[i]===T[i];
+  if(!ok){ tankOrdOf=T.slice(); tankOrd=T.map((f,i)=>({f,i,sp:SPI[f.id],z:tankDepth(f,i),pace:tankPace(f)})).filter(o=>o.sp).sort((a,b)=>b.z-a.z); }
+  return tankOrd; }
+function drawTank(now){ const cnv=$('tankcv'); if(!cnv) return; const r=cnv.getBoundingClientRect(); const w=r.width, h=r.height; if(!w||h<20) return;
   if(cnv.width!==Math.round(w*DPR)||cnv.height!==Math.round(h*DPR)){ cnv.width=Math.round(w*DPR); cnv.height=Math.round(h*DPR); }
   const c=cnv.getContext('2d'); c.setTransform(DPR,0,0,DPR,0,0); const t=now/1000;
   drawTankBack(c,w,h,t);
-  const list=S.tank.map((f,i)=>({f,i,sp:SPI[f.id],z:tankDepth(f,i)})).filter(o=>o.sp).sort((a,b)=>b.z-a.z); /* far first */
-  for(const o of list){ const {f,i,sp,z}=o, k=1-.3*z, L=tankLen(f,h,w)*k, pace=tankPace(f), tk=t*pace;
+  for(const o of tankOrder()){ const {f,i,sp,z,pace}=o, k=1-.3*z, L=tankLen(f,h,w)*k, tk=t*pace;
     const M=tankMove(f,sp,i,tk,w,h,L); nibMove(f,M,t,w,h); const y=M.y+(z-.5)*h*.06; /* farther fish sit a touch higher, like looking into the tank */
     c.save(); if(z>.35) c.globalAlpha=1-(z-.35)*.45;
     drawCreature(c,sp,M.x,y,L,{shiny:f.sh||0,pv:f.pv,seedAdd:i,wag:tk*M.wag+i,flip:!M.dir}); c.restore(); }
@@ -19756,6 +19600,7 @@ const TEST_NOTES={v:'test', label:'Test build · Android', name:'0.4.9 big patch
   'Deep QC round: 30 fish renamed so no two share a name; attachment stats no longer read “undefined”; oddity names wrap on small PC windows.',
   'Second QC round (looks): the Tide Pass page shows this chapter’s exclusives as pictures plus progress for every chapter; a new Wardrobe tab to wear auras, bobbers and lines; Paths is shorter and uses two columns on wide screens; path fees are round numbers; Boons fill the whole width; end-game waters get their own heading.',
   'Top bar: with a live event and a long water name, the Bait chip no longer gets squeezed to a sliver; Tasks or the event chip make room instead.',
+  'Code cleanup: about 260 lines of old code that could never run are gone (each build is about 40 KB smaller), the aquarium no longer re-sorts its fish every frame, and a reeling safety check was added. Nothing should look or play differently.',
   'Please test on every platform and send me anything that feels off.']};
 addTestNotes(TEST_NOTES);
 // =====================================================================
@@ -20209,7 +20054,7 @@ if(/[?&]test\b/.test(location.search)) window.__profUI=(page,n=3)=>{ const acc={
   try{ for(let i=0;i<n;i++){ setTab(DASH); setTab(page); } } finally{ un.forEach(u=>u()); setTab(DASH); }
   return Object.fromEntries(Object.entries(acc).map(([k,v])=>[k,+(v/n).toFixed(1)])); };
 // test-mode layout check: the dashboard, every page (via __audit / __trunc) and the menu header in each category
-if(/[?&]test\b/.test(location.search)) window.__layoutQC=async()=>{ const chk=()=>{ const out=[]; const vw=document.documentElement.clientWidth; document.querySelectorAll('#panel *, .hud *, #tabs *, #menuov .mo-top *').forEach(e=>{ const r=e.getBoundingClientRect(); if(!r.width||!r.height||!e.offsetParent) return; if(window.__inHScroll&&__inHScroll(e)) return; const cs=getComputedStyle(e); if(cs.position==='fixed') return; if(r.right>vw+2&&!e.closest('.subbar')) out.push('off '+(e.className||e.tagName)+' "'+(e.textContent||'').trim().slice(0,20)+'"'); const t=(e.textContent||'').trim(); if(t&&e.clientWidth>2&&e.children.length<=2&&e.scrollWidth>e.clientWidth+1&&(cs.textOverflow==='ellipsis'||cs.overflow==='hidden'||cs.overflowX==='hidden')) out.push('cut "'+t.slice(0,30)+'"'); }); if(document.documentElement.scrollWidth>vw+1) out.push('page scrolls sideways'); return out; };
+if(/[?&]test\b/.test(location.search)) window.__layoutQC=async()=>{ /* wait for running animations (a popup fading in measures as cut) */ await Promise.race([Promise.all(document.getAnimations().map(a=>a.finished.catch(()=>{}))),new Promise(x=>setTimeout(x,1500))]); const chk=()=>{ const out=[]; const vw=document.documentElement.clientWidth; document.querySelectorAll('#panel *, .hud *, #tabs *, #menuov .mo-top *').forEach(e=>{ const r=e.getBoundingClientRect(); if(!r.width||!r.height||!e.offsetParent) return; if(window.__inHScroll&&__inHScroll(e)) return; const cs=getComputedStyle(e); if(cs.position==='fixed') return; if(r.right>vw+2&&!e.closest('.subbar')) out.push('off '+(e.className||e.tagName)+' "'+(e.textContent||'').trim().slice(0,20)+'"'); const t=(e.textContent||'').trim(); if(t&&e.clientWidth>2&&e.children.length<=2&&e.scrollWidth>e.clientWidth+1&&(cs.textOverflow==='ellipsis'||cs.overflow==='hidden'||cs.overflowX==='hidden')) out.push('cut "'+t.slice(0,30)+'"'); }); if(document.documentElement.scrollWidth>vw+1) out.push('page scrolls sideways'); return out; };
   const r={size:innerWidth+'x'+innerHeight, layout:document.body.className.replace(/\bv3\b|plat-\w+/g,'').trim()}; closeMenu(); await new Promise(x=>setTimeout(x,500)); { const w=document.querySelector('.wrap').getBoundingClientRect(), s=$('stage').getBoundingClientRect(), c=$('cv').getBoundingClientRect(); r.fishing={stageFillsToBottom:Math.abs(w.bottom-Math.max(s.bottom,$('catdock').getBoundingClientRect().bottom))<=2*UIZ+(UIZ>1?4:0), waterUncovered:(()=>{ const d=$('catdock').getBoundingClientRect(); return !(d.left<s.right-1&&d.right>s.left+1&&d.top<s.bottom-1&&d.bottom>s.top+1); })(), canvasFillsStage:Math.abs(c.height-s.height)<=2*UIZ+(UIZ>1?1:0)&&Math.abs(c.width-s.width)<=2*UIZ+(UIZ>1?1:0), menuButton:!!$('catdock')&&$('catdock').offsetParent!==null&&$('catdock').getBoundingClientRect().bottom<=w.bottom+1, pageScrolls:document.documentElement.scrollHeight>innerHeight+1, hudCut:chk().filter(x=>!/#panel/.test(x))}; } openMenu(DASH); await new Promise(x=>setTimeout(x,500)); r.dash=chk(); r.audit=(await __audit()).out; r.trunc=await __trunc(); const heads=[]; for(const s of [...document.querySelectorAll('#tabs .secb')]){ s.click(); await new Promise(x=>setTimeout(x,150)); heads.push(...chk().filter(x=>!/#panel/.test(x))); } r.head=[...new Set(heads)]; closeMenu(); const f=r.fishing; r.clean=!r.dash.length&&!r.audit.length&&!r.trunc.length&&!r.head.length&&f.stageFillsToBottom&&f.waterUncovered&&f.canvasFillsStage&&f.menuButton&&!f.pageScrolls&&!f.hudCut.length; return r; };
 // test builds: ?test&open=<page> opens that menu page right after load (for screenshots of a menu page)
 if(/[?&]test\b/.test(location.search)){ const m=location.search.match(/[?&]open=([\w-]+)/); if(m) setTimeout(()=>{ try{ openMenu(m[1]==='dash'?undefined:m[1]); }catch(e){} },700); }
@@ -20401,7 +20246,6 @@ $('panel').addEventListener('click',e=>{ const b=e.target.closest('[data-tabgo]'
 function renderPanel(){ const P=$('panel'); const fn={cooler:renderCooler, shop:renderShop, skills:renderSkills2, aquarium:renderAquarium, bounties:renderBounties, feats:renderFeats, journal:renderJournal, map:renderMap, style:renderStyle, pets:renderPets, save:renderSave, games:renderBoardwalk, settings:renderSettings, rods:renderRods, paths:renderPaths, home:renderHome, pass:renderPass}[S.tab]||renderCooler; fn(P); }
 const tags = f => (f.sh===2?' <span class="sh" style="color:'+PRISM[f.pv||'rainbow'].c+'">✦✦ '+PRISM[f.pv||'rainbow'].n+' prismatic</span>':f.sh?' <span class="sh">✦ Shiny</span>':'')+(f.hy?' · <span class="sh">Hybrid</span>':'')+(f.tr?' · Trophy':'');
 const aqTxt = f => { const L=aqBuffsOf(f), sp=SPI[f.id]; return L.length ? L.map(e=>fmtB(e.k,e.v)+(sp&&e.t!==sp.r?' ('+RAR[e.t].k+' boost)':'')).join(' + ') : 'no special effect'; };
-function paintFish(P){ P.querySelectorAll('canvas[data-fish]').forEach(c=>fishCanvas(c,SPI[c.dataset.fish],c.dataset.known!=='0',+c.dataset.sh||0,c.dataset.pv||null)); }
 
 const isProtected = f => S.settings.protectRare && (f.sh || SPI[f.id].r>=3);
 function renderCooler(P){
@@ -20415,22 +20259,6 @@ function renderCooler(P){
    <div class="val coin" ${dm.id===f.id?'style="color:var(--gold)" title="Fishmonger pays double"':''}>${fmt(salePrice(f))}${dm.id===f.id?' ×2':''}</div><div class="acts"><button class="btn alt sm" data-act="totank" data-i="${i}" ${tankFree?'':'disabled'} title="${tankFree?'Earns '+fmt(fishRate(f)*60)+' coins per hour':'Aquarium is full'}">To aquarium</button><button class="btn alt sm" data-act="sell" data-i="${i}">Sell</button>${nibScrapBtn(f,i)}</div></div>`; }).reverse().join('')+'</div>'
    : '<div class="empty">Nothing in the cooler yet. Cast a line and land your first fish.</div>');
   paintFish(P);
-}
-function renderShop(P){
-  const gearTiles = Object.entries(GEAR).map(([k,G2])=>{ const lv=S.gear[k], max=G2.lv.length-1, next=lv<max?G2.cost[lv+1]:0;
-    return `<div class="tile"><div class="row spread"><h4>${G2.name}</h4><span class="meta">Level ${lv+1} / ${max+1}</span></div>
-    <div class="pips">${G2.lv.map((_,i)=>`<i class="${i<=lv?'on':''}"></i>`).join('')}</div>
-    <div class="meta">${G2.what}</div>
-    <div class="val">${G2.fmt(G2.lv[lv])}${lv<max?` <span class="meta">→ ${G2.fmt(G2.lv[lv+1])}</span>`:''}</div>
-    ${lv<max?`<button class="btn" data-act="buygear" data-k="${k}" ${S.money>=next?'':'disabled'}>Upgrade · <span class="coin">${fmt(next)}</span></button>`:'<button class="btn alt" disabled>Maxed out</button>'}</div>`; }).join('');
-  const baitTile = ([k,b]) => `<div class="tile"><div class="row spread"><h4>${b.name}</h4><span class="meta">You have ${S.bait[k]}</span></div>
-    <div class="meta">${b.note} Bites ${Math.round((b.speed-1)*100)}% faster.</div>
-    <div class="row">${b.junk?'':b.scales?`<button class="btn" data-act="buybait" data-k="${k}" ${S.scales>=b.scales?'':'disabled'}>Buy ${b.pack} · ${b.scales} Scales</button>`:`<button class="btn" data-act="buybait" data-k="${k}" ${S.money>=b.price?'':'disabled'}>Buy ${b.pack} · <span class="coin">${fmt(b.price)}</span></button><button class="btn alt sm" data-act="buybait" data-k="${k}" data-n="5" ${S.money>=b.price*4.5?'':'disabled'} title="10% off">×${b.pack*5} · <span class="coin">${fmt(b.price*4.5)}</span></button>`}
-    <button class="btn alt" data-act="usebait" data-k="${k}" ${S.bait[k]>0&&S.baitSel!==k?'':'disabled'}>${S.baitSel===k?'In use':'Use'}</button></div></div>`;
-  const shopBait = Object.entries(BAIT).filter(([k,b])=>k!=='worm'&&!b.junk), junkBait=Object.entries(BAIT).filter(([k,b])=>b.junk);
-  P.innerHTML=`<h2>Tackle shop</h2><p class="sub">Heavier fish need stronger line and a faster reel. Better bait brings rarer fish; one bait is used each time you set the hook.</p>
-  <div class="grid">${gearTiles}</div><h2 style="margin-top:18px">Bait</h2><div class="grid">${shopBait.map(baitTile).join('')}</div>
-  <h2 style="margin-top:18px">Special lures</h2><p class="sub">Can’t be bought. They come out of junk you fish up: cheese, disco balls, magnets, gold.</p><div class="grid">${junkBait.map(baitTile).join('')}</div>`;
 }
 function renderAquarium(P){ accrue(); const rate=tankRate(); let AQS=null; const next=TANK_COST[S.tankSlots];
   const sums={}; for(const f of S.tank) for(const e of aqBuffsOf(f)) sums[e.k]=(sums[e.k]||0)+e.v;
@@ -20514,64 +20342,9 @@ function renderMap(P){
     ${!open&&prev?`<div class="meta" style="color:${met?'var(--kelp)':'var(--muted)'}">${met?'✓':'·'} ${unlockLine(i)}</div>`:''}${btn}</div>`; }).join('')+'</div>'+renderVoyage()+relicHTML();
 }
 const canRetire = () => S.unlocked.includes('trench') && pearlsFor() > 0 && G.st==='idle';
-function renderVoyage(){ const n=pearlsFor(), ok=canRetire();
-  const box = confirmBox==='retire' ? `<div class="tile" style="border-color:var(--danger)"><h4>Set sail again?</h4>
-    <div class="meta">You lose your coins, tackle, bait, cooler fish, bounties and every water except Willow Pond. You keep your level, skills, encyclopedia, feats, aquarium, pets, hats, clothes and Wisdom Pearls.</div>
-    <div class="row"><button class="btn" data-act="retireok">Set sail with +${n} pearl${n===1?'':'s'}</button><button class="btn alt" data-act="cancel">Keep fishing</button></div></div>` : '';
-  return `<div class="jsec"><h2>Set sail again</h2><p class="sub">Once you reach Hollow Trench you can start over from Willow Pond with Wisdom Pearls. Each pearl adds +25% to all coins and XP and a little to your rare odds, forever. Pearls are hard to earn: the more coins you earn in a voyage, the more you get. More coins earned this voyage means more pearls.</p>
-  <div class="grid"><div class="tile"><div class="row spread"><h4>Voyage ${S.tides+1}</h4><span class="meta">${S.pearls} pearl${S.pearls===1?'':'s'} · +${Math.round((coinMult()-1)*100)}% now</span></div>
-  <div class="meta">Coins earned this voyage: <span class="coin">${fmt(S.stats.runEarned)}</span>. Next pearl at <span class="coin">${fmt(Math.pow(n+1,2)*PEARL_DIV)}</span>. Boardwalk winnings count for at most a quarter of it.</div>
-  <div class="val">Setting sail now gives +${n} pearl${n===1?'':'s'}</div>
-  <button class="btn" data-act="retire" ${ok&&!confirmBox?'':'disabled'}>${S.unlocked.includes('trench')?(n?'Set sail again':'Earn more coins first'):'Reach Hollow Trench first'}</button></div>${box}</div></div>`; }
 
 // ---------- wardrobe ----------
-function shopOffers(){ const slot=Math.floor(Date.now()/1000/SHOP_LEN);
-  const pool=[...SHOP_COLS.map(c=>({kind:'col',id:c[0],name:c[1],price:c[2]})), ...PATTERNS.filter(p=>p[2]).map(p=>({kind:'pat',id:p[0],name:p[1]+' fabric',price:p[2]})), ...HATS.filter(h=>h.src==='shop').map(h=>({kind:'hat',id:h.id,name:h.name,price:h.price})),
-    ...OUTFITS.filter(o=>o[3]==='shop').map(o=>({kind:'out',id:o[0],name:o[1],price:o[2]})), ...GLASSES.filter(g2=>g2[2]).map(g2=>({kind:'gls',id:g2[0],name:g2[1],price:g2[2]})),
-    ...SHOES.filter(x=>x[3]==='shop').map(x=>({kind:'shoe',id:x[0],name:x[1],price:x[2]})), ...NECKS.filter(x=>x[3]==='shop').map(x=>({kind:'neck',id:x[0],name:x[1],price:x[2]})), ...BACKS.filter(x=>x[3]==='shop').map(x=>({kind:'back',id:x[0],name:x[1],price:x[2]}))];
-  const out=[], idx=[...pool.keys()]; let h=hashStr('shop'+slot); while(out.length<8&&idx.length){ h=Math.imul(h^(h>>>13),1597334677)>>>0; out.push(pool[idx.splice(h%idx.length,1)[0]]); } return out.sort((a,b)=>a.price-b.price); }
 const ownedOffer = o => o.kind==='shoe'?S.owned.shoes.includes(o.id):o.kind==='neck'?S.owned.necks.includes(o.id):o.kind==='back'?S.owned.backs.includes(o.id):o.kind==='col'?S.owned.cols.includes(o.id):o.kind==='pat'?S.owned.pats.includes(o.id):o.kind==='out'?S.owned.outfits.includes(o.id):o.kind==='gls'?S.owned.glasses.includes(o.id):S.owned.hats.includes(o.id);
-function renderStyle(P){ const lk=S.look, cols=[...FREE_COLS,...S.owned.cols];
-  const sw=(k,list)=>`<div class="chips">${list.map(cl=>`<button class="sw" data-act="look" data-k="${k}" data-v="${cl}" aria-pressed="${lk[k]===cl}" style="background:${cl}" title="${cl}"></button>`).join('')}</div>`;
-  const pats=PATTERNS.filter(p=>S.owned.pats.includes(p[0])).map(p=>`<button class="chipb" data-act="look" data-k="pat" data-v="${p[0]}" aria-pressed="${lk.pat===p[0]}">${p[1]}</button>`).join('');
-  const hats=HATS.filter(h=>S.owned.hats.includes(h.id)).map(h=>`<button class="hatb" data-act="look" data-k="hat" data-v="${h.id}" aria-pressed="${lk.hat===h.id}"><canvas width="112" height="112" data-hat="${h.id}"></canvas>${esc(h.name)}</button>`).join('');
-  const offers=shopOffers().map(o=>{ const own=ownedOffer(o); return `<div class="tile offer" style="flex-direction:row;align-items:center;gap:10px"><canvas width="128" height="128" data-offer="${o.kind}:${o.id}"></canvas>
-    <div style="min-width:0;flex:1"><h4>${esc(o.name)}</h4><div class="meta">${o.kind==='col'?'Colour for shirts, trousers and hats':o.kind==='pat'?'Fabric for shirts and some outfits':o.kind==='shoe'?'Shoes':o.kind==='neck'?'Neckwear':o.kind==='back'?'Worn on your back':o.kind==='out'?'Outfit':o.kind==='gls'?'Glasses':'Hat'}</div>
-    ${own?'<button class="btn alt sm" disabled>Owned</button>':`<div class="row" style="gap:4px"><button class="btn alt sm" data-act="tryon" data-k="${o.kind}:${o.id}">${PREVIEW&&PREVIEW.kind===o.kind&&PREVIEW.id===o.id?'Wearing it':'Try on'}</button><button class="btn sm" data-act="buyoffer" data-k="${o.kind}:${o.id}" ${S.money>=o.price?'':'disabled'}>Buy · <span class="coin">${fmt(o.price)}</span></button></div>`}</div></div>`; }).join('');
-  const fishHats=HATS.filter(h=>h.src==='fish'), gotFish=fishHats.filter(h=>S.owned.hats.includes(h.id)).length;
-  P.innerHTML=`<h2>Wardrobe</h2><p class="sub">Dress your angler. New colours, fabrics and hats rotate through the clothing shop, and rare hats can be fished out of the water (${gotFish} of ${fishHats.length} found).</p>
-  <div class="stylewrap"><div class="preview">${previewBarHTML()}<canvas id="lookcv" width="520" height="560"></canvas></div><div>
-    <h5>Body</h5><div class="chips"><button class="chipb" data-act="look" data-k="g" data-v="m" aria-pressed="${lk.g==='m'}">Man</button><button class="chipb" data-act="look" data-k="g" data-v="f" aria-pressed="${lk.g==='f'}">Woman</button></div>
-    <h5>Build</h5><div class="chips">${BUILDS.map(([k,n])=>`<button class="chipb" data-act="look" data-k="build" data-v="${k}" aria-pressed="${(lk.build||'average')===k}">${n}</button>`).join('')}</div>
-    <h5>Skin</h5>${sw('skin',SKINS.map((_,i)=>i)).replace(/data-v="(\d)"([^>]*)style="background:\d"/g,(m,i,mid)=>`data-v="${i}"${mid}style="background:${SKINS[i]}"`).replace(/aria-pressed="(true|false)"/g,(m)=>m)}
-    <h5>Hair</h5>${sw('hair',HAIRS.map((_,i)=>i)).replace(/data-v="(\d)"([^>]*)style="background:\d"/g,(m,i,mid)=>`data-v="${i}"${mid}style="background:${HAIRS[i]}"`)}
-    <h5>Eyes</h5><div class="chips">${EYES.map(([cl,n],i)=>`<button class="sw" data-act="look" data-k="eye" data-v="${i}" aria-pressed="${(lk.eye|0)===i}" style="background:${cl}" title="${n}"></button>`).join('')}</div>
-    <h5>Hairstyle</h5><div class="chips">${HAIRSTYLES.map(([k,n])=>`<button class="chipb" data-act="look" data-k="hairStyle" data-v="${k}" aria-pressed="${(lk.hairStyle||'auto')===k}">${n}</button>`).join('')}</div>
-    <h5>Facial hair</h5><div class="chips">${BEARDS.map(([k,n])=>`<button class="chipb" data-act="look" data-k="beard" data-v="${k}" aria-pressed="${(lk.beard||'none')===k}">${n}</button>`).join('')}</div>
-    <h5>Glasses</h5><div class="chips">${GLASSES.filter(x=>S.owned.glasses.includes(x[0])).map(([k,n])=>`<button class="chipb" data-act="look" data-k="glasses" data-v="${k}" aria-pressed="${(lk.glasses||'none')===k}">${n}</button>`).join('')}</div>
-    <h5>Shirt colour</h5>${sw('shirt',cols)}<h5>Shirt fabric</h5><div class="chips">${pats}</div>
-    <h5>Outfit</h5><div class="chips">${OUTFITS.filter(x=>S.owned.outfits.includes(x[0])).map(([k,n])=>`<button class="chipb" data-act="look" data-k="outfit" data-v="${k}" aria-pressed="${(lk.outfit||'none')===k}">${n}</button>`).join('')}</div>
-    ${lk.outfit&&lk.outfit!=='none'&&lk.outfit!=='spacesuit'?'<h5>Outfit colour</h5>'+sw('outCol',cols):''}
-    <h5>Trousers</h5>${sw('pants',cols)}
-    <h5>Shoes</h5><div class="chips">${SHOES.filter(x=>S.owned.shoes.includes(x[0])).map(([k,n])=>`<button class="chipb" data-act="look" data-k="shoes" data-v="${k}" aria-pressed="${(lk.shoes||'boots')===k}">${n}</button>`).join('')}</div>
-    <h5>Neckwear</h5><div class="chips">${NECKS.filter(x=>S.owned.necks.includes(x[0])).map(([k,n])=>`<button class="chipb" data-act="look" data-k="neck" data-v="${k}" aria-pressed="${(lk.neck||'none')===k}">${n}</button>`).join('')}</div>
-    <h5>On your back</h5><div class="chips">${BACKS.filter(x=>S.owned.backs.includes(x[0])).map(([k,n])=>`<button class="chipb" data-act="look" data-k="back" data-v="${k}" aria-pressed="${(lk.back||'none')===k}">${n}</button>`).join('')}</div>
-    ${(lk.neck&&lk.neck!=='none')||(lk.back&&lk.back!=='none')?'<h5>Accessory colour</h5>'+sw('accCol',cols):''}
-    <h5>Hat</h5><div class="hatgrid">${hats}</div>
-    <h5>Hat colour ${HATI[lk.hat]&&HATI[lk.hat].fixed?'<span style="text-transform:none;letter-spacing:0">(this hat keeps its own colours)</span>':''}</h5>${sw('hatCol',cols)}
-  </div></div>
-  <div class="jsec"><div class="row spread"><h2>Clothing shop</h2><span class="sub">New stock in <b id="shopleft">${mmss(Math.ceil(SHOP_LEN-(Date.now()/1000%SHOP_LEN)))}</b></span></div><div class="grid">${offers}</div></div>`;
-  P.querySelectorAll('.sw[data-k="skin"],.sw[data-k="hair"],.sw[data-k="eye"]').forEach(b=>{ b.setAttribute('aria-pressed', String(String(lk[b.dataset.k])===b.dataset.v)); });
-  drawLookPreview();
-  P.querySelectorAll('canvas[data-hat]').forEach(c=>{ const cx=c.getContext('2d'); cx.clearRect(0,0,c.width,c.height); hatPreview(cx,c.width,c.height,c.dataset.hat,lk.hatCol); });
-  P.querySelectorAll('canvas[data-offer]').forEach(c=>{ const [kind,id]=c.dataset.offer.split(':'); const cx=c.getContext('2d'); cx.clearRect(0,0,128,128);
-    if(kind==='col'){ cx.fillStyle=id; cx.beginPath(); cx.arc(64,64,42,0,7); cx.fill(); cx.strokeStyle='#23434e'; cx.lineWidth=3; cx.stroke(); }
-    else if(kind==='pat'){ cx.save(); cx.translate(64,20); cx.scale(4,4); cx.fillStyle=lk.shirt; cx.beginPath(); cx.moveTo(-9,0); cx.lineTo(9,0); cx.lineTo(8,24); cx.lineTo(-8,24); cx.closePath(); cx.fill(); cx.clip(); drawPattern(cx,id,lk.shirt,-10,-1,20,26); cx.restore(); }
-    else if(kind==='shoe'||kind==='neck'||kind==='back') wearPreview(cx,kind,id,128,128);
-    else if(kind==='out') drawAngler(cx,64,124,1.75,Object.assign({},lk,{outfit:id,hat:'none'}),{});
-    else if(kind==='gls'){ cx.save(); cx.translate(64,150); cx.scale(2.4,2.4); drawAngler(cx,0,0,1,Object.assign({},lk,{glasses:id,hat:'none'}),{}); cx.restore(); }
-    else hatPreview(cx,128,128,id,lk.hatCol); });
-}
 function drawLookPreview(){ const c=$('lookcv'); if(!c) return; const cx=c.getContext('2d'); cx.clearRect(0,0,c.width,c.height);
   if(V3ON) v3Pedestal(cx,250,470,215,performance.now()/1000); else { cx.fillStyle='#6b4a2e'; cx.fillRect(0,470,520,22); cx.fillStyle='#4a3220'; cx.fillRect(60,492,20,70); cx.fillRect(420,492,20,70); cx.fillStyle='#7c5838'; for(let x=0;x<520;x+=40) cx.fillRect(x,470,3,22); }
   { const big=S.pet==='horse'||S.pet==='cow', s=6.4; drawPetStyled(cx,S.pet,Math.max(big?120:70,300-(big?44:31)*s),470,s*(big?.85:1),performance.now()/1000); } drawAngler(cx,300,470,6.4,previewLook(),{t:performance.now()/1000}); }
