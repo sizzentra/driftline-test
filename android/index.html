@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="DL Test Android">
 <script>
-window.DL_BUILD='android'; window.DL_PREVIEW=true; window.DL_VERSION='2026.11.18-2156';
+window.DL_BUILD='android'; window.DL_PREVIEW=true; window.DL_VERSION='2026.11.18-2209';
 window.addEventListener('beforeinstallprompt',function(e){ e.preventDefault(); window.__dlInstallPrompt=e; });
 </script>
 </head>
@@ -15972,7 +15972,7 @@ const IS_IPHONE=()=>/iPhone|iPod/.test(navigator.userAgent)||(/[?&]test\b/.test(
 
 // ---------- frame rate: the game's work runs only as often as the chosen rate (the display keeps its own timing) ----------
 { const _fr=frame; let shown=0;
-  const capMs=()=>{ const c=S.settings.fpsCap; return c==='30'?1000/30:c==='60'?1000/60:0; };
+  const capMs=()=>{ const c=S.settings.fpsCap||'60'; /* never chosen = 60 on every phone (director 2026-11-18: Android defaulted to Max = every refresh, 120 a second on a Pixel, 26 fps; 30 mode gave 60-100) */ return c==='30'?1000/30:c==='60'?1000/60:0; };
   frame=function(now){ if(DEV_GUARD) DEV_GUARD(); const cap=MOB()?capMs():0; if(cap&&shown&&now>=shown&&now-shown<cap-2){ requestAnimationFrame(frame); return; } shown=(cap&&shown&&now>=shown&&now-shown<cap*2)?shown+cap:now; return _fr.apply(this,arguments); }; }
 
 // ---------- the Settings page on phones ----------
@@ -15984,7 +15984,7 @@ const IS_IPHONE=()=>/iPhone|iPod/.test(navigator.userAgent)||(/[?&]test\b/.test(
     for(const m of P.querySelectorAll('.tile .meta')) if(/mouse wheel/i.test(m.textContent)) m.innerHTML='Reel by <b>holding</b> the water, or by <b>drawing circles</b> on it like a crank.';
     const fr=rowOf(P.querySelector('[data-act="tog"][data-k="showFps"]')); if(fr){ const b=fr.querySelector('b'), m=fr.querySelector('.meta'); if(b) b.textContent='Frame rate counter'; if(m) m.textContent='Shows the current frame rate in the corner of the water.'; }
     const disp=[...P.querySelectorAll('.tile')].find(t=>{ const h=t.querySelector('h4'); return h&&h.textContent.trim()==='Display'; });
-    if(disp){ const cur=S.settings.fpsCap||(ip?'60':'max'), opt=ip?[['30','30 · Saver'],['60','60 · Smooth']]:[['30','30 · Saver'],['60','60 · Standard'],['max','Max']];
+    if(disp){ const cur=S.settings.fpsCap||'60', opt=ip?[['30','30 · Saver'],['60','60 · Smooth']]:[['30','30 · Saver'],['60','60 · Standard'],['max','Max']];
       const why={ '30':'Draws 30 frames a second: cooler phone, longer battery.', '60':ip?'Draws up to 60 frames a second, as smooth as an iPhone browser allows.':'Draws up to 60 frames a second.', 'max':'Draws as fast as your screen allows (90 or 120 on many phones). Uses the most battery.' };
       disp.insertAdjacentHTML('beforeend',`<h5>Frame rate</h5><div class="chips">${opt.map(([k,n])=>`<button class="chipb" type="button" data-fps="${k}" aria-pressed="${cur===k}">${n}</button>`).join('')}</div><div class="meta" style="margin-top:6px">${why[cur]||why['60']}</div>`);
       disp.querySelectorAll('[data-fps]').forEach(b=>b.addEventListener('click',e=>{ e.stopPropagation(); S.settings.fpsCap=b.dataset.fps; save(); renderPanel(); })); }
