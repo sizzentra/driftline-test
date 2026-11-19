@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="DL Test iPhone">
 <script>
-window.DL_BUILD='ios'; window.DL_PREVIEW=true; window.DL_VERSION='2026.11.18-1814';
+window.DL_BUILD='ios'; window.DL_PREVIEW=true; window.DL_VERSION='2026.11.18-1820';
 window.addEventListener('beforeinstallprompt',function(e){ e.preventDefault(); window.__dlInstallPrompt=e; });
 </script>
 </head>
@@ -16447,7 +16447,7 @@ html body.phone-land #menuov .secbar .secb,html body.phone-app #menuov .secbar .
 html body.phone-land #menuov #tabs .secbar .secb .secdot,html body.phone-app #menuov #tabs .secbar .secb .secdot{top:50%!important;bottom:auto!important;right:4px!important;left:auto!important;transform:translateY(-50%)!important;margin:0!important}
 </style>`);
 document.head.insertAdjacentHTML('beforeend',`<style>
-html body.phone-land.dock-mini #menuov #tabs .secbar .secb .secdot{top:3px!important;right:1px!important;bottom:auto!important;left:auto!important;transform:none!important} html body.phone-land.dock-mini #menuov #tabs .secbar .secb:has(.secdot){justify-content:flex-start!important;padding-left:2px!important} /* collapsed rail: the badge in the top-right corner, the icon moves left to make room (only on buttons with a badge) */
+html body.phone-land.dock-mini #menuov #tabs .secbar .secb .secdot{top:0!important;right:0!important;bottom:auto!important;left:auto!important;transform:none!important} html body.phone-land.dock-mini #menuov #tabs .secbar .secb{justify-content:center!important;padding-left:0!important;padding-right:0!important} html body.phone-land.dock-mini #menuov #tabs .secbar .secb .seci{margin:0!important;transform:translateY(3px)} /* collapsed rail (director: "doesn't look centered"): every icon in the middle of its button, a touch low so the badge fits in the top-right corner */
 </style>`);
 // =====================================================================
 // Phones and tablets, round 8: the top bar's goal (director, 2026-11-18: "The 'next goal' function on mobile upper header is too big
@@ -16521,11 +16521,13 @@ html body.phone-app.dl-fish .hud > #mbgoal .mbg-bar{bottom:2px}
   const tasks=()=>{ try{ const d=ensureDaily(); const ready=d.tasks.filter(t=>!t.claimed&&taskHave(t)>=t.n).length+(typeof wqReady==='function'?wqReady():0); const done=d.tasks.filter(t=>t.claimed).length; return {ready, txt:ready?ready+' ready':done+'/'+d.tasks.length+' done'}; }catch(e){ return {ready:0,txt:'—'}; } };
   const pass=()=>{ try{ const pl=S.pass.lvl|0, un=pl-(S.pass.claimed|0); return {ready:un>0, txt:'Lv '+pl+(un>0?' · claim':'')}; }catch(e){ return {ready:false,txt:'—'}; } };
   const fit=()=>{ const hud=document.querySelector('.hud'); if(!hud||!T) return; const land=document.body.classList.contains('phone-land');
-    T.hidden=!land; Pz.hidden=!land; if(!land) return; if(hud.scrollWidth>hud.clientWidth+1) Pz.hidden=true; if(hud.scrollWidth>hud.clientWidth+1) T.hidden=true; };
+    T.hidden=!land; Pz.hidden=!land; if(!land) return; if(hud.scrollWidth>hud.clientWidth+1) Pz.hidden=true; if(hud.scrollWidth>hud.clientWidth+1) T.hidden=true;
+    if(!ro&&typeof ResizeObserver==='function'){ ro=new ResizeObserver(()=>{ if(!busy) requestAnimationFrame(()=>{ busy=true; try{ fit(); }finally{ busy=false; } }); }); } if(ro){ for(const k of [hud,...hud.children]) if(!seen.has(k)){ seen.add(k); ro.observe(k); } } };
+  let ro=null, busy=false; const seen=new WeakSet(); /* round 8 (director: "settings cut off sometimes on top right"): the bar is re-checked whenever it or any chip changes size (the Live timer text, opening or closing the side panel), not only when Tasks or Tide Pass change */
   const tick=()=>{ if(!MOB()) return; const hud=document.querySelector('.hud'), lv=document.getElementById('mblive'); if(!hud||!lv) return;
     if(!T||!T.isConnected){ T=mk('mbtasks','bounties','Tasks'); Pz=mk('mbpass','pass','Tide Pass'); lv.after(T); T.after(Pz); last=''; }
     const a=tasks(), b=pass(), live=!lv.hidden, key=a.txt+'|'+a.ready+'|'+b.txt+'|'+live+'|'+document.body.classList.contains('phone-land');
-    if(key===last) return; last=key; T.querySelector('b').textContent=a.txt; T.classList.toggle('ready',a.ready>0); Pz.querySelector('b').textContent=b.txt; Pz.classList.toggle('ready',b.ready);
+    if(key===last){ fit(); return; } last=key; T.querySelector('b').textContent=a.txt; T.classList.toggle('ready',a.ready>0); Pz.querySelector('b').textContent=b.txt; Pz.classList.toggle('ready',b.ready);
     T.title=a.ready?a.ready+' task reward'+(a.ready===1?'':'s')+' ready. Tap for Bounties.':'Daily tasks and weekly quests. Tap for Bounties.'; Pz.title='Tide Pass. Tap to open it.'; fit(); };
   setInterval(tick,500); setTimeout(tick,50); addEventListener('resize',()=>{ last=''; setTimeout(tick,200); }); }
 document.head.insertAdjacentHTML('beforeend',`<style>
@@ -16600,8 +16602,17 @@ html body.phone-app .hud > #mbgoal > .lbl,html body.phone-land .hud > #mbgoal > 
 //    behind the settings gear; the gear keeps Settings and Save. Your Level in the top bar also opens Stats (teal: tap me).
 // Android + iPhone + tablets.
 // =====================================================================
-{ const coll=MENU_SECS.find(s=>s.id==='coll'); if(coll&&!coll.tabs.includes('stats')) coll.tabs.push('stats');
+/* Stats is its own button on the side panel, right under Collection (director, 2026-11-18: "stats deserves its own tab on the
+   side panel for mobile. It makes no sense to be in collection") */
+{ for(const s of MENU_SECS){ const k=s.tabs.indexOf('stats'); if(k>=0) s.tabs.splice(k,1); }
+  if(!MENU_SECS.some(s=>s.id==='stats')){ const at=MENU_SECS.findIndex(s=>s.id==='coll');
+    MENU_SECS.splice(at<0?MENU_SECS.length:at+1,0,{id:'stats', name:'Stats', short:'Stats', tabs:['stats'], icon:'<path d="M4 20h16"/><path d="M7 20v-6"/><path d="M12 20V8"/><path d="M17 20v-9"/><path d="M5.5 9.5 10 6l4 3 4.5-4"/>'}); }
   const i=MENU_MORE.tabs.indexOf('stats'); if(i>=0) MENU_MORE.tabs.splice(i,1);
+  /* the side panel's buttons, rebuilt with the new list (same markup as bm_ui04; the click handler finds buttons by data-sec) */
+  const T=$('tabs'), bar=T&&T.querySelector('.secbar');
+  if(bar){ const svg=p=>`<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${p}</svg>`;
+    bar.querySelectorAll(":scope > .secb").forEach(b=>b.remove()); bar.insertAdjacentHTML("afterbegin",MENU_SECS.map(s=>`<button type="button" class="secb" data-sec="${s.id}" aria-pressed="false" title="${esc(s.name)}"><span class="seci">${svg(s.icon)}</span><span class="secl"><span class="secfull">${s.name}</span><span class="secshort">${s.short}</span></span><span class="seclive" hidden>LIVE</span><span class="secdot" hidden></span></button>`).join('')); /* the Collapse panel button at the end stays */
+    try{ menuSubKey=''; }catch(e){} }
   try{ if(typeof SECT==='object'&&SECT.settings==='Save & codes') delete SECT.settings; }catch(e){} }
 
 /* the Level chip opens Stats */
@@ -16949,7 +16960,9 @@ PATCHES.unshift({v:'0.4.8.5', name:'Easy Finds', items:[
   'Section bars inside pages (Gear / Bait, Waters / Set sail again...) no longer slide sideways when they stick to the top.',
   'On smaller phones held sideways, the page tabs show their names only so they always fit, and badges sit on the tab corner.']});
 PATCHES.unshift({v:'0.4.8.6', name:'Tidy Up', items:[
-  'Stats is easy to reach: it sits in Collection now (side menu), and tapping your Level in the top bar opens it.',
+  'Stats has its own button on the side panel now, and tapping your Level in the top bar opens it too.',
+  'The side panel looks tidy when folded: every icon sits in the middle of its button, with its count in the corner.',
+  'The top bar never cuts off the settings button: when a live event’s name gets long, Tide Pass and Tasks step aside until there is room again.',
   'Every tab lives in one place: Settings no longer repeats Save. The gift code and the backup and erase tools are in Save, Save codes.',
   'Page summaries and intros no longer repeat the same numbers, and the side menu’s badges are never cut off or covering the button above.',
   'Mountains look clean again: no more thin stripes running down them or their reflections.']});
@@ -16957,7 +16970,7 @@ PATCHES.unshift({v:'0.4.8.6', name:'Tidy Up', items:[
 // iPhone test notes (preview builds only; the live game never shows them). Write what the next test build changes here
 // (spoiler-free); it opens once in the iPhone test app. Released notes live in notes_release.js.
 const TEST_NOTES={v:'test', label:'Test build · iPhone', name:'One Look, Easy Aquarium', items:[
-  'NEW in this build (0.4.8.6): mountains drawn without stripes; Stats in Collection and on the Level chip; Settings no longer repeats Save (gift code and backup tools are in Save); summaries no longer repeat numbers.',
+  'NEW in this build (0.4.8.6): mountains drawn without stripes; Stats has its own side-panel button (and the Level chip); folded side panel centred; top bar never cuts off settings; Settings no longer repeats Save (gift code and backup tools are in Save); summaries no longer repeat numbers.',
   'NEW in this build: fish fight shows a tension ring at the fish with the instruction above it; hints are touch only; homes are never called docks; the layout always switches when you turn the phone; smoother storms at Starfall.',
   'NEW in this build: Compact Goal chip (opens the right page) and a separate Live chip, plus Tasks and Tide Pass in the top bar. Your home shows the real home of every water. Colour choices are round swatches.',
   'NEW in this build: every menu page works like the aquarium (key numbers and main button first, sections as tabs, one scrolling list, badges where rewards wait). The Wardrobe shows your angler big with the categories in Options. Pages keep your place when they refresh.',
