@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="DL Test Android">
 <script>
-window.DL_BUILD='android'; window.DL_PREVIEW=true; window.DL_VERSION='2026.11.18-2051';
+window.DL_BUILD='android'; window.DL_PREVIEW=true; window.DL_VERSION='2026.11.18-2120';
 window.addEventListener('beforeinstallprompt',function(e){ e.preventDefault(); window.__dlInstallPrompt=e; });
 </script>
 </head>
@@ -2791,7 +2791,7 @@ document.addEventListener('keydown',()=>startAudio(),{once:true});
 // Update 1.5: rods & attachments, pet dress-up / petting / bond,
 // daily tasks & gift, patch notes, safe reset, Boardwalk 2.0, quips
 // =====================================================================
-const GAME_VERSION = '0.4.8.6';
+const GAME_VERSION = '0.4.8.6.1';
 const PATCHES = [
 {v:'0.4.7', name:'Full Screen Fix', items:['## PC','The PC layout now shows in full screen too: the one-row header, the clear water with its strip above, the new Fish Log, Feats, Settings and every other PC page. Full screen used to bring back the old layout with the bar at the bottom.']},
 {v:'0.4.6', name:'Hotfix', items:['## PC','Patch notes are a proper reader: the updates you missed are listed on the left, the one you pick on the right with its sections side by side, and Let’s fish! always at the top.','The header stays at the top in narrower windows and with browser zoom (it went back to the bottom under 900 pixels wide). In small windows it turns compact: icon tabs, short counters.','## Everywhere','The tip line no longer shows as an empty bubble, and it hides while a card is open over the water.']},
@@ -17227,7 +17227,7 @@ document.head.insertAdjacentHTML('beforeend',`<style>
 </style>`);
 /* the frame-rate counter (Settings > Display) sits in the top-right corner of the water on phones: at the bottom it covered the
    fishing hint ("Touch and hold the water…") on narrower screens (director, 2026-11-18) */
-document.head.insertAdjacentHTML('beforeend',`<style>html body.phone-land #fpsbox,html body.phone-app #fpsbox{top:10px!important;bottom:auto!important;right:10px!important}</style>`);
+document.head.insertAdjacentHTML('beforeend',`<style>html body.phone-land #fpsbox,html body.phone-app #fpsbox{top:44px!important;bottom:auto!important;right:10px!important;left:auto!important} /* below the streak chip, which d_draw paints on the water at y 12-36 (HOTFIX 0.4.8.6.1: it covered it) */</style>`);
 /* PERFORMANCE: switching menu tabs (director, 2026-11-18: "seems to be a performance problem from switching upper tabs in ui menus").
    Measured (desktop CPU, a phone is several times slower): a switch averaged 18 ms, the Fish Log 45 ms, Oddities 39 ms, Pets 31 ms.
    - pictures: only the first 12 fish pictures are drawn at once; the rest are drawn as they come into view (they were all drawn on every
@@ -17244,7 +17244,14 @@ document.head.insertAdjacentHTML('beforeend',`<style>html body.phone-land #fpsbo
 { const _mp=menuPillView; menuPillView=function(sb,p){ if(MOB()){ requestAnimationFrame(()=>{ try{ _mp(sb,p); }catch(e){} }); return; } return _mp.apply(this,arguments); }; }
 /* speed: the chip / tab rows are scrolled to the chosen one on the next frame instead of in the middle of the switch (menuTidy2 measured
    every row right after the page was built: a forced layout pass of 3-7 ms per switch) */
-{ const _mt=menuTidy2; let q=0; menuTidy2=function(){ if(MOB()){ if(!q) q=requestAnimationFrame(()=>{ q=0; try{ _mt(); }catch(e){} }); return; } return _mt.apply(this,arguments); }; try{ menuTidy=menuTidy2; }catch(e){} } /* the page switch calls the older alias menuTidy */
+{ const _mt=menuTidy2; let q=0;
+  /* HOTFIX 0.4.8.6.1: the cheap part of the tidy-up (marking the page header .dl-head / .dl-headw / .dl-dup, no layout reads) must run
+     at once: page layers that rebuild right after renderPanel (aquarium07 hides its old header by that mark) depend on it. Only the
+     rest (scrolling chip rows, which measures) waits for the next frame. Same logic as bm_ui04 menuTidy2's first lines. */
+  const quick=()=>{ if(!MENU_OPEN) return; const P=$('panel'); if(!P) return; const on=$('tabs')&&$('tabs').querySelector('.subp.on');
+    const h=P.querySelector(':scope > h2, :scope > .row > div > h2'); if(h){ const lbl=on?on.textContent.replace(/[\d\s]+/g,' ').trim().toLowerCase():''; const t=h.textContent.replace(/\s+/g,' ').trim().toLowerCase(); h.classList.toggle('dl-dup', !!lbl&&!!t&&lbl.includes(t)); }
+    const hr=P.querySelector(':scope > .row.spread'); if(hr&&hr.querySelector('h2')){ const wide=[...hr.children].slice(1).some(c=>c.matches('select,input,.fld')||c.querySelector('select,input,.fld')); hr.classList.toggle('dl-head',!wide); hr.classList.toggle('dl-headw',wide); } };
+  menuTidy2=function(){ if(MOB()){ try{ quick(); }catch(e){} if(!q) q=requestAnimationFrame(()=>{ q=0; try{ _mt(); }catch(e){} }); return; } return _mt.apply(this,arguments); }; try{ menuTidy=menuTidy2; }catch(e){} } /* the page switch calls the older alias menuTidy */
 /* TROPHY ROOM fits one screen (director, 2026-11-18): a compact wall, each plaque just the fish and its name (about eight across);
    tap a plaque to see its details in a bar under the wall (rarity, weight, water, date) with To cooler. The intro line steps aside. */
 { const _rp=renderPanel; renderPanel=function(){ const r=_rp.apply(this,arguments); try{ if(!MOB()||S.tab!=='trophy') return r; const P=$('panel'), room=P.querySelector('.tp-room'); if(!room||room.classList.contains('tp8')) return r;
@@ -17330,6 +17337,16 @@ html body.phone-land #menuov #panel.pg08[data-pg-tab="feats"] .grid > .tile:not(
 </style>`);
 document.head.insertAdjacentHTML('beforeend',`<style>#menuov #panel.pg08[data-pg-tab="feats"] .grid > .tile > .row.spread{min-height:0!important;height:auto!important;padding:0!important;align-items:center!important}#menuov #panel.pg08[data-pg-tab="feats"] .grid > .tile > .row.spread h4{line-height:1.2!important;white-space:normal!important;overflow:visible!important;text-overflow:clip!important;min-width:0!important}#menuov #panel.pg08[data-pg-tab="feats"] .grid > .tile > .row.spread .meta{font-size:11.5px!important;white-space:nowrap}</style>`); /* Feats title row: one line */
 document.head.insertAdjacentHTML('beforeend',`<style>html body.phone-land #menuov #panel.pg08[data-pg-tab="feats"] .grid > .tile > .row.spread,html body.phone-app #menuov #panel.pg08[data-pg-tab="feats"] .grid > .tile > .row.spread{display:flex!important;flex-direction:row!important;justify-content:space-between!important;text-align:left!important}html body.phone-land #menuov #panel.pg08[data-pg-tab="feats"] .grid > .tile > .row.spread h4,html body.phone-app #menuov #panel.pg08[data-pg-tab="feats"] .grid > .tile > .row.spread h4{text-align:left!important}</style>`); /* Feats: title left, progress count right, on one line */
+
+/* HOTFIX 0.4.8.6.1 (director: "can't close patch notes"): the popup card lives inside #stage, which blocks finger panning
+   (touch-action:none, for casting), so a long card (What's new after several updates) could not be scrolled by finger and its
+   only button sat thousands of px down. Phones: while a card is open the stage allows panning, the card scrolls with the finger,
+   and the closing button row stays pinned to the bottom of the card. */
+document.head.insertAdjacentHTML('beforeend',`<style>
+html body.phone-land.ev-open #stage,html body.phone-app.ev-open #stage{touch-action:pan-y!important}
+html body.phone-land #evcard #evin,html body.phone-app #evcard #evin{touch-action:pan-y!important;-webkit-overflow-scrolling:touch}
+html body.phone-land #evcard #evin > .row:last-child:has([data-ev="skip"]),html body.phone-app #evcard #evin > .row:last-child:has([data-ev="skip"]){position:sticky;bottom:-10px;z-index:2;background:linear-gradient(rgba(15,24,40,0),rgb(15,24,40) 14px);margin-bottom:-10px!important;padding:16px 0 10px}
+</style>`);
 // =====================================================================
 // Phones: the SET MEASUREMENTS (director, 2026-11-18: "I want standards and set measurements for each platform going forward,
 // I'm tired of the same mistakes"). The numbers are written down in docs/PLATFORM_DESIGN.md ("Phone frame: set measurements")
@@ -17682,12 +17699,13 @@ PATCHES.unshift({v:'0.4.8.6', name:'Tidy Up', items:[
   'Bait has its own page, opened from Bait in the top bar: Switch shows every bait and lure you own as big buttons (one tap to use), plus Buy bait and Special lures. Tackle keeps your gear upgrades. Every bait on Switch has a short line saying what it does.',
   'Menus switch faster: pictures are drawn as they come into view, and pages no longer measure themselves several times when they open.',
   'Trophy Room fits on one screen: a neat wall of plaques, tap one to see it up close. Tide Pass and the Boardwalk take up far less space.',
-  'Waters is now called Map on the side panel.']});
+  'Waters is now called Map on the side panel.',
+  'Search works from the top bar only and always opens the right page and tab; Settings has its gear back; Events no longer repeat the same things across Calendar, Challenges and Derby; Feats cards are smaller, so more fit on screen.']});
 
 // Android test notes (preview builds only; the live game never shows them). Write what the next test build changes here
 // (spoiler-free); it opens once in the Android test app. Released notes live in notes_release.js.
 const TEST_NOTES={v:'test', label:'Test build · Android', name:'One Look, Easy Aquarium', items:[
-  'NEW in this build (0.4.8.6): faster menu switching; Trophy wall on one screen; slimmer Tide Pass and Boardwalk; Waters renamed Map; bait descriptions; Bait page (Switch, Buy bait, Special lures) from the top bar; Tackle = Gear; Oddities/Treasures tabs; Aquarium + Home lessons in Quests; fps counter top corner; Quests (goals, lessons, find, help); Bait in the top bar; Home chip; Cooler rework; Oddities in Collection; coins/level/water in one box; Tasks tabs without repeats; Fish Log only from the top bar; Prestige page (Set sail again + Pearl relics); tidy Waters that opens at your water; Fishing renamed Catch; XP bar on Skills; side-panel counts never cover names; menus use the full width with a slim number strip; Skills categories without badges; Rods tabs fixed + tidy presets; small-iPhone cut-offs fixed; smooth Home live view; tank size + clear tank upgrade in the Aquarium; mountains drawn without stripes; Stats has its own side-panel button (and the Level chip); folded side panel centred; top bar never cuts off settings; Settings no longer repeats Save (gift code and backup tools are in Save); summaries no longer repeat numbers.',
+  'NEW in this build (0.4.8.6): search fixed (top bar only, opens the right tab); gear Settings icon; Events without repeats; smaller Feats cards; faster menu switching; Trophy wall on one screen; slimmer Tide Pass and Boardwalk; Waters renamed Map; bait descriptions; Bait page (Switch, Buy bait, Special lures) from the top bar; Tackle = Gear; Oddities/Treasures tabs; Aquarium + Home lessons in Quests; fps counter top corner; Quests (goals, lessons, find, help); Bait in the top bar; Home chip; Cooler rework; Oddities in Collection; coins/level/water in one box; Tasks tabs without repeats; Fish Log only from the top bar; Prestige page (Set sail again + Pearl relics); tidy Waters that opens at your water; Fishing renamed Catch; XP bar on Skills; side-panel counts never cover names; menus use the full width with a slim number strip; Skills categories without badges; Rods tabs fixed + tidy presets; small-iPhone cut-offs fixed; smooth Home live view; tank size + clear tank upgrade in the Aquarium; mountains drawn without stripes; Stats has its own side-panel button (and the Level chip); folded side panel centred; top bar never cuts off settings; Settings no longer repeats Save (gift code and backup tools are in Save); summaries no longer repeat numbers.',
   'NEW in this build: fish fight shows a tension ring at the fish with the instruction above it; hints are touch only; homes are never called docks; the layout always switches when you turn the phone; smoother storms at Starfall.',
   'NEW in this build: Android phones are landscape only (upright pauses the game). Compact Goal chip (opens the right page) and a separate Live chip, plus Tasks and Tide Pass in the top bar. Your home shows the real home of every water. Colour choices are round swatches.',
   'NEW in this build: every menu page works like the aquarium (key numbers and main button first, sections as tabs, one scrolling list, badges where rewards wait). The Wardrobe shows your angler big with the categories in Options. Pages keep your place when they refresh.',
