@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="DL Test Android">
 <script>
-window.DL_BUILD='android'; window.DL_PREVIEW=true; window.DL_VERSION='2026.11.19-0015';
+window.DL_BUILD='android'; window.DL_PREVIEW=true; window.DL_VERSION='2026.11.19-0045';
 window.addEventListener('beforeinstallprompt',function(e){ e.preventDefault(); window.__dlInstallPrompt=e; });
 </script>
 </head>
@@ -17461,6 +17461,29 @@ document.head.insertAdjacentHTML('beforeend',`<style>html body.phone-land #catdo
     const tx=e.c.getContext('2d'); tx.setTransform(1,0,0,1,0,0); tx.clearRect(0,0,pw,ph); tx.setTransform(sc,0,0,sc,-bx0*sc,-by0*sc);
     _ld(tx,bx0,by0,bx1,by1,fn,o); e.at=now; e.seen=now;
     c.save(); c.setTransform(1,0,0,1,0,0); c.drawImage(e.c,dx,dy); c.restore(); }; }
+
+/* Boats and floating docks (director, 2026-11-19: "anything with open water and a boat or different dock tanked his fps"): there every
+   decoration bobs with the platform, so the position-keyed litDraw cache above never hit and each item was re-lit from scratch every
+   frame. Phones: each dock item is cached by WHAT it is (id, size, night level, front/back), not where it is: its lit picture is
+   refreshed at most every 66 ms (flags, campfires and wind chimes keep moving) and drawn wherever the platform carries it this frame.
+   Same box as litDraw uses, so the picture is identical. PC is untouched. */
+{ const _dd=drawDockItem, DC=new Map();
+  drawDockItem=function(c,id,x,y,s,t,night,back){ if(!(MOB()&&c===g)) return _dd.apply(this,arguments);
+    const m=c.getTransform(), k=Math.hypot(m.a,m.b); if(m.b||m.c||!(k>0)||!(s>0)) return _dd.apply(this,arguments);
+    const big=id==='cottage', w=(big?46:44)*s, hg=(big?64:96)*s, bx=-w, by=-hg, bw=2*w, bh=hg+6*s, pw=Math.ceil(bw*k), ph=Math.ceil(bh*k);
+    if(!(pw>2&&ph>2)||pw*ph>4e6) return _dd.apply(this,arguments);
+    const key=id+'|'+Math.round(s*200)+'|'+Math.round((night||0)*20)+'|'+(back?1:0)+'|'+pw+'x'+ph, now=performance.now();
+    let e=DC.get(key); if(!e){ e={c:document.createElement('canvas'),at:-1e9,seen:now}; DC.set(key,e); if(DC.size>60){ for(const [kk,v] of DC) if(now-v.seen>3000) DC.delete(kk); } }
+    e.seen=now;
+    if(now-e.at>=66){ if(e.c.width!==pw||e.c.height!==ph){ e.c.width=pw; e.c.height=ph; } const tx=e.c.getContext('2d'); tx.setTransform(1,0,0,1,0,0); tx.clearRect(0,0,pw,ph); tx.setTransform(k,0,0,k,-bx*k,-by*k); _dd(tx,id,0,0,s,t,night,back); e.at=now; }
+    c.drawImage(e.c,x+bx,y+by,bw,bh); }; }
+
+/* Light and weather transitions on phones (director, 2026-11-19: drops to 30-40 fps "and keeps fluctuating back up to 60", worst in
+   weather). Every light step rebuilds the whole scenery picture (v3land: 10-30 ms on a desktop, several times that on a phone); with
+   14 night / 9 dusk / 6 weather steps that was a stall about every 1.5 s through dusk, dawn and every weather fade (measured: 30-40% of
+   frames over 8 ms during those transitions, every water). Phones now use 5 / 3 / 2 steps and a 5 s cross-fade between them, so the
+   light still flows smoothly but the scenery is rebuilt about a fifth as often. PC keeps its own steps. */
+{ const _st=v3steps, _fd=v3fade; v3steps=function(){ return (MOB()&&!document.body.classList.contains('pch-on'))?[5,3,2]:_st(); }; v3fade=function(){ return (MOB()&&!document.body.classList.contains('pch-on'))?5:_fd(); }; }
 // =====================================================================
 // Phones: the SET MEASUREMENTS (director, 2026-11-18: "I want standards and set measurements for each platform going forward,
 // I'm tired of the same mistakes"). The numbers are written down in docs/PLATFORM_DESIGN.md ("Phone frame: set measurements")
@@ -17823,7 +17846,8 @@ PATCHES.unshift({v:'0.4.8.6.2', name:'Fixes', items:[
   'Side-panel counts never cover a button’s name, even at 99+.',
   'Opening a menu while an info card is up closes the card first, so Travel here always works.',
   'The update message only appears when there really is an update (it kept coming back on phones).',
-  'Much smoother with a decorated home: decorations on the dock no longer slow the game down (a well-decorated home could halve the frame rate on Android).',
+  'Much smoother with a decorated home: decorations on the dock (and on boats and floating docks) no longer slow the game down.',
+  'Smoother fights, storms, dusk, dawn and weather changes on phones.',
   'Opening and closing a menu no longer shows another water’s scenery for a moment.',
   'After moving your progress from another device, patch notes you already saw on this phone don’t come back.',
   'Android draws a steady 60 frames a second (also on 120 Hz screens) and iPhone runs at its natural rate; the frame-rate choice is gone from Settings.',
@@ -17840,6 +17864,8 @@ const TEST_NOTES={v:'test', label:'Test build · Android', name:'Natural frame r
   'Much smoother with a decorated home: decorations on the dock are no longer re-lit from scratch every frame (a moved save with many decorations made Android drop to about 25 fps).',
   'After moving your progress from another device, patch notes you already saw on this phone don’t come back.',
   'Smoother fights and storms on phones: the red danger glow on the fight ring and the rain ripples on the water are much cheaper to draw.',
+  'Smoother on boats and floating docks: decorations that bob with the water are no longer re-lit every frame.',
+  'Smoother dusk, dawn and weather changes: the scenery’s light now changes in fewer, softer steps on phones, so the game rebuilds it far less often.',
   'Tester tools (Stats), Graphics test: the angler, pets, home decorations, moving cosmetic effects and oddities now have their own buttons. If a moved save makes the game slow, turn them off one at a time and watch the frame counter.']};
 addTestNotes(TEST_NOTES);
 // =====================================================================
