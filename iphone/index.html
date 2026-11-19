@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="DL Test iPhone">
 <script>
-window.DL_BUILD='ios'; window.DL_PREVIEW=true; window.DL_VERSION='2026.11.19-0854';
+window.DL_BUILD='ios'; window.DL_PREVIEW=true; window.DL_VERSION='2026.11.19-0936';
 window.addEventListener('beforeinstallprompt',function(e){ e.preventDefault(); window.__dlInstallPrompt=e; });
 </script>
 </head>
@@ -468,25 +468,25 @@ const RAR = [
   {k:'Mythic',    c:'#ff6ad5', w:.1,  f:3.4, xp:40,  val:4,    aq:5,   sc:40},
 ];
 const LOCS = [
-  {id:'pond',  name:'Willow Pond',     cost:0,      need:0, bonus:800,    plat:'dock',  blurb:'A quiet pond behind the boathouse. Gentle fish, good for learning the line.',
+  {id:'pond',  name:'Willow Pond',     cost:0,      bonus:800,    plat:'dock',  blurb:'A quiet pond behind the boathouse. Gentle fish, good for learning the line.',
    sky:['#86bcd9','#f2dcb6'], water:['#3f827b','#173e42'], hill:'#2d5a3e', amp:.07, freq:2.3, depth:'1–3 m', loot:40},
-  {id:'river', name:'Stonebrook River', cost:600,    need:8, bonus:4000,   plat:'dock',  blurb:'Fast cold water over stones. Trout and pike that fight back.',
+  {id:'river', name:'Stonebrook River', cost:600,    bonus:4000,   plat:'dock',  blurb:'Fast cold water over stones. Trout and pike that fight back.',
    sky:['#8cc2e0','#e9e2c4'], water:['#3a7690','#143547'], hill:'#3b5a4a', amp:.12, freq:3.4, depth:'2–6 m', loot:120},
-  {id:'coast', name:'Saltmarsh Coast',  cost:2500,   need:8, bonus:15000,  plat:'pier',  blurb:'Grey dunes and a long pier. Strong saltwater fish and the first tuna.',
+  {id:'coast', name:'Saltmarsh Coast',  cost:2500,   bonus:15000,  plat:'pier',  blurb:'Grey dunes and a long pier. Strong saltwater fish and the first tuna.',
    sky:['#9ec9df','#f4e2c0'], water:['#2f6f93','#0f2e48'], hill:'#8a8263', amp:.035, freq:5.5, depth:'4–20 m', loot:400},
-  {id:'frost', name:'Frostbite Lake',   cost:6000,   need:8, bonus:35000,  plat:'ice',   blurb:'A frozen lake far north. Open leads in the ice, snow on the pines, and fish that like the cold.',
+  {id:'frost', name:'Frostbite Lake',   cost:6000,   bonus:35000,  plat:'ice',   blurb:'A frozen lake far north. Open leads in the ice, snow on the pines, and fish that like the cold.',
    sky:['#a9c6dc','#eef2f5'], water:['#2a6a86','#07202e'], hill:'#e3ebf0', amp:.09, freq:2.8, depth:'5–40 m', loot:800},
-  {id:'reef',  name:'Coral Shallows',   cost:15000,  need:8, bonus:80000,  plat:'sand',  blurb:'Warm turquoise water over a living reef. The colours are unreal and so are the fish.',
+  {id:'reef',  name:'Coral Shallows',   cost:15000,  bonus:80000,  plat:'sand',  blurb:'Warm turquoise water over a living reef. The colours are unreal and so are the fish.',
    sky:['#6fc3ec','#fbe7c3'], water:['#2bb3b8','#0b4f6e'], hill:'#3e8f4e', amp:.035, freq:1.6, depth:'1–30 m', loot:1600},
-  {id:'shelf', name:'Brine Shelf',      cost:35000,  need:8, bonus:180000, plat:'boat',  blurb:'Open sea at the edge of the shelf. Marlin country. Bring heavy line.',
+  {id:'shelf', name:'Brine Shelf',      cost:35000,  bonus:180000, plat:'boat',  blurb:'Open sea at the edge of the shelf. Marlin country. Bring heavy line.',
    sky:['#7fb4d8','#e6d9c9'], water:['#1f5a8a','#081f3a'], hill:'#3f5468', amp:0, freq:1, depth:'30–200 m', loot:2200},
-  {id:'deep',  name:'Midnight Deep',    cost:80000,  need:8, bonus:400000, plat:'trawler', blurb:'Far offshore on a trawler. The swell is huge, and the big game is bigger.',
+  {id:'deep',  name:'Midnight Deep',    cost:80000,  bonus:400000, plat:'trawler', blurb:'Far offshore on a trawler. The swell is huge, and the big game is bigger.',
    sky:['#557595','#c7b9b0'], water:['#163f6e','#030b1a'], hill:'#24384c', amp:0, freq:1, depth:'500–3,000 m', loot:4500},
-  {id:'trench',name:'Hollow Trench',    cost:180000, need:8, bonus:1000000, plat:'raft', blurb:'Black water over a drop no one has measured. Things down here glow.',
+  {id:'trench',name:'Hollow Trench',    cost:180000, bonus:1000000, plat:'raft', blurb:'Black water over a drop no one has measured. Things down here glow.',
    sky:['#5d7f99','#b9b1b8'], water:['#123a55','#02080f'], hill:'#1b2a36', amp:0, freq:1, depth:'1,000 m +', loot:10000},
-  {id:'ember', name:'Ember Springs',    cost:400000, need:8, bonus:2500000, plat:'stone', blurb:'Steaming hot springs in a volcanic valley. The water glows at night, and so do the fish.',
+  {id:'ember', name:'Ember Springs',    cost:400000, bonus:2500000, plat:'stone', blurb:'Steaming hot springs in a volcanic valley. The water glows at night, and so do the fish.',
    sky:['#b8604a','#f2c08a'], water:['#b8582a','#2a0a06'], hill:'#3a2420', amp:.13, freq:2.2, depth:'Bubbling', loot:13000},
-  {id:'starfall',name:'Starfall Lake',  cost:1200000, need:8, bonus:8000000, plat:'crystal', blurb:'A lake high above the clouds, where the stars come down to drink. Nobody quite knows how you got here.',
+  {id:'starfall',name:'Starfall Lake',  cost:1200000, bonus:8000000, plat:'crystal', blurb:'A lake high above the clouds, where the stars come down to drink. Nobody quite knows how you got here.',
    sky:['#2a1a5a','#c8a0e8'], water:['#5a3aa8','#0a0828'], hill:'#3a2a6a', amp:.06, freq:1.4, depth:'Endless sky', loot:33000},
 ];
 const SEA = ['shelf','deep','trench'];
@@ -1353,7 +1353,7 @@ const fresh = () => ({v:3, money:0, xp:0, lvl:1, gear:{rod:0,reel:0,line:0,hook:
   buffs:[], look:{g:'m',skin:1,hair:1,shirt:'#3a6f9a',pat:'none',pants:'#2f3b4a',hat:'cap',hatCol:'#c8553a',hairStyle:'auto',beard:'none',glasses:'none',outfit:'none',outCol:'#d8a020',build:'average',eye:0,shoes:'boots',neck:'none',back:'none',accCol:'#c8553a',nose:'button',brows:'soft',mouth:'smile',blush:'on'},
   owned:{hats:['none','cap','bucket'],cols:[],pats:['none'],pets:['dog'],outfits:['none','vest'],glasses:['none','round'],shoes:['boots','sneakers','barefoot'],necks:['none'],backs:['none']}, pet:'dog', junk:{}, tickets:0, freeSpins:1,
   settings:{master:.8, music:.55, sfx:.7, amb:.5, musicOn:true, ambient:true, style:'auto', castMode:'meter', vibrate:true, minigames:true, rest:false, effects:true, boostsOnScreen:true, hints:true, protectRare:true, units:'kg'},
-  aq:{theme:'lagoon', sand:'gold', decor:[], hid:[], owned:['lagoon','gold']}, fedT:0, wheelT:0, rankClaimed:0, tokens:{small:0,big:0,legend:0},
+  aq:{theme:'lagoon', sand:'gold', decor:[], hid:[], owned:['lagoon','gold']}, voyCatch:{}, fedT:0, wheelT:0, rankClaimed:0, tokens:{small:0,big:0,legend:0},
   gstats:{frenzy:0, frenzyFish:0, chests:0, stars:0, spins:0, crates:0, flips:0, flipWins:0, scratch:0, scratchWins:0, pets:0, tasks:0},
   petLook:{}, bond:{}, petTints:['none'], petAccs:['none','bandana'], scales:0, specs:{}, relics:[], castN:0,
   pet2:null, dock:{wood:'oak', decor:[], owned:['oak']}, pass:{xp:0,lvl:0,claimed:0}, derby:null, medals:{gold:0,silver:0,bronze:0},
@@ -1395,7 +1395,8 @@ function migrate(o){ const d=fresh(); if(!isObj(o)) return d; o=saveClean(o,d);
   m.tickets=+o.tickets||0; if(o.freeSpins==null) m.freeSpins = (Date.now()-(o.wheelT||0)>=3600000) ? 1 : 0;
   if(!m.owned.hats.includes(m.look.hat)) m.look.hat='cap'; if(!PETI[m.pet]||!m.owned.pets.includes(m.pet)) m.pet='dog';
   m.buffs=(o.buffs||[]).filter(b=>b&&BK[b.k]&&b.until>Date.now()); m.junk=Object.assign({},o.junk||{});
-  m.settings=Object.assign(fresh().settings,o.settings||{}); if(m.settings.units!=='lb') m.settings.units='kg'; const aq=Object.assign(fresh().aq,o.aq||{}); aq.owned=uniq(['lagoon','gold',...(aq.owned||[])]); aq.decor=(aq.decor||[]).filter(x=>aq.owned.includes(x)); aq.hid=(Array.isArray(aq.hid)?aq.hid:[]).filter(x=>aq.decor.includes(x)); m.aq=aq;
+  m.settings=Object.assign(fresh().settings,o.settings||{}); if(m.settings.units!=='lb') m.settings.units='kg'; const aq=Object.assign(fresh().aq,o.aq||{}); aq.owned=uniq(['lagoon','gold',...(aq.owned||[])]); aq.decor=(aq.decor||[]).filter(x=>aq.owned.includes(x)); aq.hid=(Array.isArray(aq.hid)?aq.hid:[]).filter(x=>aq.decor.includes(x));
+  if(!o.voyCatch||typeof o.voyCatch!=='object'){ m.voyCatch={}; for(const L of LOCS){ let n=0; for(const s of SP) if(s.loc===L.id&&m.journal&&m.journal[s.id]) n+=m.journal[s.id].n||1; if(n) m.voyCatch[L.id]=n; } } else { m.voyCatch={}; for(const k in o.voyCatch) if(LOCS.some(L=>L.id===k)&&o.voyCatch[k]>0) m.voyCatch[k]=Math.floor(o.voyCatch[k]); } /* [16] old saves start with their lifetime catches per water */ m.aq=aq;
   m.tokens=Object.assign(fresh().tokens,o.tokens||{}); m.gstats=Object.assign(fresh().gstats,o.gstats||{}); delete m.muted;
   m.petLook=Object.assign({},o.petLook||{}); m.bond=Object.assign({},o.bond||{}); m.petTints=uniq(['none',...(o.petTints||[])]); m.petAccs=uniq(['none','bandana',...(o.petAccs||[])]);
   const rd=Object.assign(fresh().rods,o.rods||{}); rd.owned=uniq(['bamboo',...(rd.owned||[])]); if(!rd.owned.includes(rd.eq)) rd.eq='bamboo'; rd.lvl=Object.assign({},rd.lvl||{}); rd.att=Object.assign({},rd.att||{}); m.rods=rd;
@@ -1478,6 +1479,12 @@ function mix(a,b,t){ const A=hex2rgb(rgb2hex(a)),B=hex2rgb(rgb2hex(b)); return '
 function rgb2hex(s){ if(s[0]==='#') return s; const m=s.match(/\d+/g); return '#'+m.slice(0,3).map(v=>(+v).toString(16).padStart(2,'0')).join(''); }
 const lum = h => { const [r,g2,b]=hex2rgb(h); return .3*r+.59*g2+.11*b; };
 function caughtAt(loc){ return SP.filter(s=>s.loc===loc && S.journal[s.id]).length; }
+// 0.4.9 [16] (director: "10 fish catches are required now. Each voyage, another 10 ... 5th time, 50 fish. This is where it stops
+// scaling"): the next water opens after that many fish caught at the one before, during this voyage.
+const unlockNeed = () => Math.min(50, 10*((S.tides||0)+1));
+const voyCatchAt = loc => (S.voyCatch&&S.voyCatch[loc])||0;
+const unlockMet = i => i<=0 || S.unlocked.includes(LOCS[i].id) || voyCatchAt(LOCS[i-1].id) >= unlockNeed();
+const unlockLine = i => { const prev=LOCS[i-1]; return Math.min(voyCatchAt(prev.id),unlockNeed())+' / '+unlockNeed()+' fish caught at '+prev.name+' this voyage'; };
 const spAt = loc => SP.filter(s=>s.loc===loc);
 
 const CYCLE = 360;
@@ -1618,7 +1625,7 @@ function finishCatch(){ const f=G.fish; G.land=null; if(!f){ G.st='idle'; return
   if(f.hot) S.stats.hot++; G.inHot=false;
   if(f.kind==='fish') landFish(); else if(f.kind==='hat') landHat(); else landJunk(); }
 function landFish(){
-  const f=G.fish, sp=f.sp; G.st='result'; G.fish=null;
+  const f=G.fish, sp=f.sp; G.st='result'; G.fish=null; S.voyCatch=S.voyCatch||{}; S.voyCatch[sp.loc]=(S.voyCatch[sp.loc]||0)+1; /* [16] catches per water this voyage */
   const j=S.journal[sp.id]; const isNew=!j; const record = j && !f.hy && f.kg > j.best; const hyNew = f.hy && !(j&&j.hb!=null);
   journalAdd(f);
   S.streak++; S.stats.bestStreak=Math.max(S.stats.bestStreak,S.streak); const streakBonus = Math.min(streakCap(),.05*(S.streak-1));
@@ -1634,7 +1641,7 @@ function landFish(){
   taskProgress('catch',1,sp); if(sp.r>=2) taskProgress('rare',1,sp); if(f.hot) taskProgress('hot',1);
   addPassXP(PASS_XP[sp.r]*(f.shiny?2:1)*(f.trophy?1.5:1)); derbyCatch(f);
   const lvUps = addXP(xp); const bdone = checkBounties(sp, f.kg).concat(checkBounties2(f)); const setNow = checkSet(sp.loc);
-  const b=[]; if(f.shiny===2) b.push(['g',PRISM[f.pv].n+' prismatic ×'+PRISM_VALUE+' value']); else if(f.shiny) b.push(['g','Shiny ×4 value']); if(f.hy) b.push(['g','Hybrid: the weight of a '+SPI[f.hy].name]); if(hyNew) b.push(['g','First hybrid of this fish']); b.push(...preyB); if(f.ate) b.push(['g','Swallowed your catch: ×1.5 coins']); if(f.trophy) b.push(['g','Trophy size ×1.5']); if(f.hot) b.push(['k','Hotspot catch']);
+  const b=[]; if(f.shiny===2) b.push(['g',PRISM[f.pv].n+' prismatic ×'+PRISM_VALUE+' value']); else if(f.shiny) b.push(['g','Shiny ×4 value']); if(f.hy) b.push(['g','Hybrid: the weight of a '+SPI[f.hy].name+(f.hx?' and still its own size: ×'+f.hx+' value and aquarium income':'')]); if(hyNew) b.push(['g','First hybrid of this fish']); b.push(...preyB); if(f.ate) b.push(['g','Swallowed your catch: ×1.5 coins']); if(f.trophy) b.push(['g','Trophy size ×1.5']); if(f.hot) b.push(['k','Hotspot catch']);
   if(f.demand) b.push(['g','Fishmonger wants it: ×2 if sold now']); if(G.perfect) b.push(['','Perfect hook']); if(S.streak>=2) b.push(['','Streak '+S.streak+' · +'+Math.round(streakBonus*100)+'% XP']);
   if(scl) b.push(['k','+'+scl+' Scales']); if(tok) b.push(['g','+1 '+(tok==='big'?'big':'small')+' Mystery Crate']);
   if(isNew) b.push(['','New species']); if(record) b.push(['g','Personal record']); const ae=aqBase(sp.id); if(ae && isNew) b.push(['k','In the aquarium: '+fmtB(ae.k,ae.v)]);
@@ -1906,6 +1913,7 @@ const PRISM = {rainbow:{n:'Rainbow',c:'#ff7ad8'}, starry:{n:'Starry',c:'#9ab8ff'
 const PRISM_KEYS = Object.keys(PRISM);
 const PRISM_SHARE = .06;        // share of shiny rolls that come up prismatic instead
 const PRISM_VALUE = 15;         // value multiplier (shiny is ×4)
+const HYBRID_IN_RANGE = [2,2.5,3,3.5,4,5]; // [23] a hybrid inside its own normal weight range: value and aquarium income ×, by rarity
 const HYBRID_BASE = .001;       // 0.1%, up to 1% with the Odd Genes skill
 const hybridChance = () => HYBRID_BASE*(1+pr('hybrid'))*(pr('hybrid')>=9?2:1);
 const PRED_RX = /pike|musky|muskie|bass|gar|barracuda|shark|tuna|grouper|cod|walleye|zander|trout|salmon|snakehead|catfish|wolf|viper|angler|marlin|swordfish|wahoo|kingfish|mackerel|eel|moray|piranha|perch|char|taimen|arapaima|dragon|fang|leviathan|maw/;
@@ -1962,16 +1970,19 @@ function rollFish(sp,ctx){ const b=BAIT[S.baitSel], wx=weather(), dm=ctx.dist||{
   const shiny = shRoll ? (Math.random()<PRISM_SHARE?2:1) : 0, pv = shiny===2 ? pick(PRISM_KEYS) : null;
   const trophy = !hy && rel > .9;
   // hybrids: the further from normal size, the bigger the multiplier, capped at ×25 so a lucky hybrid is a jackpot, not a broken economy
-  let value = Math.max(1,Math.round(sp.base*(hy?clamp(Math.pow(R,.85)*(1+.6*Math.abs(Math.log(R))),.3,25):Math.pow(R,.85))));
+  /* [23] (director): a hybrid that still lands inside its own normal weight range is worth ×2 (common) to ×5 (mythic) of a normal
+     fish its size, in coins and in aquarium income */
+  const hx = hy && kg>=sp.min && kg<=sp.max ? HYBRID_IN_RANGE[sp.r] : 0;
+  let value = Math.max(1,Math.round(sp.base*(hy&&!hx?clamp(Math.pow(R,.85)*(1+.6*Math.abs(Math.log(R))),.3,25):Math.pow(R,.85)*(hx||1))));
   value=Math.round(value*RAR[sp.r].val*(1+(spec('collector')?.15:.1)*mastery(sp.id))*specLocValue(sp.loc)); if(trophy) value=Math.round(value*(spec('trophyking')?2:1.5));
   if(shiny===1) value*=4; else if(shiny===2) value*=PRISM_VALUE;
   const ab=rollAqBuff(sp,kg), ab2=hy?rollAqBuff(SPI[hy],kg,true):null;
-  const f={kind:'fish', sp, kg, rel:clamp(rel,0,1), str, th:sp.th, beh:sp.beh, aggr:sp.aggr, value, shiny, pv, hy, ab, ab2, trophy, storm: wx.k==='Storm', hot:G.inHot, prey:null};
+  const f={kind:'fish', sp, kg, rel:clamp(rel,0,1), str, th:sp.th, beh:sp.beh, aggr:sp.aggr, value, shiny, pv, hy, hx, ab, ab2, trophy, storm: wx.k==='Storm', hot:G.inHot, prey:null};
   // a predator may already have a smaller fish in its belly
   if(!ctx.noPrey && isPredator(sp) && Math.random()<.12+sp.aggr*.12){ const pp=preyPool(sp,SP.filter(s=>s.loc===sp.loc && timeOk(s,phase()))); if(pp.length){ f.prey=[]; const n=Math.random()<.15?2:1; for(let i=0;i<n;i++) f.prey.push(rollFish(pick(pp),{noHybrid:true,noPrey:true})); } }
   return f; }
 // the cooler entry for a landed fish
-function coolerEntry(f){ const e={id:f.sp.id, kg:+f.kg.toFixed(3), value:f.value, sh:f.shiny||0, tr:f.trophy?1:0}; if(f.pv) e.pv=f.pv; if(f.hy) e.hy=f.hy; if(f.ab) e.ab=f.ab; if(f.ab2) e.ab2=f.ab2; return e; }
+function coolerEntry(f){ const e={id:f.sp.id, kg:+f.kg.toFixed(3), value:f.value, sh:f.shiny||0, tr:f.trophy?1:0}; if(f.pv) e.pv=f.pv; if(f.hy) e.hy=f.hy; if(f.hx) e.hx=f.hx; if(f.ab) e.ab=f.ab; if(f.ab2) e.ab2=f.ab2; return e; }
 // journal update incl. smallest, prismatic and hybrid records
 function journalAdd(f){ const sp=f.sp, j=S.journal[sp.id], kg=+f.kg.toFixed(3);
   const n={n:(j?j.n:0)+1, best:j?j.best:0, min:j&&j.min!=null?j.min:null, sh:(j&&j.sh)||!!f.shiny, pr:(j&&j.pr)||f.shiny===2, tr:(j&&j.tr)||f.trophy, bv:Math.max((j&&j.bv)||0, f.value), first:(j&&j.first)||Date.now()};
@@ -1989,7 +2000,7 @@ if(/[?&]test\b/.test(location.search)) window.__prismSheet=(ids)=>{ const o=docu
 // rising with rarity. So a full tank is a strong passive bonus, and fishing yourself always pays more per hour.
 const AQ_CAP_K=[.006,.008,.012,.02,.03,.045], WATER_EV={};
 function waterEV(loc){ if(WATER_EV[loc]==null){ const pool=SP.filter(s=>s.loc===loc); let a=0,t=0; for(let r=0;r<6;r++){ const L=pool.filter(s=>s.r===r); if(!L.length) continue; a+=RAR[r].w*L.reduce((x,s)=>x+s.base,0)/L.length*RAR[r].val; t+=RAR[r].w; } WATER_EV[loc]=t?a/t:1; } return WATER_EV[loc]; }
-function aqFishBase(f){ const sp=SPI[f.id]; if(!sp) return 0; const raw=(+f.value||0)*TANK_RATE*.75*RAR[sp.r].aq*(f.sh===2?1.6:1)*(f.hy?1.3:1), cap=waterEV(sp.loc)*4.6*AQ_CAP_K[sp.r]*aqWeightK(f,sp)*(f.sh===2?1.6:f.sh?1.25:1)*(f.hy?1.3:1); return Math.min(raw,cap); }
+function aqFishBase(f){ const sp=SPI[f.id]; if(!sp) return 0; const raw=(+f.value||0)*TANK_RATE*.75*RAR[sp.r].aq*(f.sh===2?1.6:1)*(f.hy?1.3:1), cap=waterEV(sp.loc)*4.6*AQ_CAP_K[sp.r]*aqWeightK(f,sp)*(f.sh===2?1.6:f.sh?1.25:1)*(f.hy?1.3:1)*(f.hx||1); return Math.min(raw,cap); } /* [23] in-range hybrids lift the cap by the same multiplier */
 // 0.3.2: weight counts in the aquarium. A fish heavy for its kind earns more (its income cap grows from x0.75 for the
 // lightest to x1.7 for a record-breaker) and rolls stronger buffs, so your best prized catches belong on display.
 function aqRel(f,sp){ return sp&&sp.max>sp.min ? clamp(((+f.kg||0)-sp.min)/(sp.max-sp.min),0,1.5) : .5; }
@@ -2099,12 +2110,13 @@ function fishCanvas(cnv, sp, known=true, shiny=false, pv=null){ const c=cnv.getC
 // ---------- drawing: junk ----------
 function drawJunk(c,w,h,id,sil){ drawJunkAt(c,id,w/2,h/2,Math.min(w,h)/220,sil); }
 /* 0.4.9: the shadow of a hooked oddity or hat is its own outline (director: "Oddities should have shadows in the water that
-   represent what you're fishing up"), drawn once into a small picture per item and reused every frame */
-const ODD_SIL=new Map();
-function oddSil(f){ const key=f.kind==='junk'?'j:'+f.item.id:'h:'+(f.hat&&f.hat.id); let c=ODD_SIL.get(key); if(c) return c;
-  c=document.createElement('canvas'); c.width=c.height=96; const x=c.getContext('2d');
-  if(f.kind==='junk') drawJunkAt(x,f.item.id,48,52,.36,'#06121a'); else { x.translate(48,60); x.scale(1.6,1.6); drawHat(x,f.hat.id,'#888888',0); x.setTransform(1,0,0,1,0,0); x.globalCompositeOperation='source-in'; x.fillStyle='#06121a'; x.fillRect(0,0,96,96); }
-  ODD_SIL.set(key,c); return c; }
+   represent what you're fishing up"). Oddities use drawJunkAt's own cached silhouette (bb_odd036: oddSil); hats get one small
+   cached picture each here. (A first version reused the name oddSil, the older function won, and every frame of an oddity or
+   hat fight crashed: the angler, dock and fight panel vanished. 0.4.8.9.1.) */
+const HAT_SIL=new Map();
+function hookedHatSil(id){ let c=HAT_SIL.get(id); if(c) return c; c=document.createElement('canvas'); c.width=c.height=96; const x=c.getContext('2d');
+  x.translate(48,60); x.scale(1.6,1.6); drawHat(x,id,'#888888',0); x.setTransform(1,0,0,1,0,0); x.globalCompositeOperation='source-in'; x.fillStyle='#06121a'; x.fillRect(0,0,96,96); HAT_SIL.set(id,c); return c; }
+function drawHookedOdd(f,x,y){ try{ if(f.kind==='junk'&&f.item) drawJunkAt(g,f.item.id,x,y+20,.3,'#06121a'); else if(f.kind==='hat'&&f.hat) g.drawImage(hookedHatSil(f.hat.id),x-24,y,48,48); }catch(e){ if(!drawHookedOdd.warned){ drawHookedOdd.warned=1; console.error(e); } } }
 function drawJunkAt(c,id,x,y,s,sil){
   c.save(); c.translate(x,y); c.scale(s,s); c.lineJoin='round'; c.lineCap='round';
   const F=col=>sil||col; const R=(x,y,w,h,col)=>{ c.fillStyle=F(col); c.fillRect(x,y,w,h); }; const Ci=(x,y,r,col)=>{ c.fillStyle=F(col); c.beginPath(); c.arc(x,y,r,0,7); c.fill(); };
@@ -2405,7 +2417,7 @@ function draw(now){
   drawEat(t);
   if(G.st==='reeling' && G.fish){ const f=G.fish; const len = f.kind!=='fish' ? 26 : 30 + Math.min(60, Math.sqrt(f.kg||1)*8);
     if(G.ev==='jump' && f.kind==='fish'){ const k=1-G.evDur/.85; const jx=G.bob.x+len*.2, jy=G.bob.y-Math.sin(k*Math.PI)*H*.13; g.save(); g.translate(jx,jy); g.rotate(-Math.cos(k*Math.PI)*.9); drawCreature(g,f.sp,0,0,len,{shiny:f.shiny,pv:f.pv,wag:t*20,flip:true}); g.restore(); }
-    else { g.globalAlpha=.35; if(f.kind!=='fish'){ g.drawImage(oddSil(f), G.bob.x-24+(G.ev==='snag'?0:Math.sin(t*1.6)*3), G.bob.y+4, 48, 48); } else drawCreature(g,f.sp,G.bob.x + (G.run?Math.sin(t*9)*10:Math.sin(t*2)*6)+len*.4, G.bob.y + 14, len, {sil:'#06121a', wag:t*12, flip:true}); g.globalAlpha=1; } }
+    else { g.globalAlpha=.35; if(f.kind!=='fish'){ drawHookedOdd(f, G.bob.x+(G.ev==='snag'?0:Math.sin(t*1.6)*3), G.bob.y+4); } else drawCreature(g,f.sp,G.bob.x + (G.run?Math.sin(t*9)*10:Math.sin(t*2)*6)+len*.4, G.bob.y + 14, len, {sil:'#06121a', wag:t*12, flip:true}); g.globalAlpha=1; } }
   const dockY=H*.6, pb = (L.plat==='boat'||L.plat==='trawler'||L.plat==='raft') ? Math.sin(t*1.1)*2.5*(L.plat==='trawler'?1.6:1) : 0;
   if(!v3Platform(L,t,night,dockY,pb)) drawPlatform(L,t,night,dockY,pb);
   { const scH=clamp(H/420,.7,1.25); drawHome(L,t,night,dockY,pb,scH); g.fillStyle='rgba(0,0,0,.22)'; g.beginPath(); g.ellipse(W*.12,dockY+pb+1,11*scH,2.4*scH,0,0,7); g.fill(); }
@@ -2834,7 +2846,7 @@ document.addEventListener('keydown',()=>startAudio(),{once:true});
 // Update 1.5: rods & attachments, pet dress-up / petting / bond,
 // daily tasks & gift, patch notes, safe reset, Boardwalk 2.0, quips
 // =====================================================================
-const GAME_VERSION = '0.4.9';
+const GAME_VERSION = '0.4.8.9';
 const PATCHES = [
 {v:'0.4.7', name:'Full Screen Fix', items:['## PC','The PC layout now shows in full screen too: the one-row header, the clear water with its strip above, the new Fish Log, Feats, Settings and every other PC page. Full screen used to bring back the old layout with the bar at the bottom.']},
 {v:'0.4.6', name:'Hotfix', items:['## PC','Patch notes are a proper reader: the updates you missed are listed on the left, the one you pick on the right with its sections side by side, and Let’s fish! always at the top.','The header stays at the top in narrower windows and with browser zoom (it went back to the bottom under 900 pixels wide). In small windows it turns compact: icon tabs, short counters.','## Everywhere','The tip line no longer shows as an empty bubble, and it hides while a card is open over the water.']},
@@ -3293,6 +3305,9 @@ const RODS = [
  ['spine','Leviathan Spine','feat',0,'pond',3,'#ff6ad5',{rare:.5,reel:.25,tension:.25},'Rumour says it once belonged to something mythic.'],
 ].map(a=>({id:a[0],name:a[1],src:a[2],price:a[3],need:a[4],slots:a[5],col:a[6],st:a[7],d:a[8]}));
 const ROD_I = Object.fromEntries(RODS.map(r=>[r.id,r]));
+/* [24] (director: "Purchasing rods should also incorporate scaling amount of scales ... scales are a harder feat"): shop rods cost Scales too, rising with the rod */
+const ROD_SC = {willow:5, pondrod:10, fibre:20, carbon:40, reefrod:60, frostrod:80, coralrod:120, stormrod:200, abyssrod:320, emberrod:500, starrod:800};
+const rodScales = r => (r&&ROD_SC[r.id])||0;
 // id, name, key, values per tier, description
 const ATTS = [
  ['bobber','Bright Bobber','bite',[.08,.15,.25],'Fish notice your bait sooner.'],
@@ -3337,7 +3352,7 @@ function renderRods(P){ const r=rod(), atts=rodAtts();
     <h5>Attachments (${r.slots} slot${r.slots>1?'s':''})</h5>${Array.from({length:r.slots},(_,i)=>slotRow(i)).join('')}
     ${!Object.keys(S.atts).length?'<p class="sub">Buy attachments below, then fit them here.</p>':''}</div>
   <h2 style="margin-top:16px">Rod rack</h2><div class="grid">${RODS.map(x=>{ const own=S.rods.owned.includes(x.id), here=S.rods.eq===x.id, open=S.unlocked.includes(x.need), hidden=!own&&x.src!=='shop'&&x.src!=='start';
-    const btn = here?'<button class="btn alt sm" disabled>Equipped</button>' : own?`<button class="btn sm" data-act="rodeq" data-k="${x.id}">Equip</button>` : x.src==='shop'?(open?`<button class="btn sm" data-act="rodbuy" data-k="${x.id}" ${S.money>=x.price?'':'disabled'}>Buy · <span class="coin">${fmt(x.price)}</span></button>`:`<span class="meta">Unlock ${LOCS[locIdx(x.need)].name} first</span>`) : '<span class="meta">Not sold anywhere. Keep fishing…</span>';
+    const btn = here?'<button class="btn alt sm" disabled>Equipped</button>' : own?`<button class="btn sm" data-act="rodeq" data-k="${x.id}">Equip</button>` : x.src==='shop'?(open?`<button class="btn sm" data-act="rodbuy" data-k="${x.id}" ${S.money>=x.price&&S.scales>=rodScales(x)?'':'disabled'}>Buy · <span class="coin">${fmt(x.price)}</span>${rodScales(x)?' + '+rodScales(x)+' Scales':''}</button>`:`<span class="meta">Unlock ${LOCS[locIdx(x.need)].name} first</span>`) : '<span class="meta">Not sold anywhere. Keep fishing…</span>';
     return `<div class="tile ${here?'done':''}">${rodSVG(hidden?"#2a4a55":x.col,own?rodLvl(x.id):0,hidden?null:x.id)}<h4>${hidden?'???':x.name}</h4><div class="meta">${hidden?'How to get it: '+esc(rodHint(x)):esc(x.d)}</div><div class="meta">${hidden?'':stats(x)+' · '+x.slots+' slot'+(x.slots>1?'s':'')}</div>${btn}</div>`; }).join('')}</div>
   <h2 style="margin-top:16px">Attachments</h2><p class="sub">Each attachment has three tiers. Once you own one, it fits on any rod.</p><div class="grid">${ATTS.map(a=>{ const t=S.atts[a.id]||0, next=t<3?ATT_COST[t]:null;
     return `<div class="tile"><div class="row spread"><h4>${a.name}</h4><span class="meta">Tier ${t} / 3</span></div><div class="pips">${[0,1,2].map(i=>`<i class="${i<t?'on':''}"></i>`).join('')}</div><div class="meta">${esc(a.d)}</div>
@@ -3544,7 +3559,7 @@ function renderBoardwalk(P){ accrueSpins(); const tk=S.tokens, base=bestLoot(); 
 function extraAct2(b){ const k=b.dataset.k, i=+b.dataset.i;
   switch(b.dataset.act){
     case 'rodeq': if(S.rods.owned.includes(k)){ S.rods.eq=k; toast('You pick up the '+ROD_I[k].name+'.'); } return 'render';
-    case 'rodbuy': { const r=ROD_I[k]; if(!r||r.src!=='shop'||S.rods.owned.includes(k)||S.money<r.price||!S.unlocked.includes(r.need)) return 'skip'; S.money-=r.price; S.rods.owned.push(k); S.rods.eq=k; sfx.coin(); toast('New rod: '+r.name+'!'); return 'render'; }
+    case 'rodbuy': { const r=ROD_I[k]; if(!r||r.src!=='shop'||S.rods.owned.includes(k)||S.money<r.price||S.scales<rodScales(r)||!S.unlocked.includes(r.need)) return 'skip'; S.money-=r.price; S.scales-=rodScales(r); S.rods.owned.push(k); S.rods.eq=k; sfx.coin(); toast('New rod: '+r.name+'!'); return 'render'; }
     case 'rodup': { const c=rodUpCost(k); if(rodLvl(k)>=10||S.money<c.coins||S.scales<c.scales) return 'skip'; S.money-=c.coins; S.scales-=c.scales; S.rods.lvl[k]=rodLvl(k)+1; sfx.catch(2); toast(ROD_I[k].name+' is now level '+S.rods.lvl[k]); return 'render'; }
     case 'rodatt': { const [si,a]=k.split(':'); const id=S.rods.eq, list=(S.rods.att[id]||[]).slice(); list[+si]=a||''; S.rods.att[id]=list.slice(0,rod().slots); return 'render'; }
     case 'attbuy': { const t=S.atts[k]||0; if(t>=3) return 'skip'; const c=ATT_COST[t]; if(S.money<c[0]||S.scales<c[1]) return 'skip'; S.money-=c[0]; S.scales-=c[1]; S.atts[k]=t+1; sfx.coin(); toast(ATT_I[k].name+' tier '+(t+1)+'!');
@@ -11635,8 +11650,8 @@ body.phone-app #towater{display:none!important}
 
 // ---------- full-screen water on phones held upright: the same toggle and saved setting as phones held sideways ----------
 // One tap and the water fills the screen (menus hidden, the top bar stays); one more tap and the menus come back.
-function stageHOverride(W,H){ if(!(document.body.classList.contains('phone-app')&&document.body.classList.contains('side-off'))) return 0;
-  const hud=document.querySelector('.hud'), top=hud?hud.getBoundingClientRect().bottom:0; return Math.max(240,Math.round(window.innerHeight-top-14)); }
+stageHOverride=function(W,H){ /* replaces the core one explicitly (a second declaration of the same name is refused by the build) */ if(!(document.body.classList.contains('phone-app')&&document.body.classList.contains('side-off'))) return 0;
+  const hud=document.querySelector('.hud'), top=hud?hud.getBoundingClientRect().bottom:0; return Math.max(240,Math.round(window.innerHeight-top-14)); };
 // re-measure the water whenever the toggle flips (the sideways code already does this; upright needs it too)
 { const t=$('sidetog'); if(t) t.addEventListener('click',()=>setTimeout(()=>{ try{ resize(); }catch(e){} },40)); }
 document.head.insertAdjacentHTML('beforeend',`<style>
@@ -12463,8 +12478,8 @@ body.pc-wide .wrap > #panel{grid-row:3}
 // ---------------------------------------------------------------------
 function nextGoal(){ if(!S.stats.caught) return {t:'Catch your first fish', sub:'Hold on the water, let go to cast', tab:null};
   const i=LOCS.findIndex(L=>!S.unlocked.includes(L.id));
-  if(i>0){ const L=LOCS[i], prev=LOCS[i-1], have=caughtAt(prev.id), cost=locCost(L);
-    if(have<L.need) return {t:'Find '+L.need+' species at '+prev.name, sub:have+' / '+L.need+' found, then '+fmtShort(cost)+' coins opens '+L.name, p:have/L.need, tab:'journal', loc:prev.id};
+  if(i>0){ const L=LOCS[i], prev=LOCS[i-1], have=voyCatchAt(prev.id), need=unlockNeed(), cost=locCost(L);
+    if(have<need) return {t:'Catch '+need+' fish at '+prev.name, sub:have+' / '+need+' caught this voyage, then '+fmtShort(cost)+' coins opens '+L.name, p:have/need, tab:'map', loc:prev.id};
     if(S.money<cost) return {t:'Save '+fmtShort(cost)+' coins for '+L.name, sub:fmtShort(S.money)+' / '+fmtShort(cost), p:S.money/cost, tab:'map'};
     return {t:L.name+' is ready to open', sub:'Tap to go to Waters', p:1, tab:'map', ready:true}; }
   const here=SP.filter(s=>s.loc===S.loc), got=here.filter(s=>S.journal[s.id]).length;
@@ -16334,7 +16349,7 @@ function DK_SCENE_OK(now){ if(S.tab!=='home'||!MOB()) return false; const c=$('h
       P.querySelectorAll(':scope > .sect-nav').forEach(n=>n.remove());
       const grid=P.querySelector(':scope > .grid'); if(!grid) return r; grid.classList.add('wt8-grid');
       for(const card of grid.querySelectorAll(':scope > .tile.loc')){ const h4=card.querySelector('h4'), L=h4&&LOCS.find(l=>l.name===h4.textContent.trim()); if(!L) continue;
-        const metas=[...card.querySelectorAll(':scope > .meta')], blurb=metas[0], req=metas.find(m=>/species found at/.test(m.textContent)), btn=card.querySelector(':scope > button'), th=card.querySelector(':scope > .sw2');
+        const metas=[...card.querySelectorAll(':scope > .meta')], blurb=metas[0], req=metas.find(m=>/fish caught at/.test(m.textContent)), btn=card.querySelector(':scope > button'), th=card.querySelector(':scope > .sw2');
         const sps=spAt(L.id), got=caughtAt(L.id), here=S.loc===L.id, open=S.unlocked.includes(L.id);
         card.title=(blurb?blurb.textContent.trim():''); card.classList.add('wt8');
         const info=document.createElement('div'); info.className='wt8-info';
@@ -16521,7 +16536,7 @@ const Q8_LESSONS=[
  ['trophy','Your fish','The Trophy Room','Keep a fish forever','<b>Keep</b> mounts a fish in the Trophy Room for good: it earns nothing and gives no boost, but it is never lost, not even when you set sail again.',['trophy',null]],
  ['log','Your fish','The Fish Log and mastery','Every species, and stars for each','The <b>Fish Log</b> (top bar) lists every species at every water. Catch a species 3, 10, 30 and 100 times for its <b>mastery stars</b>: each star adds +10% to that fish\'s value, and every 8 stars is a new Angler Rank with coins and a free Mystery Crate.',['journal',null]],
  ['odd','Your fish','Oddities','Junk, odd finds and treasure','Not everything that bites is a fish. Junk, odd junk and rare finds go in <b>Oddities</b> (Collection), with <b>Treasures</b> in their own tab beside them: some pay, some boost your fishing, some come with a pet or a hat. Special lures (Bait, in the top bar) pull up more of them.',['oddities',null]],
- ['waters','Getting stronger','New waters','How to open the next water','Each water has 52 fish of its own and is tougher than the last. Find <b>8 species</b> at a water and you can open the next one with coins on the Map. Your goal (Quests) always says how close you are.',['map',null]],
+ ['waters','Getting stronger','New waters','How to open the next water','Each water has 52 fish of its own and is tougher than the last. Catch <b>10 fish</b> at a water (10 more each voyage, up to 50) and you can open the next one with coins on the Map. Your goal (Quests) always says how close you are.',['map',null]],
  ['tackle','Getting stronger','Tackle upgrades','Rod length, reel, line, hook, cooler, finder','In Tackle, Gear: <b>Rod length</b> casts farther with better far-cast odds, <b>Reel</b> winds faster, <b>Line</b> takes more tension, <b>Hook</b> gives a longer window, <b>Cooler</b> holds more fish and the <b>Fish Finder</b> reads bites and finds hotspots.',['shop',['tackleview','gear']]],
  ['rods','Getting stronger','Rods, Scales and attachments','Collect rods, upgrade them, fit parts','Your rod shapes every cast. Collect rods in the Rod rack, upgrade them with coins and <b>Scales</b> (Scales come from Rare and better fish) and fit <b>attachments</b>: each has three tiers and fits any rod once you own it. Save a rod and its parts as a <b>preset</b> to switch in one tap.',['rods','Your rods']],
  ['skills','Getting stronger','Skills','Small steady gains with a big finish','Levels give <b>skill points</b>. Skills are small steady gains in five groups, and every skill unlocks a <b>special effect</b> when fully learned. The XP bar next to your level shows how close the next point is. Skills can be reset for coins.',['skills',null]],
@@ -16554,7 +16569,7 @@ const Q8_HELP=[
  ['My cooler is full','Open the Cooler and Sell all (with a filter if you want to keep some), put fish in the Aquarium, or Keep the best ones in the Trophy Room. A bigger Cooler is in Tackle.',['cooler',null],'Cooler'],
  ['How do I earn more coins?','Sell bigger and rarer fish, fill the fishmonger\'s wish (double pay), keep the Aquarium full, finish bounties and tasks, and raise your sale bonus with skills and mastery stars.',['bounties','Bounties'],'Bounties'],
  ['Where do Scales come from?','Rare and better fish. You spend them on rod upgrades.',['rods','Your rods'],'Rods'],
- ['How do I open the next water?','Find 8 species at the water before it, then pay its price on the Map. Your goal shows both.',['map',null],'Map'],
+ ['How do I open the next water?','Catch 10 fish at the water before it this voyage (10 more each voyage, up to 50), then pay its price on the Map. Your goal shows both.',['map',null],'Map'],
  ['What do I keep when I set sail again?','Your level, skills, Fish Log, feats, Trophy Room, pets, clothes, relics and Wisdom Pearls. Coins, tackle, bait, cooler fish, bounties and waters reset; aquarium fish are mounted in the Trophy Room.',['prestige','Set sail again'],'Prestige'],
  ['Where did my aquarium coins go?','Visitors pay for up to 8 hours while you are away, then stop until you collect. Collect from the strip under the tank (the Aquarium chip turns gold when coins wait).',['aquarium',null],'Aquarium'],
  ['How do I move a decoration?','In the Aquarium, drag it along the sand. At home, drag it (or your pet) along your home in the live view.',['home',null],'Home'],
@@ -16577,7 +16592,7 @@ function q8html(){ const gl=Q8.goal(), read=Q8.read(), p=gl.p!=null?Math.max(0,M
   let live=''; try{ const L=liveNow&&liveNow(); if(L) live=`<div class="tile q8-row"><div><b>${esc(L.t)}</b>${L.sub?`<div class="meta">${esc(L.sub)}</div>`:''}</div><button class="btn alt sm" data-q8go="events">Events</button></div>`; }catch(e){}
   const rd=q8ready(); const ready=rd.length?`<h5>Waiting for you</h5><div class="q8-list">${rd.map(([t,tab,sect])=>`<div class="tile q8-row"><b>${esc(t)}</b><button class="btn alt sm" data-q8go="${tab}"${sect?` data-q8s="${esc(sect)}"`:''}>Open</button></div>`).join('')}</div>`:'';
   /* the journey: every water, then Hollow Trench and the voyages */
-  const jr=LOCS.map((L,i)=>{ const open=S.unlocked.includes(L.id), prev=i?LOCS[i-1]:null, need=prev?Math.min(caughtAt(prev.id),L.need)+' / '+L.need+' species at '+prev.name:''; return `<div class="q8-step${open?' done':''}"><span class="q8-dot">${open?'✓':i+1}</span><div><b>${open?'Opened ':'Open '}${esc(L.name)}</b>${!open&&prev?`<div class="meta">${need} · ${fmtShort(locCost(L))} coins</div>`:''}</div></div>`; }).join('')+
+  const jr=LOCS.map((L,i)=>{ const open=S.unlocked.includes(L.id), prev=i?LOCS[i-1]:null, need=prev?unlockLine(i):''; return `<div class="q8-step${open?' done':''}"><span class="q8-dot">${open?'✓':i+1}</span><div><b>${open?'Opened ':'Open '}${esc(L.name)}</b>${!open&&prev?`<div class="meta">${need} · ${fmtShort(locCost(L))} coins</div>`:''}</div></div>`; }).join('')+
     `<div class="q8-step${(S.tides||0)>0?' done':''}"><span class="q8-dot">${(S.tides||0)>0?'✓':'⚓'}</span><div><b>Set sail again</b><div class="meta">${(S.tides||0)>0?(S.tides+' voyage'+(S.tides>1?'s':'')+' so far, '+(S.pearls||0)+' Wisdom Pearls'):'Reach Hollow Trench to start over for Wisdom Pearls'}</div></div></div>`;
   const goals=`<div class="jsec q8-sec" data-q8sec="Goals"><h2>Goals</h2>${goal}${live}${ready}<h5>Your journey</h5><div class="q8-journey">${jr}</div></div>`;
   /* lessons, grouped */
@@ -18003,7 +18018,9 @@ PATCHES.unshift({v:'0.4.8.8', name:'Fixes and Small Wishes', items:[
   'Home and Bait are in the top bar from the first moment, so it no longer shifts just after the game opens.',
   '## Behind the scenes',
   'Old unused parts of the game were cleared out (a retired menu button, an old hairstyle, old dolphin and Boardwalk drawings), so it starts with a little less work and has less to keep running every second.']});
-PATCHES.unshift({v:'0.4.9', name:'Work in progress', items:[
+PATCHES.unshift({v:'0.4.8.8.1', name:'Hotfix', items:[
+  'The side panel in menus always reaches the bottom of the screen with every section (on some iPhones it could still stop after Quests).']});
+PATCHES.unshift({v:'0.4.8.9', name:'The Fight', items:[
   '## The fight',
   'Rarer fish fight like it at every gear level: during their runs they hold you still or take line even while you reel, and a top mythic takes 30 seconds to a minute with the best gear.',
   'Each new voyage makes fish fight a little harder, up to five voyages.',
@@ -18197,6 +18214,11 @@ ui(){ QA.sys='UI';
     const ss=statSec; statSec='overview'; openMenu('stats'); if(!/Angler strength/.test($('panel').textContent)) e.push('not in Stats › Overview'); statSec='gear'; renderPanel(); if(!/Angler strength/.test($('panel').textContent)) e.push('not in Stats › Gear'); statSec=ss; closeMenu();
     const ls=GEAR.line.lv, maxPull=Math.max(...SP.map(fishPull)); if(ls[7]>=maxPull) e.push('line level 7 already beats every fish ('+ls[7]+' vs '+Math.round(maxPull)+')'); if(ls[ls.length-1]<maxPull) e.push('the best line never beats the strongest fish');
     return e.length?{ok:false,detail:e.join(' | ')}:{ok:true,detail:'you '+Math.round(a)+', first water '+st.beat+'/'+st.n}; });
+  T('every kind of catch can be fought and drawn without an error: fish, oddity, hat (0.4.8.9: an oddity fight crashed every frame and the angler, dock and fight panel vanished)',()=>{ const e=[], sv=save, ts=toast; save=function(){}; toast=function(){}; const weak={str:5,th:.15,beh:'calm',aggr:.15,kg:1};
+    const hats=(typeof fishHatsLeft==='function'&&fishHatsLeft().length?fishHatsLeft():HATS).filter(Boolean);
+    const kinds={fish:()=>rollFish(SP.find(s=>s.loc===S.loc)||SP[0],{noHybrid:true,noPrey:true}), oddity:()=>Object.assign({kind:'junk',item:pickJunk()},weak), hat:()=>Object.assign({kind:'hat',hat:hats[0]},weak)};
+    try{ for(const k in kinds){ try{ G.pend=kinds[k](); G.lastCast=.8; G.waitT=0; G.biteEnd=0; hookIt(); for(let i=0;i<20;i++) fight(1/60); draw(performance.now()); if(G.st==='reeling'||G.st==='landing') drawFightHUD(performance.now()); }catch(x){ e.push(k+': '+x.message); } G.st='idle'; G.fish=null; } }
+    finally{ save=sv; toast=ts; G.st='idle'; G.fish=null; } return e.length?{ok:false,detail:e.join(' | ')}:{ok:true,detail:'fish, oddity, hat'}; });
   T('badges: no count circle is cut by the box around it, on the fishing screen and every page, also with "99+" (PC full screen cut the top of the orange circle)',()=>{ const bad=[]; const SEL='.cddot,.secdot,.subdot,.sdot,.q8-dot,.od-dot,.dot'; const forced=[];
     const check=tag=>{ for(const d of document.querySelectorAll(SEL)){ if(d.hidden&&d.matches('.cddot,.secdot,.subdot')&&d.closest('button')&&d.closest('button').offsetParent!==null){ forced.push([d,d.textContent]); d.hidden=false; d.textContent='99+'; } if(d.offsetParent===null) continue; const r=d.getBoundingClientRect(); if(r.width<4) continue; const own=d.closest('button,[role="tab"],a')||d.parentElement, o=own.getBoundingClientRect();
         for(let p=own.parentElement;p&&p!==document.documentElement;p=p.parentElement){ const cs=getComputedStyle(p); if(cs.overflowX==='visible'&&cs.overflowY==='visible') continue; const q=p.getBoundingClientRect(); const ownIn=o.top>=q.top-.5&&o.bottom<=q.bottom+.5&&o.left>=q.left-.5&&o.right<=q.right+.5; if(!ownIn) break; const cut=Math.max(q.top-r.top,r.bottom-q.bottom,q.left-r.left,r.right-q.right); if(cut>.5) bad.push(tag+': '+d.className+' cut '+cut.toFixed(1)+' px by '+((p.id&&'#'+p.id)||String(p.className).split(' ')[0])); } }
@@ -18413,7 +18435,7 @@ if(/[?&]test\b/.test(location.search)) window.__inGame=(code)=>eval('(()=>{'+cod
 
 // ---------- loop ----------
 let last=performance.now();
-function frame(now){ const dt=Math.min(.05,(now-last)/1000); last=now; update(dt); draw(now); if(S.tab==='aquarium') drawTank(now); hud(); requestAnimationFrame(frame); }
+function frame(now){ const dt=Math.min(.05,(now-last)/1000); last=now; try{ update(dt); draw(now); if(S.tab==='aquarium') drawTank(now); }catch(e){ if(!frame.err){ frame.err=1; console.error(e); } } hud(); requestAnimationFrame(frame); } /* 0.4.8.9.1: one failing frame never stops the game loop */
 let lastBuffN=-1, lastShopSlot=Math.floor(Date.now()/1000/SHOP_LEN);
 setInterval(()=>{ accrue(); const el=$('tankbank'); if(el){ const t=fmtShort(S.tankBank); if(el.textContent!==t){ el.textContent=t; el.title=fmt(S.tankBank)+' coins'; } } /* short form like the top bar, so big numbers never overflow (2026-11-19) */ const cb=$('collectbtn'); if(cb) cb.disabled=S.tankBank<1;
   const dl=$('dmleft'); if(dl){ dl.textContent=mmss(wxLeft()); if(wxLeft()>=WX_LEN-1 && S.tab==='cooler') renderPanel(); }
@@ -18599,13 +18621,13 @@ function renderJournal(P){
   paintFish(P); P.querySelectorAll('canvas[data-junk]').forEach(c=>{ const cx=c.getContext('2d'); cx.clearRect(0,0,c.width,c.height); if(c.dataset.known==='1') drawJunk(cx,c.width,c.height,c.dataset.junk,null); else mysteryThumb(cx,c.width,c.height,c.dataset.junk); });
 }
 function renderMap(P){
-  P.innerHTML=`<h2>Waters</h2><p class="sub">Unlock new waters with coins once you have found ${LOCS[1].need} species in the one before. Each has ${spAt('pond').length} fish of its own, its own junk and treasure, and is tougher than the last.</p><div class="grid">`+
-  LOCS.map((L,i)=>{ const open=S.unlocked.includes(L.id), here=S.loc===L.id; const prev=i?LOCS[i-1]:null; const met=!prev||caughtAt(prev.id)>=L.need; const sps=spAt(L.id);
+  P.innerHTML=`<h2>Waters</h2><p class="sub">Unlock new waters with coins once you have caught ${unlockNeed()} fish in the one before this voyage (10 more every voyage, up to 50). Each has ${spAt('pond').length} fish of its own, its own junk and treasure, and is tougher than the last.</p><div class="grid">`+
+  LOCS.map((L,i)=>{ const open=S.unlocked.includes(L.id), here=S.loc===L.id; const prev=i?LOCS[i-1]:null; const met=unlockMet(i); const sps=spAt(L.id);
     const btn = here ? '<button class="btn alt" disabled>Fishing here</button>' : open ? `<button class="btn" data-act="goto" data-k="${L.id}" ${G.st==='idle'?'':'disabled'}>Travel here</button>`
       : `<button class="btn" data-act="unlock" data-k="${L.id}" ${met&&S.money>=locCost(L)&&(!prev||S.unlocked.includes(prev.id))?'':'disabled'}>Unlock · <span class="coin">${fmt(locCost(L))}</span></button>`;
     return `<div class="tile loc ${here?'here':''}"><div class="sw2" style="background:linear-gradient(${L.sky[0]},${L.sky[1]} 48%,${L.water[0]} 52%,${L.water[1]})"></div>
     <h4>${L.name}</h4><div class="meta">${L.blurb}</div><div class="meta">Depth ${L.depth} · ${caughtAt(L.id)}/${sps.length} species</div>${strStandHTML(sps)}
-    ${!open&&prev?`<div class="meta" style="color:${met?'var(--kelp)':'var(--muted)'}">${met?'✓':'·'} ${Math.min(caughtAt(prev.id),L.need)} / ${L.need} species found at ${prev.name}</div>`:''}${btn}</div>`; }).join('')+'</div>'+renderVoyage()+relicHTML();
+    ${!open&&prev?`<div class="meta" style="color:${met?'var(--kelp)':'var(--muted)'}">${met?'✓':'·'} ${unlockLine(i)}</div>`:''}${btn}</div>`; }).join('')+'</div>'+renderVoyage()+relicHTML();
 }
 const canRetire = () => S.unlocked.includes('trench') && pearlsFor() > 0 && G.st==='idle';
 function renderVoyage(){ const n=pearlsFor(), ok=canRetire();
@@ -18735,11 +18757,11 @@ $('panel').addEventListener('click',e=>{ const b=e.target.closest('[data-act]');
     case 'reset': confirmBox='reset'; break;
     case 'cancel': confirmBox=null; pendingLoad=null; break;
     case 'retireok': { if(!canRetire()) return; const n=pearlsFor(); S.pearls+=n; S.tides++;
-      Object.assign(S,{money:relic('headstart')?25000:0, gear:relic('seasoned')?Object.fromEntries(Object.keys(GEAR).map(k=>[k,Math.min(2,GEAR[k].lv.length-1)])):fresh().gear, bait:relic('tacklebox')?S.bait:baitZero(), baitSel:relic('tacklebox')?S.baitSel:'worm', unlocked:['pond'], loc:'pond', cooler:[], bounties:[], setDone:{}, streak:0});
+      Object.assign(S,{money:relic('headstart')?25000:0, gear:relic('seasoned')?Object.fromEntries(Object.keys(GEAR).map(k=>[k,Math.min(2,GEAR[k].lv.length-1)])):fresh().gear, bait:relic('tacklebox')?S.bait:baitZero(), baitSel:relic('tacklebox')?S.baitSel:'worm', unlocked:['pond'], loc:'pond', cooler:[], bounties:[], setDone:{}, streak:0, voyCatch:{}});
       S.stats.runEarned=0; S.stats.runBw=0; confirmBox=null; fillBounties(); sfx.catch(4); toast('You set sail again with '+S.pearls+' Wisdom Pearls: +'+Math.round((coinMult()-1)*100)+'% coins and XP, and better rare odds'); break; }
     case 'resetok': { S=fresh(); S.savedAt=Date.now(); confirmBox=null; G.st='idle'; encLoc=null; encSel=null; fillBounties(); toast('Progress reset. A fresh start at Willow Pond.'); break; }
     case 'reroll': { const bo=S.bounties[i]; const c=Math.ceil(bo.reward*.1); if(S.money<c) return; S.money-=c; const L=bo.loc||S.loc; S.bounties[i]=makeBounty2(L)||makeBounty(L); break; }
-    case 'unlock': { const L=LOCS[locIdx(k)]; if(S.money<locCost(L)) return; S.money-=locCost(L); S.unlocked.push(k); S.loc=k; G.hot=null; fillBounties(); sfx.catch(2); toast('Welcome to '+L.name); break; }
+    case 'unlock': { const i=locIdx(k), L=LOCS[i]; if(!L||S.unlocked.includes(k)||S.money<locCost(L)||!unlockMet(i)||(i>0&&!S.unlocked.includes(LOCS[i-1].id))) return; /* the requirement is checked here too, not only on the button */ S.money-=locCost(L); S.unlocked.push(k); S.loc=k; G.hot=null; fillBounties(); sfx.catch(2); toast('Welcome to '+L.name); break; }
     case 'goto': if(G.st!=='idle') return; S.loc=k; G.hot=null; toast('Travelled to '+LOCS[locIdx(k)].name); break;
     case 'encloc': if(k==='junk'||LOCS[locIdx(k)]) encLoc=k; encSel=null; break;
     case 'bloc': bLoc=k; break;
