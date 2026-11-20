@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="DL Test iPhone">
 <script>
-window.DL_BUILD='ios'; window.DL_PREVIEW=true; window.DL_VERSION='2026.11.19-2100';
+window.DL_BUILD='ios'; window.DL_PREVIEW=true; window.DL_VERSION='2026.11.19-2358';
 window.addEventListener('beforeinstallprompt',function(e){ e.preventDefault(); window.__dlInstallPrompt=e; });
 </script>
 </head>
@@ -12566,7 +12566,7 @@ function nextGoal(){ if(!S.stats.caught) return {t:'Catch your first fish', sub:
   let last=''; const tick=()=>{ const show=(el.closest('.hud')||['idle','waiting','result','rest'].includes(G.st))&&!S.settings.hideGoal; let html='';
     if(show){ const gl=nextGoal(); html=`<span class="gl-k">${gl.ready?'Ready':gl.live?'Live':'Next goal'}</span><span class="gl-t">${esc(gl.t)}</span><span class="gl-s">${esc(gl.sub)}</span>${gl.p!=null?`<i class="gl-bar"><b style="width:${Math.round(clamp(gl.p,0,1)*100)}%"></b></i>`:''}`; el.classList.toggle('ready',!!gl.ready); el.classList.toggle('live',!!gl.live); el.title=(gl.sub?gl.sub+'. ':'')+(gl.tab?'Open the page for this goal':''); }
     if(html!==last){ last=html; el.innerHTML=html; el.hidden=!html; } };
-  setInterval(tick,700); tick(); })();
+  setInterval(tick,700); setTimeout(tick,0); })(); /* first tick after the whole script has loaded: at load time the Paths tables (cg_paths.js) do not exist yet, and a save with a Path chosen crashed the start (Cam, 2026-11-19) */
 
 // ---------------------------------------------------------------------
 // Top bar: only what you check constantly (coins, level, water, cooler, boosts, bait). The clock and weather move onto
