@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>DL Test check-up</title></head>
+<body style="margin:0;background:#0a161d;color:#e6efe8;font:14px/1.45 system-ui,sans-serif;padding:12px">
+<h2 style="margin:0 0 6px">DL Test check-up</h2>
+<p style="margin:0 0 10px;opacity:.8">Reads what the test app stored on this phone and starts the test app in the box below, catching any error. It changes nothing unless you press the button at the bottom. Saves are never touched. Screenshot the whole page and send it.</p>
+<pre id="out" style="white-space:pre-wrap;background:#14202b;border-radius:10px;padding:10px;font:12px/1.4 ui-monospace,Menlo,Consolas,monospace;margin:0 0 10px">Checking...</pre>
+<iframe id="f" style="width:100%;height:240px;border:1px solid #ffffff33;border-radius:10px;background:#000"></iframe>
+<p><button id="clr" style="font:700 14px system-ui;padding:12px 14px;border-radius:10px;border:0;background:#8a3a1f;color:#fff">Clear the test app's offline copy (keeps every save)</button></p>
+<pre id="out2" style="white-space:pre-wrap;font:12px ui-monospace,Menlo,Consolas,monospace"></pre>
+<script>
+(async function(){
+  const L=[], out=document.getElementById('out'), p=s=>{ L.push(s); out.textContent=L.join('\n'); };
+  p('Page: '+location.href.split('?')[0]); p('Phone: '+navigator.userAgent.slice(0,120)); p('Screen '+screen.width+'x'+screen.height+', window '+innerWidth+'x'+innerHeight);
+  // stored data: names and sizes only, never contents
+  try{ const ks=Object.keys(localStorage).sort(); p('Stored items ('+ks.length+'):'); for(const k of ks){ const v=localStorage.getItem(k)||''; let note=''; if(/^driftline-save/.test(k)){ try{ const o=JSON.parse(v); note=' save ok: level '+o.lvl+', v'+o.v+(o.pearlV!=null?', pearlV '+o.pearlV:'')+(o.savedAt?', saved '+new Date(o.savedAt).toLocaleString():''); }catch(e){ note=' SAVE DOES NOT READ: '+e.message; } } p('  '+k+' ('+v.length+' chars)'+note); } }catch(e){ p('Stored items: cannot read ('+e.message+')'); }
+  // offline helpers and their saved copies
+  try{ const regs=navigator.serviceWorker?await navigator.serviceWorker.getRegistrations():[]; p('Offline helpers ('+regs.length+'):'); for(const r of regs) p('  '+r.scope+(r.active?' (active)':'')+(r.waiting?' (update waiting)':'')); }catch(e){ p('Offline helpers: '+e.message); }
+  try{ const names=await caches.keys(); p('Saved copies: '+(names.join(', ')||'none')); for(const n of names){ const c=await caches.open(n); for(const req of await c.keys()){ if(!/driftline-test\/android/.test(req.url)) continue; const res=await c.match(req); const t=await res.clone().text(); const m=t.match(/window\.DL_VERSION='([^']*)'/); p('  '+req.url.replace(location.origin,'')+': '+t.length+' chars, stamp '+(m?m[1]:'?')+(/<\/html>\s*$/.test(t)?'':' CUT OFF (no end)')); } } }catch(e){ p('Saved copies: '+e.message); }
+  // the test app as the server has it now
+  let html=''; try{ const r=await fetch('android/index.html?nc='+Date.now(),{cache:'no-store'}); html=await r.text(); const m=html.match(/window\.DL_VERSION='([^']*)'/); p('Server copy: '+html.length+' chars, stamp '+(m?m[1]:'?')); }catch(e){ p('Server copy: cannot load ('+e.message+')'); }
+  // start it here with an error catcher in front of the game's own script
+  if(html){ const errs=[]; window.addEventListener('message',e=>{ if(e.data&&e.data.dlErr){ errs.push(e.data.dlErr); } });
+    const catcher='<base href="'+location.href.replace(/[^/]*$/,'')+'android/"><script>addEventListener("error",function(e){parent.postMessage({dlErr:(e.message||"error")+" (line "+e.lineno+":"+e.colno+")"},"*")},true);addEventListener("unhandledrejection",function(e){parent.postMessage({dlErr:"promise: "+(e.reason&&e.reason.message||e.reason)},"*")});<\/script>';
+    const i=html.indexOf('<script'); const f=document.getElementById('f'); f.srcdoc=html.slice(0,i)+catcher+html.slice(i);
+    p('Starting the test app in the box...'); await new Promise(r=>setTimeout(r,9000));
+    let state='?'; try{ const d=f.contentDocument; state=(d.body?d.body.className:'no page')+(d.getElementById('catdock')?' | side panel built':' | side panel NOT built'); }catch(e){ state='cannot look inside ('+e.message+')'; }
+    p('After 9 s: '+state); p('Errors while starting ('+errs.length+'):'); for(const e of errs.slice(0,8)) p('  '+e); }
+  document.getElementById('clr').onclick=async()=>{ const o=document.getElementById('out2'); const log=[];
+    try{ for(const r of await navigator.serviceWorker.getRegistrations()){ if(r.scope.indexOf('/driftline-test/')>=0){ await r.unregister(); log.push('removed offline helper '+r.scope); } }
+      for(const n of await caches.keys()){ const c=await caches.open(n); for(const req of await c.keys()){ if(req.url.indexOf('/driftline-test/')>=0){ await c.delete(req); log.push('removed saved copy '+req.url.replace(location.origin,'')); } } }
+      log.push('Done. Saves untouched. Now close the test app fully and open it again from the home screen.'); }catch(e){ log.push('Could not finish: '+e.message); }
+    o.textContent=log.join('\n'); };
+})();
+</script>
+</body></html>
