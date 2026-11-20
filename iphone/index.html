@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="DL Test iPhone">
 <script>
-window.DL_BUILD='ios'; window.DL_PREVIEW=true; window.DL_VERSION='2026.11.20-0241';
+window.DL_BUILD='ios'; window.DL_PREVIEW=true; window.DL_VERSION='2026.11.20-0330';
 window.addEventListener('beforeinstallprompt',function(e){ e.preventDefault(); window.__dlInstallPrompt=e; });
 </script>
 </head>
@@ -202,9 +202,9 @@ textarea:focus-visible{outline:2px solid var(--kelp);outline-offset:1px}
 @media (max-width:640px){.stylewrap{grid-template-columns:1fr}.detail{grid-template-columns:1fr}.detail canvas{margin:0 auto}}
 .evcard .in{width:min(440px,100%)}
 .chests{display:flex;gap:12px;justify-content:center;margin:12px 0}
-.chests button{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:6px;cursor:pointer}
+.chests button{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:6px;cursor:pointer;flex:1 1 0;min-width:0;max-width:170px}
 .chests button:hover{border-color:var(--gold)}
-.chests canvas{width:96px;height:72px;pointer-events:none}
+#evin .chests canvas{width:100%!important;height:auto!important;aspect-ratio:4/3;pointer-events:none} /* C18 (2026-11-20): the catch card's ".card canvas" sizes (160 px) beat the old 96 px rule, so three chests overflowed the pop-up; now they share its width */
 .setrow{display:grid;grid-template-columns:150px 1fr 48px;gap:10px;align-items:center;margin:6px 0}
 .setrow input[type=range]{width:100%;accent-color:var(--buoy)}
 .toggle{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid var(--line)}
@@ -507,7 +507,7 @@ const SP = [
  ['perch','pond','Pond Perch',0,.2,.9,9,1.5,'any',.3,'#8a9a3c','#f1e3a0',.36,'thrash',.4,'f',1,'Striped and stubborn for its size.'],
  ['minnow','pond','Fathead Minnow',0,.02,.1,5,.8,'any',.7,'#9aa58a','#e9e6c9',.32,'dart',.5,'f',0,'Tiny, twitchy, and everywhere.'],
  ['sunfish','pond','Pumpkinseed',0,.1,.4,8,1.2,'day',.4,'#c9802f','#ffd16a',.5,'thrash',.6,'f',2,'Orange-bellied and full of attitude.'],
- ['stickleback','pond','Stickleback',0,.01,.05,4,.8,'any',.7,'#7a8a5a','#d8e0b0',.3,'thrash',.6,'f',1,'Puffs out its spines at you. Adorable.'],
+ ['stickleback','pond','Stickleback',0,.01,.05,4,.8,'any',.7,'#7a8a5a','#d8e0b0',.3,'thrash',.6,'f',1,'This is how you remind me...'],
  ['roach','pond','Roach',0,.1,.6,7,1.3,'any',.35,'#9aa6ae','#e8b0a0',.38,'calm',.2,'f',0,'Red-eyed and silver. A dock regular.'],
  ['rudd','pond','Rudd',0,.1,.7,8,1.4,'day',.4,'#b0a060','#ff9a6a',.4,'dart',.3,'f',0,'Gold flanks, red fins, sunny mood.'],
  ['tadpole','pond','Giant Tadpole',0,.05,.3,6,.9,'any',.5,'#4a4a30','#8a8a5a',.5,'dart',.4,'f',0,'It refuses to become a frog.'],
@@ -929,7 +929,7 @@ const WEATHERS = [
   {k:'Clear',  w:31, note:'Calm skies. Nothing special.'},
   {k:'Rainbow', w:3, shiny:2, xp:1.3, note:'A rainbow over the water. Shinies ×2 and XP +30%.'},
   {k:'Rain',   w:22, bite:1.35, note:'Bites come 35% faster.'},
-  {k:'Fog',    w:15, fog:true, note:'Thick fog makes the water as dark as night: hard to see far, and night-only fish come out even by day.'},
+  {k:'Fog',    w:15, fog:true, note:'Heavy fog obscures fish, even the fish don’t know if it’s day or night.'},
   {k:'Storm',  w:11, rare:.5, str:1.2, note:'Much rarer fish, but they fight 20% harder.'},
   {k:'Gilded', w:8,  shiny:3, note:'Shiny fish are 3 times as common.'},
   {k:'Aurora', w:4,  xp:2, note:'The sky is putting on a show. XP ×2.'},
@@ -1584,7 +1584,7 @@ const fresh = () => ({v:3, money:0, xp:0, lvl:1, gear:{rod:0,reel:0,line:0,hook:
   perks:{}, bonusPts:0, tank:[], tankSlots:3, tankT:0, tankBank:0, feats:{}, pearls:0, tides:0, streak:0,
   buffs:[], look:{g:'m',skin:1,hair:1,shirt:'#3a6f9a',pat:'none',pants:'#2f3b4a',hat:'cap',hatCol:'#c8553a',hairStyle:'auto',beard:'none',glasses:'none',outfit:'none',outCol:'#d8a020',build:'average',eye:0,shoes:'boots',neck:'none',back:'none',accCol:'#c8553a',nose:'button',brows:'soft',mouth:'smile',blush:'on',aura:'none',bob:'none',line:'none',face:'natural',eyeShape:'round'},
   owned:{hats:['none','cap','bucket'],cols:[],pats:['none'],pets:['dog'],outfits:['none','vest'],glasses:['none','round'],shoes:['boots','sneakers','barefoot'],necks:['none'],backs:['none'],auras:[],bobs:[],lines:[]}, pet:'dog', junk:{}, tickets:0, freeSpins:1,
-  settings:{master:.8, music:.55, sfx:.7, amb:.5, musicOn:true, ambient:true, style:'auto', castMode:'meter', vibrate:true, minigames:true, rest:false, effects:true, boostsOnScreen:true, hints:true, protectRare:true, units:'kg', hand:'r', uiScale:'auto', renderQ:'auto'},
+  settings:{master:.8, music:.55, sfx:.7, amb:.5, musicOn:true, ambient:true, style:'auto', castMode:'meter', vibrate:true, minigames:true, rest:false, effects:true, wxPop:true, boostsOnScreen:true, hints:true, protectRare:true, units:'kg', hand:'r', uiScale:'auto', renderQ:'auto'},
   aq:{theme:'lagoon', sand:'gold', decor:[], hid:[], owned:['lagoon','gold']}, voyCatch:{}, titled:{}, nib:{}, pathXP:{}, pearlOld:0, pearlMig:1, pshop:{}, boons:{}, boonPts:0, passMig:1, fedT:0, wheelT:0, rankClaimed:0, tokens:{small:0,big:0,legend:0},
   gstats:{frenzy:0, frenzyFish:0, chests:0, stars:0, spins:0, crates:0, flips:0, flipWins:0, scratch:0, scratchWins:0, pets:0, tasks:0},
   petLook:{}, bond:{}, petTints:['none'], petAccs:['none','bandana'], scales:0, specs:{}, relics:[], castN:0,
@@ -1800,7 +1800,7 @@ function startCharge(){ if(S.cooler.length >= gv('cooler')){ toast(quip('full')+
   G.st='charging'; G.power=0; G.pdir=1; ac(); }
 function release(){ if(G.st!=='charging') return; G.st='flying'; G.t=0; G.lastCast=G.power; const tip=TIP(); G.from={x:tip.x,y:tip.y}; const x=castX(G.power); G.to={x, y:waterY(x)};
   G.inHot = !!(G.hot && Math.abs(G.power-G.hot.p) <= G.hot.r); if(G.inHot) G.hot=null; if(!G.inHot && maxed('caster') && G.power>.97){ G.inHot=true; toast('Bullseye!'); } sfx.cast(); }
-function beginWait(){ G.st='waiting'; G.waitT=0; const b=BAIT[S.baitSel]; const wx=weather();
+function beginWait(){ G.st='waiting'; G.waitT=0; G.missN=0; const b=BAIT[S.baitSel]; const wx=weather();
   const speed=biteSpeed(G.inHot);
   G.biteAt = rnd(1.4,4.6)/speed; S.castN=(S.castN||0)+1; if(maxed('patience') && S.castN%10===0) G.biteAt=.35; G.nib=[]; const n=Math.floor(Math.random()*3); for(let i=0;i<n;i++) G.nib.push(rnd(.5,Math.max(.6,G.biteAt-.4))); G.nibOn=0;
   splash(G.bob.x,G.bob.y,10); sfx.splash(); if(G.inHot){ splash(G.bob.x,G.bob.y,14); sfx.hot(); toast('Right in the hotspot! Rare fish are gathering.'); } }
@@ -1841,7 +1841,7 @@ function hookIt(){ const perfect = (G.waitT - (G.biteEnd - hookWin())) < .3*hook
   if(S.baitSel!=='worm'&&!pathSave()){ S.bait[S.baitSel]=Math.max(0,S.bait[S.baitSel]-1); if(S.bait[S.baitSel]===0) toast(BAIT[S.baitSel].name+' used up. Back to worms.'); renderBait(); save(); }
   G.st='reeling'; G.crank=0; G.d0=G.d= 6 + G.lastCast*gv('rod')*.6*rodCast(); G.maxOut = gv('rod')*rodCast() + 28 + rodSpool(); G.ten=10; G.sta=1; G.temper=0; G.run=false; G.runT=rnd(.5,1.1); G.ev=null; G.evT=rnd(1,2.2); G.hold=false; tone(660,.08,'square',.05);
   G.fightT=0; G.saved=false; G.eat=null; G.eatDone=false; G.behT=0; G.surge=null; G.surgeN=0;
-  if(G.fish.kind==='fish'){ const fp=fishPull(G.fish), as=anglerStr(); if(fp>as) setTimeout(()=>toast('Heavy fish: it pulls '+strTxt(fp)+', more than your Angler strength ('+strTxt(as)+'). Let it run, reel when it rests.'),300); else if(fightWill(G.fish)>=.66&&G.fish.shiny!==2) setTimeout(()=>toast('Something big is on the line. Watch it closely.'),300); }
+  if(G.fish.kind==='fish'){ const fp=fishPull(G.fish), as=anglerStr(); if(fp>as) setTimeout(()=>toast(Math.round(wNum(fp))-Math.round(wNum(as))>=10?'Good luck, this fish is out of your league!':'Prepare for a fight, this fish is strong!'),300); /* C8 (director + Cam, 2026-11-20): never "heavier", no numbers unless 10+ stronger than you */ else if(fightWill(G.fish)>=.66&&G.fish.shiny!==2) setTimeout(()=>toast('Something big is on the line. Watch it closely.'),300); }
   G.eatAt = G.forceEat ? (G.forceEat=false, .5) : (G.fish.kind==='fish' && !isPredator(G.fish.sp) && G.fish.sp.r<=2 && Math.random()<.05*pathMul('eat')) ? rnd(1.4,3.8) : null; /* 0.4.9: half as often (director: "slightly rarer") */
   if(G.fish.kind==='fish' && G.fish.shiny===2) setTimeout(()=>toast('It shimmers like nothing you have seen. It will fight every way a fish can.'),400);
   if(G.fish.kind==='fish' && G.fish.hy) setTimeout(()=>toast(G.fish.kg>(G.fish.sp.min+G.fish.sp.max)/2?'This feels far too heavy for what it looks like...':'Strangely light on the line...'),600);
@@ -1851,7 +1851,7 @@ function endFight(kind){
   if(kind==='caught'){ G.st='landing'; G.land={t:0, dur:.85, x0:G.bob.x, y0:G.bob.y}; splash(G.bob.x,G.bob.y,24); sfx.pull(); return; }
   G.st='idle'; G.fish=null; G.inHot=false; if(kind!=='nohook') breakStreak(); /* director 2026-11-18: a missed strike keeps the streak; only a hooked fish that gets away ends it */
   if(kind==='snap'){ S.stats.snapped++; sfx.snap(); toast((G.temper>1.6 ? 'Snap! It lost its temper. Let go now and then. ' : 'Snap! Ease off when it runs. ')+quip('snap')); checkFeats(); save(); }
-  else if(kind==='nohook'){ sfx.lost(); toast(S.streak>=2?'Too slow: it swam off, but your streak of '+S.streak+' is safe. Strike on the big splash.':'Too slow: it bit and swam off. Strike on the big splash.'); } /* a missed strike said "slipped off the hook" before */
+  else if(kind==='nohook'){ sfx.lost(); toast('Missed a bite'); } /* a missed strike said "slipped off the hook" before */
   else { sfx.lost(); toast((kind==='spool' ? 'It ran out all your line. ' : 'It slipped off the hook. ')+quip('lost')); }
 }
 function finishCatch(){ const f=G.fish; G.land=null; if(!f){ G.st='idle'; return; } if(V3ON) vib([30,40,70]);
@@ -2017,7 +2017,7 @@ function down(e){
     case 'frenzy': frenzyHit(e); break;
     case 'rest': toast('You are resting. Press the Rest button (bottom left of the water) to fish yourself.'); break;
     case 'idle': if(V3ON && aimCast(e)) break; startCharge(); break;
-    case 'waiting': G.st='idle'; G.inHot=false; toast(S.streak>=2?'Reeled in early: no harm done, your streak of '+S.streak+' is safe. Wait for the big splash.':'Reeled in early. Wait for the big splash.'); break; /* director 2026-11-18: an early reel or an accidental cast is never punished */
+    case 'waiting': G.st='idle'; G.inHot=false; toast('Reeled in early'); break; /* director 2026-11-18: an early reel or an accidental cast is never punished */
     case 'bite': hookIt(); break;
     case 'reeling': G.hold=true; break;
     case 'result': hideCard(); break;
@@ -2040,7 +2040,7 @@ function update(dt){ if(V3ON) padPoll(); if(G.st==='rest') restTick(dt);
   else if(G.st==='waiting'){ G.waitT+=dt; G.nibOn=Math.max(0,G.nibOn-dt);
     for(let i=G.nib.length-1;i>=0;i--) if(G.waitT>=G.nib[i]){ G.nib.splice(i,1); G.nibOn=.3; sfx.nibble(); }
     if(G.waitT>=G.biteAt){ G.pend=G.forced||chooseCatch(); G.forced=null; G.st='bite'; G.biteEnd=G.waitT+hookWin(); sfx.bite(); splash(G.bob.x,G.bob.y,12); if(V3ON) vib(45); } }
-  else if(G.st==='bite'){ G.waitT+=dt; if(G.waitT>G.biteEnd){ G.pend=null; endFight('nohook'); } }
+  else if(G.st==='bite'){ G.waitT+=dt; if(G.waitT>G.biteEnd){ G.pend=null; G.missN=(G.missN||0)+1; if(G.missN<5){ sfx.lost(); toast('Missed a bite'); G.st='waiting'; G.waitT=0; G.biteAt=rnd(1.4,4.6)/biteSpeed(G.inHot); G.nib=[]; G.nibOn=0; } else { G.missN=0; endFight('nohook'); } } } /* C3 (director + Cam, 2026-11-20): a missed bite keeps the line out; the 5th in a row reels in */
   else if(G.st==='reeling'){ fight(dt); }
   else if(G.st==='landing'){ G.land.t+=dt; if(G.land.t>=G.land.dur) finishCatch(); }
   for(let i=G.parts.length-1;i>=0;i--){ const p=G.parts[i]; p.t+=dt; p.x+=p.vx*dt; p.y+=p.vy*dt; p.vy+=420*dt; if(p.t>p.life) G.parts.splice(i,1); }
@@ -2068,7 +2068,7 @@ const fishPull = s => s.str*4/3;
 const anglerStr = () => gv('line')/tensionMult();
 const strTxt = v => Math.round(wNum(v))+' '+wUnit();
 function strStand(sps){ const ps=sps.map(fishPull), lo=Math.min(...ps), hi=Math.max(...ps), a=anglerStr(); return {lo, hi, a, beat:ps.filter(p=>p<=a).length, n:ps.length, pos:clamp((a-lo)/Math.max(1,hi-lo),0,1)}; }
-function strStandHTML(sps){ const s=strStand(sps); return `<div class="meta strst" title="Angler strength comes from your Line (Tackle) and skills that lower tension. Fish stronger than you are heavy: let them run, reel when they rest.">Fish ${strTxt(s.lo)}–${strTxt(s.hi)} <span class="strbar" aria-hidden="true"><i style="left:${(s.pos*100).toFixed(0)}%"></i></span> you ${strTxt(s.a)} · stronger than ${s.beat} of ${s.n}</div>`; }
+function strStandHTML(sps){ const s=strStand(sps); return `<div class="meta strst" title="Angler strength comes from your Line (Tackle) and skills that lower tension. Fish stronger than you put up a fight: let them run, reel when they rest.">Fish ${strTxt(s.lo)}–${strTxt(s.hi)} <span class="strbar" aria-hidden="true"><i style="left:${(s.pos*100).toFixed(0)}%"></i></span> you ${strTxt(s.a)} · stronger than ${s.beat} of ${s.n}</div>`; }
 document.head.insertAdjacentHTML('beforeend','<style>.strst{white-space:normal;overflow-wrap:anywhere}.strst .strbar{white-space:nowrap}.strbar{display:inline-block;position:relative;width:56px;height:6px;border-radius:3px;margin:0 4px;vertical-align:middle;background:linear-gradient(90deg,#5ad8b0,#ffd36a,#ff7a5a)}.strbar i{position:absolute;top:-3px;width:4px;height:12px;margin-left:-2px;background:#fff;border-radius:2px;box-shadow:0 0 3px #000c}</style>');
 // Legendary and mythic fish have a signature surge: halfway in (and again near the end for mythics) they make one long,
 // heavy run with a burst of spray, then go still for a moment, then leap. Watching the fish beats it; holding loses it.
@@ -2701,7 +2701,7 @@ function draw(now){
     const grd=g.createLinearGradient(bxx,0,bxx+bw,0); grd.addColorStop(0,'#7fc8a9'); grd.addColorStop(.8,'#ffc94d'); grd.addColorStop(1,'#ff6a3d'); g.fillStyle=grd; rr(bxx,byy,bw*G.power,14,5); g.fill();
     g.strokeStyle='rgba(255,255,255,.5)'; g.beginPath(); g.moveTo(bxx+bw*farAt(),byy-2); g.lineTo(bxx+bw*farAt(),byy+16); g.stroke();
     const inHot = G.hot && Math.abs(G.power-G.hot.p)<=G.hot.r;
-    g.fillStyle=inHot?'#ffc94d':'#e6efe8'; g.font='700 12px system-ui'; g.textAlign='center'; g.fillText(inHot?'Over the hotspot: release!':G.power>farAt()?'Far cast: better fish':'Cast power', W/2, byy-9);
+    g.fillStyle=inHot?(G.hot.col||'#ffc94d'):'#e6efe8'; g.font='700 12px system-ui'; g.textAlign='center'; g.fillText(G.power>farAt()?'Far cast: better fish':'Cast power', W/2, byy-9); /* C2: over a hotspot only the colour changes (the hotspot's colour) */
     const x=castX(G.power), wy=waterY(x); /* the aim marker: a dark halo under a bright ring and a centre pin, so it reads on bright water and in strong light */
     g.lineWidth=4.5; g.strokeStyle='rgba(6,14,22,.55)'; g.beginPath(); g.ellipse(x,wy,12,3.8,0,0,7); g.stroke();
     g.lineWidth=2; g.strokeStyle=inHot?'rgba(255,214,90,1)':'rgba(255,120,70,.98)'; g.setLineDash([5,3]); g.lineDashOffset=-performance.now()/60; g.beginPath(); g.ellipse(x,wy,12,3.8,0,0,7); g.stroke(); g.setLineDash([]); g.lineDashOffset=0;
@@ -2728,7 +2728,7 @@ function drawFightHUD(t){
   g.fillRect(x-2+shake,y1-h*ten,14,h*ten);
   g.fillStyle='#e6efe8'; g.font='700 10px system-ui'; g.textAlign='center'; g.fillText('LINE',x+5,y0-12);
   const px=14, py=14, pw=Math.min(260,W*.46); g.fillStyle='rgba(5,14,20,.75)'; rr(px,py,pw,72,10); g.fill();
-  const odd = G.fish&&G.fish.kind!=='fish', msg = odd ? (G.ev==='snag' ? 'Snagged! Let go a moment' : G.ten>60 ? 'The line is straining! Ease off' : G.hold ? 'Dead weight: reel in short pulls' : 'Hold to reel, in short pulls') : G.ev==='jump' ? 'It jumped! Let go!' : G.ev==='shake' ? 'Head shake! Ease off' : G.run ? 'It’s running! Ease off' : G.temper>1.7&&G.hold ? 'It’s getting angry! Let go a moment' : G.hold ? 'Reeling…' : 'Hold to reel';
+  const odd = G.fish&&G.fish.kind!=='fish', msg = odd ? (G.ev==='snag' ? 'Snagged!' : G.ten>60 ? 'The line is straining! Ease off' : 'Dead Weight') : G.ev==='jump' ? 'It jumped! Let go!' : G.ev==='shake' ? 'Head shake! Ease off' : G.run ? 'It’s running!' : G.temper>1.7&&G.hold ? 'Careful!' : G.hold ? 'Reeling…' : 'Hold to reel';
   g.fillStyle = (G.ev||G.run||G.temper>1.7) ? '#ffc94d' : '#e6efe8'; g.textAlign='left'; g.font='800 15px "Bricolage Grotesque", system-ui'; g.fillText(msg, px+10, py+20);
   g.font='700 12px system-ui'; g.fillStyle='#8aa5a2'; g.fillText(Math.max(0,G.d).toFixed(1)+' m out', px+10, py+38);
   const bw=pw*.5-50; g.fillText('Fight', px+pw*.5, py+38); g.fillStyle='#0a161d'; rr(px+pw*.5+44,py+30,bw,7,3); g.fill(); g.fillStyle='#ff6a3d'; rr(px+pw*.5+44,py+30,bw*G.sta,7,3); g.fill();
@@ -2914,7 +2914,7 @@ function renderSettings(P){ const s=S.settings; const sl=(k,label)=>`<div class=
      ${tg('musicOn','Music','Calm music that plays while you fish.')}${tg('ambient','Nature sounds','Waves, birds, crickets and wind for each water.')}
      <h5>Music style</h5><div class="chips">${styles.map(([k,n])=>`<button class="chipb" data-act="mstyle" data-k="${k}" aria-pressed="${s.style===k}">${n}</button>`).join('')}</div></div>
    ${V3ON?`<div class="tile"><h4>Controls</h4><h5>Casting</h5><div class="chips"><button class="chipb" data-act="castmode" data-k="meter" aria-pressed="${s.castMode!=='aim'}">Power meter</button><button class="chipb" data-act="castmode" data-k="aim" aria-pressed="${s.castMode==='aim'}">Tap to aim</button></div><div class="meta" style="margin-top:6px">${s.castMode==='aim'?'Tap the spot on the water you want. The line lands close to it, never quite perfect.':'Hold to fill the meter, let go at the right moment.'}</div>${tg('vibrate','Vibration','Phones buzz on a bite, when the line is close to snapping, and on a catch.')}<div class="meta" style="margin-top:6px">Reel by <b>holding</b>, by <b>drawing circles</b> on the water like a crank, or with the <b>mouse wheel</b>. Controllers work too: <b>A</b> casts and reels, the <b>right trigger</b> reels with pressure.</div></div>`:''}
-   <div class="tile"><h4>Display</h4>${tg('effects','Weather effects','Rain, snow, lightning flashes and sparkles.')}${tg('boostsOnScreen','Boost timers on screen','Show active boosts in the corner of the water.')}${tg('hints','Hints','The help line under the water.')}<h5>Weights</h5><div class="chips"><button class="chipb" data-act="units" data-k="kg" aria-pressed="${s.units!=='lb'}">Kilograms (kg)</button><button class="chipb" data-act="units" data-k="lb" aria-pressed="${s.units==='lb'}">Pounds (lb)</button></div><h5>Rod hand</h5><div class="chips"><button class="chipb" data-act="hand" data-k="r" aria-pressed="${s.hand!=='l'}">Right-handed</button><button class="chipb" data-act="hand" data-k="l" aria-pressed="${s.hand==='l'}">Left-handed</button></div>${tg('showFps','Frame rate','Shows how many frames per second the game draws, in the corner of the water.')}
+   <div class="tile"><h4>Display</h4>${tg('effects','Weather effects','Rain, snow, lightning flashes and sparkles.')}${tg('wxPop','Weather pop-ups','A short note when the weather changes.')}${tg('boostsOnScreen','Boost timers on screen','Show active boosts in the corner of the water.')}${tg('hints','Hints','The help line under the water.')}<h5>Weights</h5><div class="chips"><button class="chipb" data-act="units" data-k="kg" aria-pressed="${s.units!=='lb'}">Kilograms (kg)</button><button class="chipb" data-act="units" data-k="lb" aria-pressed="${s.units==='lb'}">Pounds (lb)</button></div><h5>Rod hand</h5><div class="chips"><button class="chipb" data-act="hand" data-k="r" aria-pressed="${s.hand!=='l'}">Right-handed</button><button class="chipb" data-act="hand" data-k="l" aria-pressed="${s.hand==='l'}">Left-handed</button></div>${tg('showFps','Frame rate','Shows how many frames per second the game draws, in the corner of the water.')}
      <div class="toggle"><div><b>Full screen</b><div class="meta">Fill the whole screen with the game.</div></div><button class="btn alt sm" data-act="fullscreen">Toggle</button></div></div>
    <div class="tile"><h4>Gameplay</h4>${tg('protectRare','Protect rare fish','“Sell all” keeps Epic, Legendary and shiny fish in your cooler.')}${tg('minigames','Mini-games','Now and then a mini-game pops up between catches. Turn this off and they never will.')}
      </div>
@@ -3608,7 +3608,7 @@ function petTap(id){ const today=dayKey(); const b=S.bond[id]||(S.bond[id]={xp:0
   if(maxed('petpal') && Date.now()-(S.petGiftT||0)>3600000 && Math.random()<.35){ S.petGiftT=Date.now(); const r=Math.random(); let gift;
     if(r<.4){ gift=fmt(earn(bestLoot()*rnd(2,5)*coinMult()))+' coins'; } else if(r<.75){ const sc=rint(3,8); S.scales+=sc; gift=sc+' Scales'; } else { const opts=Object.keys(BAIT).filter(k=>k!=='worm'&&!BAIT[k].junk&&!BAIT[k].scales); const k=pick(opts); S.bait[k]+=5; renderBait(); gift='5 '+BAIT[k].name; }
     setTimeout(()=>toast(petName(id)+' brought you a gift: '+gift+'!'),600); sfx.coin(); }
-  refreshPetInfo(); const after=bondLevel(id); if(after>before){ toast(petName(id)+' feels closer to you. Bond level '+after+'! (+'+after*5+'% pet bonus)'); sfx.shiny(); } else if(Math.random()<.25) toast(petName(id)+' '+quip('pet')+'.');
+  refreshPetInfo(); const after=bondLevel(id); if(after>before){ toast(petName(id)+' feels closer to you. Bond level '+after+'! (+'+after*5+'% pet bonus)'); sfx.shiny(); } else if(Math.random()<.25) toast(petName(id)+' '+pick(QUIPS.pet.filter(q=>q!=='purrs'||/cat|kitten|tiger|lynx/.test(id)))+'.'); /* C10: only cats purr (Lily is a dog) */
   checkFeats(); save(); }
 function petBondText(id){ const bl=bondLevel(id), b=S.bond[id], p=PETI[id], fav=id===S.pet; const val=fav?petVal(id):petVal(id)*compShare();
   return `Bonus: <span class="aq">${fmtB(p.k,val)}</span>${bl?' (bond +'+bl*5+'%)':''}${fav?'':' ('+Math.round(compShare()*100)+'% as your companion, rising with bond)'}. ${bl<10?`Pet them to grow closer: ${b?b.xp:0} / ${Math.pow(bl+1,2)*4}. Up to 25 pets a day count${b&&b.today>=25?' (that’s today’s 25!)':''}${fav?', and favourites bond twice as fast':''}.`:'You’re best friends.'}`; }
@@ -10370,6 +10370,16 @@ function baitRow([k,b]){ const using=S.baitSel===k;
   return `<div class="tk-row ${using?'on':''}"><div class="tk-main"><div class="row" style="gap:8px;align-items:baseline"><b>${b.name}</b><span class="meta">You have ${S.bait[k]||0}</span>${using?'<span class="badge g">In use</span>':''}</div>
     <div class="meta">${esc(b.note)}</div><div class="badges" style="justify-content:flex-start;margin-top:4px">${baitChips(b)}</div></div>
     <div class="tk-acts">${buy}<button class="btn alt sm" data-act="usebait" data-k="${k}" ${S.bait[k]>0&&!using?'':'disabled'}>${using?'In use':'Use'}</button></div></div>`; }
+/* C16 (director + Cam, 2026-11-20): bait in three groups (Everyday bait, Water baits, Favourite foods), each sorted by purchase price
+   (coins first, then Scales), each group folds, and the page opens folded. One place for phones, PC windows and full-screen PC. */
+const BAIT_GROUPS=[['Everyday bait','Works at every water'],['Water baits','Each one is best at its own water'],['Favourite foods','Every fish loves one food and dislikes one: the Fish Log shows which']];
+const baitGrp=b=>b.junk?3:b.food?2:b.loc?1:0, baitCost=b=>b.scales?1e15+b.scales:(b.price||0);
+const baitSorted=list=>list.slice().sort((x,y)=>baitGrp(x[1])-baitGrp(y[1])||baitCost(x[1])-baitCost(y[1]));
+let baitFold=[true,true,true];
+const baitFoldHead=(g,n,open)=>`<button type="button" class="bt-fold" data-act="baitfold" data-k="${g}" aria-expanded="${open}"><span class="bt-fold-t">${BAIT_GROUPS[g][0]} <em>${n}</em></span><span class="bt-fold-s">${BAIT_GROUPS[g][1]}</span></button>`;
+function baitGroupsHTML(list){ const L=baitSorted(list); return '<div class="tk-list tk-groups">'+[0,1,2].map(g=>{ const rows=L.filter(e=>baitGrp(e[1])===g); if(!rows.length) return ''; const open=!baitFold[g]; return baitFoldHead(g,rows.length,open)+(open?`<div class="tk-list">${rows.map(baitRow).join('')}</div>`:''); }).join('')+'</div>'; } /* one wrapper: the phone Bait page copies the shop's .tk-list */
+{ const _st=setTab; setTab=function(t){ if(t!==S.tab) baitFold=[true,true,true]; return _st.apply(this,arguments); }; } /* every visit opens folded */
+{ const _ea=extraAct7; extraAct7=function(b){ if(b.dataset.act==='baitfold'){ const g=+b.dataset.k; if(g>=0&&g<3) baitFold[g]=!baitFold[g]; return 'render'; } if(b.dataset.act==='tackleview'&&b.dataset.k==='bait') baitFold=[true,true,true]; return _ea(b); }; }
 function renderShop(P){ const shopBait=Object.entries(BAIT).filter(([k,b])=>k!=='worm'&&!b.junk), junkBait=Object.entries(BAIT).filter(([k,b])=>b.junk), cur=BAIT[S.baitSel]||BAIT.worm;
   const gearTiles = Object.entries(GEAR).map(([k,G2])=>{ const lv=S.gear[k], max=G2.lv.length-1, next=lv<max?G2.cost[lv+1]:0;
     return `<div class="tile"><div class="row spread"><h4>${G2.name}</h4><span class="meta">Level ${lv+1} / ${max+1}</span></div><div class="pips">${G2.lv.map((_,i)=>`<i class="${i<=lv?'on':''}"></i>`).join('')}</div>
@@ -10379,7 +10389,7 @@ function renderShop(P){ const shopBait=Object.entries(BAIT).filter(([k,b])=>k!==
   P.innerHTML=`<h2>Tackle shop</h2><p class="sub">Stronger line and a faster reel land heavier fish. Better bait brings rarer fish; one bait is used each time you set the hook.</p>
    <div class="tile tk-cur"><span class="meta">Bait in use</span><b>${cur.name}</b>${S.baitSel!=='worm'?`<span class="meta">${S.bait[S.baitSel]||0} left</span><button class="btn alt sm" data-act="usebait" data-k="worm">Switch to worms</button>`:'<span class="meta">Free and endless</span>'}</div>
    <div class="bwx-nav" role="tablist">${[['gear','Gear'],['bait','Bait · '+shopBait.length],['lures','Special lures · '+owned+'/'+junkBait.length]].map(([k,n])=>`<button role="tab" data-act="tackleview" data-k="${k}" aria-selected="${tackleView===k}">${n}</button>`).join('')}</div>
-   ${tackleView==='bait'?`<div class="tk-list">${shopBait.map(baitRow).join('')}</div>`
+   ${tackleView==='bait'?baitGroupsHTML(shopBait)
     :tackleView==='lures'?`<p class="sub">These can’t be bought. They come out of junk you fish up: cheese, disco balls, magnets, gold.</p><div class="tk-list">${junkBait.map(baitRow).join('')}</div>`
     :`<div class="grid">${gearTiles}</div>`}`; };
 const _extraAct2_2 = extraAct2;
@@ -10387,6 +10397,9 @@ extraAct2 = function(b){ if(b.dataset.act==='tackleview'){ tackleView=b.dataset.
 document.head.insertAdjacentHTML('beforeend',`<style>
 #panel .tk-cur{display:flex;flex-direction:row;align-items:center;gap:10px;flex-wrap:wrap;margin:10px 0}
 .tk-list{display:flex;flex-direction:column;gap:8px}
+.bt-fold{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:2px 10px;width:100%;margin:10px 0 6px;padding:10px 12px;border-radius:12px;background:var(--glass,#16243a);border:1px solid var(--line);color:#fff;text-align:left;cursor:pointer;font:inherit}
+.bt-fold::after{content:"Show";grid-column:2;grid-row:1 / span 2;font:700 12px system-ui;color:#7fe3c4}.bt-fold[aria-expanded="true"]::after{content:"Hide";color:#9fb2c8}
+.bt-fold-t{font:800 15px var(--display,system-ui)}.bt-fold-t em{font-style:normal;font-weight:700;font-size:12px;color:#9fb2c8;margin-left:4px}.bt-fold-s{grid-column:1;font:600 12px system-ui;color:#9fb2c8}
 .tk-row{display:flex;gap:12px;align-items:center;justify-content:space-between;padding:10px 12px;border-radius:14px;background:var(--glass,#16243a);border:1px solid var(--line);box-shadow:inset 0 1px 0 #ffffff10}
 .tk-row.on{border-color:#ffd36a66;box-shadow:inset 0 1px 0 #ffffff10,0 0 18px #ffd36a1a}
 .tk-main{min-width:0;flex:1}
@@ -11298,7 +11311,7 @@ function tankMove(f,sp,i,t,w,h,L){ let m=TANK_MV.get(f); if(!m){ const hs=hashSt
 // Tapping anywhere else keeps it in the cooler, as always. (The Cooler stays a normal menu tab.)
 // =====================================================================
 const _showCard_cq = showCard;
-showCard = function(o){ _showCard_cq(o); const old=$('cardq'); if(old) old.remove(); const ce=G.lastEntry; G.lastEntry=null; if(!ce||!S.cooler.includes(ce)) return;
+showCard = function(o){ _showCard_cq(o); const old=$('cardq'); if(old) old.remove(); const ce=G.lastEntry; G.lastEntry=null; if(!ce||!S.cooler.includes(ce)){ const t=$('cardin').querySelector('.tap'); if(t) t.textContent=TOUCH?'Tap to dismiss':'Click to dismiss'; return; } /* C1 (director + Cam, 2026-11-20): an oddity or other non-fish catch kept the last fish card's "keep it in your cooler" line */
   const tankFree=S.tank.length<aqCap(), price=salePrice(ce), d=document.createElement('div'); d.id='cardq'; d.className='cardq';
   d.innerHTML=`<button class="btn sm" data-q="sell">Sell · <span class="coin">${fmt(price)}</span></button><button class="btn alt sm" data-q="tank" ${tankFree?'':'disabled title="Your aquarium is full"'}>To aquarium</button>`;
   const tap=$('cardin').querySelector('.tap'); $('cardin').insertBefore(d,$('cardbadges'));
@@ -11330,7 +11343,7 @@ renderCooler = function(P){ _renderCooler_034(P); const btn=P.querySelector('[da
   const sel=(k,list,cur)=>`<select data-sf="${k}">${list.map(([v,n])=>`<option value="${v}" ${String(cur)===String(v)?'selected':''}>${n}</option>`).join('')}</select>`;
   // 0.3.4.3: the price is typed in (plain numbers or 50k / 1.2m); empty means any price
   const pv=+s.sellP>0?fmtShort(+s.sellP):'';
-  btn.insertAdjacentHTML('beforebegin',`<div class="sellf"><span class="meta">Sell</span>${sel('sellR',SELL_RAR,s.sellR||'all')}<label class="sellp"><span>under</span><input data-sp type="text" inputmode="decimal" autocomplete="off" placeholder="any price" value="${pv}" aria-label="Only sell fish worth less than this"></label>${+s.sellP>0?'<button class="btn alt sm" data-spclear title="Clear the price limit">×</button>':''}<button class="chipb sellsh" data-ssh aria-pressed="${sellShinyOn()}" title="When on, Sell all also sells shiny fish"><span class="ssh-star" aria-hidden="true">✦</span> Sell shinies too</button></div>`);
+  btn.insertAdjacentHTML('beforebegin',`<div class="sellf"><span class="meta">Sell</span>${sel('sellR',SELL_RAR,s.sellR||'all')}<label class="sellp"><span>under</span><input data-sp type="text" inputmode="decimal" autocomplete="off" placeholder="any price" value="${pv}" aria-label="Only sell fish worth less than this"></label>${+s.sellP>0?'<button class="btn alt sm" data-spclear title="Clear the price limit">×</button>':''}<button class="chipb sellsh" data-ssh aria-pressed="${sellShinyOn()}" title="When on, Sell all also sells shiny fish"><span class="ssh-star" aria-hidden="true">✦</span> Sell shinies too</button>${(()=>{ const n=S.cooler.filter(f=>!sellKeep(f)).length; return `<button class="btn alt sm" data-act="scrapall" ${n?'':'disabled'} title="Scrap every fish Sell all would sell, for Fish Nibbles">Scrap ${sellFilterOn()?'matching':'all'} (${n})</button>`; })()}</div>`); /* C11: Scrap all lives in the filter row, so it uses the same filters and travels with them on every layout */
   const ssh=P.querySelector('[data-ssh]'); if(ssh) ssh.onclick=()=>{ S.settings.sellShiny=!sellShinyOn(); save(); renderPanel(); };
   P.querySelectorAll('[data-sf]').forEach(el=>el.onchange=()=>{ S.settings[el.dataset.sf]=el.value; save(); renderPanel(); });
   const inp=P.querySelector('[data-sp]'); if(inp){ const apply=()=>{ const v=sellParse(inp.value); if(v===+S.settings.sellP||(!v&&!(+S.settings.sellP))){ inp.value=v?fmtShort(v):''; return; } S.settings.sellP=v; save(); renderPanel(); };
@@ -12349,7 +12362,7 @@ const SEARCH_IDX=[
  ['Settings: patch notes','settings','Patch notes','patch notes updates whats new changes'],
  ['Settings: save & codes','settings','Save & codes','save code backup restore erase'],
  ['Stats','stats',null,'stats numbers odds income'],
- ['Angler strength (heavy fish)','stats',null,'angler strength heavy fish line strong weak pull'],
+ ['Angler strength (strong fish)','stats',null,'angler strength heavy strong fish line weak pull fight'],
  ['Fish Nibbles (scrap and feed)','cooler',null,'nibbles nibble scrap candy feed level up upgrade favourite fish aquarium'],
  ['Save: move to another device','save','Move to another device','transfer phone pc move progress code'],
 ];
@@ -12942,7 +12955,7 @@ document.head.insertAdjacentHTML('beforeend',`<style>
 // =====================================================================
 const ACT_OK=(()=>{ const has=(arr,k)=>arr.some(x=>(Array.isArray(x)?x[0]:x&&x.id)===k), colon=k=>typeof k==='string'&&/^[\w-]+:[\w-]*$/.test(k), idx=(i,a)=>Number.isInteger(i)&&i>=0&&i<a.length;
   const pv={wood:k=>has(DOCK_WOODS,k), style:k=>has(DOCK_STYLES,k), decor:k=>!!DOCKI[k]}, apv={theme:k=>has(THEMES,k), sand:k=>has(SANDS,k), decor:k=>!!DECORI[k]};
-  return { buygear:k=>!!GEAR[k], unlock:k=>LOCS.some(L=>L.id===k)&&!S.unlocked.includes(k), goto:k=>S.unlocked.includes(k)&&LOCS.some(L=>L.id===k),
+  return { scrapall:()=>true, coolsort:k=>['recent','old','value','aq','species'].includes(k), baitfold:k=>['0','1','2'].includes(String(k)), /* C16 bait groups (u_tackle.js) */ buygear:k=>!!GEAR[k], unlock:k=>LOCS.some(L=>L.id===k)&&!S.unlocked.includes(k), goto:k=>S.unlocked.includes(k)&&LOCS.some(L=>L.id===k),
     reroll:(k,i)=>idx(i,S.bounties), claim:(k,i)=>idx(i,S.bounties), sell:(k,i)=>idx(i,S.cooler), totank:(k,i)=>idx(i,S.cooler), untank:(k,i)=>idx(i,S.tank),
     rodup:k=>!!ROD_I[k], rodbuy:k=>!!ROD_I[k], rodeq:k=>!!ROD_I[k], attbuy:k=>has(ATTS,k),
     buyoffer:colon, bwbuy:colon, rodatt:colon, spec:colon, tryon:colon, petpv:colon,
@@ -15236,18 +15249,22 @@ const NIB_WORD = n => n+' Nibble'+(n===1?'':'s');
 
 // scrap and feed
 let NIB_ANIM=null;
-function nibScrap(i){ const f=S.cooler[i]; if(!f||!SPI[f.id]) return 'skip'; const sp=SPI[f.id], ok=Math.random()<nibOdds(f); S.cooler.splice(i,1);
-  S.stats.scrapped=(S.stats.scrapped||0)+1;
-  if(ok){ const n=nibAmount(f)+(maxed('nibbler')?1:0)+Math.round(pathAdd('nibplus')); S.nib=S.nib||{}; S.nib[sp.id]=nibOf(sp.id)+n; sfx.coin(); toast('Scrapped: +'+NIB_WORD(n)+' for '+sp.name+'. Feed them to a '+sp.name+' in your Aquarium.'); }
-  else toast('Scrapped the '+sp.name+', but no Nibbles this time.');
+/* one fish: removes it and returns the Nibbles it gave (0 on a miss); shared by Scrap and Scrap all */
+function nibScrapOne(f){ const sp=SPI[f.id], ok=Math.random()<nibOdds(f); S.stats.scrapped=(S.stats.scrapped||0)+1;
+  if(!ok) return 0; const n=nibAmount(f)+(maxed('nibbler')?1:0)+Math.round(pathAdd('nibplus')); S.nib=S.nib||{}; S.nib[sp.id]=nibOf(sp.id)+n; return n; }
+function nibScrap(i){ const f=S.cooler[i]; if(!f||!SPI[f.id]) return 'skip'; const sp=SPI[f.id]; S.cooler.splice(i,1); const n=nibScrapOne(f);
+  if(n){ sfx.coin(); toast('Scrapped: +'+NIB_WORD(n)+' for '+sp.name+'. Feed them to a '+sp.name+' in your Aquarium.'); } else toast('Scrapped the '+sp.name+', but no Nibbles this time.');
   return 'render'; }
+/* C11 (director + Cam, 2026-11-20): Scrap all, like Sell all and with the same filters (what Sell all would sell gets scrapped) */
+function nibScrapAll(){ const go=S.cooler.filter(f=>!sellKeep(f)&&SPI[f.id]); if(!go.length) return 'skip'; S.cooler=S.cooler.filter(f=>!go.includes(f)); let got=0, hit=0; for(const f of go){ const n=nibScrapOne(f); if(n){ got+=n; hit++; } }
+  if(got) sfx.coin(); toast('Scrapped '+go.length+' fish: '+(got?NIB_WORD(got)+' from '+hit+' of them.':'no Nibbles this time.')); return 'render'; }
 function nibFeed(i){ const f=S.tank[i]; if(!f||!SPI[f.id]||nibOf(f.id)<1) return 'skip'; const sp=SPI[f.id]; accrue();
   S.nib[sp.id]--; if(!S.nib[sp.id]) delete S.nib[sp.id]; f.fed=(f.fed||0)+1; let msg=sp.name+' ate a Nibble: '+fmt(Math.round(fishRate(f)*60))+' coins per hour now.';
   if(f.fed%NIB_STEP===0){ const ch=f.fed%NIB_BIG===0?NIB_ADD_BIG:NIB_ADD;
     if(nibBuffCount(f)<NIB_MAX_BUFFS&&Math.random()<ch){ const b=rollAqBuff(sp,f.kg); f.abx=(f.abx||[]).concat([b]); msg=sp.name+' grew a new bonus: +'+BK[b.k]+'!'; }
     else { f.nbst=(f.nbst||0)+1; msg=sp.name+'’s bonuses grew stronger (+'+Math.round(NIB_BOOST*100*f.nbst)+'%).'; } }
   NIB_ANIM={f, t0:performance.now(), col:sp.col||'#ffd36a', col2:sp.belly||'#fff3c8', beh:sp.beh}; sfx.coin(); toast(msg); return 'render'; }
-{ const _ea7=extraAct7; extraAct7=function(b){ const i=+b.dataset.i; if(b.dataset.act==='scrap') return nibScrap(i); if(b.dataset.act==='nibfeed') return nibFeed(i); return _ea7(b); }; }
+{ const _ea7=extraAct7; extraAct7=function(b){ const i=+b.dataset.i; if(b.dataset.act==='scrap') return nibScrap(i); if(b.dataset.act==='scrapall') return nibScrapAll(); if(b.dataset.act==='nibfeed') return nibFeed(i); return _ea7(b); }; }
 
 // the tank: the Nibble drops, the fish swims up and eats it (how depends on how it swims), then goes back to its own path
 function nibMove(f,M,t,w,h){ const A=NIB_ANIM; if(!A||A.f!==f) return; const k=(performance.now()-A.t0)/1000;
@@ -16760,17 +16777,8 @@ body.phone-app #menuov .chips [aria-pressed="true"],body.phone-app #menuov .chip
 body.phone-app #menuov .tile,body.phone-land #menuov .tile{background:linear-gradient(180deg,#132238,#0e1a2c)!important;border-radius:14px}
 </style>`);
 
-// ---------- Bait list on phones: everyday bait and water baits each get a heading (the order itself is shared data), and the
-// "Bait in use" row wraps instead of cutting its words ----------
-{ const _rp=renderPanel; renderPanel=function(){ const r=_rp.apply(this,arguments); try{ if(!MOB()) return r; const P=$('panel'); const cards=[...P.querySelectorAll('.tk-row')]; if(!cards.length||P.querySelector('.mb-sec')) return r;
-    const water=new Set(Object.values(BAIT).filter(b=>b.loc&&!b.junk).map(b=>b.name)), isW=c=>{ const b=c.querySelector('.tk-main b'); return !!b&&water.has(b.textContent.trim()); };
-    const food=new Set(Object.values(BAIT).filter(b=>b.food).map(b=>b.name)), isF=c=>{ const b=c.querySelector('.tk-main b'); return !!b&&food.has(b.textContent.trim()); };
-    const fw=cards.find(isW), ff=cards.find(isF), fe=cards.find(c=>!isW(c)&&!isF(c)&&!!c.querySelector('.tk-main b')); if(!fw||!fe) return r;
-    if(ff) ff.insertAdjacentHTML('beforebegin','<h3 class="mb-sec">Favourite foods<span>Every fish loves one and dislikes one: see the Fish Log</span></h3>');
-    fe.insertAdjacentHTML('beforebegin','<h3 class="mb-sec">Everyday bait<span>Works at every water</span></h3>'); fw.insertAdjacentHTML('beforebegin','<h3 class="mb-sec">Water baits<span>Each one is best at its own water</span></h3>'); }catch(e){ console.error(e); } return r; }; }
+// ---------- Bait list on phones: the "Bait in use" row wraps instead of cutting its words (the groups, headings and folding are shared: u_tackle.js) ----------
 document.head.insertAdjacentHTML('beforeend',`<style>
-body.phone-app #panel .mb-sec,body.phone-land #panel .mb-sec{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 8px;margin:14px 2px 6px;font:800 15px var(--display,system-ui);color:#fff}
-body.phone-app #panel .mb-sec span,body.phone-land #panel .mb-sec span{font:600 12px system-ui;color:#9fb2c8}
 body.phone-app #panel .tk-cur.tk-slim,body.phone-land #panel .tk-cur.tk-slim{flex-wrap:wrap!important;row-gap:6px}
 body.phone-app #panel .tk-cur.tk-slim > *,body.phone-land #panel .tk-cur.tk-slim > *{white-space:nowrap;overflow:visible!important;text-overflow:clip!important;max-width:none!important}
 body.phone-app #panel .tk-cur.tk-slim > .btn,body.phone-land #panel .tk-cur.tk-slim > .btn{margin-left:0!important;flex:1 0 100%}
@@ -16881,7 +16889,7 @@ body.phone-app #panel .hm-note,body.phone-land #panel .hm-note{margin:8px 2px 4p
 // =====================================================================
 { const _rp=renderPanel; renderPanel=function(){ const r=_rp.apply(this,arguments); try{ if(!MOB()) return r; const P=$('panel');
     if(S.tab==='aquarium'&&!P.querySelector('.mb-aqh')){ const hd=P.querySelector(':scope > .dl-head'), badges=P.querySelector(':scope > .badges');
-      if(hd){ hd.classList.add('mb-aqh'); const sub=hd.querySelector('p.sub'); if(sub){ const full=sub.textContent; sub.textContent='Visitors pay to see your fish, even while you are away. Every fish on display adds its boost.'; sub.insertAdjacentHTML('afterend',`<details class="mb-more"><summary>How the aquarium works</summary><p>${esc(full)}</p></details>`); }
+      if(hd){ hd.classList.add('mb-aqh'); const sub=hd.querySelector('p.sub'); if(sub){ const full=sub.textContent; sub.textContent='Visitors pay to see your fish, even while you are away. Every fish on display adds its boost.'; sub.insertAdjacentHTML('afterend',`<details class="mb-more"><summary>How the aquarium works</summary><p>${esc(full)}</p><p>Increase your tank size for more fish, more buffs, and more income!</p></details>`); }
         if(badges){ badges.removeAttribute('style'); badges.classList.add('mb-aqb'); hd.appendChild(badges); } } }
     if(S.tab==='cooler'&&!P.querySelector('.mb-help')){ const sell=[...P.querySelectorAll('button')].find(b=>/^Sell all/.test(b.textContent.trim()));
       if(sell){ (sell.closest('.row')||sell).insertAdjacentHTML('afterend',`<details class="mb-help mb-more"><summary>Keep, To aquarium, Sell: what they do</summary><div><p><b>🏛️ Keep</b> mounts the fish in the Trophy Room for good. No income, but it is never lost on a new voyage.</p><p><b>🐠 To aquarium</b> puts it on display: it earns coins every hour, even while you are away, and gives its boost.</p><p><b>🪙 Sell</b> gives coins right now. Sell all sells everything that matches the choices above.</p></div></details>`); } }
@@ -17528,7 +17536,7 @@ html body.phone-app #mbwx[data-k="Rain"],html body.phone-land #mbwx[data-k="Rain
 //    two are hidden there. The help text speaks about touch only (no mouse wheel, no keyboard).
 // Android + iPhone only.
 // =====================================================================
-const DEV_KEYS=['master','music','sfx','amb','musicOn','ambient','style','castMode','units','hand','vibrate','effects','boostsOnScreen','hints','showFps','gfx','fpsCap','dockMini','hdrStat','logShow','vaultSort','hideGoal','lastPage','pageLast'];
+const DEV_KEYS=['master','music','sfx','amb','musicOn','ambient','style','castMode','units','hand','vibrate','effects','wxPop','boostsOnScreen','hints','showFps','gfx','fpsCap','dockMini','hdrStat','logShow','vaultSort','hideGoal','lastPage','pageLast'];
 const DEV_STORE='dl-device-settings-v1';
 var DEV_GUARD=null;
 const IS_IPHONE=()=>/iPhone|iPod/.test(navigator.userAgent)||(/[?&]test\b/.test(location.search)&&/[?&]iphone\b/.test(location.search));
@@ -18041,7 +18049,7 @@ const Q8_LESSONS=[
  ['aq-add','Aquarium','Putting fish on display','From the Cooler to the tank','In the <b>Cooler</b>, every fish shows what it would earn per hour in the tank: tap <b>To aquarium</b> on the ones worth keeping. You can also add them from Aquarium, Your tank, Add from your Cooler. Each fish rolls its own boost when caught; heavier fish give more, shiny fish double.',['cooler',null]],
  ['aq-earn','Aquarium','Earning and collecting','Visitors pay while you are away','Fish on display earn coins from visitors even while you are away, for <b>up to 8 hours</b>, so collect before long breaks. The Aquarium chip in the top bar turns <b>gold</b> when coins are waiting. <b>Feed fish</b> gives +25% aquarium income for 30 minutes, once an hour.',['aquarium',null]],
  ['aq-boost','Aquarium','Boosts','Every fish on display helps you fish','Each fish on display adds a boost (bite speed, rare odds, line tension, sale price and more) and <b>boosts stack</b>. Your tank lists them under Boosts. Usually a boost fits the fish\'s rarity; now and then one rolls much better.',['aquarium','Your tank']],
- ['aq-room','Aquarium','A bigger tank and decorations','More room, more boosts','On Your tank, the <b>Room for … fish</b> button shows how many more fish the next tank holds and its price. <b>Decorate</b> places decorations in the tank: drag one along the sand to move it. <b>Advice:</b> fill every spot before buying more room, and swap in better fish as you catch them.',['aquarium','Your tank']],
+ ['aq-room','Aquarium','A bigger tank and decorations','More room, more boosts','On Your tank, <b>Expand Tank</b> shows its price, with how many fish the next expansion holds under it. <b>Decorate</b> places decorations in the tank: drag one along the sand to move it. <b>Advice:</b> fill every spot before buying more room, and swap in better fish as you catch them.',['aquarium','Your tank']],
  ['trophy','Your fish','The Trophy Room','Keep a fish forever','<b>Keep</b> mounts a fish in the Trophy Room for good: it earns nothing and gives no boost, but it is never lost, not even when you set sail again.',['trophy',null]],
  ['log','Your fish','The Fish Log and mastery','Every species, and stars for each','The <b>Fish Log</b> (top bar) lists every species at every water. Catch a species 3, 10, 30 and 100 times for its <b>mastery stars</b>: each star adds +10% to that fish\'s value, and every 8 stars is a new Angler Rank with coins and a free Mystery Crate.',['journal',null]],
  ['odd','Your fish','Oddities','Junk, odd finds and treasure','Not everything that bites is a fish. Junk, odd junk and rare finds go in <b>Oddities</b> (Collection), with <b>Treasures</b> in their own tab beside them: some pay, some boost your fishing, some come with a pet or a hat. Special lures (Bait, in the top bar) pull up more of them.',['oddities',null]],
@@ -18717,7 +18725,7 @@ document.head.insertAdjacentHTML('beforeend','<style>html body.phone-land .hud >
     g.strokeStyle=col; g.beginPath(); g.arc(cx,cy,r,-Math.PI/2,-Math.PI/2+Math.PI*2*Math.max(.02,ten)); g.stroke();
     g.fillStyle='rgba(255,84,104,.35)'; g.beginPath(); g.arc(cx,cy,r+g.lineWidth*.5+2,-Math.PI/2+Math.PI*2*.8,-Math.PI/2+Math.PI*2,false); g.arc(cx,cy,r+g.lineWidth*.5+5,-Math.PI/2+Math.PI*2,-Math.PI/2+Math.PI*2*.8,true); g.fill(); /* the red zone: snapping risk */
     /* the instruction, right above */
-    const odd = G.fish&&G.fish.kind!=='fish', msg = odd ? (G.ev==='snag' ? 'Snagged! Let go a moment' : danger ? 'Line strained! Ease off' : G.hold ? 'Dead weight: reel in short pulls' : 'Hold to reel, in short pulls') : G.ev==='jump' ? 'It jumped! Let go!' : G.ev==='shake' ? 'Head shake! Ease off' : G.run ? 'It’s running! Ease off' : G.temper>1.7&&G.hold ? 'It’s angry! Let go a moment' : danger ? 'Line strained! Ease off' : G.hold ? 'Reeling…' : 'Hold to reel';
+    const odd = G.fish&&G.fish.kind!=='fish', msg = odd ? (G.ev==='snag' ? 'Snagged!' : danger ? 'Line strained! Ease off' : 'Dead Weight') : G.ev==='jump' ? 'It jumped! Let go!' : G.ev==='shake' ? 'Head shake! Ease off' : G.run ? 'It’s running!' : G.temper>1.7&&G.hold ? 'Careful!' : danger ? 'Line strained! Ease off' : G.hold ? 'Reeling…' : 'Hold to reel';
     const alert = !!(G.ev||G.run||G.temper>1.7||danger);
     g.font='800 '+(W<700?15:17)+'px "Bricolage Grotesque", system-ui'; g.textAlign='center'; g.textBaseline='alphabetic';
     const mw=g.measureText(msg).width+22, mx=clamp(cx,mw/2+8,W-mw/2-8), my=Math.max(48,cy-r-16);
@@ -18790,9 +18798,9 @@ document.head.insertAdjacentHTML('beforeend','<style>html body.phone-land .hud >
       cell.innerHTML=`<div class="sub">Tank</div><b>${n} / ${cap}</b>`; if(last) last.after(cell); else bank.prepend(cell); }
     const hr=P.querySelector('.aq07-sec-tank > .aq07-h'); if(hr&&!hr.querySelector('.mb-tankcap')){ const h2=hr.querySelector('h2'); if(h2) h2.insertAdjacentHTML('beforeend',` <span class="mb-tankcap">· holds ${cap} fish</span>`);
       const buy=hr.querySelector('[data-act="buytank"]'); const cost=TANK_COST[S.tankSlots];
-      if(buy&&cost!=null){ S.tankSlots++; const nx=aqCap(); S.tankSlots--; const more=nx-cap;
-        buy.innerHTML=`Room for ${nx} fish · <span class="coin">${fmt(cost)}</span>`; buy.title='A bigger tank: '+cap+' → '+nx+' fish';
-        hr.insertAdjacentHTML('afterend',`<p class="meta mb-tankwhy">A bigger tank holds <b>${more} more fish</b> (${cap} → ${nx}). Every fish on display earns coins from visitors and adds its boost, so more room means more coins and stronger boosts.${S.money<cost?` You need <span class="coin">${fmt(cost-S.money)}</span> more.`:''}</p>`); }
+      if(buy&&cost!=null){ S.tankSlots++; const nx=aqCap(); S.tankSlots--;
+        buy.innerHTML=`Expand Tank · <span class="coin">${fmt(cost)}</span>`; /* C17 (director + Cam, 2026-11-20) */ buy.title='A bigger tank: '+cap+' → '+nx+' fish';
+        hr.insertAdjacentHTML('afterend',`<p class="meta mb-tankwhy">Next expansion: ${nx} fish${S.money<cost?` · you need <span class="coin">${fmt(cost-S.money)}</span> more`:''}</p>`); }
       else if(cost==null) hr.insertAdjacentHTML('afterend',`<p class="meta mb-tankwhy">Your tank is as big as it gets: ${cap} fish.</p>`); }
   }catch(e){ console.error(e); } return r; }; }
 
@@ -19132,6 +19140,13 @@ html body.phone-app #menuov .secbar .secb .secdot[class],html body.phone-app #ca
    long bait name pushed Search and Settings off the screen once Tasks and Live had already stepped aside. The Bait chip is the one
    that gives way: it shortens its name with "…" only when the bar runs out of room. */
 document.head.insertAdjacentHTML('beforeend','<style>html body.phone-land .hud > #mbbait.stat,html body.phone-app .hud > #mbbait.stat{min-width:0!important;flex:0 1 auto!important}html body.phone-land .hud > #mbbait.stat > b,html body.phone-app .hud > #mbbait.stat > b{display:block;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}</style>');
+/* C15 (director + Cam, 2026-11-20): on phones, a button beside Settings switches between the Aquarium and the Cooler while you are in
+   either one (shown only on those two pages). */
+{ const _ms=menuSync; menuSync=function(){ _ms.apply(this,arguments); try{ if(!MOB()) return; const tools=document.querySelector('#menuov .mo-tools'); if(!tools) return;
+    let b=tools.querySelector('.mo-swap'); if(!b){ b=document.createElement('button'); b.type='button'; b.className='mo-tb mo-swap';
+      b.addEventListener('click',e=>{ e.stopPropagation(); openMenu(S.tab==='cooler'?'aquarium':'cooler'); }); const set=tools.querySelector('[data-mo="settings"]'); if(set) set.after(b); else tools.appendChild(b); }
+    const on=S.tab==='cooler'||S.tab==='aquarium'; b.hidden=!on; if(on){ const to=S.tab==='cooler'?'Aquarium':'Cooler'; b.textContent=(to==='Aquarium'?'🐠 ':'🧊 ')+to; b.setAttribute('aria-label','Switch to the '+to); } }catch(e){} }; }
+document.head.insertAdjacentHTML('beforeend','<style>html body.phone-land #menuov .mo-tools > .mo-tb.mo-swap,html body.phone-app #menuov .mo-tools > .mo-tb.mo-swap{width:auto!important;min-width:0!important;padding:0 12px!important;font:800 13px var(--display,system-ui)!important;font-size:13px!important;color:#dbe7f3!important;white-space:nowrap}#menuov .mo-tb.mo-swap[hidden]{display:none}html body.phone-land #menuov .mo-tools > .mo-tb.mo-swap::before,html body.phone-app #menuov .mo-tools > .mo-tb.mo-swap::before,html body.phone-land #menuov .mo-tools > .mo-tb.mo-swap::after,html body.phone-app #menuov .mo-tools > .mo-tb.mo-swap::after{content:none!important;display:none!important}</style>');
 // =====================================================================
 // Phones: the SET MEASUREMENTS (director, 2026-11-18: "I want standards and set measurements for each platform going forward,
 // I'm tired of the same mistakes"). The numbers are written down in docs/PLATFORM_DESIGN.md ("Phone frame: set measurements")
@@ -19631,6 +19646,11 @@ const TEST_NOTES={v:'test', label:'Test build · '+(window.DL_BUILD==='ios'?'iPh
   'Code cleanup: about 260 lines of old code that could never run are gone (each build is about 40 KB smaller), the aquarium no longer re-sorts its fish every frame, and a reeling safety check was added. Nothing should look or play differently.',
   'Fixed: a game with a Path chosen could freeze while starting (black water, nothing reacts to taps).',
   'Behind the scenes: Android and iPhone now share one set of patch notes. Nothing should look or play differently.',
+  'NEW (your list, part 1): fight messages are short now: It’s running!, Careful!, Snagged!, Dead Weight; strong fish say Prepare for a fight, this fish is strong! (or Good luck, this fish is out of your league! when it is 10+ stronger than you).',
+  'A missed bite keeps your line out; the 5th miss in a row reels in. Reeled in early and Missed a bite say just that. Cast power keeps its words over a hotspot, only its colour changes.',
+  'Bait: three groups (Everyday bait, Water baits, Favourite foods), each sorted by price; they open folded, tap a group to open it. Cooler: Sort (Newest, Oldest, Sell value, Aquarium bonus, Species) and Scrap all (same filters as Sell all).',
+  'Also: shorter Heavy fog text and a Weather pop-ups switch in Settings, Stickleback has a new line, only cats purr, oddities and other non-fish say dismiss instead of the cooler line, the three treasure chests sit inside their pop-up.',
+  'Phones: a Cooler / Aquarium button beside Settings switches between the two; the aquarium button now reads Expand Tank with the next size under it.',
   'Please test on every platform and send me anything that feels off.']};
 addTestNotes(TEST_NOTES);
 // =====================================================================
@@ -19847,6 +19867,7 @@ ui(){ QA.sys='UI';
       S.tab='aquarium'; Math.random=R; act('nibfeed',{i:'0'}); try{ const cv=document.createElement('canvas'); cv.id='tankcv'; cv.style.cssText='position:fixed;left:0;top:0;width:300px;height:200px'; const had=$('tankcv'); if(!had) document.body.appendChild(cv); for(const dt of [100,900,1700,2600,3600]){ NIB_ANIM&&(NIB_ANIM.t0=performance.now()-dt); drawTank(performance.now()); } if(!had) cv.remove(); }catch(x){ e.push('tank drawing threw '+x.message); }
     } finally{ Math.random=R; NIB_ANIM=null; }
     return e.length?{ok:false,detail:e.join(' | ')}:{ok:true,detail:'odds, amounts 1/3/3/5/7, feeding, bonuses, halving, save'}; });
+  T('C11 Scrap all scraps exactly what Sell all would sell (kept fish stay), C14 cooler sort orders and keeps the real index on every row',()=>{ const e=[]; const sp=SP.filter(s=>s.r===0&&!s.meme).slice(0,3), lg=SP.find(s=>s.r===4); S.settings.sellR='all'; S.settings.sellP=0; S.cooler=[...sp.map((s,j)=>({id:s.id,kg:s.min,value:10+j,sh:0})),{id:lg.id,kg:lg.min,value:999,sh:0}]; const keep=S.cooler.filter(sellKeep).length; act('scrapall',{}); if(S.cooler.length!==keep) e.push('left '+S.cooler.length+', want '+keep); if(S.cooler.some(f=>!sellKeep(f))) e.push('a matching fish survived'); S.cooler=sp.map((s,j)=>({id:s.id,kg:s.min,value:10+j*100,sh:0})); for(const k of ['recent','old','value','aq','species']){ coolSort=k; const L=coolOrder(); if(L.length!==3||new Set(L.map(x=>x.i)).size!==3||L.some(x=>S.cooler[x.i]!==x.f)) e.push(k+': rows lost their index'); } coolSort='value'; const v=coolOrder().map(x=>salePrice(x.f)); if(v[0]<v[1]||v[1]<v[2]) e.push('value not high to low'); coolSort='recent'; if(coolOrder()[0].i!==2) e.push('newest not first'); coolSort='recent'; return e.length?{ok:false,detail:e.join('; ')}:{ok:true,detail:'scrap all + 5 sorts'}; });
   T('[12] favourite foods: every fish has a favourite and a least favourite, a favourite bites 1.6× as often, rarer fans cost more, epic+ hidden until caught on it, the shop groups them, a save keeps the food in use',()=>{ const e=[];
     for(const s of SP){ const fv=FISH_FAV[s.id], ht=FISH_HATE[s.id]; if(!fv||!ht||fv===ht||!BAIT[fv].food||!BAIT[ht].food){ e.push('bad foods for '+s.id); break; } }
     const avgR=k=>{ const f=foodFans(k); return f.reduce((a,s)=>a+Math.pow(s.r,1.5),0)/Math.max(1,f.length); }; const ks=FOOD_KEYS.slice().sort((a,b)=>avgR(a)-avgR(b)); for(let i=1;i<ks.length;i++) if(BAIT[ks[i]].price<BAIT[ks[i-1]].price) e.push(ks[i]+' cheaper than '+ks[i-1]+' with rarer fans');
@@ -20095,6 +20116,7 @@ const CONTENT_QC_EXCEPT={ pc:['Fishmonger’s Gamble'] }; /* approved exceptions
 function contentQCExtreme(){ if(window.DL_PREVIEW) testerUnlock('all'); S.money=1e15; S.tickets=999999999; S.scales=999999999; const cap=gv('cooler'); const L=SP.filter(s=>s&&s.name).sort((a,b)=>b.name.length-a.name.length).slice(0,12); S.cooler=[]; for(let i=0;i<cap;i++){ const s=L[i%L.length]; S.cooler.push({ab:{k:'bite',t:0,w:.8},id:s.id,kg:999.9,sh:1,tr:0,value:9e11}); } }
 if(/[?&]test\b/.test(location.search)) window.__contentQC=async(o={})=>{ const wait=ms=>new Promise(r=>setTimeout(r,ms)), plat=window.DL_BUILD||'', exc=CONTENT_QC_EXCEPT[plat]||[]; const keep=snap(), os=save, ot=toast; const out=new Set(); let pages=0, tabs=0, cards=0, state=null;
   const box=e=>{ if(e.closest("details:not([open])")&&!e.closest("summary")) return null; /* folded away: not on screen */ const r=e.getBoundingClientRect(); if(r.width<1||r.height<1||!e.getClientRects().length) return null; const cs=getComputedStyle(e); if(cs.visibility==='hidden'||+cs.opacity<.05) return null; return r; };
+  const box2=e=>{ const r=box(e); if(!r) return null; return (e.matches('button,canvas,input,img,svg')||own(e))?r:null; }; /* content parts only */
   const own=e=>[...e.childNodes].some(n=>n.nodeType===3&&n.textContent.trim());
   const name=e=>(e.textContent||'').trim().replace(/\s+/g,' ').slice(0,28);
   const floating=(e,c)=>{ for(let p=e;p&&p!==c;p=p.parentElement){ const ps=getComputedStyle(p).position; if(ps==='absolute'||ps==='fixed'||ps==='sticky') return true; } return false; };
@@ -20114,6 +20136,8 @@ if(/[?&]test\b/.test(location.search)) window.__contentQC=async(o={})=>{ const w
   try{ save=function(){}; toast=function(){}; /* browsing pages must not change the save (rule: a test puts the save back) */ if(o.extreme){ contentQCExtreme(); state={cooler:S.cooler.length, coins:fmtShort(S.money), longest:S.cooler[0]&&SPI[S.cooler[0].id]?SPI[S.cooler[0].id].name:"", pets:(S.owned.pets||[]).length}; }
     await Promise.race([Promise.all(document.getAnimations().map(a=>a.finished.catch(()=>{}))),wait(1500)]);
     for(const t of (o.only||qaAllPages())){ try{ openMenu(t); }catch(e){ out.add(t+': page threw '+e.message); continue; } pages++; await wait(220); await look(t); const nav=[...document.querySelectorAll('#menuov .sect-nav [data-sect], #panel .sect-nav [data-sect]')]; for(let i=0;i<nav.length;i++){ const b=[...document.querySelectorAll('#menuov .sect-nav [data-sect], #panel .sect-nav [data-sect]')][i]; if(!b) break; b.click(); tabs++; await wait(180); await look(t+' › '+((typeof tabShownName==='function'?tabShownName(b):b.textContent)||'').trim().replace(/\d+$/,'')); } }
+    /* mini-game pop-ups (C18, 2026-11-20: the three chests overflowed the pop-up on phones): every part stays inside the pop-up */
+    if(!o.only) { try{ closeMenu(); }catch(e){} for(const k of ['chest','knot','memory','skip']){ try{ openEvent(k); }catch(e){ out.add('mini-game '+k+': threw '+e.message); continue; } await wait(250); const box=$('evin'); if(box){ const q=box.getBoundingClientRect(); for(const e of box.querySelectorAll('*')){ const r=box2(e); if(!r) continue; const sp=Math.max(q.top-r.top,r.bottom-q.bottom,q.left-r.left,r.right-q.right); if(sp>1.5){ out.add('mini-game '+k+': "'+(name(e)||e.tagName.toLowerCase())+'" spills '+Math.round(sp)+' px out of the pop-up'); break; } } } try{ clearInterval(MG&&MG.iv); }catch(e){} const ec=$('evcard'); if(ec) ec.hidden=true; G.st='idle'; } }
   } finally{ try{ if(!o.keepOpen) closeMenu(); }catch(e){} restore(keep); save=os; toast=ot; try{ renderPanel(); }catch(e){} }
   const L=[...out]; return {build:plat, size:innerWidth+'x'+innerHeight, extreme:!!o.extreme, state, pages, tabs, cards, issues:L.length, list:L.slice(0,120)}; };
 })();
@@ -20250,7 +20274,7 @@ function hud(){
   $('money').textContent=fmtShort(S.money); $('money').title=fmt(S.money)+' coins'; $('lvl').textContent=S.lvl; $('xpfill').style.width=(S.xp/xpNeed(S.lvl)*100)+'%';
   $('locname').textContent=curLoc().name; $('tod').textContent=tod(p); $('todnext').textContent=nf.label+' '+mmss(nf.s);
   $('wx').textContent=wxName(wx.k); $('wxnext').textContent='Changes in '+mmss(wl); $('wxchip').title=wx.note; $('wx').style.color = wx.k==='Gilded'?'var(--gold)':wx.k==='Storm'?'#9fb4ff':'';
-  if(wx.k!==lastWx){ if(lastWx) toast('Weather: '+wxName(wx.k)+'. '+wx.note); lastWx=wx.k; }
+  if(wx.k!==lastWx){ if(lastWx&&S.settings.wxPop!==false) toast('Weather: '+wxName(wx.k)+'. '+wx.note); lastWx=wx.k; }
   $('coolerct').textContent=S.cooler.length+' / '+gv('cooler'); $('coolerct').style.color = S.cooler.length>=gv('cooler') ? 'var(--danger)' : '';
   const ab=activeBuffs(); $('buffct').textContent=ab.length?ab.length+' active':'None'; $('buffct').style.color=ab.length?'var(--kelp)':'var(--muted)'; $('buffchip').title=ab.length?ab.map(b=>b.src+': '+fmtB(b.k,b.v)).join('\n'):'Fish up junk, spin the wheel or catch a falling star for boosts';
   const T=$('tabs'); const dot=n=>n?'<span class="dot">'+n+'</span>':'';
@@ -20317,15 +20341,22 @@ const tags = f => (f.sh===2?' <span class="sh" style="color:'+PRISM[f.pv||'rainb
 const aqTxt = f => { const L=aqBuffsOf(f), sp=SPI[f.id]; return L.length ? L.map(e=>fmtB(e.k,e.v)+(sp&&e.t!==sp.r?' ('+RAR[e.t].k+' boost)':'')).join(' + ') : 'no special effect'; };
 
 const isProtected = f => S.settings.protectRare && (f.sh || SPI[f.id].r>=3);
-function renderCooler(P){
+/* C14 (director + Cam, 2026-11-20): sort the cooler by most/least recent, sell value, aquarium bonus or species. Most recent after
+   every restart (kept in memory only), otherwise it remembers the last choice. Rows keep their real cooler index for the buttons. */
+let coolSort='recent'; const COOL_SORTS=[['recent','Newest'],['old','Oldest'],['value','Sell value'],['aq','Aquarium bonus'],['species','Species']];
+function coolOrder(){ const L=S.cooler.map((f,i)=>({f,i})); const nm=x=>(SPI[x.f.id]||{}).name||'';
+  if(coolSort==='old') return L; if(coolSort==='value') return L.sort((a,b)=>salePrice(b.f)-salePrice(a.f)); if(coolSort==='aq') return L.sort((a,b)=>fishRate(b.f)-fishRate(a.f)); if(coolSort==='species') return L.sort((a,b)=>nm(a).localeCompare(nm(b))||b.i-a.i); return L.reverse(); }
+const coolSortBar=()=>S.cooler.length<2?'':`<div class="cool-sort" role="group" aria-label="Sort the cooler"><span class="meta">Sort</span>${COOL_SORTS.map(([k,n])=>`<button type="button" class="chip${coolSort===k?' on':''}" data-act="coolsort" data-k="${k}" aria-pressed="${coolSort===k}">${n}</button>`).join('')}</div>`;
+{ const _ea=extraAct7; extraAct7=function(b){ if(b.dataset.act==='coolsort'){ if(COOL_SORTS.some(s=>s[0]===b.dataset.k)) coolSort=b.dataset.k; return 'render'; } return _ea(b); }; }
+document.head.insertAdjacentHTML('beforeend','<style>.cool-sort{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:10px 0 2px}.cool-sort .chip{height:32px;padding:0 12px;border-radius:10px;border:1px solid var(--line);background:var(--glass,#16243a);color:#cfe0ee;font:700 12.5px var(--display,system-ui);cursor:pointer}.cool-sort .chip.on{background:linear-gradient(180deg,#ffe08a,#f3b94e);color:#2a1c05;border-color:#ffe6a3}</style>');function renderCooler(P){
   const total=S.cooler.filter(f=>!sellKeep(f)).reduce((a,f)=>a+salePrice(f),0); const tankFree = S.tank.length < aqCap(); const dm=demandSp();
   P.innerHTML=`<div class="row spread"><div><h2>Cooler</h2><p class="sub">${S.cooler.length} of ${gv('cooler')} slots. Your bonuses add +${Math.round((sellMult()-1)*100)}% to every sale. Fish in the aquarium earn coins and give stacking boosts.</p></div>
   <button class="btn" data-act="sellall" ${total?'':'disabled'}>Sell ${sellFilterOn()?"matching":"all"}${S.cooler.some(sellKeep)?" (keeping "+S.cooler.filter(sellKeep).length+")":""} for <span class="coin">${fmt(total)}</span></button></div>
   <div class="tile" style="margin-top:10px;flex-direction:row;align-items:center;gap:12px"><canvas width="128" height="64" data-fish="${dm.id}" style="width:64px;height:32px"></canvas>
   <div style="min-width:0"><b>The fishmonger wants ${dm.name}</b> <span class="meta">(${LOCS[locIdx(dm.loc)].name})</span><div class="meta">Pays double for it until the weather changes (<span id="dmleft">${mmss(wxLeft())}</span>).</div></div></div>`+
-  (S.cooler.length ? '<div class="list">'+S.cooler.map((f,i)=>{ const sp=SPI[f.id]; return `<div class="fishrow"><canvas width="128" height="64" data-fish="${f.id}" data-sh="${f.sh||0}" data-pv="${f.pv||''}"></canvas>
+  (S.cooler.length ? coolSortBar()+'<div class="list">'+coolOrder().map(({f,i})=>{ const sp=SPI[f.id]; return `<div class="fishrow"><canvas width="128" height="64" data-fish="${f.id}" data-sh="${f.sh||0}" data-pv="${f.pv||''}"></canvas>
    <div class="nm"><span style="color:${RAR[sp.r].c}">${sp.name}</span><small>${RAR[sp.r].k} · ${kgStr(f.kg)}${tags(f)} · <span class="aq">Aquarium: ${aqTxt(f)}</span></small></div>
-   <div class="val coin" ${dm.id===f.id?'style="color:var(--gold)" title="Fishmonger pays double"':''}>${fmt(salePrice(f))}${dm.id===f.id?' ×2':''}</div><div class="acts"><button class="btn alt sm" data-act="totank" data-i="${i}" ${tankFree?'':'disabled'} title="${tankFree?'Earns '+fmt(fishRate(f)*60)+' coins per hour':'Aquarium is full'}">To aquarium</button><button class="btn alt sm" data-act="sell" data-i="${i}">Sell</button>${nibScrapBtn(f,i)}</div></div>`; }).reverse().join('')+'</div>'
+   <div class="val coin" ${dm.id===f.id?'style="color:var(--gold)" title="Fishmonger pays double"':''}>${fmt(salePrice(f))}${dm.id===f.id?' ×2':''}</div><div class="acts"><button class="btn alt sm" data-act="totank" data-i="${i}" ${tankFree?'':'disabled'} title="${tankFree?'Earns '+fmt(fishRate(f)*60)+' coins per hour':'Aquarium is full'}">To aquarium</button><button class="btn alt sm" data-act="sell" data-i="${i}">Sell</button>${nibScrapBtn(f,i)}</div></div>`; }).join('')+'</div>'
    : '<div class="empty">Nothing in the cooler yet. Cast a line and land your first fish.</div>');
   paintFish(P);
 }
