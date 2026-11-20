@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="DL Test Android">
 <script>
-window.DL_BUILD='android'; window.DL_PREVIEW=true; window.DL_VERSION='2026.11.19-2100';
+window.DL_BUILD='android'; window.DL_PREVIEW=true; window.DL_VERSION='2026.11.19-2305';
 window.addEventListener('beforeinstallprompt',function(e){ e.preventDefault(); window.__dlInstallPrompt=e; });
 </script>
 </head>
@@ -1585,7 +1585,7 @@ const fresh = () => ({v:3, money:0, xp:0, lvl:1, gear:{rod:0,reel:0,line:0,hook:
   buffs:[], look:{g:'m',skin:1,hair:1,shirt:'#3a6f9a',pat:'none',pants:'#2f3b4a',hat:'cap',hatCol:'#c8553a',hairStyle:'auto',beard:'none',glasses:'none',outfit:'none',outCol:'#d8a020',build:'average',eye:0,shoes:'boots',neck:'none',back:'none',accCol:'#c8553a',nose:'button',brows:'soft',mouth:'smile',blush:'on',aura:'none',bob:'none',line:'none',face:'natural',eyeShape:'round'},
   owned:{hats:['none','cap','bucket'],cols:[],pats:['none'],pets:['dog'],outfits:['none','vest'],glasses:['none','round'],shoes:['boots','sneakers','barefoot'],necks:['none'],backs:['none'],auras:[],bobs:[],lines:[]}, pet:'dog', junk:{}, tickets:0, freeSpins:1,
   settings:{master:.8, music:.55, sfx:.7, amb:.5, musicOn:true, ambient:true, style:'auto', castMode:'meter', vibrate:true, minigames:true, rest:false, effects:true, boostsOnScreen:true, hints:true, protectRare:true, units:'kg', hand:'r', uiScale:'auto', renderQ:'auto'},
-  aq:{theme:'lagoon', sand:'gold', decor:[], hid:[], owned:['lagoon','gold']}, voyCatch:{}, titled:{}, nib:{}, pathXP:{}, pearlOld:0, pearlMig:1, pshop:{}, boons:{}, boonPts:0, passMig:1, fedT:0, wheelT:0, rankClaimed:0, tokens:{small:0,big:0,legend:0},
+  aq:{theme:'lagoon', sand:'gold', decor:[], hid:[], owned:['lagoon','gold']}, voyCatch:{}, titled:{}, nib:{}, pathXP:{}, pearlOld:0, pearlMig:1, pearlV:2, pshop:{}, boons:{}, boonPts:0, passMig:1, fedT:0, wheelT:0, rankClaimed:0, tokens:{small:0,big:0,legend:0},
   gstats:{frenzy:0, frenzyFish:0, chests:0, stars:0, spins:0, crates:0, flips:0, flipWins:0, scratch:0, scratchWins:0, pets:0, tasks:0},
   petLook:{}, bond:{}, petTints:['none'], petAccs:['none','bandana'], scales:0, specs:{}, relics:[], castN:0,
   pet2:null, dock:{wood:'oak', decor:[], owned:['oak']}, pass:{xp:0,lvl:0,claimed:0}, derby:null, medals:{gold:0,silver:0,bronze:0},
@@ -3709,8 +3709,6 @@ function addTickets(n){ n=Math.max(0,Math.round(n)); S.tickets+=n; return n; }
 let duck=null, hilo=null;
 function newHilo(){ hilo={card:rint(1,13), streak:0, pot:Math.round(bestLoot()*2), done:false, msg:'Higher or lower than '+0+'?'}; }
 const CARD_FISH = ['','Minnow','Perch','Trout','Bass','Carp','Pike','Salmon','Tuna','Shark','Marlin','Kraken','Leviathan','Legend'];
-function boardwalkBanner(){ return `<div class="bw-banner"><div class="bw-lights">${Array.from({length:18},(_,i)=>`<i style="animation-delay:${(i%6)*.25}s"></i>`).join('')}</div><h2>The Boardwalk</h2><p class="sub">Games of chance on the pier. Coins only, no real money, and the gulls are watching.</p>
-  <div class="row" style="justify-content:center;gap:18px;margin-top:6px"><span><b class="coin">${fmtShort(S.money)}</b></span><span><b>🎟 ${fmt(S.tickets)}</b> <span class="meta">tickets</span></span><span><b style="color:var(--kelp)">${fmt(S.scales)}</b> <span class="meta">Scales</span></span></div></div>`; }
 
 // ---------- actions for this update ----------
 function extraAct2(b){ const k=b.dataset.k, i=+b.dataset.i;
@@ -4443,10 +4441,6 @@ function playClaw(){ const tot=CLAW_PRIZES.reduce((a,p)=>a+p[2],0); let x=Math.r
   if(p[0]==='tickets') txt+=': +'+addTickets(rint(15,40))+' tickets'; if(p[0]==='tickets2') txt+=': +'+addTickets(rint(60,120))+' tickets'; if(p[0]==='scales'){ const n=rint(6,15); S.scales+=n; txt+=': +'+n+' Scales'; }
   if(p[0]==='crate') S.tokens.small++; if(p[0]==='plush'){ if(!S.owned.hats.includes('clawplush')){ S.owned.hats.push('clawplush'); } else { txt='Another plush crab! Swapped for 150 tickets'; addTickets(150); } }
   if(p[0]!=='nothing'){ S.gstats.claw=(S.gstats.claw||0)+1; sfx.coin(); } else sfx.lost(); claw={txt, t:performance.now(), win:p[0]!=='nothing'}; taskProgress('game',1); }
-function clawHTML(){ return `<div class="tile bwt" style="--c:#ff7ab0"><h4>Claw machine</h4><div class="meta">A glass box full of plushies, tickets and secrets. The claw is… mostly honest.</div>
-  <canvas id="clawcv" width="420" height="260" style="width:100%;height:auto;cursor:default;border-radius:10px;background:#1a2a3a"></canvas>
-  ${claw?`<div class="val" style="text-align:center;color:${claw.win?'var(--gold)':'var(--muted)'}">${esc(claw.txt)}</div>`:''}
-  <button class="btn" data-act="claw" ${S.money>=clawCost()?'':'disabled'}>Drop the claw · <span class="coin">${fmt(clawCost())}</span></button></div>`; }
 function paintClaw(){ const c=$('clawcv'); if(!c) return; const x=c.getContext('2d'), w=c.width, h=c.height; x.clearRect(0,0,w,h);
   x.fillStyle='#24384a'; x.fillRect(0,0,w,h); x.fillStyle='rgba(255,255,255,.06)'; x.fillRect(16,10,8,h-20);
   const cols=['#ff9ad0','#7fc8a9','#ffd84a','#5aa9ff','#c38bff','#ff7a5a']; for(let i=0;i<16;i++){ const px=30+((i*53)%(w-60)), py=h-24-((i*29)%60); x.fillStyle=cols[i%6]; x.beginPath(); x.arc(px,py,14,0,7); x.fill(); x.fillStyle='#1a1a1a'; x.beginPath(); x.arc(px-4,py-3,1.6,0,7); x.arc(px+4,py-3,1.6,0,7); x.fill(); }
@@ -10520,13 +10514,13 @@ if(/[?&]test\b/.test(location.search)) window.__fightSim=(opts)=>{ const B=__bal
  try{ window.save=()=>{};
   for(const [loc,lvl,g,rod] of opts.places) for(const r of opts.rars) for(const [name,lag,thr] of opts.players){ S.loc=loc; S.lvl=lvl; ['rod','reel','line','hook','cooler','finder'].forEach((k,i)=>S.gear[k]=g[i]); S.rod=rod; S.baitSel='worm'; S.perks={}; S.tides=opts.tides||0;
    const pool=SP.filter(s=>s.loc===loc&&s.r===r); if(!pool.length) continue; let caught=0,ts=0,N=opts.N||100,peak=0;
-   for(let i=0;i<N;i++){ const sp=pool[i%pool.length]; G.fish=rollFish(sp,{}); G.fish.kind='fish'; G.fish.shiny=0; G.st='reeling'; G.lastCast=.8; G.d0=G.d=6+.8*gv('rod')*.6; G.maxOut=gv('rod')+28; G.ten=10; G.sta=1; G.temper=0; G.run=false; G.runT=.8; G.ev=null; G.evT=1.6; G.hold=false; G.fightT=0; G.eatAt=null; G.eat=null; G.behT=0; G.tickT=1; G.surge=null; G.surgeN=0;
+   for(let i=0;i<N;i++){ const sp=pool[i%pool.length]; G.fish=rollFish(sp,{}); G.fish.kind='fish'; G.fish.shiny=0; G.st='reeling'; G.lastCast=.8; G.d0=G.d=6+.8*gv('rod')*.6; G.maxOut=gv('rod')+28; G.ten=10; G.sta=1; G.temper=0; G.run=false; G.runT=.8; G.ev=null; G.evT=1.6; G.hold=false; G.padReel=0; G.crank=0; G.fightT=0; G.eatAt=null; G.eat=null; G.behT=0; G.tickT=1; G.surge=null; G.surgeN=0;
     let t=0; const dt=1/60, hist=[]; let pk=0;
-    while(t<90){ hist.push({ten:G.ten,run:G.run,ev:G.ev,tmp:G.temper}); const o=hist[Math.max(0,hist.length-1-Math.round(lag/dt))]; G.hold = name==='holder'?true:!(o.ten>thr || o.run || o.ev || o.tmp>1.2); fight(dt); pk=Math.max(pk,G.ten); t+=dt; if(G.st!=='reeling') break; }
+    while(t<90){ hist.push({ten:G.ten,run:G.run,ev:G.ev,tmp:G.temper}); const o=hist[Math.max(0,hist.length-1-Math.round(lag/dt))]; G.hold = name==='holder'?true:!(o.ten>thr || o.run || o.ev || o.tmp>1.2); const t0n=G.ten; fight(dt); if(opts.trace&&out.length<1&&G.ten>t0n+.5&&!G.hold&&(opts.tr=opts.tr||[]).length<12) opts.tr.push({t:+t.toFixed(2),ten:+G.ten.toFixed(1),run:G.run,ev:G.ev,crank:G.crank,pad:G.padReel,surge:G.surge&&G.surge.phase,d:+G.d.toFixed(2)}); pk=Math.max(pk,G.ten); t+=dt; if(G.st!=='reeling') break; }
     if(G.st==='landing'){ caught++; ts+=t; } peak+=pk; }
    out.push(loc+' '+['C','U','R','E','L','M'][r]+' '+name+': '+Math.round(caught/N*100)+'% in '+(caught?(ts/caught).toFixed(1):'-')+'s peak '+Math.round(peak/N)); }
  }catch(e){ out.push(String(e.stack).slice(0,300)); } finally { window.save=os; const o=JSON.parse(snap); for(const k of Object.keys(S)) delete S[k]; Object.assign(S,o); for(const k in gsnap) G[k]=gsnap[k]; G.st='idle'; G.fish=null; }
- return out; };
+ return opts.trace?{out,trace:opts.tr||[]}:out; };
 
 // =====================================================================
 // 0.3 less scrolling: long menus get sections you switch between (the same segmented bar as the
@@ -15339,7 +15333,6 @@ const PATH_FX = {
 const PATH_RANKS=[50,150,400,1000,2500], PATH_RN=['','I','II','III','IV','V'];
 const pathRank = id => { const n=(S.pathXP&&S.pathXP[id])||0; let r=0; while(r<5&&n>=PATH_RANKS[r]) r++; return r; };
 const pathPow = id => 1+.1*pathRank(id);
-function pathOn(id){ return spec(id); }
 function pathChosen(){ return S.specs ? Object.values(S.specs).filter(Boolean) : []; }
 function pathMul(k){ let m=1; if(!S||!S.specs) return 1; for(const id of pathChosen()){ const fx=PATH_FX[id]; if(!fx||!fx.mul||fx.mul[k]==null||(fx.when&&!fx.when())) continue; m*=1+(fx.mul[k]-1)*pathPow(id); } return Math.max(.05,m); }
 function pathAdd(k){ let v=0; if(!S||!S.specs) return 0; for(const id of pathChosen()){ const fx=PATH_FX[id]; if(fx&&fx.addv&&fx.addv[k]!=null) v+=fx.addv[k]*(k==='nibplus'?1:pathPow(id)); } return v; }
@@ -15489,7 +15482,7 @@ document.addEventListener('click',e=>{ const b=e.target.closest&&e.target.closes
     setTimeout(()=>toast('+'+pts+' Boon points to spend in Prestige, Boons.'+(nest?' Nest Egg: +'+fmt(nest)+' coins.':'')),2400); },0); },true);
 // ---------- saves ----------
 { const _m=migrate; migrate=function(o){ const raw=isObj(o)?o:null; const m=_m(o);
-    try{ if(raw&&raw.pearlMig!==1){ m.pearlOld=Math.max(0,Math.floor(+raw.pearls||0)); m.pearlMig=1; }
+    try{ if(raw&&raw.pearlMig!==1){ m.pearlOld=Math.max(0,Math.floor(+m.pearls||0)); m.pearlMig=1; /* the pearls after the older 0.3 rule (pearlV) cut them, not the raw number */ }
       if(!isFinite(+m.pearlOld)||m.pearlOld<0) m.pearlOld=0; m.pearlOld=Math.floor(m.pearlOld);
       const ps={}; if(isObj(m.pshop)) for(const k of ['gold','xp']){ const n=Math.floor(+m.pshop[k]); if(isFinite(n)&&n>0) ps[k]=Math.min(PSHOP_MAX,n); } m.pshop=ps;
       const bo={}; if(isObj(m.boons)) for(const k in m.boons){ const n=Math.floor(+m.boons[k]); if(BOONI[k]&&isFinite(n)&&n>0) bo[k]=Math.min(5,n); } m.boons=bo;
@@ -19558,6 +19551,7 @@ PATCHES.unshift({v:'0.4.9', name:'Work in progress', items:[
   '## Voyages',
   'Wisdom Pearls are now spent: the new Pearl shop sells +1% coins or +1% XP for 2 pearls a level, up to 100 levels each. Each pearl on a voyage needs more coins than the last. Pearls you already had keep their old bonus for good.',
   'Boons: every voyage gives Boon points to raise 16 lasting Boons, such as heavier fish, Derby boosts, Catch Surges on long streaks, more cooler space and more pearls.',
+  'Fixed: a brand-new game could lose some Wisdom Pearls the first time it was reloaded.',
   '32 voyage milestones now, all the way to voyage 100, and 21 new Pearl relics.',
   '## Boardwalk',
   'Fishmonger’s Gamble: stake a fish from your cooler for a chance at 1.8×, 3× or 8× its price. Treasure chests: pick one of three for tickets, Scales, Nibbles, foods, coins or a rare pet colour. Ticket games sometimes pay a coin jackpot.',
@@ -19590,7 +19584,9 @@ const TEST_NOTES={v:'test', label:'Test build · Android', name:'0.4.9 big patch
   'Looks: reel hand + left-handed (Settings › Display), Natural face + new hair/noses/mouths/eye shapes (Wardrobe), new fish eyes, wizard hat, pet colours.',
   'Fight rework: fish must be tired out; holding through rare runs snaps the line. Times with maxed gear: ~2.5 s common to ~36 s mythic.',
   'Fishing: try holding reel through a rare fish’s runs (it should snap), then let go when it runs (it should land).',
-  'NEW in this build: aquarium fish show real sizes and depth; hair rebuilt with volume (all 20 styles); body builds have distinct silhouettes; smaller noses on the Natural face.',
+  'NEW: tap the “test build” pill for the device report. Play, then Copy report and send it (Cam: text it to the director). The 10-step phone script comes with Claude’s message.',
+  'Fixed: a brand-new game could lose some Wisdom Pearls on its first reload.',
+  'Earlier in part 3: aquarium fish show real sizes and depth; hair rebuilt with volume (all 20 styles); body builds have distinct silhouettes; smaller noses on the Natural face.',
   'Deep QC round: 30 fish renamed so no two share a name; attachment stats no longer read “undefined”; oddity names wrap on small PC windows.',
   'Second QC round (looks): the Tide Pass page shows this chapter’s exclusives as pictures plus progress for every chapter; a new Wardrobe tab to wear auras, bobbers and lines; Paths is shorter and uses two columns on wide screens; path fees are round numbers; Boons fill the whole width; end-game waters get their own heading.',
   'Top bar Bait chip, fixed properly this time (the first fix did not work): with a live event on, Tasks and then the event chip make room before Bait ever shortens.',
@@ -19604,6 +19600,8 @@ addTestNotes(TEST_NOTES);
 // =====================================================================
 if(/[?&]test\b/.test(location.search)) (function(){
 const QA={R:[], sys:''};
+/* every page a player can open: side-panel sections, More, AND the pages reached from the top bar (Cooler, Aquarium, Home, Fish Log...), which belong to no section on phones (2026-11-19: checks that walked only MENU_SECS never saw the pages in the director's screenshots) */  const qaAllPages=()=>[...new Set([...MENU_SECS.flatMap(s=>s.tabs),...MENU_MORE.tabs,...[...$('tabs').querySelectorAll(':scope > [data-tab]')].map(b=>b.dataset.tab),'trophy','home'])].filter(t=>t&&t!=='dash');
+window.__allPages=()=>qaAllPages(); /* the automatic check (src/testonly/check_runner.js) walks the same pages */
 const snap=()=>JSON.stringify(S);
 function restore(s){ const o=JSON.parse(s); for(const k of Object.keys(S)) delete S[k]; Object.assign(S,o); }
 function T(name,fn){ const s0=snap(); const g0={st:G.st}; let r; try{ r=fn(); }catch(e){ r={ok:false, detail:'THREW '+(e&&e.message)+' '+String(e&&e.stack||'').split('\n')[1]}; }
@@ -19713,7 +19711,6 @@ ui(){ QA.sys='UI';
         visit(); [...P.querySelectorAll('[data-act]')].filter(b=>sub.includes(b.dataset.act)).map(b=>[b.dataset.act,b.dataset.k]).forEach(([a,k])=>{ try{ act(a,{k}); visit(); }catch(e){} }); [...P.querySelectorAll('[data-sect]')].map(b=>b.dataset.sect).forEach(s=>{ const b=[...P.querySelectorAll('[data-sect]')].find(x=>x.dataset.sect===s); try{ b&&b.click(); visit(); }catch(e){} }); }
       setTab(DASH); return bad.length?{ok:false,detail:bad.slice(0,8).join(' | ')}:{ok:true,detail:n+' real buttons checked'}; });
   T('menu: no Overview; opening the menu shows the last page used and closing returns to fishing',()=>{ const errs=[]; openMenu('rods'); closeMenu(); openMenu(); if(S.tab!=='rods') errs.push('opened '+S.tab); if($('panel').querySelector('.dash')) errs.push('overview rendered'); if(document.querySelector('#menuov .mo-home')) errs.push('overview button'); closeMenu(); if(MENU_OPEN||S.tab!==DASH) errs.push('did not close'); return errs.length?{ok:false,detail:errs.join('; ')}:{ok:true,detail:'Menu opens the last page; no Overview'}; });
-/* every page a player can open: side-panel sections, More, AND the pages reached from the top bar (Cooler, Aquarium, Home, Fish Log...), which belong to no section on phones (2026-11-19: checks that walked only MENU_SECS never saw the pages in the director's screenshots) */  const qaAllPages=()=>[...new Set([...MENU_SECS.flatMap(s=>s.tabs),...MENU_MORE.tabs,...[...$('tabs').querySelectorAll(':scope > [data-tab]')].map(b=>b.dataset.tab),'trophy','home'])].filter(t=>t&&t!=='dash');
   T('contrast: every button and label on every menu page is readable (ratio 3+)',()=>{ const bad=[]; const pages=qaAllPages(); for(const t of pages){ openMenu(t); for(const c of __contrast()) bad.push(t+': '+c); } closeMenu(); return bad.length?{ok:false,detail:bad.slice(0,8).join(' | ')}:{ok:true,detail:pages.length+' pages readable'}; });
   T('side panel: every section button fits in the menu rail, also when the rail is not stretched (as on iPhone)',()=>{ const mob=typeof MOB==='function'&&MOB(); if(!mob) return {ok:true,detail:'phones only'}; const bad=[]; openMenu('cooler'); const bar=document.querySelector('#menuov .secbar'); if(!bar){ closeMenu(); return {ok:false,detail:'no rail'}; }
     const fits=tag=>{ const r=bar.getBoundingClientRect(); if(bar.scrollHeight>bar.clientHeight+1) bad.push(tag+': rail scrolls ('+bar.scrollHeight+' > '+bar.clientHeight+')'); for(const b of bar.querySelectorAll('.secb')){ const q=b.getBoundingClientRect(); if(q.height&&(q.top<r.top-1||q.bottom>r.bottom+1)) bad.push(tag+': '+b.dataset.sec+' cut'); } };
@@ -19842,8 +19839,11 @@ ui(){ QA.sys='UI';
     b.dataset.k='xp'; b.dataset.n='1'; extraAct7(b); if(!(xpMult()>x0)) e.push('XP level does nothing'); S.pshop.gold=99; S.pearls=100; b.dataset.k='gold'; b.dataset.n='10'; extraAct7(b); if(pshopLv('gold')!==100) e.push('cap '+pshopLv('gold'));
     S.boonPts=3; const bb=document.createElement('button'); bb.dataset.act='boon'; bb.dataset.k='shine'; const s0=bonus('shiny'); extraAct7(bb); extraAct7(bb); if(boonR('shine')!==2||S.boonPts!==0) e.push('boon ranks '+boonR('shine')+' pts '+S.boonPts); if(Math.abs(bonus('shiny')-s0-.12)>1e-9&&!BONUS_CAP.shiny) e.push('Glimmer');
     voyApplyCooler(); const cl0=gv('cooler'); S.boons.cooler=3; voyApplyCooler(); if(gv('cooler')!==cl0+3) e.push('Deep Cooler '+(gv('cooler')-cl0)); S.boons.cooler=0; voyApplyCooler();
-    const o=JSON.parse(JSON.stringify(S)); delete o.pearlMig; delete o.boonMig; o.pearls=7; o.tides=5; o.pshop={gold:'250',bad:3}; o.boons={heavy:9,nope:2}; const m=migrate(o); if(m.pearlOld!==7||m.pearls!==7) e.push('old pearls '+m.pearlOld+'/'+m.pearls); if(m.pshop.gold!==100||'bad' in m.pshop) e.push('shop save '+JSON.stringify(m.pshop)); if(m.boons.heavy!==5||'nope' in m.boons) e.push('boon save'); if(!(m.boonPts>=3+3+3+4+4)) e.push('back pay '+m.boonPts);
+    const o=JSON.parse(JSON.stringify(S)); delete o.pearlMig; delete o.boonMig; o.pearls=7; o.pearlV=2; o.tides=5; o.pshop={gold:'250',bad:3}; o.boons={heavy:9,nope:2}; const m=migrate(o); if(m.pearlOld!==7||m.pearls!==7) e.push('old pearls '+m.pearlOld+'/'+m.pearls); if(m.pshop.gold!==100||'bad' in m.pshop) e.push('shop save '+JSON.stringify(m.pshop)); if(m.boons.heavy!==5||'nope' in m.boons) e.push('boon save'); if(!(m.boonPts>=3+3+3+4+4)) e.push('back pay '+m.boonPts);
     const m2=migrate(JSON.parse(JSON.stringify(m))); if(m2.pearlOld!==7) e.push('old pearls doubled on reload');
+    /* phase 2 (found by the automatic check on a fresh save): a brand-new save kept its pearls through its first reload only if it had been reloaded once before (fresh() had no pearlV), and a 0.3-era save's old pearls skipped the 0.3 cut */
+    { const f=fresh(); f.pearls=7; const n=migrate(JSON.parse(JSON.stringify(f))); if(n.pearls!==7) e.push('a new save lost pearls on its first reload ('+n.pearls+' of 7)');
+      const a=JSON.parse(JSON.stringify(S)); delete a.pearlMig; a.pearlV=1; a.pearls=10; const am=migrate(a); if(am.pearlOld!==am.pearls||am.pearls!==4) e.push('0.3-era save: old pearls '+am.pearlOld+', pearls '+am.pearls+' (both should be 4)'); }
     openMenu(MENU_SECS.some(s=>s.id==='prestige')?'prestige':'map'); const t=$('panel').textContent; if(!/Pearl shop/.test(t)||!/Boons/.test(t)||!/Voyage milestones/.test(t)) e.push('Prestige page parts missing'); closeMenu();
     return e.length?{ok:false,detail:e.join(' | ')}:{ok:true,detail:'pearl 5 at '+fmtShort(need(5))+', pearl 10 at '+fmtShort(need(10))}; });
   T('[52] Boardwalk: Fishmonger’s Gamble pays or keeps the fish, treasure chests cost tickets and pay one of three, coin jackpots ride on ticket wins and count only a quarter toward pearls, both new games on the page',()=>{ const e=[]; const rnd0=Math.random, sv=save, ts=toast; save=()=>{}; toast=()=>{};
@@ -19890,7 +19890,7 @@ ui(){ QA.sys='UI';
     S.tides=3; S.unlocked=['pond','river']; egOpenAdd(S); if(!S.unlocked.includes('farm')||!S.unlocked.includes('buffet')||S.unlocked.includes('corporate')) e.push('voyage opening '+S.unlocked.join(','));
     const fi=locIdx('farm'); if(unlockMet(fi)&&!S.unlocked.includes('farm')) e.push('farm unlockable by catches'); if(!/voyage/.test(unlockLine(locIdx('olympus')))) e.push('end-game unlock text');
     if(bestLoot()!==LOCS[locIdx('river')].loot) e.push('end-game water raised bestLoot to '+bestLoot());
-    const sp=SP.find(s=>s.loc==='farm'&&s.r===2), k=egScale(); S.loc='farm'; const f=rollFish(sp,{noHybrid:true,noPrey:true}); if(!(f.value<sp.base*3*k.v+5)) e.push('farm fish not scaled: '+f.value); if(Math.abs(k.v-1.25*LOCS[locIdx('river')].loot/33000)>1e-9) e.push('scale '+k.v);
+    const sp=SP.find(s=>s.loc==='farm'&&s.r===2), k=egScale(); S.loc='farm'; let f; for(let i=0;i<40;i++){ f=rollFish(sp,{noHybrid:true,noPrey:true}); if(!f.shiny) break; } /* a random shiny is worth x4: compare a plain fish (it failed now and then) */ if(!(f.value<sp.base*3*k.v+5)) e.push('farm fish not scaled: '+f.value); if(Math.abs(k.v-1.25*LOCS[locIdx('river')].loot/33000)>1e-9) e.push('scale '+k.v);
     S.unlocked.push('trench'); S.stats.runEarned=1e9; G.st='idle'; if(!canRetire()) e.push('Trench no longer the voyage goal');
     return e.length?{ok:false,detail:e.join(' | ')}:{ok:true,detail:LOCS.length+' waters, '+SP.length+' species'}; });
   T('[2] oddities: 300 with unique ids and names, every new one drawn, water and night rules respected, gold from your best water (≥60% in earlier ones, +10% per repeat to ×3), rarity hidden until found',()=>{ const e=[]; if(JUNK.length!==300) e.push(JUNK.length+' oddities');
@@ -20162,6 +20162,150 @@ if(/[?&]test\b/.test(location.search)) window.__fnTime=(names,fn,n=1)=>{ const T
   const t0=performance.now(); try{ for(let i=0;i<n;i++) fn(); } finally{ for(const k in orig){ try{ eval(k+'=orig["'+k+'"]'); }catch(e){} } } const tot=(performance.now()-t0)/n; const out={total:+tot.toFixed(2)}; for(const k in T) out[k]=+(T[k]/n).toFixed(2); return out; };
 // run a snippet inside the game's own scope (preview + ?test only), for scenario tests: __inGame("endFight('snap'); return S.streak")
 if(/[?&]test\b/.test(location.search)) window.__inGame=(code)=>eval('(()=>{'+code+'})()');
+// =====================================================================
+// Device report (phase 2, 2026-11-19): test builds only. build.ps1 adds src/testonly/ to previews and never to a release, and
+// tools/code_rules.ps1 refuses a release page that holds "dl-devreport". Hidden until the "test build" badge is tapped.
+// While you play it records, per screen: frames per second, the worst frame and the stutters (a frame over 50 ms), plus every
+// error with the screen it happened on, the screen size, the OS version and the build stamp. "Copy report" puts it on the
+// clipboard as plain text for the director (and Cam, by text message) to paste into the session.
+// Kept in this phone's storage until "Start over" or a new build, so a reload or switching apps never loses it.
+// =====================================================================
+if(window.DL_PREVIEW) (function(){
+  const KEY='dl-devreport', STUTTER=50, now=()=>Date.now();
+  const blank=()=>({stamp:window.DL_VERSION, build:window.DL_BUILD, start:now(), screens:{}, errors:[], worst:[], launches:0});
+  let D; try{ D=JSON.parse(localStorage.getItem(KEY)||'null'); }catch(e){ D=null; }
+  if(!D||D.stamp!==window.DL_VERSION||D.build!==window.DL_BUILD) D=blank();
+  D.launches++;
+  const store=()=>{ try{ localStorage.setItem(KEY,JSON.stringify(D)); }catch(e){} };
+  // which screen the player is on, in the words the player sees
+  function where(){ try{
+    const sov=document.getElementById('searchov'); if(sov&&!sov.hidden&&sov.getClientRects().length) return 'Search';
+    if(MENU_OPEN){ const b=document.querySelector('#tabs > [data-tab="'+S.tab+'"]'); return 'Page: '+(((b&&(b.dataset.label||b.textContent.trim()))||S.tab).replace(/^[^A-Za-z0-9]+/,'')); }
+    const card=document.getElementById('card'); if(card&&!card.hidden&&card.getClientRects().length) return 'Catch card';
+    if(G.st==='bite'||G.st==='reeling') return 'Fishing: reeling';
+    return 'Fishing';
+  }catch(e){ return 'Starting up'; } }
+  const row=n=>D.screens[n]||(D.screens[n]={frames:0, ms:0, worst:0, stutters:0, draws:0});
+  // frames: the browser's own frame rhythm (what the eye sees, menus and scrolling included)
+  let last=0;
+  const tick=t=>{ if(last&&!document.hidden){ const dt=t-last; if(dt<5000){ const r=row(where()); r.frames++; r.ms+=dt; if(dt>r.worst) r.worst=dt; if(dt>STUTTER){ r.stutters++; D.worst.push([Math.round(dt),where(),now()]); D.worst.sort((a,b)=>b[0]-a[0]); D.worst.length=Math.min(D.worst.length,5); } } } last=t; requestAnimationFrame(tick); };
+  requestAnimationFrame(tick);
+  document.addEventListener('visibilitychange',()=>{ last=0; if(document.hidden) store(); });
+  addEventListener('pagehide',store); setInterval(store,5000);
+  // the game's own drawing (Android draws at most 60 a second on purpose; the browser may run faster)
+  const _draw=draw; draw=function(){ row(where()).draws++; return _draw.apply(this,arguments); };
+  // errors, with the screen they happened on (the game loop reports a failing frame through console.error)
+  const err=m=>{ m=String(m||'unknown error').slice(0,240); const s=where(); const e=D.errors.find(x=>x.m===m&&x.s===s); if(e) e.n++; else if(D.errors.length<30) D.errors.push({m, s, n:1, t:now()}); store(); };
+  addEventListener('error',e=>err((e.message||'error')+(e.filename?' @'+String(e.lineno||''):'')));
+  addEventListener('unhandledrejection',e=>err('promise: '+(e.reason&&e.reason.message||e.reason)));
+  const ce=console.error; console.error=function(...a){ try{ err(a.map(x=>x&&x.message?x.message:String(x)).join(' ')); }catch(_){} return ce.apply(this,a); };
+
+  function osName(){ const u=navigator.userAgent; let m;
+    if((m=u.match(/iPhone OS (\d+)_(\d+)(?:_(\d+))?/))) return 'iOS '+m[1]+'.'+m[2]+(m[3]?'.'+m[3]:'');
+    if((m=u.match(/Android (\d+(?:\.\d+)*)/))) return 'Android '+m[1];
+    if((m=u.match(/Windows NT (\d+\.\d+)/))) return 'Windows NT '+m[1];
+    if((m=u.match(/Mac OS X (\d+[._]\d+)/))) return 'macOS '+m[1].replace('_','.');
+    return u.slice(0,80); }
+  const dur=ms=>{ const s=Math.round(ms/1000); return s>=60?Math.floor(s/60)+'m '+String(s%60).padStart(2,'0')+'s':s+'s'; };
+  const clock=t=>new Date(t).toTimeString().slice(0,5);
+  function text(){
+    const inst=!!(window.matchMedia&&(matchMedia('(display-mode: standalone)').matches||matchMedia('(display-mode: fullscreen)').matches)||navigator.standalone);
+    const all=Object.values(D.screens), F=all.reduce((a,r)=>a+r.frames,0), MS=all.reduce((a,r)=>a+r.ms,0);
+    const L=['Driftline device report',
+      'Build: '+({pc:'PC',android:'Android',ios:'iPhone'}[D.build]||D.build)+' test build, version '+GAME_VERSION+', stamp '+D.stamp,
+      'Device: '+osName()+', screen '+screen.width+'x'+screen.height+' at '+(window.devicePixelRatio||1)+'x, window '+innerWidth+'x'+innerHeight+(inst?', installed app':', in the browser'),
+      'Recorded: '+dur(MS)+' of play since '+clock(D.start)+(D.launches>1?' ('+D.launches+' launches)':'')+(F?', about '+Math.round(F*1000/MS)+' fps overall':''),
+      '', 'Screens (fps / worst frame / stutters over '+STUTTER+' ms / time / game draws a second):'];
+    const rows=Object.entries(D.screens).filter(([,r])=>r.frames>10).sort((a,b)=>b[1].ms-a[1].ms);
+    if(!rows.length) L.push('  nothing yet: play for a minute first');
+    for(const [n,r] of rows) L.push('  '+n+': '+Math.round(r.frames*1000/r.ms)+' fps / '+Math.round(r.worst)+' ms / '+r.stutters+' / '+dur(r.ms)+' / '+Math.round(r.draws*1000/r.ms));
+    L.push('', 'Worst stutters:'); if(!D.worst.length) L.push('  none'); for(const [ms,s,t] of D.worst) L.push('  '+ms+' ms on '+s+' at '+clock(t));
+    L.push('', 'Errors ('+D.errors.length+'):'); if(!D.errors.length) L.push('  none'); for(const e of D.errors) L.push('  ['+e.s+'] '+e.m+(e.n>1?' (x'+e.n+')':'')+' at '+clock(e.t));
+    return L.join('\n'); }
+
+  // the panel: opened by tapping the "test build" badge
+  let box=null;
+  function show(){ if(!box){ box=document.createElement('div'); box.id='dl-devreport'; box.setAttribute('role','dialog'); box.setAttribute('aria-label','Device report');
+      box.style.cssText='position:fixed;inset:0;z-index:2147483000;display:flex;align-items:center;justify-content:center;background:#0008;padding:12px;box-sizing:border-box';
+      box.innerHTML='<div style="background:#14202b;color:#e6efe8;border:1px solid #ffd59a88;border-radius:14px;max-width:640px;width:100%;max-height:100%;display:flex;flex-direction:column;font:13px/1.4 system-ui,sans-serif;box-sizing:border-box">'
+        +'<div style="display:flex;align-items:center;gap:8px;padding:10px 12px;border-bottom:1px solid #ffffff22"><b style="flex:1;font-size:15px;color:#ffd59a">Device report (test build)</b>'
+        +'<button type="button" data-dr="copy" style="font:700 14px system-ui;padding:9px 14px;border-radius:10px;border:0;background:#1f8a86;color:#fff">Copy report</button>'
+        +'<button type="button" data-dr="reset" style="font:600 13px system-ui;padding:9px 12px;border-radius:10px;border:1px solid #ffffff44;background:none;color:#e6efe8">Start over</button>'
+        +'<button type="button" data-dr="close" aria-label="Close" style="font:700 16px system-ui;padding:6px 12px;border-radius:10px;border:0;background:#ffffff1a;color:#e6efe8">✕</button></div>'
+        +'<pre style="margin:0;padding:10px 12px;overflow:auto;white-space:pre-wrap;user-select:text;-webkit-user-select:text;font:12px/1.45 ui-monospace,Menlo,Consolas,monospace"></pre>'
+        +'<div data-dr="msg" style="padding:0 12px 10px;color:#ffd59a;min-height:18px"></div></div>';
+      box.addEventListener('click',e=>{ const b=e.target.closest('[data-dr]'); e.stopPropagation(); if(e.target===box){ hide(); return; } if(!b) return; const k=b.dataset.dr;
+        if(k==='close') hide();
+        else if(k==='reset'){ D=blank(); D.launches=1; store(); fill(); msg('Started over: play the script, then copy.'); }
+        else if(k==='copy') copy(); });
+      ['pointerdown','pointerup','mousedown','mouseup'].forEach(t=>box.addEventListener(t,e=>e.stopPropagation()));
+      document.body.appendChild(box); }
+    fill(); box.style.display='flex'; }
+  const hide=()=>{ if(box) box.style.display='none'; };
+  const fill=()=>{ box.querySelector('pre').textContent=text(); };
+  const msg=m=>{ box.querySelector('[data-dr="msg"]').textContent=m; };
+  function copy(){ const t=text(); box.querySelector('pre').textContent=t;
+    const fallback=()=>{ const r=document.createRange(); r.selectNodeContents(box.querySelector('pre')); const s=getSelection(); s.removeAllRanges(); s.addRange(r); let ok=false; try{ ok=document.execCommand('copy'); }catch(e){} msg(ok?'Copied. Paste it into the session (Cam: text it to the director).':'Selected: tap Copy in the menu that appears.'); };
+    if(navigator.clipboard&&navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(()=>msg('Copied. Paste it into the session (Cam: text it to the director).'),fallback); else fallback(); }
+  // the badge is drawn by build.ps1 at the end of the page (it takes taps in test builds); tapping it opens the report
+  const hook=()=>{ const b=document.querySelector('.dlprev'); if(!b||b.dataset.dr) return; b.dataset.dr='1'; b.setAttribute('role','button'); b.setAttribute('aria-label','Test build: open the device report');
+    b.addEventListener('pointerdown',e=>e.stopPropagation());
+    b.addEventListener('click',e=>{ e.stopPropagation(); e.preventDefault(); show(); });
+    ['pointerup','mousedown','mouseup'].forEach(t=>b.addEventListener(t,e=>e.stopPropagation())); };
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',hook); else hook();
+  setTimeout(hook,1500);
+  if(/[?&]test\b/.test(location.search)) window.__devReport={text, show, data:()=>D};
+})();
+// =====================================================================
+// The automatic check, in-page part (phase 2, 2026-11-19). Test builds only: build.ps1 adds src/testonly/ to previews, never to a
+// release. tools/check.ps1 opens each build at one exact screen size with ?test&autocheck=<target>&w=&h=[&safe=l,r,t,b]; this
+// runs every check in that page and sends the results to the check's local server (POST /report/<target>).
+// Nothing here runs without ?autocheck in the address.
+// =====================================================================
+if(/[?&]autocheck=/.test(location.search)&&/[?&]test\b/.test(location.search)) (function(){
+  const q=new URLSearchParams(location.search), target=(q.get('autocheck')||'x').replace(/[^\w-]/g,''), want={w:+q.get('w')||0, h:+q.get('h')||0};
+  const safe=(q.get('safe')||'').split(',').filter(Boolean).map(Number);
+  const PAGE_MS=300; /* a page that takes longer than this to open on this PC is far too slow for a phone */
+  const errs=[]; const where=()=>{ try{ return MENU_OPEN?'page '+S.tab:'fishing'; }catch(e){ return 'start-up'; } };
+  addEventListener('error',e=>errs.push(where()+': '+(e.message||e.error)));
+  addEventListener('unhandledrejection',e=>errs.push(where()+': '+String(e.reason&&e.reason.message||e.reason)));
+  const ce=console.error; console.error=function(...a){ errs.push(where()+': '+a.map(x=>x&&x.stack?x.stack.split('\n').slice(0,2).join(' '):String(x)).join(' ').slice(0,300)); return ce.apply(this,a); };
+  /* the window is already the phone's full screen: a full-screen request (the random-action test presses the game's own button) would
+     resize the headless window to its default screen and every later result would be for the wrong size */
+  for(const o of [Element.prototype,Document.prototype]){ if(o.requestFullscreen) o.requestFullscreen=function(){ return Promise.reject(new Error('full screen is off during the check')); }; }
+  /* a game controller plugged into this PC (someone playing) must not reach the tests: a held trigger reels in every fight test */
+  try{ Object.defineProperty(navigator,'getGamepads',{configurable:true,value:()=>[]}); }catch(e){}
+  const sizes=new Set(); addEventListener('resize',()=>{ if(innerWidth!==want.w||innerHeight!==want.h) sizes.add(innerWidth+'x'+innerHeight+' during '+where()); });
+  const wait=ms=>new Promise(r=>setTimeout(r,ms));
+  const send=(name,o)=>fetch('/report/'+name,{method:'POST',body:JSON.stringify(o)}).catch(()=>{});
+  const pages=()=>window.__allPages();
+  async function run(){
+    const R={target, build:window.DL_BUILD, stamp:window.DL_VERSION, version:GAME_VERSION, size:innerWidth+'x'+innerHeight, layout:document.body.className.replace(/\s+/g,' ').trim(), started:new Date().toISOString(), steps:[]};
+    const step=async(name,fn)=>{ await send(target+'-progress',{at:name}); const t0=performance.now(); let r; try{ r=await fn(); }catch(e){ r={ok:false, detail:'the check itself threw: '+(e&&e.message)}; } r.name=name; r.ms=Math.round(performance.now()-t0); R.steps.push(r); };
+    await step('screen size',()=>({ok:innerWidth===want.w&&innerHeight===want.h, detail:'window '+innerWidth+'x'+innerHeight+' (wanted '+want.w+'x'+want.h+')'}));
+    if(safe.length===4) await step('iPhone camera and corners',()=>{ const n=window.__safeSim(...safe); return {ok:n>0, detail:'safe areas '+safe.join('/')+' px simulated in '+n+' rules'}; });
+    await step('logic tests (__qa)',async()=>{ const r=await window.__qa(); return {ok:r.fail===0, detail:r.pass+'/'+(r.pass+r.fail)+' pass', problems:r.fails.map(f=>f.sys+': '+f.name+' :: '+f.detail)}; });
+    await wait(2600); /* __qa puts the save back 1.8 s after it ends */
+    await step('layout on every page (__layoutQC)',async()=>{ const r=await window.__layoutQC(); const p=[];
+      for(const k of ['dash','audit','trunc','head']) for(const x of (r[k]||[])) p.push(k+': '+(typeof x==='string'?x:JSON.stringify(x)));
+      const f=r.fishing||{}; for(const k of ['stageFillsToBottom','waterUncovered','canvasFillsStage','menuButton']) if(f[k]===false) p.push('fishing screen: '+k+' is false'); if(f.pageScrolls) p.push('fishing screen: the page scrolls'); for(const x of (f.hudCut||[])) p.push('top bar cut: '+(typeof x==='string'?x:JSON.stringify(x)));
+      return {ok:!!r.clean&&!p.length, detail:r.clean?'clean':p.length+' problems', problems:p.slice(0,40)}; });
+    if(typeof window.__spec==='function') await step('phone frame and controls on every page (__spec)',async()=>{ const bad=[]; closeMenu(); await wait(400);
+      for(const x of window.__spec()) bad.push('fishing: '+x);
+      for(const t of pages()){ try{ openMenu(t); }catch(e){ bad.push(t+': opening threw '+e.message); continue; } await wait(250); for(const x of window.__spec()) bad.push(t+': '+x); }
+      closeMenu(); await wait(300); return {ok:!bad.length, detail:bad.length?bad.length+' problems':'clean on '+(pages().length+1)+' screens', problems:bad.slice(0,40)}; });
+    if(typeof window.__searchQC==='function') await step('search (__searchQC)',async()=>{ const r=await window.__searchQC(); return {ok:!r.bad.length, detail:r.checked+' checked', problems:r.bad.slice(0,20)}; });
+    await wait(800); /* back-to-back tools collide (LESSONS): let Search finish closing */
+    if(typeof window.__questsQC==='function') await step('quests (__questsQC)',async()=>{ const r=await window.__questsQC(); return {ok:!r.bad.length, detail:r.checked+' checked', problems:r.bad.slice(0,20)}; });
+    await step('page open time',async()=>{ const slow=[], times=[]; for(const t of pages()){ closeMenu(); await wait(80); const t0=performance.now(); openMenu(t); const ms=Math.round(performance.now()-t0); times.push([t,ms]); if(ms>PAGE_MS) slow.push(t+' took '+ms+' ms (limit '+PAGE_MS+')'); }
+      closeMenu(); times.sort((a,b)=>b[1]-a[1]); return {ok:!slow.length, detail:'slowest: '+times.slice(0,3).map(x=>x[0]+' '+x[1]+' ms').join(', '), problems:slow}; });
+    await wait(500);
+    await step('the window kept its size the whole run',()=>({ok:!sizes.size, detail:sizes.size?'it changed':want.w+'x'+want.h+' throughout', problems:[...sizes].slice(0,10)}));
+    await step('no errors during the whole run',()=>({ok:!errs.length, detail:errs.length?errs.length+' errors':'none', problems:[...new Set(errs)].slice(0,20)}));
+    R.ok=R.steps.every(s=>s.ok); R.ended=new Date().toISOString(); await send(target,R); document.title='CHECK DONE '+(R.ok?'PASS':'FAIL');
+  }
+  addEventListener('load',()=>setTimeout(()=>run().catch(e=>send(target,{target,ok:false,steps:[{name:'runner',ok:false,detail:'runner threw: '+(e&&e.message)}]})),2500));
+})();
 
 // ---------- loop ----------
 let last=performance.now();
@@ -20446,7 +20590,7 @@ offlineIncome(); fillBounties(); ensureDaily(); accrueSpins(); checkFeats(); ref
 if(!S.stats.caught && !S.savedAt) setTimeout(()=>toast('Hold on the water to cast your first line'),600);
 })();
 </script>
-<style>html body span.dlprev.dlprev{transform:none!important;right:10px!important;left:auto!important;top:auto!important;bottom:calc(env(safe-area-inset-bottom) + 84px)!important}@media (orientation:landscape){html body span.dlprev.dlprev{right:auto!important;left:calc(env(safe-area-inset-left) + 22px)!important;bottom:auto!important;top:calc(env(safe-area-inset-top) + 92px)!important}}</style><span class="dlprev" style="position:fixed!important;z-index:30;display:inline-block!important;width:auto!important;height:auto!important;min-height:0!important;max-height:22px!important;white-space:nowrap!important;background:#2a2048cc;color:#ffd59a;border:1px solid #ffd59a88;border-radius:999px;padding:3px 10px!important;margin:0!important;font:700 11px/14px system-ui,sans-serif!important;pointer-events:none;box-sizing:border-box">test build - Android</span>
+<style>html body span.dlprev.dlprev{transform:none!important;right:10px!important;left:auto!important;top:auto!important;bottom:calc(env(safe-area-inset-bottom) + 84px)!important}@media (orientation:landscape){html body span.dlprev.dlprev{right:auto!important;left:calc(env(safe-area-inset-left) + 22px)!important;bottom:auto!important;top:calc(env(safe-area-inset-top) + 92px)!important}}</style><span class="dlprev" style="position:fixed!important;z-index:30;display:inline-block!important;width:auto!important;height:auto!important;min-height:0!important;max-height:22px!important;white-space:nowrap!important;background:#2a2048cc;color:#ffd59a;border:1px solid #ffd59a88;border-radius:999px;padding:3px 10px!important;margin:0!important;font:700 11px/14px system-ui,sans-serif!important;pointer-events:auto;cursor:pointer;box-sizing:border-box">test build - Android</span>
 <div id="updbar" hidden style="position:fixed;left:50%;bottom:16px;transform:translateX(-50%);z-index:65;display:flex;gap:10px;align-items:center;background:#10222b;border:1px solid #ffc94d;color:#e6efe8;padding:8px 10px 8px 16px;border-radius:999px;font:700 14px system-ui,sans-serif;box-shadow:0 10px 30px #0008;max-width:calc(100% - 32px)">
   <span>🎣 A new Driftline update is ready <span style="opacity:.7;font-weight:400">· your progress is safe</span></span>
   <button id="updbtn" type="button" style="background:#ff6a3d;color:#1d0d06;border:0;border-radius:999px;padding:6px 14px;font:inherit;cursor:pointer">Update &amp; see what’s new</button>
