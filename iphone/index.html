@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="DL Test iPhone">
 <script>
-window.DL_BUILD='ios'; window.DL_PREVIEW=true; window.DL_VERSION='2026.11.20-0330';
+window.DL_BUILD='ios'; window.DL_PREVIEW=true; window.DL_VERSION='2026.11.20-0342';
 window.addEventListener('beforeinstallprompt',function(e){ e.preventDefault(); window.__dlInstallPrompt=e; });
 </script>
 </head>
@@ -1867,7 +1867,7 @@ function landFish(){
   if(isNew && maxed('naturalist')) S.scales+=5;
   f.demand = demandSp().id===sp.id; if(f.demand) S.stats.demand++; f.streakBonus=streakBonus;
   { const ce=coolerEntry(f); S.cooler.push(ce); G.lastEntry=ce; } S.stats.caught++; if(f.shiny===2) S.stats.prism=(S.stats.prism||0)+1; if(f.hy) S.stats.hybrid=(S.stats.hybrid||0)+1;
-  const preyB=[]; for(const p of (f.prey||[])){ journalAdd(p); S.stats.caught++; if(S.cooler.length<gv('cooler')){ S.cooler.push(coolerEntry(p)); preyB.push(['k','Swallowed '+p.sp.name+' ('+kgStr(p.kg)+'): in your cooler']); } else { const c2=earn(salePrice(coolerEntry(p))); preyB.push(['k','Swallowed '+p.sp.name+': sold for '+fmt(c2)]); } }
+  const preyB=[]; for(const p of (f.prey||[])){ journalAdd(p); S.stats.caught++; S.cooler.push(coolerEntry(p)); preyB.push(['k','Swallowed '+p.sp.name+' ('+kgStr(p.kg)+'): in your cooler'+(S.cooler.length>gv('cooler')?' (over its limit)':'')]); } /* C19 (director + Cam, 2026-11-20): fish a predator swallowed always go to the cooler, even past its limit */
   if(f.shiny) S.stats.shiny++; if(f.trophy) S.stats.trophies++; if(f.storm && sp.r>=3) S.stats.stormEpic++;
   const scl=Math.round(RAR[sp.r].sc*(f.shiny?3:1)*(f.trophy?(maxed('trophy')?3:1.5):1)*(relic('luckyscale')?1.2:1)); if(scl) S.scales+=scl;
   const tok = sp.r>=4 && Math.random()<(sp.r===5?1:.15) ? (sp.r===5?'big':'small') : null; if(tok) S.tokens[tok]++;
@@ -3617,7 +3617,7 @@ function petCustomHTML(){ const id=editPet(), lk=petLook(id), p=PETI[id], bl=bon
   const tints=PET_TINTS.filter(x=>x[2]||S.petTints.includes(x[0])||!(x[0] in PRIZE_TINT)).map(x=>{ const own=S.petTints.includes(x[0]); return `<button class="chipb" data-act="${own?'pettint':'petpv'}" data-k="${own?x[0]:'tint:'+x[0]}" aria-pressed="${lk.tint===x[0]||pvOn('tint',x[0])}"><span class="tint-dot" style="${x[3]==='rainbow'?'background:linear-gradient(90deg,#ff6a6a,#ffd84a,#6aff8a,#5ab8ff,#b88aff)':'background:#c8945a;'+(x[3]?'filter:'+x[3]:'')}"></span>${x[1]}${own?'':' · '+fmt(x[2])}</button>`; }).join('');
   const accs=PET_ACCS.filter(x=>x[2]||S.petAccs.includes(x[0])||!PRIZE_ACC[x[0]]).map(x=>{ const own=S.petAccs.includes(x[0]); return `<button class="chipb" data-act="${own?'petacc':'petpv'}" data-k="${own?x[0]:'acc:'+x[0]}" aria-pressed="${lk.acc===x[0]||pvOn('acc',x[0])}">${x[1]}${own?'':' · '+fmt(x[2])}</button>`; }).join('');
   const hats=HATS.filter(h=>S.owned.hats.includes(h.id)).map(h=>`<button class="chipb" data-act="pethat" data-k="${h.id}" aria-pressed="${lk.hat===h.id}">${esc(h.name)}</button>`).join('');
-  const cols=[...FREE_COLS,...S.owned.cols]; const sw=k=>`<div class="chips">${cols.map(cl=>`<button class="sw" data-act="petcol" data-k="${k}" data-v="${cl}" aria-pressed="${lk[k]===cl}" style="background:${cl}" title="${cl}"></button>`).join('')}</div>`;
+  const cols=[...FREE_COLS,...S.owned.cols]; const sw=k=>`<div class="chips">${cols.map(cl=>`<button class="sw" data-act="petcol" data-k="${k}" data-v="${cl}" aria-pressed="${lk[k]===cl}" style="background:${cl};--swc:${cl}" title="${cl}"></button>`).join('')}</div>`;
   const pick2 = S.pet2 ? `<div class="chips" style="margin-bottom:8px"><span class="meta" style="align-self:center">Dressing up:</span><button class="chipb" data-act="petedit" data-k="${S.pet}" aria-pressed="${id===S.pet}">★ ${esc(petName(S.pet))}</button><button class="chipb" data-act="petedit" data-k="${S.pet2}" aria-pressed="${id===S.pet2}">${esc(petName(S.pet2))}</button></div>` : '';
   return `<div class="tile" style="margin-top:10px">${petPvBarHTML()}${pick2}<div class="stylewrap petwrap" style="margin-top:0"><div class="preview"><canvas id="petcv" width="400" height="300" style="cursor:pointer" title="Pet me!"></canvas></div><div>
     <div class="row spread"><h4>${id===S.pet?'<span title="Favourite" style="color:#ffc94d">★</span> ':''}${esc(petName(id))} <span class="meta">the ${(id==="lily"||id==="daxniko")?p.name:p.name.toLowerCase()}${S.pet2?(id===S.pet?' · favourite':' · companion'):''}</span></h4><span id="petbond"><span class="meta">Bond ${'♥'.repeat(bl)}${'♡'.repeat(10-bl)}</span></span></div>
@@ -9493,7 +9493,7 @@ function wItemCard(it,feat){ const own=wOwned(it.kind,it.id), trying=PREVIEW&&PR
   return `<div class="wd-item ${own?'own':''} ${feat?'feat':''}"><canvas width="120" height="120" data-wthumb="${it.kind}:${it.id}"></canvas><div class="wd-it"><b>${esc(it.name)}</b><span class="meta">${W_KIND_NAME[it.kind]}</span></div>
     <div class="wd-ia">${own?'<span class="badge g">Owned</span>':`<button class="btn alt sm" data-act="wtry" data-k="${it.kind}:${it.id}">${trying?'Wearing it':'Try on'}</button><button class="btn sm" data-act="wbuy" data-k="${it.kind}:${it.id}" ${S.money>=it.price?'':'disabled'}><span class="coin">${fmtShort(it.price)}</span></button>`}</div></div>`; }
 function wChips(k,list,cur,label){ return `<div class="chips">${list.map(([v,n])=>`<button class="chipb" data-act="look" data-k="${k}" data-v="${v}" aria-pressed="${String(cur)===String(v)}">${esc(n)}</button>`).join('')}</div>`; }
-function wSw(k,list,cur){ return `<div class="chips">${list.map(([v,cl,n])=>`<button class="sw" data-act="look" data-k="${k}" data-v="${v}" aria-pressed="${String(cur)===String(v)}" style="background:${cl}" title="${esc(n||cl)}"></button>`).join('')}</div>`; }
+function wSw(k,list,cur){ return `<div class="chips">${list.map(([v,cl,n])=>`<button class="sw" data-act="look" data-k="${k}" data-v="${v}" aria-pressed="${String(cur)===String(v)}" style="background:${cl};--swc:${cl}" title="${esc(n||cl)}"></button>`).join('')}</div>`; }
 function wThumbGrid(k,kind,items,cur){ return `<div class="wd-thumbs">${items.map(([id,n])=>`<button class="wd-th" data-act="look" data-k="${k}" data-v="${id}" aria-pressed="${cur===id}"><canvas width="96" height="96" data-wthumb="${kind}:${id}"></canvas><span>${esc(n)}</span></button>`).join('')}</div>`; }
 function renderStyle(P){ const lk=S.look, cols=[...FREE_COLS,...S.owned.cols].map(c=>[c,c]);
   const secs=[['body','Body','👤'],['clothes','Clothes','👕'],['hats','Hats','🎩'],['glasses','Glasses','👓'],['shoes','Shoes','👟'],['neckback','Neck & back','🧣'],['tidepass','Tide Pass','🌊'],['shop','Shop','🛍️']];
@@ -19147,6 +19147,9 @@ document.head.insertAdjacentHTML('beforeend','<style>html body.phone-land .hud >
       b.addEventListener('click',e=>{ e.stopPropagation(); openMenu(S.tab==='cooler'?'aquarium':'cooler'); }); const set=tools.querySelector('[data-mo="settings"]'); if(set) set.after(b); else tools.appendChild(b); }
     const on=S.tab==='cooler'||S.tab==='aquarium'; b.hidden=!on; if(on){ const to=S.tab==='cooler'?'Aquarium':'Cooler'; b.textContent=(to==='Aquarium'?'🐠 ':'🧊 ')+to; b.setAttribute('aria-label','Switch to the '+to); } }catch(e){} }; }
 document.head.insertAdjacentHTML('beforeend','<style>html body.phone-land #menuov .mo-tools > .mo-tb.mo-swap,html body.phone-app #menuov .mo-tools > .mo-tb.mo-swap{width:auto!important;min-width:0!important;padding:0 12px!important;font:800 13px var(--display,system-ui)!important;font-size:13px!important;color:#dbe7f3!important;white-space:nowrap}#menuov .mo-tb.mo-swap[hidden]{display:none}html body.phone-land #menuov .mo-tools > .mo-tb.mo-swap::before,html body.phone-app #menuov .mo-tools > .mo-tb.mo-swap::before,html body.phone-land #menuov .mo-tools > .mo-tb.mo-swap::after,html body.phone-app #menuov .mo-tools > .mo-tb.mo-swap::after{content:none!important;display:none!important}</style>');
+/* C12 (director + Cam, 2026-11-20): a chosen colour keeps its own colour and gets a gold box around it (the general "chosen chip" gold
+   used to fill the whole swatch, so you couldn't see which colour you had) */
+document.head.insertAdjacentHTML('beforeend','<style>html body.phone-app #menuov .chips .sw[aria-pressed="true"],html body.phone-land #menuov .chips .sw[aria-pressed="true"]{background:var(--swc)!important;border-color:transparent!important;box-shadow:0 0 0 2px #0b1626,0 0 0 4px #ffd36a!important}</style>');
 // =====================================================================
 // Phones: the SET MEASUREMENTS (director, 2026-11-18: "I want standards and set measurements for each platform going forward,
 // I'm tired of the same mistakes"). The numbers are written down in docs/PLATFORM_DESIGN.md ("Phone frame: set measurements")
@@ -19629,9 +19632,26 @@ PATCHES.unshift({v:'0.4.9', name:'Work in progress', items:phoneNotes([
   'Oddities, hotspots and shinies have sensible limits however much you stack them.',
   'A few fish that shared a name with another now have names of their own (your Fish Log keeps every catch).'])});
 // Phone test notes, Android and iPhone in one file (since 2026-11-20). Preview builds only; the live game never shows them.
-// One short line per change in the next test build, curly apostrophes only. The card opens once per device whenever the
+// Grouped by test build, newest first (director, 2026-11-20): new lines go under '## New in this build'; when that build is published the heading becomes '## Test build <stamp>' at the next round. Curly apostrophes only. The card opens once per device whenever the
 // text changes. Released notes live in notes_release.js.
-const TEST_NOTES={v:'test', label:'Test build · '+(window.DL_BUILD==='ios'?'iPhone':'Android'), name:'0.4.9 big patch, part 3: everything in', items:[
+const TEST_NOTES={v:'test', label:'Test build · '+(window.DL_BUILD==='ios'?'iPhone':'Android'), name:'0.4.9 test build (newest first)', items:[
+  '## New in this build',
+  'Cooler: fish a predator swallowed always go into your cooler, even past its limit (they used to be sold).',
+  'Wardrobe and pet colours: the colour you chose keeps its colour and gets a gold box around it (it used to turn solid gold).',
+  '## Test build 0330 (your list, part 1)',
+  'Fight messages are short now: It’s running!, Careful!, Snagged!, Dead Weight; strong fish say Prepare for a fight, this fish is strong! (or Good luck, this fish is out of your league! when it is 10+ stronger than you).',
+  'A missed bite keeps your line out; the 5th miss in a row reels in. Reeled in early and Missed a bite say just that. Cast power keeps its words over a hotspot, only its colour changes.',
+  'Bait: three groups (Everyday bait, Water baits, Favourite foods), each sorted by price; they open folded, tap a group to open it. Cooler: Sort (Newest, Oldest, Sell value, Aquarium bonus, Species) and Scrap all (same filters as Sell all).',
+  'Also: shorter Heavy fog text and a Weather pop-ups switch in Settings, Stickleback has a new line, only cats purr, oddities and other non-fish say dismiss instead of the cooler line, the three treasure chests sit inside their pop-up.',
+  'Phones: a Cooler / Aquarium button beside Settings switches between the two; the aquarium button now reads Expand Tank with the next size under it.',
+  '## Fixes earlier in 0.4.9',
+  'Deep QC round: 30 fish renamed so no two share a name; attachment stats no longer read “undefined”; oddity names wrap on small PC windows.',
+  'Second QC round (looks): the Tide Pass page shows this chapter’s exclusives as pictures plus progress for every chapter; a new Wardrobe tab to wear auras, bobbers and lines; Paths is shorter and uses two columns on wide screens; path fees are round numbers; Boons fill the whole width; end-game waters get their own heading.',
+  'Top bar Bait chip, fixed properly this time (the first fix did not work): with a live event on, Tasks and then the event chip make room before Bait ever shortens.',
+  'Code cleanup: about 260 lines of old code that could never run are gone (each build is about 40 KB smaller), the aquarium no longer re-sorts its fish every frame, and a reeling safety check was added. Nothing should look or play differently.',
+  'Fixed: a game with a Path chosen could freeze while starting (black water, nothing reacts to taps).',
+  'Behind the scenes: Android and iPhone now share one set of patch notes. Nothing should look or play differently.',
+  '## What the 0.4.9 big patch adds',
   'Paths (15, ranks I–V, Remove + fee on each fork), Prestige: Pearl shop, Boons, 32 milestones, 21 relics.',
   'Boardwalk: Fishmonger’s Gamble and Treasure chests. Tide Pass: 100 levels, chapters, exclusives (Wardrobe › Tide Pass exclusives).',
   'New waters: Cherry Blossom (after Stonebrook), Rockies (after Frostbite), Keys (after Coral), Amazon (after Brine Shelf). End-game waters open by voyage (Stats › tester tools can add voyages).',
@@ -19639,18 +19659,7 @@ const TEST_NOTES={v:'test', label:'Test build · '+(window.DL_BUILD==='ios'?'iPh
   'Looks: reel hand + left-handed (Settings › Display), Natural face + new hair/noses/mouths/eye shapes (Wardrobe), new fish eyes, wizard hat, pet colours.',
   'Fight rework: fish must be tired out; holding through rare runs snaps the line. Times with maxed gear: ~2.5 s common to ~36 s mythic.',
   'Fishing: try holding reel through a rare fish’s runs (it should snap), then let go when it runs (it should land).',
-  'NEW in this build: aquarium fish show real sizes and depth; hair rebuilt with volume (all 20 styles); body builds have distinct silhouettes; smaller noses on the Natural face.',
-  'Deep QC round: 30 fish renamed so no two share a name; attachment stats no longer read “undefined”; oddity names wrap on small PC windows.',
-  'Second QC round (looks): the Tide Pass page shows this chapter’s exclusives as pictures plus progress for every chapter; a new Wardrobe tab to wear auras, bobbers and lines; Paths is shorter and uses two columns on wide screens; path fees are round numbers; Boons fill the whole width; end-game waters get their own heading.',
-  'Top bar Bait chip, fixed properly this time (the first fix did not work): with a live event on, Tasks and then the event chip make room before Bait ever shortens.',
-  'Code cleanup: about 260 lines of old code that could never run are gone (each build is about 40 KB smaller), the aquarium no longer re-sorts its fish every frame, and a reeling safety check was added. Nothing should look or play differently.',
-  'Fixed: a game with a Path chosen could freeze while starting (black water, nothing reacts to taps).',
-  'Behind the scenes: Android and iPhone now share one set of patch notes. Nothing should look or play differently.',
-  'NEW (your list, part 1): fight messages are short now: It’s running!, Careful!, Snagged!, Dead Weight; strong fish say Prepare for a fight, this fish is strong! (or Good luck, this fish is out of your league! when it is 10+ stronger than you).',
-  'A missed bite keeps your line out; the 5th miss in a row reels in. Reeled in early and Missed a bite say just that. Cast power keeps its words over a hotspot, only its colour changes.',
-  'Bait: three groups (Everyday bait, Water baits, Favourite foods), each sorted by price; they open folded, tap a group to open it. Cooler: Sort (Newest, Oldest, Sell value, Aquarium bonus, Species) and Scrap all (same filters as Sell all).',
-  'Also: shorter Heavy fog text and a Weather pop-ups switch in Settings, Stickleback has a new line, only cats purr, oddities and other non-fish say dismiss instead of the cooler line, the three treasure chests sit inside their pop-up.',
-  'Phones: a Cooler / Aquarium button beside Settings switches between the two; the aquarium button now reads Expand Tank with the next size under it.',
+  'Aquarium fish show real sizes and depth; hair rebuilt with volume (all 20 styles); body builds have distinct silhouettes; smaller noses on the Natural face.',
   'Please test on every platform and send me anything that feels off.']};
 addTestNotes(TEST_NOTES);
 // =====================================================================
@@ -19867,6 +19876,8 @@ ui(){ QA.sys='UI';
       S.tab='aquarium'; Math.random=R; act('nibfeed',{i:'0'}); try{ const cv=document.createElement('canvas'); cv.id='tankcv'; cv.style.cssText='position:fixed;left:0;top:0;width:300px;height:200px'; const had=$('tankcv'); if(!had) document.body.appendChild(cv); for(const dt of [100,900,1700,2600,3600]){ NIB_ANIM&&(NIB_ANIM.t0=performance.now()-dt); drawTank(performance.now()); } if(!had) cv.remove(); }catch(x){ e.push('tank drawing threw '+x.message); }
     } finally{ Math.random=R; NIB_ANIM=null; }
     return e.length?{ok:false,detail:e.join(' | ')}:{ok:true,detail:'odds, amounts 1/3/3/5/7, feeding, bonuses, halving, save'}; });
+  T('C12 a chosen colour swatch shows its own colour (with a box around it), never a solid highlight',()=>{ const bad=[]; for(const t of ['style','pets']){ openMenu(t); for(const b of [...$('panel').querySelectorAll('.sw[aria-pressed="true"]')]){ if(!b.offsetParent) continue; const want=b.style.getPropertyValue('--swc')||b.style.background; const probe=document.createElement('i'); probe.style.color=want; document.body.appendChild(probe); const w=getComputedStyle(probe).color; probe.remove(); const cs=getComputedStyle(b); if(cs.backgroundImage!=='none'||cs.backgroundColor!==w) bad.push(t+': '+want+' shows '+(cs.backgroundImage!=='none'?'a gradient':cs.backgroundColor)); } } closeMenu(); return bad.length?{ok:false,detail:bad.slice(0,4).join(' | ')}:{ok:true}; });
+  T('C19 fish a predator swallowed always go to the cooler, even when it is full',()=>{ const cap=gv('cooler'), sp=SP.find(s=>s.r===0&&!s.meme), bigSp=SP.find(s=>s.r>=2&&!s.meme); const sv=save, ts=toast; save=()=>{}; toast=()=>{}; try{ S.cooler=Array.from({length:cap},()=>({id:sp.id,kg:sp.min,value:1,sh:0})); const big=rollFish(bigSp,{noHybrid:true,noPrey:true}); big.prey=[rollFish(sp,{noHybrid:true,noPrey:true}),rollFish(sp,{noHybrid:true,noPrey:true})]; G.fish=big; landFish(); try{ hideCard(); }catch(e){} G.st='idle'; const want=cap+3; return S.cooler.length===want?{ok:true,detail:'cooler '+S.cooler.length+' of '+cap}:{ok:false,detail:'cooler '+S.cooler.length+', want '+want}; } finally{ save=sv; toast=ts; } });
   T('C11 Scrap all scraps exactly what Sell all would sell (kept fish stay), C14 cooler sort orders and keeps the real index on every row',()=>{ const e=[]; const sp=SP.filter(s=>s.r===0&&!s.meme).slice(0,3), lg=SP.find(s=>s.r===4); S.settings.sellR='all'; S.settings.sellP=0; S.cooler=[...sp.map((s,j)=>({id:s.id,kg:s.min,value:10+j,sh:0})),{id:lg.id,kg:lg.min,value:999,sh:0}]; const keep=S.cooler.filter(sellKeep).length; act('scrapall',{}); if(S.cooler.length!==keep) e.push('left '+S.cooler.length+', want '+keep); if(S.cooler.some(f=>!sellKeep(f))) e.push('a matching fish survived'); S.cooler=sp.map((s,j)=>({id:s.id,kg:s.min,value:10+j*100,sh:0})); for(const k of ['recent','old','value','aq','species']){ coolSort=k; const L=coolOrder(); if(L.length!==3||new Set(L.map(x=>x.i)).size!==3||L.some(x=>S.cooler[x.i]!==x.f)) e.push(k+': rows lost their index'); } coolSort='value'; const v=coolOrder().map(x=>salePrice(x.f)); if(v[0]<v[1]||v[1]<v[2]) e.push('value not high to low'); coolSort='recent'; if(coolOrder()[0].i!==2) e.push('newest not first'); coolSort='recent'; return e.length?{ok:false,detail:e.join('; ')}:{ok:true,detail:'scrap all + 5 sorts'}; });
   T('[12] favourite foods: every fish has a favourite and a least favourite, a favourite bites 1.6× as often, rarer fans cost more, epic+ hidden until caught on it, the shop groups them, a save keeps the food in use',()=>{ const e=[];
     for(const s of SP){ const fv=FISH_FAV[s.id], ht=FISH_HATE[s.id]; if(!fv||!ht||fv===ht||!BAIT[fv].food||!BAIT[ht].food){ e.push('bad foods for '+s.id); break; } }
