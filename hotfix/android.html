@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Driftline">
 <script>
-window.DL_BUILD='android'; window.DL_VERSION='2026.11.20-0400';
+window.DL_BUILD='android'; window.DL_VERSION='2026.11.20-0905';
 window.addEventListener('beforeinstallprompt',function(e){ e.preventDefault(); window.__dlInstallPrompt=e; });
 </script>
 </head>
@@ -17069,7 +17069,7 @@ html body.phone-app.dl-fish .hud > #mbgoal .mbg-bar{bottom:2px}
   setInterval(tick,500); setTimeout(tick,50); addEventListener('resize',()=>{ last=''; setTimeout(tick,200); }); }
 document.head.insertAdjacentHTML('beforeend',`<style>
 html body.phone-land .hud > #mbgoal,html body.phone-land .hud > #mblive,html body.phone-land .hud > .mb-x{flex:0 1 auto!important}
-html body.phone-app .hud > .mb-x:not(#mbhome){display:none!important} /* the narrow layout (split-screen windows; phones themselves are landscape-only) hides the extra chips, but never Home: it is the only way into your home on phones (2026-11-19) */
+html body.phone-app .hud > .mb-x:not(#mbhome),html body.phone-app .hud > #mblive{display:none!important} /* the narrow layout (split-screen windows; phones themselves are landscape-only) hides the extra chips, but never Home: it is the only way into your home on phones (2026-11-19) */
 html body.phone-land .hud > .mb-x[hidden]{display:none!important}
 html body.phone-land .hud > .mb-x.ready{border-color:#ffd36a!important;box-shadow:0 0 0 1px #ffd36a66!important}
 html body.phone-land .hud > .mb-x.ready .lbl{color:#ffd36a!important}
@@ -18025,7 +18025,7 @@ PATCHES.unshift({v:'0.4.8.9.2', name:'Hotfix', items:[
   'Small phones: a long bait name no longer pushes Search and Settings off the top bar (the bait name shortens instead).']});
 PATCHES.unshift({v:'0.4.8.9.3', name:'Hotfix', items:['Waters: each water’s fish strength line now wraps instead of running past its card on small screens.']});
 PATCHES.unshift({v:'0.4.8.9.4', name:'Hotfix', items:['Top bar: with a live event on, the Bait button no longer gets squeezed to a sliver at waters with long names.']});
-PATCHES.unshift({v:'0.4.8.9.6', name:'Hotfix', items:['Tide Pass: the Claim button is back, so you can collect your rewards.']});
+PATCHES.unshift({v:'0.4.8.9.6', name:'Hotfix', items:['Tide Pass: the Claim button is back, so you can collect your rewards.','Split-screen windows: during a live event, the Live button no longer sits under the search button.']});
 // Android test notes (preview builds only; the live game never shows them). One short line per change in the next test build,
 // curly apostrophes only. The card opens once per device whenever the text changes. Released notes live in notes_release.js.
 const TEST_NOTES={v:'test', label:'Test build · Android', name:'0.4.9, part 3: the fight', items:[

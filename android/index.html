@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="DL Test Android">
 <script>
-window.DL_BUILD='android'; window.DL_PREVIEW=true; window.DL_VERSION='2026.11.20-0424';
+window.DL_BUILD='android'; window.DL_PREVIEW=true; if(/[?&]sweep\b/.test(location.search)){ window.__bootErr=[]; addEventListener("error",function(e){ __bootErr.push(String(e.message||e)+(e.lineno?" (line "+e.lineno+")":"")); }); addEventListener("unhandledrejection",function(e){ __bootErr.push("promise: "+String(e.reason&&e.reason.message||e.reason)); }); window.requestAnimationFrame=function(f){ return setTimeout(function(){ f(performance.now()); },16); }; window.cancelAnimationFrame=function(i){ clearTimeout(i); }; } window.DL_VERSION='2026.11.20-0912';
 window.addEventListener('beforeinstallprompt',function(e){ e.preventDefault(); window.__dlInstallPrompt=e; });
 </script>
 </head>
@@ -11116,7 +11116,8 @@ function renderStats(P){ P.innerHTML=`<h2>Stats</h2><p class="sub">Everything th
 // ---------- preview-only tester tools: for the director to test everything; the release build never shows them ----------
 function testerHTML(){ const B=(k,t,alt)=>`<button class="btn${alt?' alt':''} sm" data-act="tester" data-k="${k}">${t}</button>`;
   return `<details class="tile st-test" open><summary><b>Tester tools</b> <span class="meta">· test builds only, never in the real game</span></summary><p class="sub">The test build has its own save, so your real game is untouched.</p>
-  <div class="row" style="gap:6px;flex-wrap:wrap">${B('all','Unlock everything')}${B('coins','+1 billion coins',1)}${B('scales','+10,000 Scales & tickets',1)}${B('pearls','+20 Wisdom Pearls',1)}${B('pass','Tide Pass to level 50',1)}${B('lvl','+10 levels',1)}${B('log','Fill the Fish Log + oddities',1)}${B('feats','Finish every feat',1)}${B('cooler','Fill the cooler',1)}${B('time','Skip 8 hours (aquarium, spins)',1)}</div></details>`; }
+  <div class="row" style="gap:6px;flex-wrap:wrap">${B('all','Unlock everything')}${B('coins','+1 billion coins',1)}${B('scales','+10,000 Scales & tickets',1)}${B('pearls','+20 Wisdom Pearls',1)}${B('pass','Tide Pass to level 50',1)}${B('lvl','+10 levels',1)}${B('log','Fill the Fish Log + oddities',1)}${B('feats','Finish every feat',1)}${B('cooler','Fill the cooler',1)}${B('time','Skip 8 hours (aquarium, spins)',1)}</div>
+  <p class="sub" style="margin-top:8px">Run every automatic check on this device (about 8 minutes, your test save is put back afterwards):</p><a class="btn alt sm" target="_blank" rel="noopener" href="${location.hostname==='localhost'?'sweep.html':'https://sizzentra.github.io/driftline/next/sweep.html'}">Run every check</a></details>`; }
 function testerUnlock(k){ if(!window.DL_PREVIEW) return; const o=S.owned, U=(arr,ids)=>{ for(const id of ids) if(!arr.includes(id)) arr.push(id); };
   if(k==='coins'){ S.money+=1e9; return 'One billion coins added.'; } if(k==='scales'){ S.scales+=1e4; S.tickets+=1e4; return 'Scales and tickets added.'; }
   if(k==='pearls'){ S.pearls=(S.pearls||0)+20; return '20 Wisdom Pearls added: spend them in Prestige, Pearl relics.'; }
@@ -18580,11 +18581,6 @@ html body.phone-app .hud > #mbgoal .mbg-bar > b,html body.phone-land .hud > #mbg
 html body.phone-app .hud > #mbgoal.ready,html body.phone-land .hud > #mbgoal.ready{border-color:#ffd36a!important;box-shadow:0 0 0 1px #ffd36a66,0 0 14px #ffd36a44!important}
 html body.phone-app .hud > #mbgoal.ready .lbl,html body.phone-land .hud > #mbgoal.ready .lbl{color:#ffd36a!important}
 html body.phone-app .hud > #mblive .lbl,html body.phone-land .hud > #mblive .lbl{color:#ffd36a!important}
-/* upright (tablets, split screen): the goal takes the goal's old place on the second row; with a live event they share it */
-html body.phone-app.dl-fish .hud > #mbgoal{grid-column:3 / 6!important;grid-row:2!important;height:30px!important;min-height:0!important;flex-direction:row!important;align-items:center!important;gap:8px!important;justify-content:flex-start!important}
-html body.phone-app.dl-fish .hud.mb-has-live > #mbgoal{grid-column:3 / 5!important}
-html body.phone-app.dl-fish .hud > #mblive{grid-column:5 / 6!important;grid-row:2!important;height:30px!important;min-height:0!important;flex-direction:row!important;align-items:center!important;gap:6px!important}
-html body.phone-app.dl-fish .hud > #mbgoal .mbg-bar{bottom:2px}
 </style>`);
 /* the room the goal gave back: two shortcuts players check all the time, sideways only (upright the bar has no room):
    Tasks (daily tasks + weekly quests: how many rewards are ready) and Tide Pass (level; gold when a reward waits).
@@ -18617,7 +18613,7 @@ html body.phone-app.dl-fish .hud > #mbgoal .mbg-bar{bottom:2px}
   setInterval(tick,500); setTimeout(tick,50); addEventListener('resize',()=>{ last=''; setTimeout(tick,200); }); }
 document.head.insertAdjacentHTML('beforeend',`<style>
 html body.phone-land .hud > #mbgoal,html body.phone-land .hud > #mblive,html body.phone-land .hud > .mb-x{flex:0 1 auto!important}
-html body.phone-app .hud > .mb-x:not(#mbhome){display:none!important} /* the narrow layout (split-screen windows; phones themselves are landscape-only) hides the extra chips, but never Home: it is the only way into your home on phones (2026-11-19) */
+html body.phone-app .hud > .mb-x:not(#mbhome),html body.phone-app .hud > #mblive{display:none!important} /* Live too (2026-11-20, the sweep: it sat exactly under the search button; it steps aside like it does when a sideways bar runs out of room, Events stays in the menu). The narrow layout (split-screen windows; phones themselves are landscape-only) hides the extra chips, but never Home: it is the only way into your home on phones (2026-11-19) */
 html body.phone-land .hud > .mb-x[hidden]{display:none!important}
 html body.phone-land .hud > .mb-x.ready{border-color:#ffd36a!important;box-shadow:0 0 0 1px #ffd36a66!important}
 html body.phone-land .hud > .mb-x.ready .lbl{color:#ffd36a!important}
@@ -19595,7 +19591,7 @@ PATCHES.unshift({v:'0.4.8.9.3', name:'Hotfix', items:phoneNotes([
   'Waters: each water’s fish strength line now wraps instead of running past its card on small screens.'])});
 PATCHES.unshift({v:'0.4.8.9.4', name:'Hotfix', items:phoneNotes([
   'Top bar: with a live event on, the Bait button no longer gets squeezed to a sliver at waters with long names.'])});
-PATCHES.unshift({v:'0.4.8.9.6', name:'Hotfix', items:phoneNotes(['Tide Pass: the Claim button is back, so you can collect your rewards.'])});
+PATCHES.unshift({v:'0.4.8.9.6', name:'Hotfix', items:phoneNotes(['Tide Pass: the Claim button is back, so you can collect your rewards.','Split-screen windows: during a live event, the Live button no longer sits under the search button.'])});
 PATCHES.unshift({v:'0.4.9', name:'Work in progress', items:phoneNotes([
   '## Fish Nibbles',
   'Scrap a fish in the Cooler for Fish Nibbles of its species: always for common fish, less often for rarer ones, and more for shiny, hybrid and titled fish.',
@@ -19643,6 +19639,9 @@ PATCHES.unshift({v:'0.4.9', name:'Work in progress', items:phoneNotes([
 // text changes. Released notes live in notes_release.js.
 const TEST_NOTES={v:'test', label:'Test build · '+(window.DL_BUILD==='ios'?'iPhone':'Android'), name:'0.4.9 test build (newest first)', items:[
   '## New in this build',
+  'Stats › Tester tools › Run every check: opens a page that runs every automatic check on this device (about 8 minutes) and puts your test save back. When it finishes, tap Copy report and send it to me.',
+  'Split-screen windows: during a live event, the Live button no longer sits under the search button (it steps aside, Events stays in the menu). Also going to the live game with the Tide Pass hotfix.',
+  '## Test build 0424',
   'New-water fish: every decoration follows the fish’s real shape: circuit traces differ per fish (no more four dots in a column), ties start at the throat, beaks sit on the nose, horns and ears sit on the head, and nothing covers an eye.',
   'The Cooler / Aquarium button no longer stays on the Fish Log.',
   '## Test build 0403',
@@ -20128,6 +20127,8 @@ window.__qa=async(groups)=>{ QA.R=[]; const keep=snap(), tab=S.tab, off=window._
     const shut=()=>{ const ec=$('evcard'); if(ec&&!ec.hidden){ ec.hidden=true; if(G.st==='event') G.st='idle'; } }; shut(); setTimeout(shut,1600); }
   const fails=QA.R.filter(r=>!r.ok); return {pass:QA.R.length-fails.length, fail:fails.length, fails, all:QA.R}; };
 window.__inv=inv;
+// sweep: choose a Path in every tier and save for real, so the next start-up loads a save like #130's (code that runs while loading broke only for such saves)
+window.__pathsAll=()=>{ clearTimeout(QA.settleT); S.specs={}; SPEC_TIERS.forEach((T,i)=>{ S.specs[i]=T.opts[0][0]; }); (QA.realSave||save)(); return Object.keys(S.specs).length; };
 // __sweep(acts, ks, is): every action with every bad id and index, saving switched off and the save restored afterwards;
 // returns the errors with where they came from (the random fuzz only shows the message)
 window.__sweep=(acts,ks=['__bad','',undefined,'0','none','x:y'],is=['-1','0','99',undefined])=>{ const keep=snap(), errs=[]; QA.realSave=QA.realSave||save; QA.realToast=QA.realToast||toast; clearTimeout(QA.settleT); const os=QA.realSave, ot=QA.realToast; save=function(){}; toast=function(){};
