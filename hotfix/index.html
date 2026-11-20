@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="Driftline: a cosy fishing game. 520 fish, ten waters, 100 oddities, pets and hats.">
+<meta name="theme-color" content="#0a161d">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Driftline">
+<title>Driftline</title>
+<script>
+// Driftline 2026.11.19-2100: every platform has its own build. This page only picks the right one for this device and opens it
+// at once (keeping anything after ? or #, like a shared save link). All builds share this address, so they share one save.
+(function(){
+  var u = navigator.userAgent || '', q = location.search, f = /[?&]plat=(pc|android|ios)\b/.exec(q);
+  var ios = /iPad|iPhone|iPod/.test(u) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1) || (/[?&]test(&|$)/.test(q) && /[?&]ios(&|$)/.test(q));
+  var android = /Android/i.test(u);
+  var p = f ? f[1] : window.DL_DESKTOP ? 'pc' : ios ? 'ios' : android ? 'android' : 'pc';
+  location.replace(p + '.html' + q + location.hash);
+})();
+</script>
+</head>
+<body style="margin:0;background:#0a161d;color:#e6efe8;font:600 15px system-ui,sans-serif">
+<noscript><p style="padding:24px">Driftline needs JavaScript. <a href="pc.html" style="color:#ffc94d">Open the game</a></p></noscript>
+</body>
+</html>
