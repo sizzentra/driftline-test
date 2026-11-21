@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="DL Test iPhone">
 <script>
-window.DL_BUILD='ios'; window.DL_PREVIEW=true; if(/[?&]sweep\b/.test(location.search)){ window.__bootErr=[]; addEventListener("error",function(e){ __bootErr.push(String(e.message||e)+(e.lineno?" (line "+e.lineno+")":"")); }); addEventListener("unhandledrejection",function(e){ __bootErr.push("promise: "+String(e.reason&&e.reason.message||e.reason)); }); window.requestAnimationFrame=function(f){ return setTimeout(function(){ f(performance.now()); },16); }; window.cancelAnimationFrame=function(i){ clearTimeout(i); }; } window.DL_VERSION='2026.11.20-1832';
+window.DL_BUILD='ios'; window.DL_PREVIEW=true; if(/[?&]sweep\b/.test(location.search)){ window.__bootErr=[]; addEventListener("error",function(e){ __bootErr.push(String(e.message||e)+(e.lineno?" (line "+e.lineno+")":"")); }); addEventListener("unhandledrejection",function(e){ __bootErr.push("promise: "+String(e.reason&&e.reason.message||e.reason)); }); window.requestAnimationFrame=function(f){ return setTimeout(function(){ f(performance.now()); },16); }; window.cancelAnimationFrame=function(i){ clearTimeout(i); }; } window.DL_VERSION='2026.11.20-1847';
 window.addEventListener('beforeinstallprompt',function(e){ e.preventDefault(); window.__dlInstallPrompt=e; });
 </script>
 </head>
@@ -20042,6 +20042,8 @@ PATCHES.unshift({v:'0.4.9', name:'Work in progress', items:phoneNotes([
 // text changes. Released notes live in notes_release.js.
 const TEST_NOTES={v:'test', label:'Test build · '+(window.DL_BUILD==='ios'?'iPhone':'Android'), name:'0.4.9 test build (newest first)', items:[
   '## New in this build',
+  'Tester tools › Run every check: it now runs only this device’s checks (pick iPhone, Android or PC at the top; the game picks for you), carries on if the phone reloads the page partway (before, the run quietly started over and never finished), keeps the screen awake, and Copy report works at any time (it copies what is done so far).',
+  '## Test build 1402',
   'Hair: Curly is back to its hand-drawn curls. Under every hat hair now tucks in: nothing bulges out around the brim or pokes up beside the party hat, and big hair sits flat under it. Every style has a light strand texture instead of a flat painted look.',
   'Cherry Blossom Lake, redone: Mount Fuji further away and bigger, with mountains either side; cherry trees with real branches, some weeping; a five-tier pagoda and stone lanterns that glow at night; water lilies; ducks instead of the koi; petals resting and drifting on the water; paper lanterns on the lake at night; now and then a gust carries petals across.',
   'Canadian Rockies, redone: rounded Canadian Shield rocks below the peaks, birches among the pines, a waterfall into a beaver dam and lodge, beavers swimming (one slaps its tail) and gnawing, a moose that stops to drink, Canada geese (and a V flying over), a canoe with a quiet angler, a rebuilt log cabin with the flag, fireweed, clear water showing rocks and weeds, and starry nights with the Milky Way.',
