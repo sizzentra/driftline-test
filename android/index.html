@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="DL Test Android">
 <script>
-window.DL_BUILD='android'; window.DL_PREVIEW=true; if(/[?&]sweep\b/.test(location.search)){ window.__bootErr=[]; addEventListener("error",function(e){ __bootErr.push(String(e.message||e)+(e.lineno?" (line "+e.lineno+")":"")); }); addEventListener("unhandledrejection",function(e){ __bootErr.push("promise: "+String(e.reason&&e.reason.message||e.reason)); }); window.requestAnimationFrame=function(f){ return setTimeout(function(){ f(performance.now()); },16); }; window.cancelAnimationFrame=function(i){ clearTimeout(i); }; } window.DL_VERSION='2026.11.20-1946';
+window.DL_BUILD='android'; window.DL_PREVIEW=true; if(/[?&]sweep\b/.test(location.search)){ window.__bootErr=[]; addEventListener("error",function(e){ __bootErr.push(String(e.message||e)+(e.lineno?" (line "+e.lineno+")":"")); }); addEventListener("unhandledrejection",function(e){ __bootErr.push("promise: "+String(e.reason&&e.reason.message||e.reason)); }); window.requestAnimationFrame=function(f){ return setTimeout(function(){ f(performance.now()); },16); }; window.cancelAnimationFrame=function(i){ clearTimeout(i); }; } window.DL_VERSION='2026.11.20-2035';
 window.addEventListener('beforeinstallprompt',function(e){ e.preventDefault(); window.__dlInstallPrompt=e; });
 </script>
 </head>
@@ -1689,7 +1689,9 @@ const petVal = (id=S.pet) => { const p=PETI[id]; return p ? p.v*(1+.1*pr('petpal
 function petSum(k){ const p=PETI[S.pet], q=S.pet2&&PETI[S.pet2]; return (p && p.k===k ? petVal() : 0) + (q && q.k===k ? petVal(S.pet2)*compShare() : 0); }
 const compShare = () => .5+.02*bondLevel(S.pet2);
 function bonus(k){ const v=buffSum(k)+aqSum(k)+petSum(k)+rodBonus(k); return BONUS_CAP[k] ? Math.min(BONUS_CAP[k],v) : v; }
-const sellMult = () => (1 + .03*(S.lvl-1) + .04*pr('haggler') + bonus('sell') + cozyBonus()*.005 + .01*anglerRank() + (spec('merchant')?.12:0) - 0) * coinMult();
+/* the sale price before bonuses: one formula, also used by Market Rush (a copy of it missed the Merchant Path, so Rush gave 27.5% instead of 30%: Cam's Pixel, 2026-11-20) */
+const sellBase = () => 1 + .03*(S.lvl-1) + .04*pr('haggler') + cozyBonus()*.005 + .01*anglerRank() + (spec('merchant')?.12:0);
+const sellMult = () => (sellBase() + bonus('sell')) * coinMult();
 const xpMult = () => (1 + bonus('xp') + cozyBonus()*.01) * (coinMult() + .01*(pshopLv('xp')-pshopLv('gold')));
 function earn(n){ n=Math.floor(n); S.money+=n; S.stats.earned+=n; S.stats.runEarned+=n; return n; }
 const pearlsFor = () => { const n=Math.floor(Math.pow(S.stats.runEarned/PEARL_DIV,1/PEARL_EXP)*voyagePearlMult()*pathMul('pearl')); return n>0 ? n+(relic("pearlseeker")?1:0) : 0; }; /* 0.3.6: experienced sailors find more pearls */
@@ -12779,7 +12781,7 @@ const CATCHES_PER_MIN = 3.6; // a steady pace (about one landed fish every 16 se
 const SCHED=[
   {id:'shoal', name:'Shoal Run',   icon:'🐟', every:90,  len:8, off:0,  col:'#7fe3c4', fx:{bite:.6, rare:.15}, what:'Bites +60% and more rare fish', d:'A great shoal passes through every water: bites come 60% faster and rare fish are more common.'},
   {id:'gold',  name:'Golden Hour', icon:'✨', every:120, len:6, off:50, col:'#ffd36a', fx:{shiny:1},          what:'Shiny fish twice as common',  d:'The light turns gold over every water and shiny fish come out twice as often.'},
-  {id:'market',name:'Market Rush', icon:'🪙', every:75,  len:6, off:25, col:'#ffb36a', fx:{sell:()=>.3*(1+.03*(S.lvl-1)+.04*pr('haggler')+_bonus_036('sell')+cozyBonus()*.005+.01*anglerRank())}, /* a true +30% of your sale price, whatever your level */          what:'Fish sell for 30% more',      d:'Buyers crowd the harbour: the fishmonger pays 30% more for everything you sell.'},
+  {id:'market',name:'Market Rush', icon:'🪙', every:75,  len:6, off:25, col:'#ffb36a', fx:{sell:()=>.3*(sellBase()+_bonus_036('sell'))}, /* a true +30% of your sale price, whatever your level */          what:'Fish sell for 30% more',      d:'Buyers crowd the harbour: the fishmonger pays 30% more for everything you sell.'},
 ];
 const schedLeft = e => { const p=e.every*MIN, t=(Date.now()-e.off*MIN)%p, tt=t<0?t+p:t; return tt<e.len*MIN ? e.len*MIN-tt : 0; };
 const schedNext = e => { const p=e.every*MIN, t=(Date.now()-e.off*MIN)%p, tt=t<0?t+p:t; return p-tt; };
@@ -13016,14 +13018,16 @@ $('panel').addEventListener('click',e=>{ const b=e.target.closest('[data-act]');
 // One rule for every page instead of a fix per page: before the page redraws, the tapped option's place on screen is noted; after the
 // redraw (and once more just before the next frame, for pages that finish later) its scroll box is moved so the option is back on
 // that exact spot. Only option buttons (the ones that show a chosen state) are held; buttons that change the page keep their behaviour.
-{ let held=null; const keyOf=b=>['act','k','v','i'].map(a=>b.dataset[a]!=null?'[data-'+a+'="'+CSS.escape(b.dataset[a])+'"]':'').join('');
+{ let held=null; const keyOf=b=>'button[aria-pressed]'+['act','k','v','i'].map(a=>b.dataset[a]!=null?'[data-'+a+'="'+CSS.escape(b.dataset[a])+'"]':'').join('');
   const scroller=e=>{ for(let p=e.parentElement;p&&p!==document.body;p=p.parentElement){ const cs=getComputedStyle(p); if(/(auto|scroll)/.test(cs.overflowY)&&p.scrollHeight>p.clientHeight+1) return p; } return null; };
-  const settle=()=>{ if(!held) return; const P=document.getElementById('panel'), el=P&&P.querySelector(held.k); if(!el||!el.getClientRects().length) return; const dy=el.getBoundingClientRect().top-held.top; if(Math.abs(dy)<1) return; const sc=scroller(el); if(!sc) return;
+  /* sideways too (iPhone, 2026-11-20: in a row of chips that scrolls sideways, Bounties' waters, the redraw put the row back at its start and the tapped water jumped 1,044 px) */
+  const xscroller=e=>{ for(let p=e.parentElement;p&&p!==document.body;p=p.parentElement){ const cs=getComputedStyle(p); if(/(auto|scroll)/.test(cs.overflowX)&&p.scrollWidth>p.clientWidth+1) return p; } return null; };
+  const settle=()=>{ if(!held) return; const P=document.getElementById('panel'), el=P&&P.querySelector(held.k); if(!el||!el.getClientRects().length) return; const dx=el.getBoundingClientRect().left-held.left; if(Math.abs(dx)>=1){ const xs=xscroller(el); if(xs) xs.scrollLeft+=dx; } const dy=el.getBoundingClientRect().top-held.top; if(Math.abs(dy)<1) return; const sc=scroller(el); if(!sc) return;
     /* at the very bottom, a line removed below the option shortens the page and the browser scrolls everything down; a little empty room
        at the end (gone with the next redraw) lets the option stay put */
     const want=sc.scrollTop+dy, max=sc.scrollHeight-sc.clientHeight; if(want>max+.5){ let pad=sc.querySelector(':scope > .snap-pad'); if(!pad){ pad=document.createElement('div'); pad.className='snap-pad'; pad.setAttribute('aria-hidden','true'); sc.appendChild(pad); } pad.style.height=((parseFloat(pad.style.height)||0)+want-max)+'px'; }
     sc.scrollTop=want; };
-  addEventListener('click',e=>{ const b=e.target&&e.target.closest&&e.target.closest('#panel button[aria-pressed][data-act]'); held=b&&!b.disabled?{k:keyOf(b), top:b.getBoundingClientRect().top}:null;
+  addEventListener('click',e=>{ const b=e.target&&e.target.closest&&e.target.closest('#panel button[aria-pressed][data-act]'); held=b&&!b.disabled?{k:keyOf(b), top:b.getBoundingClientRect().top, left:b.getBoundingClientRect().left}:null;
     /* held for a short moment: some pages finish later (the phone home view resizes its picture after the redraw) */
     if(held){ const h=held, again=()=>{ if(held===h) settle(); }; requestAnimationFrame(()=>{ again(); requestAnimationFrame(again); }); setTimeout(again,150); setTimeout(()=>{ again(); if(held===h) held=null; },350); } },true);
   addEventListener('click',()=>settle());
@@ -18344,6 +18348,9 @@ document.head.insertAdjacentHTML('beforeend',`<style>html body.phone-land #menuo
     P.innerHTML=`<div class="row spread"><div><h2 class="dl-dup">Bait</h2><p class="sub">Better bait brings rarer fish; one bait is used each time you set the hook. Worms never run out.</p></div></div>`+
       `<div class="jsec bt8" data-bt8="Switch"><h2>Switch</h2><div class="bt8-cur"></div><h5>Your bait</h5><div class="bt8-grid">${own.filter(k=>!isLure(k)).map(btn).join('')}</div>${own.some(isLure)?`<h5>Your special lures</h5><div class="bt8-grid">${own.filter(isLure).map(btn).join('')}</div>`:''}</div>`+
       `<div class="jsec bt8" data-bt8="Buy bait"><h2>Buy bait</h2></div><div class="jsec bt8" data-bt8="Special lures"><h2>Special lures</h2></div>`;
+    /* the "Bait in use" card keeps the same height whichever bait is on (Cam's Pixel, 2026-11-20: Worms has no "Switch to worms" button,
+       so picking Crickets made the card 36 px taller and every bait button below jumped): an invisible stand-in holds the button's place */
+    { const t=cur.querySelector&&cur.querySelector('.tk-cur'); if(t&&!t.querySelector('[data-act="usebait"]')) t.insertAdjacentHTML('beforeend','<button type="button" class="btn alt sm" tabindex="-1" aria-hidden="true" style="visibility:hidden">Switch to worms</button>'); }
     P.querySelector('.bt8-cur').appendChild(cur); P.querySelector('[data-bt8="Buy bait"]').appendChild(buy); P.querySelector('[data-bt8="Special lures"]').appendChild(lures); };
   /* Tackle on phones: Gear only (bait and lures live on the Bait page) */
   const _rp=renderPanel; renderPanel=function(){ if(MOB()&&S.tab==='shop'){ try{ tackleView='gear'; }catch(e){} } const r=_rp.apply(this,arguments); try{ if(MOB()&&S.tab==='shop'){ const P=$('panel'); P.querySelectorAll('[data-act="tackleview"]').forEach(b=>{ if(b.dataset.k!=='gear') b.remove(); }); P.querySelectorAll(':scope > .bwx-nav').forEach(n=>{ if(n.querySelectorAll('button').length<2) n.remove(); }); } }catch(e){ console.error(e); } return r; }; }
@@ -18954,7 +18961,7 @@ html body.phone-app .hud > #mblive .lbl,html body.phone-land .hud > #mblive .lbl
   const tasks=()=>{ try{ const d=ensureDaily(); const ready=d.tasks.filter(t=>!t.claimed&&taskHave(t)>=t.n).length+(typeof wqReady==='function'?wqReady():0); const done=d.tasks.filter(t=>t.claimed).length; return {ready, txt:ready?ready+' ready':done+'/'+d.tasks.length+' done'}; }catch(e){ return {ready:0,txt:'—'}; } };
   const pass=()=>{ try{ const pl=S.pass.lvl|0, un=pl-(S.pass.claimed|0); return {ready:un>0, txt:'Lv '+pl+(un>0?' · claim':'')}; }catch(e){ return {ready:false,txt:'—'}; } };
   const fit=()=>{ const hud=document.querySelector('.hud'); if(!hud||!T) return; const land=document.body.classList.contains('phone-land');
-    T.hidden=!land; Pz.hidden=true; if(!land) return;
+    T.hidden=!land; Pz.hidden=true; hud.classList.remove('mb-compact'); if(!land) return;
     /* when the bar runs out of room: Tasks steps aside first, then Live shrinks to its icon and time, then Live steps aside; Bait, Cooler,
        Aquarium, Home and Fish Log always stay */
     /* "out of room" also means the Bait name is being cut: the Bait chip is allowed to shrink (polish08), so without this it soaked up all
@@ -18964,6 +18971,9 @@ html body.phone-app .hud > #mblive .lbl,html body.phone-land .hud > #mblive .lbl
     if(over()) T.hidden=true;
     if(over()&&L&&has){ const b=L.querySelector(':scope > b'); if(b){ const p=b.textContent.trim().split(' '); if(p.length>2){ b.dataset.full=b.textContent; b.textContent=p[0]+' '+p[p.length-1]; b.dataset.tight=b.textContent; } } L.classList.add('mb-tight'); }
     if(over()&&L&&has) L.hidden=true;
+    /* last step (2026-11-20, director's iPhone at 667×375: "BAIT Worms" cut, 44 px of text in 39, with nothing left to step aside): every
+       chip gives up a little of its padding before any word is cut; the info box keeps its words (rule) */
+    if(over()) hud.classList.add('mb-compact');
     if(!ro&&typeof ResizeObserver==='function'){ ro=new ResizeObserver(()=>{ if(!busy) requestAnimationFrame(()=>{ busy=true; try{ fit(); }finally{ busy=false; } }); }); } if(ro){ for(const k of [hud,...hud.children]) if(!seen.has(k)){ seen.add(k); ro.observe(k); } } };
   if(/[?&]test\b/.test(location.search)) window.__hudFit=()=>fit(); /* QA: run the step-aside check now (the 500 ms tick is too slow for a test) */
   let ro=null, busy=false; const seen=new WeakSet(); /* round 8 (director: "settings cut off sometimes on top right"): the bar is re-checked whenever it or any chip changes size (the Live timer text, opening or closing the side panel), not only when Tasks or Tide Pass change */
@@ -19023,7 +19033,7 @@ html body.phone-land .hud > .mb-stat8 > .stat.loc .lbl::after,html body.phone-ap
     if(h.previousElementSibling!==aq) aq.after(h);
     let v='—'; try{ v=cozy()+' ♥'; }catch(e){} const b=h.querySelector('b'); if(b.textContent!==v) b.textContent=v; };
   ensure(); setInterval(ensure,1000); addEventListener('resize',()=>setTimeout(ensure,220)); } /* built as the page loads (a 60 ms delay let the top bar open without Home and then shift; the QA top-bar check caught it right after a reload) */
-document.head.insertAdjacentHTML('beforeend',`<style>html body.phone-land .hud > .mb-stat8,html body.phone-land .hud > .mb-stat8 > .stat{flex:0 0 auto!important;min-width:max-content!important}html body.phone-land .hud > .mb-stat8 > .stat .lbl,html body.phone-land .hud > .mb-stat8 > .stat b{white-space:nowrap!important;overflow:visible!important;text-overflow:clip!important}</style>`); /* the info box never squeezes its words; the chips to its right make room (Tasks steps aside first) */
+document.head.insertAdjacentHTML('beforeend',`<style>html body.phone-land .hud > .mb-stat8,html body.phone-land .hud > .mb-stat8 > .stat{flex:0 0 auto!important;min-width:max-content!important}html body.phone-land .hud > .mb-stat8 > .stat .lbl,html body.phone-land .hud > .mb-stat8 > .stat b{white-space:nowrap!important;overflow:visible!important;text-overflow:clip!important}html body.phone-land .hud.mb-compact{column-gap:3px!important}html body.phone-land .hud.mb-compact > .stat,html body.phone-land .hud.mb-compact > .hud-link,html body.phone-land .hud.mb-compact > .stat.mb-x,html body.phone-land .hud.mb-compact > .mb-stat8 > .stat{padding-left:3px!important;padding-right:3px!important}html body.phone-land .hud.mb-compact > .mb-stat8{padding:0 2px!important}</style>`); /* the info box never squeezes its words (when even that is not enough, .mb-compact trims every chip’s padding, fit() above); the chips to its right make room (Tasks steps aside first) */
 /* round 8 (director, 2026-11-18: "goal shouldn't be on the top header. Bait should move up there instead"): the goal lives in Quests
    (side panel); Bait sits in the top bar after Tasks: the bait you use (and how many are left), tap to open Tackle, Bait. The Bait
    button on the water (next to Rest) is gone. */
@@ -20002,6 +20012,9 @@ PATCHES.unshift({v:'0.4.9', name:'Work in progress', items:phoneNotes([
   'Fights are about timing now: a fresh fish has to be tired out before it comes in, and reeling straight through a rare fish’s runs snaps the line, whatever your gear. Let go when it runs, reel when it rests.',
   'Strong gear and skills still make fights faster, down to a floor: a few seconds for common fish, half a minute or more for mythics.',
   'Oddities, hotspots and shinies have sensible limits however much you stack them.',
+  'Market Rush now adds its full 30% when you follow the Merchant Path (it gave a little less).',
+  'Picking a bait, or a water on the Bounties page, no longer makes the buttons jump: the Bait in use card keeps its size, and a row you scrolled sideways stays where it was.',
+  'Small iPhones: the top bar keeps every word whole; when room runs out, the chips sit a little closer together instead of cutting the bait name.',
   'Menus use much less memory: pictures a page no longer shows are let go at once, and outfit previews share their drawing space (iPhones could run short of memory after opening many pages).',
   'A few fish that shared a name with another now have names of their own (your Fish Log keeps every catch). Tall creatures show whole in their pictures, and picking an option in a menu no longer makes the page jump.'])});
 // Phone test notes, Android and iPhone in one file (since 2026-11-20). Preview builds only; the live game never shows them.
@@ -20009,6 +20022,9 @@ PATCHES.unshift({v:'0.4.9', name:'Work in progress', items:phoneNotes([
 // text changes. Released notes live in notes_release.js.
 const TEST_NOTES={v:'test', label:'Test build · '+(window.DL_BUILD==='ios'?'iPhone':'Android'), name:'0.4.9 test build (newest first)', items:[
   '## New in this build',
+  'From your two sweep reports: Market Rush gives its full 30% with the Merchant Path; picking a bait no longer makes the bait buttons jump; tapping a water in Bounties’ sideways row keeps the row where it was (this one is on every build).',
+  'iPhone SE size: the top bar no longer cuts “Worms”; when room runs out the chips sit closer together.',
+  '## Test build 1943',
   'Menus use much less memory: pictures a page no longer shows are let go at once, and outfit previews share their drawing space. On the iPhone, Run every check ran out of memory during the test suite; it should now finish (the suite itself uses about a quarter of the memory it did, and lets go of each test’s pictures).',
   '## Test build 1832',
   'Tester tools › Run every check: it now runs only this device’s checks (pick iPhone, Android or PC at the top; the game picks for you), carries on if the phone reloads the page partway (before, the run quietly started over and never finished), keeps the screen awake, and Copy report works at any time (it copies what is done so far).',
@@ -20167,7 +20183,8 @@ economy(){ QA.sys='Economy';
 events(){ QA.sys='Events';
   T('calendar: live time and next start agree for every event, every minute of a day',()=>{ const bad=[]; const o0=window.__off; for(let m=0;m<1440;m+=7){ window.__off=m*60000; for(const e of SCHED){ const l=schedLeft(e), n=schedNext(e); if(l<0||l>e.len*MIN||n<=0||n>e.every*MIN) bad.push(e.id+'@'+m); } } window.__off=o0; return bad.length?{ok:false,detail:bad.slice(0,5).join(',')}:true; });
   T('challenges: one at a time, reward once, rest blocks a restart',()=>{ S.chal=null; S.chalCd={}; const id=Object.keys(CHAL)[0]; if(!chalStart(id)) return {ok:false,detail:'could not start'}; if(chalStart(Object.keys(CHAL)[1])) return {ok:false,detail:'second challenge started'}; const m0=S.money; S.chal.prog=S.chal.need||1; S.chal.best=999; chalEnd(true); const paid=S.money-m0; chalEnd(true); chalEnd(true); if(S.money!==m0+paid) return {ok:false,detail:'paid twice'}; if(chalStart(id)) return {ok:false,detail:'restarted during rest'}; return okInv(); });
-  T('Market Rush adds a true 30% to sale prices',()=>{ const e=SCHED.find(x=>x.id==='market'); const o0=window.__off; let found=false; for(let m=0;m<200&&!found;m++){ window.__off=m*60000; if(schedLeft(e)&&!SCHED.some(x=>x!==e&&schedLeft(x))) found=true; } const dm0=demandSp().id; if(!found){ window.__off=o0; return {ok:false,detail:'no Market Rush time found'}; } const f=coolerEntry(rollFish(SP.find(s=>s.id!==dm0),{})); f.value=1e6; const on=salePrice(f); let off=null; for(let m=0;m<400&&off==null;m++){ window.__off=m*60000; if(!SCHED.some(x=>schedLeft(x))&&demandSp().id!==f.id) off=salePrice(f); } /* 2026-11-18: the quiet time must not be one where the fishmonger wants this very fish (x2), or the test reads x0.65 */ window.__off=o0; if(off==null) return {ok:false,detail:'no quiet time found'}; const ratio=on/off; return Math.abs(ratio-1.3)<.02?{ok:true,detail:'x'+ratio.toFixed(3)}:{ok:false,detail:'x'+ratio.toFixed(3)}; });
+  T('Market Rush adds a true 30% to sale prices, with and without the Merchant Path (Cam’s Pixel read x1.275: the Rush formula missed the Merchant Path)',()=>{ const s0=S.specs, res=[]; const run=()=>{ const e=SCHED.find(x=>x.id==='market'); const o0=window.__off; let found=false; for(let m=0;m<200&&!found;m++){ window.__off=m*60000; if(schedLeft(e)&&!SCHED.some(x=>x!==e&&schedLeft(x))) found=true; } const dm0=demandSp().id; if(!found){ window.__off=o0; return {ok:false,detail:'no Market Rush time found'}; } const f=coolerEntry(rollFish(SP.find(s=>s.id!==dm0),{})); f.value=1e6; const on=salePrice(f); let off=null; for(let m=0;m<400&&off==null;m++){ window.__off=m*60000; if(!SCHED.some(x=>schedLeft(x))&&demandSp().id!==f.id) off=salePrice(f); } /* 2026-11-18: the quiet time must not be one where the fishmonger wants this very fish (x2), or the test reads x0.65 */ window.__off=o0; if(off==null) return {ok:false,detail:'no quiet time found'}; const ratio=on/off; return Math.abs(ratio-1.3)<.005? /* tight: a 1e6-coin fish leaves no rounding; the Merchant bug was only 1.8% on some saves */{ok:true,detail:'x'+ratio.toFixed(3)}:{ok:false,detail:'x'+ratio.toFixed(3)}; };
+    try{ for(const m of [false,true]){ S.specs=Object.assign({},s0||{}); for(const k in S.specs) if(S.specs[k]==='merchant') delete S.specs[k]; if(m) S.specs.qa='merchant'; const r=run(); res.push((m?'with Merchant ':'')+r.detail); if(!r.ok) return {ok:false,detail:res.join('; ')}; } } finally{ S.specs=s0; } return {ok:true,detail:res.join('; ')}; });
 },
 saves(){ QA.sys='Saves';
   T('save -> load keeps everything (JSON round trip through migrate)',()=>{ dockStore(); const a=JSON.parse(JSON.stringify(S)); const b=migrate(JSON.parse(JSON.stringify(S))); const keys=['money','lvl','xp','scales','pearls','loc','unlocked','gear','bait','journal','cooler','tank','perks','feats','rods','hunts','docks','dock','pass','look','owned']; const diff=keys.filter(k=>JSON.stringify(a[k])!==JSON.stringify(b[k])); return diff.length?{ok:false,detail:'changed: '+diff.join(',')}:true; });
@@ -20471,7 +20488,7 @@ ui(){ QA.sys='UI';
   T('[14] [15] new attachments and skills work, every skill has a max-rank effect and a group, skill points come from the Fish Log too',()=>{ const e=[]; const rb=rodBonus;
     for(const id of ['snagguard','scentbead','twinhook','nibpouch','grip']){ const a=ATT_I[id]; if(!a) { e.push('no attachment '+id); continue; } if(!(a.v[0]<a.v[1]&&a.v[1]<a.v[2])) e.push(id+' tiers do not grow'); }
     try{ const sp=SP.find(s=>s.r===2)||SP[0], fav=FISH_FAV[sp.id];
-      const h0=hybridChance(), n0=nibOdds({id:sp.id}), w0=catchW(sp,[sp],0,BAIT[fav]); rodBonus=k=>({hybrid:.5,nib:.1,fav:.35}[k]||0);
+      /* measured from a clean start (Cam’s Pixel: a rod that already had a Twin Hook read 1.25x): no rod bonus, no Gourmet or Candy Maker ranks */ rodBonus=()=>0; S.perks=Object.assign({},S.perks,{gourmet:0,nibbler:0}); const h0=hybridChance(), n0=nibOdds({id:sp.id}), w0=catchW(sp,[sp],0,BAIT[fav]); rodBonus=k=>({hybrid:.5,nib:.1,fav:.35}[k]||0);
       if(!(hybridChance()>h0*1.49)) e.push('Twin Hook'); if(!(nibOdds({id:sp.id})>n0+.09||nibOdds({id:sp.id})===1)) e.push('Nibble Pouch'); if(!(catchW(sp,[sp],0,BAIT[fav])>w0*1.34)) e.push('Scent Bead'); rodBonus=rb;
       S.perks=Object.assign({},S.perks,{gourmet:5,nibbler:5}); if(!(catchW(sp,[sp],0,BAIT[fav])>w0*1.29)) e.push('Gourmet'); if(!(nibOdds({id:sp.id})>=Math.min(1,n0+.19))) e.push('Candy Maker'); const ep=SP.find(s=>s.r>=3); if(!foodKnown(ep,{n:1})) e.push('Gourmet max does not show favourites');
       S.tank=Array(10).fill(0).map(()=>({id:sp.id,kg:sp.min,value:1,sh:2,pv:'ancient'})); S.perks.prismkeeper=5; if(Math.abs(titleAura()-(TITLE_AURA_CAP+.1))>1e-9) e.push('Prism Keeper cap '+titleAura());
@@ -20668,7 +20685,7 @@ if(/[?&]test\b/.test(location.search)) window.__contentQC=async(o={})=>{ const w
 if(/[?&]test\b/.test(location.search)) window.__snapQC=async(o={})=>{ const wait=ms=>new Promise(r=>setTimeout(r,ms)), keep=snap(), os=save, ot=toast, out=[]; let pages=0, tabs=0, taps=0;
   const vis=e=>{ const r=e.getBoundingClientRect(); return r.width>2&&r.height>2&&e.getClientRects().length&&getComputedStyle(e).visibility!=='hidden'; };
   const scroller=e=>{ for(let p=e.parentElement;p&&p!==document.body;p=p.parentElement){ const cs=getComputedStyle(p); if(/(auto|scroll)/.test(cs.overflowY)&&p.scrollHeight>p.clientHeight+1) return p; } return null; };
-  const keyOf=b=>['act','k','v','i'].map(a=>b.dataset[a]!=null?'[data-'+a+'="'+CSS.escape(b.dataset[a])+'"]':'').join('');
+  const keyOf=b=>'button[aria-pressed]'+['act','k','v','i'].map(a=>b.dataset[a]!=null?'[data-'+a+'="'+CSS.escape(b.dataset[a])+'"]':'').join(''); /* option buttons only: "Switch to worms" shares the Worms button's data and was measured instead (Cam's report, 2026-11-20) */
   const tapAll=async where=>{ const P=$('panel'); if(!P) return; const SNAP_OK=new Set(['uiscale','xfsend','xfget']); /* on purpose: the interface size resizes everything (PC); Send and Receive replace the box with the transfer */ const B=[...P.querySelectorAll('button[aria-pressed][data-act]')].filter(b=>!b.disabled&&!b.closest('.sect-nav')&&!SNAP_OK.has(b.dataset.act)&&vis(b)); if(!B.length) return;
     const pick=[...new Set([B[0],B[B.length>>1],B[B.length-1]])];
     for(const b0 of pick){ const k=keyOf(b0); let b=P.querySelector(k)||b0; const sc=scroller(b); if(sc){ const r=b.getBoundingClientRect(), q=sc.getBoundingClientRect(); sc.scrollTop+=(r.top+r.height/2)-(q.top+q.height/2); await wait(80); }
