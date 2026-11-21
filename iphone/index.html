@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="DL Test iPhone">
 <script>
-window.DL_BUILD='ios'; window.DL_PREVIEW=true; if(/[?&]sweep\b/.test(location.search)){ window.__bootErr=[]; addEventListener("error",function(e){ __bootErr.push(String(e.message||e)+(e.lineno?" (line "+e.lineno+")":"")); }); addEventListener("unhandledrejection",function(e){ __bootErr.push("promise: "+String(e.reason&&e.reason.message||e.reason)); }); window.requestAnimationFrame=function(f){ return setTimeout(function(){ f(performance.now()); },16); }; window.cancelAnimationFrame=function(i){ clearTimeout(i); }; } window.DL_VERSION='2026.11.20-2047';
+window.DL_BUILD='ios'; window.DL_PREVIEW=true; if(/[?&]sweep\b/.test(location.search)){ window.__bootErr=[]; addEventListener("error",function(e){ __bootErr.push(String(e.message||e)+(e.lineno?" (line "+e.lineno+")":"")); }); addEventListener("unhandledrejection",function(e){ __bootErr.push("promise: "+String(e.reason&&e.reason.message||e.reason)); }); window.requestAnimationFrame=function(f){ return setTimeout(function(){ f(performance.now()); },16); }; window.cancelAnimationFrame=function(i){ clearTimeout(i); }; } window.DL_VERSION='2026.11.20-2143';
 window.addEventListener('beforeinstallprompt',function(e){ e.preventDefault(); window.__dlInstallPrompt=e; });
 </script>
 </head>
@@ -457,7 +457,8 @@ const PLAT={
   glowPx:()=>256,              // size of the ready-made soft glow dot (cd_efficiency)
   movingDecorMs:()=>0,         // moving dock decorations: 0 = drawn fresh every frame, else cached for this long (cd_efficiency)
   quietTabSwitch:()=>false,    // tab switches skip the per-card entry animation and its forced layout (af_smooth, aw_menu035, bm_ui04)
-  fpsText:null                 // (fps)=>text for the frame counter, null = default text (bm_ui04)
+  fpsText:null,                // (fps)=>text for the frame counter, null = default text (bm_ui04)
+  touch:()=>!!(window.matchMedia&&matchMedia('(pointer:coarse)').matches) // touch wording: Tap / Let go and no keys, written beside the mouse wording at the source (e_ui, ai_cooler); phones: always
 };
 // ---------- data ----------
 const RAR = [
@@ -1802,7 +1803,7 @@ const G = {st:'idle', power:0, pdir:1, t:0, bob:{x:0,y:0}, from:null, to:null, w
   fish:null, pend:null, d:0, d0:0, maxOut:0, ten:0, sta:1, temper:0, run:false, runT:0, ev:null, evT:2, evDur:0, hold:false, tickT:0, warnT:0,
   parts:[], lastCast:.5, flash:0, nextBolt:5, hot:null, hotNext:8, inHot:false, land:null, perfect:false};
 
-function startCharge(){ if(S.cooler.length >= gv('cooler')){ toast(quip('full')+' Sell your catch or move fish to the aquarium.'); setTab('cooler'); return; }
+function startCharge(){ if(S.cooler.length >= gv('cooler')){ toast(quip('full')+' Sell or move fish to the Aquarium.'); setTab('cooler'); return; }
   if(S.baitSel!=='worm' && S.bait[S.baitSel]<=0){ S.baitSel='worm'; renderBait(); }
   G.st='charging'; G.power=0; G.pdir=1; ac(); }
 function release(){ if(G.st!=='charging') return; G.st='flying'; G.t=0; G.lastCast=G.power; const tip=TIP(); G.from={x:tip.x,y:tip.y}; const x=castX(G.power); G.to={x, y:waterY(x)};
@@ -1857,9 +1858,9 @@ function breakStreak(){ const n=S.streak; if(!n) return; const keep=maxed("strea
 function endFight(kind){
   if(kind==='caught'){ G.st='landing'; G.land={t:0, dur:.85, x0:G.bob.x, y0:G.bob.y}; splash(G.bob.x,G.bob.y,24); sfx.pull(); return; }
   G.st='idle'; G.fish=null; G.inHot=false; if(kind!=='nohook') breakStreak(); /* director 2026-11-18: a missed strike keeps the streak; only a hooked fish that gets away ends it */
-  if(kind==='snap'){ S.stats.snapped++; sfx.snap(); toast((G.temper>1.6 ? 'Snap! It lost its temper. Let go now and then. ' : 'Snap! Ease off when it runs. ')+quip('snap')); checkFeats(); save(); }
+  if(kind==='snap'){ S.stats.snapped++; sfx.snap(); toast((G.temper>1.6 ? 'Snap! Let go when it gets angry. ' : 'Snap! Ease off when it runs. ')+quip('snap')); checkFeats(); save(); }
   else if(kind==='nohook'){ sfx.lost(); toast('Missed a bite'); } /* a missed strike said "slipped off the hook" before */
-  else { sfx.lost(); toast((kind==='spool' ? 'It ran out all your line. ' : 'It slipped off the hook. ')+quip('lost')); }
+  else { sfx.lost(); toast((kind==='spool' ? 'It took all your line. ' : 'It slipped off the hook. ')+quip('lost')); }
 }
 function finishCatch(){ const f=G.fish; G.land=null; if(!f){ G.st='idle'; return; } if(V3ON) vib([30,40,70]);
   if(f.hot) S.stats.hot++; G.inHot=false;
@@ -1989,7 +1990,7 @@ const FEATS = [
   {id:'rank20',name:'Master angler',          d:'Reach angler rank 20',      p:()=>[anglerRank(),20],     coins:150000, pt:2},
   {id:'rank50',name:'Grand master',           d:'Reach angler rank 50',      p:()=>[anglerRank(),50],     coins:2000000, pt:4},
   {id:'frenzy5',name:'Frenzy fan',            d:'Play 5 fish frenzies',      p:()=>[S.gstats.frenzy,5],   coins:3000},
-  {id:'frenzy100',name:'Fast fingers',        d:'Tap 100 frenzy fish',       p:()=>[S.gstats.frenzyFish,100], coins:20000, pt:1},
+  {id:'frenzy100',name:'Fast fingers',        d:'Grab 100 frenzy fish',       p:()=>[S.gstats.frenzyFish,100], coins:20000, pt:1},
   {id:'star1', name:'Make a wish',            d:'Catch a falling star',      p:()=>[S.gstats.stars,1],    coins:2000, pt:1},
   {id:'crates10',name:'Crate expectations',   d:'Open 10 Mystery Crates',    p:()=>[S.gstats.crates,10],  coins:10000, pt:1},
   {id:'decor5',name:'Interior designer',      d:'Place 5 decorations in your aquarium', p:()=>[S.aq.decor.length,5], coins:8000, pt:1},
@@ -2765,7 +2766,7 @@ function drawFightHUD(t){
   g.fillRect(x-2+shake,y1-h*ten,14,h*ten);
   g.fillStyle='#e6efe8'; g.font='700 10px system-ui'; g.textAlign='center'; g.fillText('LINE',x+5,y0-12);
   const px=14, py=14, pw=Math.min(260,W*.46); g.fillStyle='rgba(5,14,20,.75)'; rr(px,py,pw,72,10); g.fill();
-  const odd = G.fish&&G.fish.kind!=='fish', msg = odd ? (G.ev==='snag' ? 'Snagged!' : G.ten>60 ? 'The line is straining! Ease off' : 'Dead Weight') : G.swT>0 ? 'Second wind!' : G.ev==='windup' ? 'Get ready to let go!' : G.ev==='jump' ? 'It jumped! Let go!' : G.ev==='shake' ? 'Head shake! Ease off' : G.run ? 'It’s running!' : G.temper>1.7&&G.hold ? 'Careful!' : G.hold ? 'Reeling…' : 'Hold to reel';
+  const odd = G.fish&&G.fish.kind!=='fish', msg = odd ? (G.ev==='snag' ? 'Snagged!' : G.ten>60 ? 'Ease off!' : 'Dead Weight') : G.swT>0 ? 'Second wind!' : G.ev==='windup' ? 'It’s jumping!' : G.ev==='jump' ? 'Let go!' : G.ev==='shake' ? 'Head shake!' : G.run ? 'It’s running!' : G.temper>1.7&&G.hold ? 'Careful!' : G.hold ? 'Reeling…' : 'Hold to reel';
   g.fillStyle = (G.ev||G.run||G.temper>1.7||G.swT>0) ? '#ffc94d' : '#e6efe8'; g.textAlign='left'; g.font='800 15px "Bricolage Grotesque", system-ui'; g.fillText(msg, px+10, py+20);
   g.font='700 12px system-ui'; g.fillStyle='#8aa5a2'; g.fillText(Math.max(0,G.d).toFixed(1)+' m out', px+10, py+38);
   const bw=pw*.5-50; g.fillText('Fight', px+pw*.5, py+38); g.fillStyle='#0a161d'; rr(px+pw*.5+44,py+30,bw,7,3); g.fill(); g.fillStyle='#ff6a3d'; rr(px+pw*.5+44,py+30,bw*G.sta,7,3); g.fill();
@@ -2950,7 +2951,7 @@ function renderSettings(P){ const s=S.settings; const sl=(k,label)=>`<div class=
    <div class="tile"><h4>Sound</h4>${sl('master','Master volume')}${sl('music','Music')}${sl('sfx','Sound effects')}${sl('amb','Nature sounds')}
      ${tg('musicOn','Music','Calm music that plays while you fish.')}${tg('ambient','Nature sounds','Waves, birds, crickets and wind for each water.')}
      <h5>Music style</h5><div class="chips">${styles.map(([k,n])=>`<button class="chipb" data-act="mstyle" data-k="${k}" aria-pressed="${s.style===k}">${n}</button>`).join('')}</div></div>
-   ${V3ON?`<div class="tile"><h4>Controls</h4><h5>Casting</h5><div class="chips"><button class="chipb" data-act="castmode" data-k="meter" aria-pressed="${s.castMode!=='aim'}">Power meter</button><button class="chipb" data-act="castmode" data-k="aim" aria-pressed="${s.castMode==='aim'}">Tap to aim</button></div><div class="meta" style="margin-top:6px">${s.castMode==='aim'?'Tap the spot on the water you want. The line lands close to it, never quite perfect.':'Hold to fill the meter, let go at the right moment.'}</div>${tg('vibrate','Vibration','Phones buzz on a bite, when the line is close to snapping, and on a catch.')}<div class="meta" style="margin-top:6px">Reel by <b>holding</b>, by <b>drawing circles</b> on the water like a crank, or with the <b>mouse wheel</b>. Controllers work too: <b>A</b> casts and reels, the <b>right trigger</b> reels with pressure.</div></div>`:''}
+   ${V3ON?`<div class="tile"><h4>Controls</h4><h5>Casting</h5><div class="chips"><button class="chipb" data-act="castmode" data-k="meter" aria-pressed="${s.castMode!=='aim'}">Power meter</button><button class="chipb" data-act="castmode" data-k="aim" aria-pressed="${s.castMode==='aim'}">${PLAT.touch()?"Tap":"Click"} to aim</button></div><div class="meta" style="margin-top:6px">${s.castMode==='aim'?'Tap the spot on the water you want. The line lands close to it, never quite perfect.':'Hold to fill the meter, let go at the right moment.'}</div>${tg('vibrate','Vibration','Phones buzz on a bite, when the line is close to snapping, and on a catch.')}<div class="meta" style="margin-top:6px">Reel by <b>holding</b>, by <b>drawing circles</b> on the water like a crank, or with the <b>mouse wheel</b>. Controllers work too: <b>A</b> casts and reels, the <b>right trigger</b> reels with pressure.</div></div>`:''}
    <div class="tile"><h4>Display</h4>${tg('effects','Weather effects','Rain, snow, lightning flashes and sparkles.')}${tg('wxPop','Weather pop-ups','A short note when the weather changes.')}${tg('boostsOnScreen','Boost timers on screen','Show active boosts in the corner of the water.')}${tg('hints','Hints','The help line under the water.')}<h5>Weights</h5><div class="chips"><button class="chipb" data-act="units" data-k="kg" aria-pressed="${s.units!=='lb'}">Kilograms (kg)</button><button class="chipb" data-act="units" data-k="lb" aria-pressed="${s.units==='lb'}">Pounds (lb)</button></div><h5>Rod hand</h5><div class="chips"><button class="chipb" data-act="hand" data-k="r" aria-pressed="${s.hand!=='l'}">Right-handed</button><button class="chipb" data-act="hand" data-k="l" aria-pressed="${s.hand==='l'}">Left-handed</button></div>${tg('showFps','Frame rate','Shows how many frames per second the game draws, in the corner of the water.')}
      <div class="toggle"><div><b>Full screen</b><div class="meta">Fill the whole screen with the game.</div></div><button class="btn alt sm" data-act="fullscreen">Toggle</button></div></div>
    <div class="tile"><h4>Gameplay</h4>${tg('protectRare','Protect rare fish','“Sell all” keeps Epic, Legendary and shiny fish in your cooler.')}${tg('minigames','Mini-games','Now and then a mini-game pops up between catches. Turn this off and they never will.')}
@@ -3659,7 +3660,7 @@ function petCustomHTML(){ const id=editPet(), lk=petLook(id), p=PETI[id], bl=bon
   return `<div class="tile" style="margin-top:10px">${petPvBarHTML()}${pick2}<div class="stylewrap petwrap" style="margin-top:0"><div class="preview"><canvas id="petcv" width="400" height="300" style="cursor:pointer" title="Pet me!"></canvas></div><div>
     <div class="row spread"><h4>${id===S.pet?'<span title="Favourite" style="color:#ffc94d">★</span> ':''}${esc(petName(id))} <span class="meta">the ${(id==="lily"||id==="daxniko")?p.name:p.name.toLowerCase()}${S.pet2?(id===S.pet?' · favourite':' · companion'):''}</span></h4><span id="petbond"><span class="meta">Bond ${'♥'.repeat(bl)}${'♡'.repeat(10-bl)}</span></span></div>
     <div class="meta" id="petbondinfo">${petBondText(id)}</div>
-    <div class="meta" style="color:#ff9ac0">Tap ${esc(petName(id))} in the picture to pet them.</div>
+    <div class="meta" style="color:#ff9ac0">${PLAT.touch()?"Tap":"Click"} ${esc(petName(id))} in the picture to pet them.</div>
     <h5>Name</h5><input id="petname" maxlength="16" value="${esc(lk.name)}" placeholder="${esc(p.name)}" style="width:100%;background:#0a161d;color:var(--ink);border:1px solid var(--line);border-radius:9px;padding:8px">
     <h5>Colour</h5><div class="chips">${tints}</div>
     <h5>Accessory</h5><div class="chips">${accs}</div>${lk.acc!=='none'&&lk.acc!=='balloon'?'<h5>Accessory colour</h5>'+sw('accCol'):''}
@@ -4602,7 +4603,7 @@ function linkHTML(){ const canShare=!!navigator.share; const m=XF.mode;
   const get = m==='get' ? `<div class="row" style="gap:8px;flex-wrap:nowrap"><input id="xfin" inputmode="numeric" autocomplete="one-time-code" maxlength="7" placeholder="123 456" value="${XF.code?xfCodeFmt(XF.code):''}" class="xfin"><button class="btn" data-act="xfgo">Connect</button></div>
       <div class="meta">Type the code shown on your other device.</div>` : '';
   return `<div class="tile" style="margin-top:12px;border-color:#7fc8a988"><h4>📲 Move progress between phone and PC</h4>
-   <div class="meta">Works both ways. Tap <b>Send</b> on the device that has your progress and <b>Get progress</b> on the other one.</div>
+   <div class="meta">Works both ways. ${PLAT.touch()?"Tap":"Click"} <b>Send</b> on the device that has your progress and <b>Get progress</b> on the other one.</div>
    <div class="row" style="gap:8px;margin:10px 0;flex-wrap:wrap"><button class="btn ${m==='send'?'':'alt'}" data-act="xfsend" aria-pressed="${m==='send'}">📤 Send from this device</button><button class="btn ${m==='get'?'':'alt'}" data-act="xfget" aria-pressed="${m==='get'}">📥 Get progress on this device</button></div>
    ${send}${get}<div class="meta" id="xfstat" style="min-height:1.2em;font-weight:700${XF.ok?';color:var(--kelp)':''}">${esc(XF.stat)}</div>
    <details class="xfmore"><summary>Other ways (if the code won’t connect)</summary>
@@ -11363,7 +11364,7 @@ function tankMove(f,sp,i,t,w,h,L){ let m=TANK_MV.get(f); if(!m){ const hs=hashSt
 // Tapping anywhere else keeps it in the cooler, as always. (The Cooler stays a normal menu tab.)
 // =====================================================================
 const _showCard_cq = showCard;
-showCard = function(o){ _showCard_cq(o); const old=$('cardq'); if(old) old.remove(); const ce=G.lastEntry; G.lastEntry=null; if(!ce||!S.cooler.includes(ce)){ const t=$('cardin').querySelector('.tap'); if(t) t.textContent=TOUCH?'Tap to dismiss':'Click to dismiss'; return; } /* C1 (director + Cam, 2026-11-20): an oddity or other non-fish catch kept the last fish card's "keep it in your cooler" line */
+showCard = function(o){ _showCard_cq(o); const old=$('cardq'); if(old) old.remove(); const ce=G.lastEntry; G.lastEntry=null; if(!ce||!S.cooler.includes(ce)){ const t=$('cardin').querySelector('.tap'); if(t) t.textContent=PLAT.touch()?'Tap to dismiss':'Click to dismiss'; return; } /* C1 (director + Cam, 2026-11-20): an oddity or other non-fish catch kept the last fish card's "keep it in your cooler" line */
   const tankFree=S.tank.length<aqCap(), price=salePrice(ce), d=document.createElement('div'); d.id='cardq'; d.className='cardq';
   d.innerHTML=`<button class="btn sm" data-q="sell">Sell · <span class="coin">${fmt(price)}</span></button><button class="btn alt sm" data-q="tank" ${tankFree?'':'disabled title="Your aquarium is full"'}>To aquarium</button>`;
   const tap=$('cardin').querySelector('.tap'); $('cardin').insertBefore(d,$('cardbadges'));
@@ -12811,7 +12812,7 @@ function chalPlace(c){ return 1+c.rivals.filter(r=>r[1]>c.best).length; }
 function chalReward(m){ const base=bestLoot(); return {coins:Math.round(base*25*m*coinMult()), scales:Math.max(1,Math.round(30*m)), tickets:Math.round(150*m), xp:Math.round(300*m)}; }
 function chalStart(id){ const C=CHAL[id]; if(!C||S.chal||(S.chalCd&&S.chalCd[id]>Date.now())) return false;
   const o=catchOdds(), extra=C.setup(o); S.chal=Object.assign({id, until:Date.now()+C.mins*MIN, loc:S.loc, prog:0}, extra);
-  toast(C.icon+' '+C.name+' started at '+curLoc().name+': '+C.rule(S.chal)+' in '+C.mins+' minutes.'); try{ sfx.catch(2); }catch(e){} save(); return true; }
+  toast(C.icon+' '+C.name+': '+C.rule(S.chal)+' in '+C.mins+' min.'); try{ sfx.catch(2); }catch(e){} save(); return true; }
 function chalEnd(won){ const c=S.chal; if(!c) return; const C=CHAL[c.id]; S.chal=null; S.chalCd=S.chalCd||{}; S.chalCd[c.id]=Date.now()+CHAL_CD;
   let title, m=0; if(C.ranked){ const place=c.best>0?chalPlace(c):4; m=place<=3?[1,.55,.3][place-1]*C.m:0; title=c.best>0?(['🥇 First place!','🥈 Second place','🥉 Third place','Fourth place'][place-1]):'No fish weighed in'; }
   else { m=won?C.m:0; title=won?C.name+' complete!':C.name+': out of time'; }
@@ -14656,7 +14657,7 @@ function weeklyHTML(){ const w=ensureWeekly(), done=w.quests.filter(q=>q.claimed
 { const _rb=renderBounties; renderBounties=function(P){ _rb(P); try{ const d=[...P.children].find(c=>c.classList&&c.classList.contains('tile')&&/Daily tasks/.test(c.textContent)); const html=weeklyHTML(); if(d) d.insertAdjacentHTML('afterend',html); else P.insertAdjacentHTML('afterbegin',html); }catch(e){} }; }
 { const _xw=extraAct2; extraAct2=function(b){ const a=b.dataset.act;
   if(a==='wqclaim'){ const w=ensureWeekly(), q=w.quests[+b.dataset.i]; if(!q||q.claimed||wqHave(q)<q.n) return 'skip'; q.claimed=true; const c=earn(q.coins*coinMult()); S.scales+=q.scales; try{ addPassXP(60); }catch(e){} try{ sfx.coin(); }catch(e){} toast('Weekly quest done: +'+fmt(c)+' coins, +'+q.scales+' Scales'); save(); return 'render'; }
-  if(a==='wqbonus'){ const w=ensureWeekly(); if(w.bonus||!w.quests.every(q=>q.claimed)) return 'skip'; w.bonus=true; S.tokens.big=(S.tokens.big||0)+1; S.scales+=25; try{ sfx.catch(3); }catch(e){} toast('All weekly quests done! +25 Scales and a big Mystery Crate at the Boardwalk.'); save(); return 'render'; }
+  if(a==='wqbonus'){ const w=ensureWeekly(); if(w.bonus||!w.quests.every(q=>q.claimed)) return 'skip'; w.bonus=true; S.tokens.big=(S.tokens.big||0)+1; S.scales+=25; try{ sfx.catch(3); }catch(e){} toast('Weekly quests done! +25 Scales and a big Mystery Crate (Boardwalk).'); save(); return 'render'; }
   return _xw(b); }; }
 if(typeof ACT_OK==='object'){ ACT_OK.wqclaim=(k,i)=>Number.isInteger(i)&&i>=0&&i<ensureWeekly().quests.length; ACT_OK.wqbonus=()=>true; }
 // the Bounties tab counts claimable weekly quests too
@@ -14674,7 +14675,7 @@ function forecastHTML(){ const now=weather(), f=wxForecast(5), tag=k=>(typeof WX
 setInterval(()=>{ if(S.tab!=='events') return; const box=document.querySelector('#panel .wxf'); if(!box) return; const now=Date.now()/1000, cur=Math.floor(now/WX_LEN); if(box.dataset.slot&&+box.dataset.slot!==cur){ box.outerHTML=forecastHTML(); return; } box.dataset.slot=cur;
   const l=box.querySelector('[data-wxl]'); if(l) l.textContent=mmss(wxLeft())+' left'; const f=wxForecast(5); box.querySelectorAll('.wxf-row:not(.on) .badge').forEach((b,i)=>{ if(f[i]) b.textContent='in '+mmss(Math.max(0,Math.round(f[i].at))); }); },1000);
 // a heads-up a minute before rare weather starts (once per weather change)
-let wxWarned=-1; setInterval(()=>{ try{ const cur=Math.floor(Date.now()/1000/WX_LEN), next=weatherAt(cur+1); if(!WX_SPECIAL.has(next.k)||next.k===weatherAt(cur).k||wxWarned===cur||wxLeft()>60) return; wxWarned=cur; toast(wxName(next.k)+' weather starts in under a minute: '+((typeof WX_TAG==='object'&&WX_TAG[next.k])||next.note)); }catch(e){} },5000);
+let wxWarned=-1; setInterval(()=>{ try{ const cur=Math.floor(Date.now()/1000/WX_LEN), next=weatherAt(cur+1); if(!WX_SPECIAL.has(next.k)||next.k===weatherAt(cur).k||wxWarned===cur||wxLeft()>60) return; wxWarned=cur; toast(wxName(next.k)+' in 1 min: '+((typeof WX_TAG==='object'&&WX_TAG[next.k])||next.note)); }catch(e){} },5000);
 document.head.insertAdjacentHTML('beforeend',`<style>
 #panel .wxf-row{display:flex;align-items:center;gap:10px;padding:6px 0;border-top:1px solid var(--line)}
 #panel .wxf-row > b{flex:0 0 auto;min-width:96px}
@@ -15332,7 +15333,7 @@ let NIB_ANIM=null;
 function nibScrapOne(f){ const sp=SPI[f.id], ok=Math.random()<nibOdds(f); S.stats.scrapped=(S.stats.scrapped||0)+1;
   if(!ok) return 0; const n=nibAmount(f)+(maxed('nibbler')?1:0)+Math.round(pathAdd('nibplus')); nibAdd(sp.id,n); return n; }
 function nibScrap(i){ const f=S.cooler[i]; if(!f||!SPI[f.id]) return 'skip'; const sp=SPI[f.id]; S.cooler.splice(i,1); const n=nibScrapOne(f);
-  if(n){ sfx.coin(); toast('Scrapped: +'+NIB_WORD(n)+' for '+sp.name+'. Feed them to a '+sp.name+' in your Aquarium.'); } else toast('Scrapped the '+sp.name+', but no Nibbles this time.');
+  if(n){ sfx.coin(); toast('+'+n+' '+nibRarName(sp.id)+' Nibble'+(n===1?'':'s')+'. Feed any '+nibRarName(sp.id)+' fish in the Aquarium.'); } else toast('Scrapped. No Nibbles this time.');
   return 'render'; }
 /* C11 (director + Cam, 2026-11-20): Scrap all, like Sell all and with the same filters (what Sell all would sell gets scrapped) */
 function nibScrapAll(){ const go=S.cooler.filter(f=>!sellKeep(f)&&SPI[f.id]); if(!go.length) return 'skip'; S.cooler=S.cooler.filter(f=>!go.includes(f)); let got=0, hit=0; for(const f of go){ const n=nibScrapOne(f); if(n){ got+=n; hit++; } }
@@ -15349,9 +15350,9 @@ function nibFeed(i){ const f=S.tank[i]; if(!f||!SPI[f.id]||nibOf(f.id)<1) return
 // eats, and goes back. Each feed: FEED_SMALL chance one fish's bonuses grow a little (not its income); FEED_BIG chance one fish earns
 // more and gains another bonus. Feel calls: the chances and sizes below.
 function feedRoll(){ const T=S.tank.filter(f=>f&&SPI[f.id]); if(!T.length) return; const msgs=[];
-  if(Math.random()<FEED_SMALL){ const f=pick(T); f.fdb=(f.fdb||0)+1; msgs.push(SPI[f.id].name+'’s bonuses grew a little (+'+Math.round(FEED_BOOST*100*f.fdb)+'%)'); }
-  if(Math.random()<FEED_BIG){ const f=pick(T), sp=SPI[f.id]; f.fdi=(f.fdi||0)+1; let m=sp.name+' earns '+Math.round(FEED_INC*100*f.fdi)+'% more'; if(nibBuffCount(f)<NIB_MAX_BUFFS){ const b=rollAqBuff(sp,f.kg); f.abx=(f.abx||[]).concat([b]); m+=' and grew a new bonus: +'+BK[b.k]; } msgs.push(m); }
-  if(msgs.length){ save(); setTimeout(()=>toast(msgs.join('. ')+'!'),1600); } }
+  if(Math.random()<FEED_SMALL){ const f=pick(T); f.fdb=(f.fdb||0)+1; msgs.push(SPI[f.id].name+': bonuses +'+Math.round(FEED_BOOST*100*f.fdb)+'%'); }
+  if(Math.random()<FEED_BIG){ const f=pick(T), sp=SPI[f.id]; f.fdi=(f.fdi||0)+1; let m=sp.name+' earns '+Math.round(FEED_INC*100*f.fdi)+'% more'; if(nibBuffCount(f)<NIB_MAX_BUFFS){ const b=rollAqBuff(sp,f.kg); f.abx=(f.abx||[]).concat([b]); m+=', new bonus +'+BK[b.k]; } msgs.push(m); }
+  if(msgs.length){ save(); setTimeout(()=>toast('Fed! '+msgs.join(' · ')),1600); } }
 function feedMove(f,M,i,w,h){ if(!feedAnim) return; const k=(performance.now()-feedAnim)/1000; if(k>7){ return; }
   const st=.4+(i%7)*.32, go=clamp((k-st)/1.1,0,1), back=clamp((k-st-2.3)/1.2,0,1), e=go*(1-back), s=e*e*(3-2*e); if(s<=0) return;
   const tx=w*(.3+((i*37)%40)/100), ty=Math.max(h*.12,Math.min(h*.5,k*30*(.6+((i*13)%10)/20)+((i*7)%20)))+6; /* a flake's spot, just under it */
@@ -15367,7 +15368,7 @@ function nibDraw(c,t,w,h){ const A=NIB_ANIM; if(!A) return; const k=(performance
   else { const q=clamp((performance.now()-A.t0)/1000-1.6,0,.6)/.6; if(q<1){ c.save(); c.globalAlpha=1-q; c.fillStyle=A.col2; for(let i=0;i<6;i++){ const a=i*1.05; c.beginPath(); c.arc(A.ex+Math.cos(a)*q*14,A.ey+Math.sin(a)*q*14,1.6,0,7); c.fill(); } c.restore(); } } }
 
 // page parts: Scrap in the Cooler, Feed in the Aquarium, Nibbles in the Fish Log details, what a trophy ate
-function nibScrapBtn(f,i){ const p=Math.round(nibOdds(f)*100), n=nibAmount(f), sp=SPI[f.id]; return `<button class="btn alt sm" data-act="scrap" data-i="${i}" title="Scrap for Fish Nibbles: ${p}% chance of ${NIB_WORD(n)} for ${esc(sp.name)}. Feed them to a ${esc(sp.name)} in your Aquarium to make it earn more.">Scrap</button>`; }
+function nibScrapBtn(f,i){ const p=Math.round(nibOdds(f)*100), n=nibAmount(f), sp=SPI[f.id]; return `<button class="btn alt sm" data-act="scrap" data-i="${i}" title="Scrap: ${p}% chance of ${n} ${nibRarName(sp.id)} Nibble${n===1?'':'s'}. Feed them to any ${nibRarName(sp.id)} fish in the Aquarium to make it earn more.">Scrap</button>`; }
 function nibFeedBtn(f,i){ const n=nibOf(f.id); if(!n&&!f.fed) return ''; return `<button class="btn ${n?'':'alt '}sm nibbtn" data-act="nibfeed" data-i="${i}" ${n?'':'disabled'} title="${n?'Feed it a Nibble: more coins per hour. Every '+NIB_STEP+' Nibbles its bonuses grow.':'Scrap '+nibRarName(f.id)+' fish in the Cooler to get Nibbles'}">Feed · ${n}</button>`; }
 const nibFedTxt = f => f&&f.fed ? ' · ate '+NIB_WORD(f.fed) : '';
 document.head.insertAdjacentHTML('beforeend','<style>#panel .nibbtn{white-space:nowrap}</style>');
@@ -15515,7 +15516,7 @@ function renderPaths(P){ const open=SPEC_TIERS.filter(T=>S.lvl>=T.lvl).length, c
    <div class="meta" style="margin-top:4px">${chosen} chosen · ${open} of ${SPEC_TIERS.length} open at level ${S.lvl}</div>
    <div class="path-list">${PATH_ORDER.map(pathCard).join('')}</div>`; };
 { const _ea=extraAct7; extraAct7=function(b){ if(b.dataset.act==='specrm'){ const ti=+b.dataset.i, T=SPEC_TIERS[ti]; if(!T||!S.specs[ti]) return 'skip'; const fee=specFee(ti); if(S.money<fee){ toast('Removing this path costs '+fmt(fee)+' coins.'); return 'skip'; }
-    const o=T.opts.find(o=>o[0]===S.specs[ti]); S.money-=fee; delete S.specs[ti]; toast('Removed '+(o?o[1]:'the path')+' ('+fmt(fee)+' coins). Its rank is kept if you pick it again.'); save(); return 'render'; } return _ea(b); }; }
+    const o=T.opts.find(o=>o[0]===S.specs[ti]); S.money-=fee; delete S.specs[ti]; toast('Removed '+(o?o[1]:'the path')+' ('+fmt(fee)+' coins). Pick it again to keep its rank.'); save(); return 'render'; } return _ea(b); }; }
 if(typeof ACT_OK==='object') ACT_OK.specrm=(k,i)=>Number.isInteger(i)&&i>=0&&i<SPEC_TIERS.length;
 // feats for the longer road
 try{ const f5=FEATS.find(f=>f.id==='paths5'); if(f5){ f5.name='Five roads'; f5.d='Choose five Paths'; }
@@ -17135,6 +17136,7 @@ PLAT.anglerReuseMs=()=>MOB()?33:0;          /* the lit angler picture is redrawn
 PLAT.glowPx=()=>MOB()?128:256;              /* smaller glow dots */
 PLAT.movingDecorMs=()=>MOB()?100:0;         /* moving decorations refresh 10x a second */
 PLAT.quietTabSwitch=MOB;                    /* tab switches without the per-card animation or a forced layout */
+PLAT.touch=()=>true;                        /* phones are touch screens: hints and cards say Tap / Let go and never Space or click, even if a browser reports a mouse */
 PLAT.fpsText=fps=>(MOB()&&typeof mobFpsText==='function')?mobFpsText(fps):null;
 // =====================================================================
 // Phones, round 6 (director: "both phones get the modern PC look: teal = click me, gold = open now, the same navy panels and
@@ -17874,7 +17876,7 @@ var MB_STATUS_B=40; /* the bottom of the top-left status corner (scene chip + bo
   const _t=toast; toast=function(m){ try{ if(MOB()&&typeof m==='string'){
       let p=null;
       if(m.startsWith('Weather: ')){ const k=weather().k, n=wxName(k); p={kind:'chg',k,head:n+' now',rest:m.slice(9+n.length).replace(/^\.\s*/,' · ')}; }
-      else { const W1=' weather starts in under a minute: ', i=m.indexOf(W1); if(i>0){ const cur=Math.floor(Date.now()/1000/WX_LEN); p={kind:'warn',cur,k:weatherAt(cur+1).k,head:m.slice(0,i)+' in under a minute',rest:' · '+m.slice(i+W1.length)}; } }
+      else { const W1=' in 1 min: ', i=m.indexOf(W1); if(i>0){ const cur=Math.floor(Date.now()/1000/WX_LEN); p={kind:'warn',cur,k:weatherAt(cur+1).k,head:m.slice(0,i)+' in under a minute',rest:' · '+m.slice(i+W1.length)}; } }
       if(p){ if(!blocked()) show(p); else { pend=p; if(!poll) poll=setInterval(tick,1000); } return; } } }catch(e){ console.error(e); }
     return _t.apply(this,arguments); };
   if(/[?&]test\b/.test(location.search)) window.__wxNote=()=>({pending:pend&&pend.head, shown:!!(el&&el.classList.contains('on')), text:el&&el.textContent}); }
@@ -18447,10 +18449,10 @@ const Q8_LESSONS=[
  ['aquarium','Aquarium','Getting around the Aquarium','Where everything is','Tap <b>Aquarium</b> in the top bar. Your tank fills the left side; the strip under it shows what you <b>earn</b> per hour, the coins <b>ready</b> to collect, and how full the <b>tank</b> is, with <b>Collect</b> and <b>Feed fish</b>. The panel on the right has two tabs: <b>Your tank</b> (fish, boosts, a bigger tank) and <b>Decorate</b>. <b>Hide</b> folds the panel away to watch the whole tank.',['aquarium',null]],
  ['aq-add','Aquarium','Putting fish on display','From the Cooler to the tank','In the <b>Cooler</b>, every fish shows what it would earn per hour in the tank: tap <b>To aquarium</b> on the ones worth keeping. You can also add them from Aquarium, Your tank, Add from your Cooler. Each fish rolls its own boost when caught; heavier fish give more, shiny fish double.',['cooler',null]],
  ['aq-earn','Aquarium','Earning and collecting','Visitors pay while you are away','Fish on display earn coins from visitors even while you are away, for <b>up to 8 hours</b>, so collect before long breaks. The Aquarium chip in the top bar turns <b>gold</b> when coins are waiting. <b>Feed fish</b> gives +25% aquarium income for 30 minutes, once an hour.',['aquarium',null]],
- ['aq-boost','Aquarium','Boosts','Every fish on display helps you fish','Each fish on display adds a boost (bite speed, rare odds, line tension, sale price and more) and <b>boosts stack</b>. Your tank lists them under Boosts. Usually a boost fits the fish\'s rarity; now and then one rolls much better.',['aquarium','Your tank']],
+ ['aq-boost','Aquarium','Boosts','Every fish on display helps you fish','Each fish on display adds a boost (bite speed, rare odds, line tension, sale price and more) and <b>boosts stack</b>. Your tank lists them under Boosts. Usually a boost fits the fish’s rarity; now and then one rolls much better.',['aquarium','Your tank']],
  ['aq-room','Aquarium','A bigger tank and decorations','More room, more boosts','On Your tank, <b>Expand Tank</b> shows its price, with how many fish the next expansion holds under it. <b>Decorate</b> places decorations in the tank: drag one along the sand to move it. <b>Advice:</b> fill every spot before buying more room, and swap in better fish as you catch them.',['aquarium','Your tank']],
  ['trophy','Your fish','The Trophy Room','Keep a fish forever','<b>Keep</b> mounts a fish in the Trophy Room for good: it earns nothing and gives no boost, but it is never lost, not even when you set sail again.',['trophy',null]],
- ['log','Your fish','The Fish Log and mastery','Every species, and stars for each','The <b>Fish Log</b> (top bar) lists every species at every water. Catch a species 3, 10, 30 and 100 times for its <b>mastery stars</b>: each star adds +10% to that fish\'s value, and every 8 stars is a new Angler Rank with coins and a free Mystery Crate.',['journal',null]],
+ ['log','Your fish','The Fish Log and mastery','Every species, and stars for each','The <b>Fish Log</b> (top bar) lists every species at every water. Catch a species 3, 10, 30 and 100 times for its <b>mastery stars</b>: each star adds +10% to that fish’s value, and every 8 stars is a new Angler Rank with coins and a free Mystery Crate.',['journal',null]],
  ['odd','Your fish','Oddities','Junk, odd finds and treasure','Not everything that bites is a fish. Junk, odd junk and rare finds go in <b>Oddities</b> (Collection), with <b>Treasures</b> in their own tab beside them: some pay, some boost your fishing, some come with a pet or a hat. Special lures (Bait, in the top bar) pull up more of them.',['oddities',null]],
  ['waters','Getting stronger','New waters','How to open the next water','Each water has 52 fish of its own and is tougher than the last. Catch <b>10 fish</b> at a water (10 more each voyage, up to 50) and you can open the next one with coins on the Map. Your goal (Quests) always says how close you are.',['map',null]],
  ['tackle','Getting stronger','Tackle upgrades','Rod length, reel, line, hook, cooler, finder','In Tackle, Gear: <b>Rod length</b> casts farther with better far-cast odds, <b>Reel</b> winds faster, <b>Line</b> takes more tension, <b>Hook</b> gives a longer window, <b>Cooler</b> holds more fish and the <b>Fish Finder</b> reads bites and finds hotspots.',['shop',['tackleview','gear']]],
@@ -18466,9 +18468,9 @@ const Q8_LESSONS=[
  ['home','Your home','Getting around your home','Where everything is','Tap <b>Home</b> in the top bar (it shows how cozy your home is, ♥). The live view of the water fills the left side; the strip under it shows your <b>Cozy</b> hearts, the XP <b>bonus</b> and how many decorations are <b>placed</b>. The panel on the right has two tabs: the home itself (style and wood) and <b>Decorations</b>.',['home',null]],
  ['home-deco','Your home','Decorating','Up to 8 decorations','Pick decorations in the <b>Decorations</b> tab; up to 8 fit. <b>Drag</b> a decoration or a pet along your home in the live view to move it to the exact spot you want.',['home',null]],
  ['home-cozy','Your home','Cozy and the XP bonus','Hearts mean more XP','Every decoration and nicer wood adds <b>cozy hearts</b>, and each heart gives <b>+1% XP</b>, up to <b>+40%</b>. <b>Advice:</b> decorate the water you fish at most first; the bonus counts where you are.',['home',null]],
- ['home-each','Your home','A home at every water','Each water keeps its own','Every water has its own home. A new one starts as a copy of the home you arrive with, and you can copy another water\'s home over it from the home page. Docks, boats and shores each look their own way.',['home',null]],
+ ['home-each','Your home','A home at every water','Each water keeps its own','Every water has its own home. A new one starts as a copy of the home you arrive with, and you can copy another water’s home over it from the home page. Docks, boats and shores each look their own way.',['home',null]],
  ['pets','Home and style','Pets','Company on the water','Pets keep you company on the water. Find more in Pets, then name and dress them up.',['pets','Your pets']],
- ['style','Home and style','Wardrobe','Dress your angler','Change your angler\'s body, clothes, hats, glasses, shoes and more in the Wardrobe. Tap anything to try it on first.',['style',null]],
+ ['style','Home and style','Wardrobe','Dress your angler','Change your angler’s body, clothes, hats, glasses, shoes and more in the Wardrobe. Tap anything to try it on first.',['style',null]],
  ['sail','Prestige','Set sail again','Start over, stronger every time','Once you reach <b>Hollow Trench</b> you can start over from Willow Pond for <b>Wisdom Pearls</b>: spend them in the Pearl shop (+1% coins or +1% XP a level) or on relics. You also earn Boon points to upgrade lasting voyage Boons, your Legacy grows with every voyage, and 32 milestones up to voyage 100 unlock perks. You keep your level, skills, Fish Log, feats, Trophy Room, pets and clothes.',['prestige','Set sail again']],
  ['relics','Prestige','Pearl relics','Trade pearls for lasting bonuses','Spend Wisdom Pearls on permanent relics. Each relic is bought once and kept forever; the strongest cost the most pearls.',['prestige','Pearl relics']],
  ['save','Settings and saves','Your save on another device','Move your progress','Save, Save codes gives you a code that carries your progress to another phone or a computer. Settings belong to each device.',['save',null]],
@@ -18483,7 +18485,7 @@ const Q8_HELP=[
  ['My line keeps snapping','Let go of the screen when the fish runs, jumps or shakes its head, and watch the ring around it: red means let go now. A stronger <b>Line</b> in Tackle takes more strain.',['shop',['tackleview','gear']],'Tackle'],
  ['How do I catch rarer fish?','Better bait, far casts, hotspots, Storm weather and the rare-odds skills all help. Your Wisdom Pearls raise rare odds too.',['bait','Buy bait'],'Bait'],
  ['My cooler is full','Open the Cooler and Sell all (with a filter if you want to keep some), put fish in the Aquarium, or Keep the best ones in the Trophy Room. A bigger Cooler is in Tackle.',['cooler',null],'Cooler'],
- ['How do I earn more coins?','Sell bigger and rarer fish, fill the fishmonger\'s wish (double pay), keep the Aquarium full, finish bounties and tasks, and raise your sale bonus with skills and mastery stars.',['bounties','Bounties'],'Bounties'],
+ ['How do I earn more coins?','Sell bigger and rarer fish, fill the fishmonger’s wish (double pay), keep the Aquarium full, finish bounties and tasks, and raise your sale bonus with skills and mastery stars.',['bounties','Bounties'],'Bounties'],
  ['Where do Scales come from?','Rare and better fish. You spend them on rod upgrades.',['rods','Your rods'],'Rods'],
  ['What are Fish Nibbles?','Scrap a fish in the Cooler (next to Sell) for Nibbles of its rarity: always for common fish, less often for rarer ones, more for shiny, hybrid and titled fish. Feed them to any fish of the same rarity in your Aquarium: it earns more, and every 10 Nibbles its bonuses grow. Half of your Nibbles expire when you set sail again.',['cooler',null]],
  ['How do I open the next water?','Catch 10 fish at the water before it this voyage (10 more each voyage, up to 50), then pay its price on the Map. Your goal shows both.',['map',null],'Map'],
@@ -18852,17 +18854,6 @@ const deDockText=s=>{ if(!s||s.indexOf('ock')<0) return s; let t=s; for(const [r
   /* Search results are built from the index when you type: their text is fixed as it appears */
   new MutationObserver(ms=>{ if(!MOB()) return; for(const m of ms) for(const a of m.addedNodes) if(a.nodeType===1) walk(a); }).observe(document.body,{childList:true,subtree:false});
   document.addEventListener('input',()=>{ if(MOB()) setTimeout(()=>{ const sv=document.getElementById('searchov'); if(sv) walk(sv); },0); },true); }
-/* touch words only (director: "Mobile users don't need to know about 'space' in the how to fish tooltip"). The phone builds run on touch
-   screens, so the hint, the catch card and the pages never mention Space, clicking or a mouse, even if a browser reports a mouse. */
-const TOUCH_TXT=[[/<b>Click the water<\/b> where you want to cast \(or hold Space for the power meter\)\./g,'<b>Tap the water</b> where you want to cast.'],
-  [/<b>Hold<\/b> on the water \(or Space\) to charge a cast, <b>release<\/b> to throw\./g,'<b>Touch and hold</b> the water to charge a cast, <b>let go</b> to throw.'],
-  [/Click or press Space to set the hook\./g,'Tap to set the hook.'],[/^Release to cast\./,'Let go to cast.'],
-  [/Click or press Space to keep fishing/g,'Tap to keep fishing'],[/Click a fish for its records/g,'Tap a fish for its records'],[/\s*\(or (hold )?Space[^)]*\)/g,'']];
-const touchText=s=>{ if(!s||!/Space|Click|Release/.test(s)) return s; let t=s; for(const [re,to] of TOUCH_TXT) t=t.replace(re,to); return t; };
-{ const fix=el=>{ if(!el) return; const h=el.innerHTML, t=touchText(h); if(t!==h) el.innerHTML=t; };
-  const watch=id=>{ const el=document.getElementById(id); if(!el) return; fix(el); new MutationObserver(()=>fix(el)).observe(el,{childList:true,characterData:true,subtree:true}); };
-  const start=()=>{ watch('hint'); watch('card'); }; if(document.readyState==='loading') addEventListener('DOMContentLoaded',start); else setTimeout(start,0);
-  const _rp=renderPanel; renderPanel=function(){ const r=_rp.apply(this,arguments); try{ const P=$('panel'); if(P){ const it=document.createTreeWalker(P,NodeFilter.SHOW_TEXT); let n; while((n=it.nextNode())){ const v=n.nodeValue; if(!/Space|Click/.test(v)) continue; const t=touchText(v); if(t!==v) n.nodeValue=t; } } }catch(e){} return r; }; }
 /* Save > App on phones: how to install Driftline on THIS phone (the Windows program was the only thing offered) */
 { const _rp=renderPanel; renderPanel=function(){ const r=_rp.apply(this,arguments); try{ if(!MOB()||S.tab!=='save') return r; const P=$('panel');
       const tile=[...P.querySelectorAll('.tile')].find(t=>/Windows desktop app/.test(t.textContent)); if(!tile||tile.dataset.mb) return r; tile.dataset.mb='1';
@@ -19122,7 +19113,7 @@ document.head.insertAdjacentHTML('beforeend','<style>html body.phone-land .hud >
     g.strokeStyle=col; g.beginPath(); g.arc(cx,cy,r,-Math.PI/2,-Math.PI/2+Math.PI*2*Math.max(.02,ten)); g.stroke();
     g.fillStyle='rgba(255,84,104,.35)'; g.beginPath(); g.arc(cx,cy,r+g.lineWidth*.5+2,-Math.PI/2+Math.PI*2*.8,-Math.PI/2+Math.PI*2,false); g.arc(cx,cy,r+g.lineWidth*.5+5,-Math.PI/2+Math.PI*2,-Math.PI/2+Math.PI*2*.8,true); g.fill(); /* the red zone: snapping risk */
     /* the instruction, right above */
-    const odd = G.fish&&G.fish.kind!=='fish', msg = odd ? (G.ev==='snag' ? 'Snagged!' : danger ? 'Line strained! Ease off' : 'Dead Weight') : G.swT>0 ? 'Second wind!' : G.ev==='windup' ? 'Get ready to let go!' : G.ev==='jump' ? 'It jumped! Let go!' : G.ev==='shake' ? 'Head shake! Ease off' : G.run ? 'It’s running!' : G.temper>1.7&&G.hold ? 'Careful!' : danger ? 'Line strained! Ease off' : G.hold ? 'Reeling…' : 'Hold to reel';
+    const odd = G.fish&&G.fish.kind!=='fish', msg = odd ? (G.ev==='snag' ? 'Snagged!' : danger ? 'Ease off!' : 'Dead Weight') : G.swT>0 ? 'Second wind!' : G.ev==='windup' ? 'It’s jumping!' : G.ev==='jump' ? 'Let go!' : G.ev==='shake' ? 'Head shake!' : G.run ? 'It’s running!' : G.temper>1.7&&G.hold ? 'Careful!' : danger ? 'Ease off!' : G.hold ? 'Reeling…' : 'Hold to reel';
     const alert = !!(G.ev||G.run||G.temper>1.7||G.swT>0||danger);
     g.font='800 '+(W<700?15:17)+'px "Bricolage Grotesque", system-ui'; g.textAlign='center'; g.textBaseline='alphabetic';
     const mw=g.measureText(msg).width+22, mx=clamp(cx,mw/2+8,W-mw/2-8), my=Math.max(48,cy-r-16);
@@ -19740,11 +19731,6 @@ if(/[?&]test\b/.test(location.search)) window.__spec=()=>{ for(const a of docume
     /* the whole rule text, so shorthands (padding: max(...) max(...)...) and !important are kept */
     const walk=rs=>{ for(const rule of rs){ if(rule.cssRules&&!rule.selectorText) walk(rule.cssRules); else if(rule.style&&rule.style.cssText.includes('safe-area-inset')){ rule.style.cssText=fix(rule.style.cssText); n++; } } };
     for(const ss of document.styleSheets){ try{ walk(ss.cssRules); }catch(e){} } for(const el of document.querySelectorAll('[style*="safe-area-inset"]')){ el.setAttribute('style',fix(el.getAttribute('style'))); n++; } dispatchEvent(new Event('resize')); /* positions the game works out on a resize */ return n; }; }
-// ---- phone wording (found in the full QC pass, 2026-11-18): the bite hint and the catch card spoke about clicks and the Space key,
-// which a phone has neither of ----
-{ const MB_TOUCH=!!(window.matchMedia&&matchMedia('(pointer:coarse)').matches); /* our own check: the core's TOUCH is declared later in the build */
-  const _sh=setHint; setHint=function(){ _sh.apply(this,arguments); if(!MB_TOUCH) return; try{ if(G.st==='bite'&&S.settings.hints){ const h=document.getElementById('hint'), t='<b>Now!</b> Tap the water to set the hook.'; if(h&&h.innerHTML!==t) h.innerHTML=t; } }catch(e){} };
-  const tap=document.querySelector('#card .tap'); if(tap&&MB_TOUCH) tap.textContent='Tap to keep fishing'; }
 // Phone release notes, Android and iPhone in one file (since 2026-11-20; before that src/android/ and src/ios/ each had a copy).
 // Shown once to returning players. Kept exactly as shipped once published. A plain line shows on both phones; a line that
 // differs is {android:'...', ios:'...'}, and a line for one phone only names just that phone. DL_BUILD (set by build.ps1) picks.
@@ -20037,6 +20023,9 @@ PATCHES.unshift({v:'0.4.9', name:'Work in progress', items:phoneNotes([
   'Fights are about timing now: a fresh fish has to be tired out before it comes in, and reeling straight through a rare fish’s runs snaps the line, whatever your gear. Let go when it runs, reel when it rests.',
   'Strong gear and skills still make fights faster, down to a floor: a few seconds for common fish, half a minute or more for mythics.',
   'Oddities, hotspots and shinies have sensible limits however much you stack them.',
+  'Shorter tips: fishing hints and fight cues get to the point (“It’s jumping!”, “Let go!”, “Ease off!”), and long messages say the same in fewer words. The jokes stay as they were.',
+  'Scrapping a fish now says which Nibbles you got (common, rare…) and that any fish of that rarity can eat them.',
+  'After an oddity, the catch card no longer keeps saying “dismiss” on the next fish.',
   'Market Rush now adds its full 30% when you follow the Merchant Path (it gave a little less).',
   'Picking a bait, or a water on the Bounties page, no longer makes the buttons jump: the Bait in use card keeps its size, and a row you scrolled sideways stays where it was.',
   'Small iPhones: the top bar keeps every word whole; when room runs out, the chips sit a little closer together instead of cutting the bait name.',
@@ -20047,6 +20036,9 @@ PATCHES.unshift({v:'0.4.9', name:'Work in progress', items:phoneNotes([
 // text changes. Released notes live in notes_release.js.
 const TEST_NOTES={v:'test', label:'Test build · '+(window.DL_BUILD==='ios'?'iPhone':'Android'), name:'0.4.9 test build (newest first)', items:[
   '## New in this build',
+  'Shorter hints, fight cues (“It’s jumping!”, “Let go!”, “Ease off!”, “Head shake!”) and messages, same meaning, jokes untouched. Scrap now names the rarity of the Nibbles. The catch card no longer says “dismiss” after an oddity.',
+  'Phones: the words that used to be swapped in afterwards (tap, let go) are now written in the game itself; please tell me if any “click” or “Space” shows up anywhere.',
+  '## Test build 2035',
   'From your two sweep reports: Market Rush gives its full 30% with the Merchant Path; picking a bait no longer makes the bait buttons jump; tapping a water in Bounties’ sideways row keeps the row where it was (this one is on every build).',
   'iPhone SE size: the top bar no longer cuts “Worms”; when room runs out the chips sit closer together.',
   '## Test build 1943',
@@ -20118,6 +20110,12 @@ addTestNotes(TEST_NOTES);
 // =====================================================================
 if(/[?&]test\b/.test(location.search)) (function(){
 const QA={R:[], sys:''};
+/* the text standard's checkable rules (C, 2026-11-20; docs/TEXT_STANDARD.md), shared by __contentQC (every visible line on every page)
+   and __qa (hints, pop-ups and item lines): touch builds never mention clicking, hovering, a mouse, a keyboard or the Space key; PC
+   never says Tap; apostrophes are curly. Lengths per place (jokes and Fish Log notes have none; a pop-up's joke is not counted). */
+const textBad=v=>{ const out=[], touch=window.DL_BUILD?window.DL_BUILD!=='pc':PLAT.touch(); /* from the build, never from the setting under test (#149) */ if(touch){ if(/\b[Cc]lick(s|ed|ing)?\b/.test(v)) out.push('says click (phones tap)'); if(/\b[Hh]over/.test(v)) out.push('says hover'); if(/\b[Mm]ouse\b/.test(v)) out.push('mentions a mouse'); if(/\b[Kk]eyboard\b/.test(v)) out.push('mentions a keyboard'); if(/\b(press|hold|or|tap) Space\b|\bSpace (bar|key)\b/.test(v)) out.push('mentions the Space key'); }
+  else if(/\bTap\b|\btap (to|the|a|an|it)\b/.test(v)) out.push('says tap (PC clicks)'); if(/[A-Za-z]'[A-Za-z]/.test(v)) out.push('straight apostrophe'); return out; };
+const TEXT_LIMITS={hint:75, popup:80, pagedesc:72, bait:70, rod:70, attachment:70, skill:85, feat:45, pet:70}; /* ⚑ proposed, waiting for the director's OK */
 /* memory per test (2026-11-20, the iPhone ran out of memory during __qa, #151): drawing memory each test allocates (canvas width x height x 4 bytes, counted once per canvas when it is first drawn on) */
 window.__cvBytes=0; window.__cvAll=[]; { const ce=Document.prototype.createElement; Document.prototype.createElement=function(n){ const e=ce.apply(this,arguments); if(e.tagName==="CANVAS") e.__prog=1; return e; }; } /* canvases made in code are caches (kept); canvases from page HTML that left the page are garbage */ window.__cvFree=from=>{ for(let i=from;i<window.__cvAll.length;i++){ const c=window.__cvAll[i].deref(); if(c&&!c.__prog&&!c.isConnected&&c.width){ c.width=0; c.height=0; } } }; window.__cvHeld=()=>window.__cvAll.reduce((a,r)=>{ const c=r.deref(); return a+(c&&!c.isConnected&&c.width?c.width*c.height*4:0); },0)/1048576; /* weak references: measuring must not keep pictures alive */ { const seen=new WeakSet(), gc=HTMLCanvasElement.prototype.getContext; HTMLCanvasElement.prototype.getContext=function(){ if(!seen.has(this)){ seen.add(this); window.__cvBytes+=this.width*this.height*4; window.WeakRef&&window.__cvAll.push(new WeakRef(this)); } return gc.apply(this,arguments); }; if(window.OffscreenCanvas){ const og=OffscreenCanvas.prototype.getContext; OffscreenCanvas.prototype.getContext=function(){ if(!seen.has(this)){ seen.add(this); window.__cvBytes+=this.width*this.height*4; } return og.apply(this,arguments); }; } }
 const snap=()=>JSON.stringify(S);
@@ -20601,6 +20599,11 @@ T('page tabs: a part hidden by a page tab never stays on screen (a forced style 
   T('PC: the PC layout stays on in full screen (players who play full screen get the same header, strip and pages)',()=>{ if(!document.body.classList.contains('plat-pc')||innerWidth<800||innerHeight<560) return {ok:true,detail:'not a PC-size window'}; const d=Object.getOwnPropertyDescriptor(Document.prototype,'fullscreenElement'); let v; try{ Object.defineProperty(Document.prototype,'fullscreenElement',{configurable:true,get(){ return document.documentElement; }}); v=PC_APP(); } finally{ if(d) Object.defineProperty(Document.prototype,'fullscreenElement',d); else delete Document.prototype.fullscreenElement; } return v?{ok:true,detail:'PC layout in full screen'}:{ok:false,detail:'full screen switches the PC layout off'}; });
   T('short numbers (K, M, B...) never round up past the real amount',()=>{ const e=[]; const mul={K:1e3,M:1e6,B:1e9,T:1e12,Qa:1e15}; const vals=[99999,100000,999999,1e6-1,1e6,9999999,1e7,99999999,999999999,1e9,9.999e9,999.99e9,1e12,7.7e12,999999e9]; for(let i=0;i<300;i++) vals.push(Math.floor(Math.pow(10,5+Math.random()*10)));
     for(const v of vals){ const s=fmtShort(v), m=s.match(/^([\d.]+)(K|M|B|T|Qa)$/); if(!m){ if(v>=100000) e.push(v+' -> '+s); continue; } const back=parseFloat(m[1])*mul[m[2]]; if(back>v*(1+1e-9)) e.push(v+' -> '+s); if(parseFloat(m[1])>=1000) e.push(v+' -> '+s); } return e.length?{ok:false,detail:e.slice(0,6).join(' | ')}:{ok:true,detail:vals.length+' numbers'}; });
+  T('patch notes for the next update stay spoiler-free: no fish names, no crate-only or gift pets, no exact odds (text standard)',()=>{ const e=[]; const P0=PATCHES.find(p=>p.v===GAME_VERSION)||PATCHES[0]; const items=(P0.items||[]).map(x=>typeof x==='string'?x:JSON.stringify(x)).join('\n');
+    const esc_=s=>s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'), word=n=>new RegExp('(^|[^A-Za-z])'+esc_(n)+'($|[^A-Za-z])'); for(const s of SP){ if(!s||!s.name||!(s.name.includes(' ')||s.name.length>=7)) continue; if(word(s.name).test(items)) e.push('fish name: '+s.name); }
+    for(const p of PETS) if((p.src==='crate'||p.src==='gift')&&p.name&&word(p.name).test(items)) e.push(p.src+' pet: '+p.name);
+    const odds=items.match(/\b\d+(\.\d+)?\s?% (chance|odds)\b/gi); if(odds) e.push('exact odds: '+odds.join(', '));
+    return e.length?{ok:false,detail:e.slice(0,10).join(' | ')}:{ok:true,detail:'version '+P0.v+', '+(P0.items||[]).length+' lines'}; });
   T('memory (#151, the iPhone ran out of memory): pictures a page redraw drops are released, and angler previews share their scratch canvases',()=>{ const e=[];
     setTab('journal'); const a=[...$('panel').getElementsByTagName('canvas')]; if(!a.length) e.push('the Fish Log drew no pictures to test with');
     setTab('settings'); setTab('journal'); const kept=a.filter(c=>!c.isConnected&&c.width>0).length; if(kept) e.push(kept+' of '+a.length+' dropped Fish Log pictures still hold their memory');
@@ -20622,10 +20625,15 @@ fuzz(){ QA.sys='Adversarial';
 }};
 // fixed-phase helper for synchronous tests (the async __setPhase also hunts for clear weather)
 function __setPhaseSync(ph){ for(let k=0;k<80;k++){ const cur=(window.__realNow()/1000%CYCLE)/CYCLE; window.__off=((ph-cur+1)%1)*CYCLE*1000+k*CYCLE*1000; if(weather().k==='Clear') return true; } return false; }
-window.__qa=async(groups)=>{ QA.R=[]; const keep=snap(), tab=S.tab, off=window.__off; QA.realSave=QA.realSave||save; QA.realToast=QA.realToast||toast; clearTimeout(QA.settleT); const os=QA.realSave, ot=QA.realToast; save=function(){}; toast=function(){};
+window.__qa=async(groups)=>{ QA.R=[]; const keep=snap(), tab=S.tab, off=window.__off; QA.realSave=QA.realSave||save; QA.realToast=QA.realToast||toast; clearTimeout(QA.settleT); const os=QA.realSave, ot=QA.realToast; save=function(){}; window.__qaToasts=new Set(); toast=function(m){ try{ __qaToasts.add(String(m)); }catch(e){} }; /* every pop-up the tests cause is kept for the text check (__textInv) */
   try{ for(const g of (groups||Object.keys(GROUPS))) GROUPS[g]();
     // async: save codes
     QA.sys='Saves'; const i=QA.R.findIndex(r=>r.name.startsWith('save code')); try{ dockStore(); const ref=JSON.parse(snap()); const c=await makeCode(); const o=await readCode(c); const diff=['money','lvl','journal','unlocked','hunts','docks','dock','gear','cooler','tank'].filter(k=>JSON.stringify(o[k])!==JSON.stringify(ref[k])); if(i>=0) QA.R[i]={sys:'Saves',name:QA.R[i].name,ok:!diff.length&&c.startsWith('DL'),detail:!diff.length?'code '+c.length+' chars':'differs: '+diff.join(',')}; }catch(e){ if(i>=0) QA.R[i]={sys:'Saves',name:QA.R[i].name,ok:false,detail:'THREW '+e.message}; }
+    // the text standard on everything the tests showed (C, 2026-11-20): hints, every pop-up the tests and random actions caused, item lines
+    QA.sys='Text'; try{ const ti=window.__textInv(), e=[], jokes=Object.values(QUIPS).flat().sort((a,b)=>b.length-a.length);
+      for(const [k,L] of Object.entries(ti.out)){ if(k==='fishlog'||k==='quip') continue; for(const x of L){ for(const bad of textBad(x.t)) e.push(k+': '+bad+' in "'+x.t.slice(0,60)+'"');
+          let t=x.t; if(k==='popup') for(const j of jokes) if(t.includes(j)){ t=t.replace(j,'').trim(); break; } if(TEXT_LIMITS[k]&&t.length>TEXT_LIMITS[k]) e.push(k+' '+t.length+' > '+TEXT_LIMITS[k]+' letters: "'+t.slice(0,70)+'…"'); } }
+      const uniq=[...new Set(e)]; QA.R.push({sys:'Text', name:'text standard: hints, pop-ups and item lines use this device’s words, curly apostrophes and stay within their length (jokes and Fish Log notes excepted)', ok:!uniq.length, detail:uniq.length?uniq.length+' lines: '+uniq.slice(0,10).join(' | '):Object.values(ti.out).reduce((a,L)=>a+L.length,0)+' lines checked'}); }catch(err){ QA.R.push({sys:'Text',name:'text standard',ok:false,detail:'THREW '+err.message}); }
   } finally{ window.__off=off; restore(keep); G.st='idle'; S.tab=DASH; try{ closeMenu(); setTab(DASH); }catch(e){}
     // a test can start something that pays out later (a prize-wheel spin lands after 3.8 s): saving stays off and the state is put back again once it has finished
     const settle=()=>{ if(WH.spinning){ QA.settleT=setTimeout(settle,400); return; } restore(keep); G.st='idle'; S.tab=DASH; save=os; toast=ot; }; QA.settleT=setTimeout(settle,1800);
@@ -20694,7 +20702,11 @@ if(/[?&]test\b/.test(location.search)) window.__contentQC=async(o={})=>{ const w
       /* rule 1: nothing cut by its box; names on cards wrap instead of "…" */ for(const e of T){ const cs=getComputedStyle(e); if(e.children.length>2) continue; const hid=cs.overflow==='hidden'||cs.overflowX==='hidden'||cs.textOverflow==='ellipsis'; if(!hid) continue; const btn=!!e.closest('button,.btn,[class*="chip"],.bdg,[class*="badge"]'); if(e.scrollWidth>e.clientWidth+1&&e.clientWidth>2){ if(cs.textOverflow==='ellipsis'){ if(!btn) into.add(where+' / '+title+': "'+name(e)+'" ends in … on a card (rule 1: names on cards wrap to 2 lines)'); } else into.add(where+' / '+title+': "'+name(e)+'" is cut by its box'); } else if(e.scrollHeight>e.clientHeight+1&&!cs.webkitLineClamp?.match(/^\d/)&&e.clientHeight>2) into.add(where+' / '+title+': "'+name(e)+'" is cut at the bottom'); }
       /* rule 3: no empty cards */ const body=[...c.querySelectorAll('*')].filter(e=>e!==h&&!h.contains(e)&&box(e)&&(own(e)||e.matches('button,'+picSel))); if(!body.length) into.add(where+' / '+title+': the card is empty');
       /* rule 4: collect groups */ const g=c.parentElement; if(!groups.has(g)) groups.set(g,[]); groups.get(g).push({title, pic:hasPic(c,h)}); }
-    for(const L of groups.values()){ if(L.length<2) continue; const n=L.filter(x=>x.pic).length; if(n&&n<L.length) for(const x of L) if(!x.pic&&!exc.includes(x.title)) into.add(where+' / '+x.title+': no picture while '+n+' of '+L.length+' cards beside it have one (rule 4)'); } };
+    for(const L of groups.values()){ if(L.length<2) continue; const n=L.filter(x=>x.pic).length; if(n&&n<L.length) for(const x of L) if(!x.pic&&!exc.includes(x.title)) into.add(where+' / '+x.title+': no picture while '+n+' of '+L.length+' cards beside it have one (rule 4)'); }
+    /* rule 6, text standard (C, 2026-11-20; docs/TEXT_STANDARD.md): every visible line on the page: phones never say click, hover, mouse,
+       keyboard or Space; PC never says Tap; curly apostrophes only */
+    { const tw=document.createTreeWalker(P,NodeFilter.SHOW_TEXT); let tn; while((tn=tw.nextNode())){ const v=tn.nodeValue; if(!v||!/[A-Za-z]/.test(v)) continue; const el=tn.parentElement; if(!el||!box(el)) continue; const s=v.trim().replace(/\s+/g,' ').slice(0,70); for(const bad of textBad(v)) into.add(where+' / text: '+bad+' in "'+s+'"'); } }
+  };
   const look=async where=>{ const a=new Set(); check(where,a); if(!a.size) return; await wait(650); const b=new Set(); check(where,b); for(const x of b) if(a.has(x)) out.add(x); }; /* report only what is still wrong a moment later (a page still settling measures as broken) */
   try{ save=function(){}; toast=function(){}; /* browsing pages must not change the save (rule: a test puts the save back) */ if(o.extreme){ contentQCExtreme(); state={cooler:S.cooler.length, coins:fmtShort(S.money), longest:S.cooler[0]&&SPI[S.cooler[0].id]?SPI[S.cooler[0].id].name:"", pets:(S.owned.pets||[]).length}; }
     await Promise.race([Promise.all(document.getAnimations().map(a=>a.finished.catch(()=>{}))),wait(1500)]);
@@ -20838,6 +20850,22 @@ if(/[?&]test\b/.test(location.search)) window.__fnTime=(names,fn,n=1)=>{ const T
   const t0=performance.now(); try{ for(let i=0;i<n;i++) fn(); } finally{ for(const k in orig){ try{ eval(k+'=orig["'+k+'"]'); }catch(e){} } } const tot=(performance.now()-t0)/n; const out={total:+tot.toFixed(2)}; for(const k in T) out[k]=+(T[k]/n).toFixed(2); return out; };
 // run a snippet inside the game's own scope (preview + ?test only), for scenario tests: __inGame("endFight('snap'); return S.streak")
 if(/[?&]test\b/.test(location.search)) window.__inGame=(code)=>eval('(()=>{'+code+'})()');
+// test builds: __textInv() lists the player text by kind, with lengths (2026-11-20, text standard C; base for flavour text coverage F).
+// Pop-ups come from the last __qa run (every pop-up its 111 tests and 3,000 random actions caused). Fish Log descriptions are listed
+// as 'fishlog' and are left as written (director: keep their details).
+if(/[?&]test\b/.test(location.search)) window.__textInv=()=>{ const out={}, add=(k,s,src)=>{ if(s==null) return; const t=String(s).replace(/<[^>]+>/g,'').replace(/\s+/g,' ').trim(); if(!t) return; (out[k]=out[k]||[]).push({t,n:t.length,src:src||''}); };
+  const keepG=G.st, keepH=$('hint')?$('hint').innerHTML:''; try{ for(const st of ['idle','charging','waiting','bite','reeling','landing','frenzy']){ G.st=st; lastHint=''; setHint(); add('hint',$('hint')&&$('hint').innerHTML,st); } }catch(e){} finally{ G.st=keepG; lastHint=''; try{ setHint(); }catch(e){} }
+  try{ for(const [k,a] of Object.entries(QUIPS)) a.forEach(s=>add('quip',s,k)); }catch(e){}
+  try{ for(const [k,s] of Object.entries(PAGE_DESC)) add('pagedesc',s,k); }catch(e){}
+  const fields=(k,list,id)=>{ try{ for(const x of list){ for(const f of ['note','d','desc','blurb','what','per','txt']) if(typeof x[f]==='string'&&x[f].length>3) add(k,x[f],(x[id]||x.name||'')+'.'+f); } }catch(e){} };
+  fields('bait',Object.entries(BAIT).map(([id,b])=>Object.assign({id},b)),'id'); fields('rod',RODS,'id'); fields('attachment',ATTS,'id'); fields('skill',Object.entries(PERKS).map(([id,p])=>Object.assign({id},p)),'id'); fields('feat',FEATS,'id');
+  try{ for(const p of PETS) add('pet',p.desc||p.d||p[6],p.id||p[0]); }catch(e){}
+  try{ for(const s of SP) if(s&&s.note) add('fishlog',s.note,s.id); }catch(e){}
+  try{ if(typeof Q8_LESSONS!=='undefined') for(const l of Q8_LESSONS) add('lesson',Array.isArray(l)?l.slice(1).join(' '):(l.d||l.t||JSON.stringify(l)),Array.isArray(l)?l[0]:l.id); }catch(e){}
+  try{ if(typeof Q8_HELP!=='undefined') for(const h of Q8_HELP) add('help',h[1],h[0]); }catch(e){}
+  try{ for(const m of (window.__qaToasts||[])) add('popup',m); }catch(e){}
+  const sum={}; for(const [k,L] of Object.entries(out)){ const ns=L.map(x=>x.n).sort((a,b)=>a-b); sum[k]={count:L.length, median:ns[ns.length>>1], p90:ns[Math.floor(ns.length*.9)], max:ns[ns.length-1]}; }
+  return {sum, out}; };
 
 // ---------- loop ----------
 let last=performance.now();
@@ -20867,7 +20895,7 @@ function hud(){
   setT('cooler',S.cooler.length); setT('bounties',S.bounties.filter(b=>bDone(b)).length+(S.daily?S.daily.tasks.filter(t=>!t.claimed&&taskHave(t)>=t.n).length:0)); setT('skills',ptsFree());
   setT('pass',S.pass?S.pass.lvl-S.pass.claimed:0); setT('paths',SPEC_TIERS.filter((T2,i)=>S.lvl>=T2.lvl&&!S.specs[i]).length);
 }
-let lastHint=''; const TOUCH=window.matchMedia&&matchMedia('(pointer:coarse)').matches;
+let lastHint='';
 function fmtShort(n){ n=Math.floor(n); if(n<100000) return fmt(n);
   // short forms round down like every other coin number (rounding to nearest showed 999,999 as "1000K")
   const tr=(v,d)=>{ const p=Math.pow(10,d); return (Math.floor(v*p+1e-6)/p).toFixed(d); };
@@ -20875,15 +20903,15 @@ function fmtShort(n){ n=Math.floor(n); if(n<100000) return fmt(n);
   /* 0.3.6: trillions and beyond keep a short form (7.7 trillion used to read "7700.00B") */ const U=['B','T','Qa','Qi','Sx','Sp','Oc','No','Dc']; let i=0, v=n/1e9; while(v>=1000&&i<U.length-1){ v/=1000; i++; } return tr(v,v<10?2:v<100?1:0)+U[i]; }
 function setHint(){ let h='';
   switch(G.st){
-    case 'idle': h = S.cooler.length>=gv('cooler') ? 'Cooler full. Open the <b>Cooler</b> tab to sell, or move fish to the <b>Aquarium</b>.' : G.hot ? 'A <b>hotspot</b> is rippling! Cast right into it for rarer fish.' : (V3ON && S.settings.castMode==='aim') ? (TOUCH ? '<b>Tap the water</b> where you want to cast.' : '<b>Click the water</b> where you want to cast (or hold Space for the power meter).') : TOUCH ? '<b>Touch and hold</b> the water to charge a cast, <b>let go</b> to throw.' : '<b>Hold</b> on the water (or Space) to charge a cast, <b>release</b> to throw.'; break;
-    case 'charging': h='Release to cast. A <b>far cast</b> or a <b>hotspot</b> improves your odds.'; break;
+    case 'idle': h = S.cooler.length>=gv('cooler') ? 'Cooler full. Sell in the <b>Cooler</b> or move fish to the <b>Aquarium</b>.' : G.hot ? 'A <b>hotspot</b>! Cast into it for rarer fish.' : (V3ON && S.settings.castMode==='aim') ? (PLAT.touch() ? '<b>Tap the water</b> to cast there.' : '<b>Click the water</b> to cast there (hold Space for power).') : PLAT.touch() ? '<b>Touch and hold</b> to charge, <b>let go</b> to cast.' : '<b>Hold</b> on the water (or Space) to charge, <b>release</b> to cast.'; break;
+    case 'charging': h=(PLAT.touch()?'Let go':'Release')+' to cast. <b>Far casts</b> and <b>hotspots</b> bring better fish.'; break;
     case 'flying': h='&nbsp;'; break;
-    case 'waiting': h='Watch the bobber. Small twitches are nibbles: <b>wait for the big splash</b>.'; break;
-    case 'bite': h='<b>Now!</b> Click or press Space to set the hook.'; break;
-    case 'reeling': h=V3ON?'<b>Hold</b> to reel, or <b>draw circles</b> to crank. <b>Let go</b> when it runs, jumps, shakes or gets angry.':'<b>Hold</b> to reel. <b>Let go</b> when it runs, jumps, shakes or gets angry.'; break;
+    case 'waiting': h='Twitches are nibbles. <b>Wait for the big splash.</b>'; break;
+    case 'bite': h=PLAT.touch()?'<b>Now!</b> Tap to hook it.':'<b>Now!</b> Click or Space to hook it.'; break;
+    case 'reeling': h=V3ON?'<b>Hold</b> or <b>draw circles</b> to reel. <b>Let go</b> on runs, jumps, shakes and anger.':'<b>Hold</b> to reel. <b>Let go</b> when it runs, jumps, shakes or gets angry.'; break;
     case 'landing': h='Pulling it out…'; break;
     case 'result': h='Nice catch.'; break;
-    case 'frenzy': h='<b>Tap the leaping fish!</b>'; break;
+    case 'frenzy': h=PLAT.touch()?'<b>Tap the leaping fish!</b>':'<b>Click the leaping fish!</b>'; break;
     case 'event': h='&nbsp;'; break;
   } if(!S.settings.hints) h='&nbsp;'; if(h!==lastHint){ const el=$('hint'); el.innerHTML=h; el.style.visibility=h==='&nbsp;'?'hidden':''; lastHint=h; } } /* an empty hint keeps its space but draws no empty box (director, 2026-11-19: hints off left a blank circle) */
 let toastT=0; function toast(m){ const el=$('toast'); el.textContent=m; el.classList.add('on'); clearTimeout(toastT); toastT=setTimeout(()=>el.classList.remove('on'),3200); }
@@ -20894,7 +20922,8 @@ function showCard(o){
   $('cardrar').textContent=o.rar; $('cardrar').style.color=o.rarCol; $('cardname').textContent=o.name;
   $('cardnums').innerHTML=o.nums.map(n=>`<div><span>${esc(n[0])}</span><b${n[2]?' class="coin"':''}>${esc(n[1])}</b></div>`).join('');
   if(o.html) $('carddesc').innerHTML=o.desc; else $('carddesc').textContent=o.desc;
-  $('cardbadges').innerHTML=o.badges.map(b=>`<span class="badge ${b[0]}">${esc(b[1])}</span>`).join(''); $('card').hidden=false; }
+  $('cardbadges').innerHTML=o.badges.map(b=>`<span class="badge ${b[0]}">${esc(b[1])}</span>`).join('');
+  /* the line at the bottom, every time (it stayed on an oddity's "dismiss" for every later fish) */ const tp=$('cardin').querySelector('.tap'); if(tp) tp.textContent=PLAT.touch()?'Tap to keep fishing':'Click or press Space to keep fishing'; $('card').hidden=false; }
 function hideCard(){ $('card').hidden=true; G.st='idle'; afterCard(); }
 $('card').addEventListener('pointerdown',e=>{ e.stopPropagation(); hideCard(); });
 
@@ -20952,7 +20981,7 @@ document.head.insertAdjacentHTML('beforeend','<style>.cool-sort{display:flex;fle
 function renderAquarium(P){ accrue(); const rate=tankRate(); let AQS=null; const next=TANK_COST[S.tankSlots];
   const sums={}; for(const f of S.tank) for(const e of aqBuffsOf(f)) sums[e.k]=(sums[e.k]||0)+e.v;
   const chips=Object.entries(sums).map(([k,v])=>`<span class="badge k">${fmtB(k,Math.min(v,BONUS_CAP[k]||9))}</span>`).join('');
-  P.innerHTML=`<div class="row spread"><div><h2>Aquarium</h2><p class="sub">Visitors pay to see your fish, even while you're away (up to 8 hours). Every fish gives a boost while on display, and boosts stack. Each fish rolls its own boost when caught: usually one that fits its rarity, now and then a much better (or weaker) one. Heavier fish give more, shiny fish double, and the strangest catches give the most.</p></div>
+  P.innerHTML=`<div class="row spread"><div><h2>Aquarium</h2><p class="sub">Visitors pay to see your fish, even while you’re away (up to 8 hours). Every fish gives a boost while on display, and boosts stack. Each fish rolls its own boost when caught: usually one that fits its rarity, now and then a much better (or weaker) one. Heavier fish give more, shiny fish double, and the strangest catches give the most.</p></div>
   <div class="bank"><div><div class="sub">Earning</div><b class="coin" title="${fmt(rate*60)} coins an hour">${fmtShort(rate*60)}</b><span class="sub"> / hour</span></div><div><div class="sub">Ready to collect</div><b class="coin" id="tankbank" title="${fmt(S.tankBank)} coins">${fmtShort(S.tankBank)}</b></div>
   <button class="btn" id="collectbtn" data-act="collect" ${S.tankBank>=1?'':'disabled'}>Collect</button></div></div>
   <div class="badges" style="justify-content:flex-start;margin-top:8px">${chips||'<span class="sub">No boosts yet. Put a fish on display.</span>'}</div>
@@ -21005,7 +21034,7 @@ function renderJournal(P){
       <div><span>Mastery</span> <span class="sh">${starStr(mastery(sel.id))}</span> +${mastery(sel.id)*10}%${mastery(sel.id)<4?` · next at ${MASTERY[mastery(sel.id)]}`:''}</div>
       <div><span>Fights like a</span> ${B.n.toLowerCase()}</div><div><span>Temper</span> ${'●'.repeat(Math.round(sel.aggr*5))+'○'.repeat(5-Math.round(sel.aggr*5))}</div><div><span>In the aquarium</span> ${ae?fmtB(ae.k,ae.v):'—'}</div>
       ${j&&j.first?`<div><span>First caught</span> ${new Date(j.first).toLocaleDateString()}</div>`:''}</div><p class="sub" style="margin-top:6px">${B.d}</p></div></div>`; }
-    body=`<div class="row spread" style="margin-top:6px"><span class="sub">${got} / ${list.length} found${S.setDone[L.id]?' · complete':` · find them all for <span class="coin">${fmt(L.bonus)}</span>`}${open?'':' · water locked'}</span><span class="sub">Click a fish for its records</span></div>
+    body=`<div class="row spread" style="margin-top:6px"><span class="sub">${got} / ${list.length} found${S.setDone[L.id]?' · complete':` · find them all for <span class="coin">${fmt(L.bonus)}</span>`}${open?'':' · water locked'}</span><span class="sub">${PLAT.touch()?'Tap':'Click'} a fish for its records</span></div>
       <div class="prog"><i style="width:${got/list.length*100}%"></i></div>${det}
       <div class="jgrid">${list.map(s=>{ const j=S.journal[s.id]; return `<button class="jcard ${encSel===s.id?'sel':''}" data-act="enc" data-k="${s.id}"><canvas width="200" height="100" data-fish="${s.id}" data-known="${j?1:0}" data-sh="${j&&j.sh?1:0}"></canvas>
         <b style="color:${j?RAR[s.r].c:'var(--muted)'}">${j?s.name:'???'}${j&&j.sh?' <span class="sh">✦</span>':''}</b><small>${RAR[s.r].k}${s.time!=='any'?' · '+(s.time==='night'?'night':'day'):''}</small>
@@ -21075,7 +21104,7 @@ function renderSave(P){ const isApp=window.matchMedia && matchMedia('(display-mo
     ${pendingLoad?`<div class="meta" style="color:var(--danger)">Replace this device’s progress with level ${pendingLoad.lvl}, ${fmt(pendingLoad.money||0)} coins, ${Object.keys(pendingLoad.journal||{}).length} species?</div><div class="row"><button class="btn" data-act="loadok" style="background:var(--danger)">Replace progress</button><button class="btn alt" data-act="cancel">Cancel</button></div>`
     :`<div class="row"><button class="btn alt" data-act="loadsave">Load code</button></div>`}</div>
   ${window.DL_DESKTOP?'<div class="tile"><h4>Desktop app</h4><div class="meta">You’re playing the Driftline desktop app. It updates itself and keeps your progress on this PC.</div></div>':''}
-  ${window.DL_VERSION&&!window.DL_DESKTOP?'<div class="tile"><h4>Windows desktop app</h4><div class="meta">A real program with its own window and Start-menu icon. Updates itself.</div><a class="btn" href="download/Driftline-Setup.zip" download style="text-decoration:none;text-align:center">Download for Windows</a><div class="meta">Unzip it and run <b>Driftline.exe</b>. If Windows shows “protected your PC”, click <b>More info</b>, then <b>Run anyway</b>. Your browser progress doesn’t carry over automatically: copy a save code here and load it in the app.</div></div>':''}
+  ${window.DL_VERSION&&!window.DL_DESKTOP?'<div class="tile"><h4>Windows desktop app</h4><div class="meta">A real program with its own window and Start-menu icon. Updates itself.</div><a class="btn" href="'+(window.DL_PREVIEW?'../':'')+'download/Driftline-Setup.zip" download style="text-decoration:none;text-align:center">Download for Windows</a><div class="meta">Unzip it and run <b>Driftline.exe</b>. If Windows shows “protected your PC”, click <b>More info</b>, then <b>Run anyway</b>. Your browser progress doesn’t carry over automatically: copy a save code here and load it in the app.</div></div>':''}
   ${window.DL_VERSION&&!window.DL_DESKTOP?'':'<!--'}<div class="tile"><h4>Install as an app</h4><div class="meta">${isApp?'You are playing the installed app. It updates itself when a new version is out.':'Get a home-screen icon, full-screen play and offline fishing. It updates itself.'}</div>
     ${isApp?'':window.__dlInstallPrompt?'<button class="btn" data-act="install">Install Driftline</button>':'<div class="meta">iPhone: Share, then <b>Add to Home Screen</b>. Android, Windows or Mac in Chrome or Edge: the install icon in the address bar, or the menu, then <b>Install</b>.</div>'}</div>${window.DL_VERSION&&!window.DL_DESKTOP?'':'-->'}</div>
   ${window.DL_VERSION?`<p class="sub" style="margin-top:10px">Version ${esc(window.DL_VERSION)}</p>`:''}`;
