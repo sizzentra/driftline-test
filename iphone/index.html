@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="DL Test iPhone">
 <script>
-window.DL_BUILD='ios'; window.DL_PREVIEW=true; if(/[?&]sweep\b/.test(location.search)){ window.__bootErr=[]; addEventListener("error",function(e){ __bootErr.push(String(e.message||e)+(e.lineno?" (line "+e.lineno+")":"")); }); addEventListener("unhandledrejection",function(e){ __bootErr.push("promise: "+String(e.reason&&e.reason.message||e.reason)); }); window.requestAnimationFrame=function(f){ return setTimeout(function(){ f(performance.now()); },16); }; window.cancelAnimationFrame=function(i){ clearTimeout(i); }; } window.DL_VERSION='2026.11.20-1847';
+window.DL_BUILD='ios'; window.DL_PREVIEW=true; if(/[?&]sweep\b/.test(location.search)){ window.__bootErr=[]; addEventListener("error",function(e){ __bootErr.push(String(e.message||e)+(e.lineno?" (line "+e.lineno+")":"")); }); addEventListener("unhandledrejection",function(e){ __bootErr.push("promise: "+String(e.reason&&e.reason.message||e.reason)); }); window.requestAnimationFrame=function(f){ return setTimeout(function(){ f(performance.now()); },16); }; window.cancelAnimationFrame=function(i){ clearTimeout(i); }; } window.DL_VERSION='2026.11.20-1943';
 window.addEventListener('beforeinstallprompt',function(e){ e.preventDefault(); window.__dlInstallPrompt=e; });
 </script>
 </head>
@@ -3744,8 +3744,6 @@ function addTickets(n){ n=Math.max(0,Math.round(n)); S.tickets+=n; return n; }
 let duck=null, hilo=null;
 function newHilo(){ hilo={card:rint(1,13), streak:0, pot:Math.round(bestLoot()*2), done:false, msg:'Higher or lower than '+0+'?'}; }
 const CARD_FISH = ['','Minnow','Perch','Trout','Bass','Carp','Pike','Salmon','Tuna','Shark','Marlin','Kraken','Leviathan','Legend'];
-function boardwalkBanner(){ return `<div class="bw-banner"><div class="bw-lights">${Array.from({length:18},(_,i)=>`<i style="animation-delay:${(i%6)*.25}s"></i>`).join('')}</div><h2>The Boardwalk</h2><p class="sub">Games of chance on the pier. Coins only, no real money, and the gulls are watching.</p>
-  <div class="row" style="justify-content:center;gap:18px;margin-top:6px"><span><b class="coin">${fmtShort(S.money)}</b></span><span><b>🎟 ${fmt(S.tickets)}</b> <span class="meta">tickets</span></span><span><b style="color:var(--kelp)">${fmt(S.scales)}</b> <span class="meta">Scales</span></span></div></div>`; }
 
 // ---------- actions for this update ----------
 function extraAct2(b){ const k=b.dataset.k, i=+b.dataset.i;
@@ -3983,10 +3981,6 @@ const MASTERY_FX = {
 };
 const offlineCap = () => (maxed('keeper') ? 16*60 : OFFLINE_CAP_MIN)*pathMul('offline');
 function renderSkills2(P){ const free=ptsFree(), cost=50*S.lvl;
-  const specRow=(T,ti)=>{ const cur=S.specs[ti], locked=S.lvl<T.lvl;
-    return `<div class="tile ${cur?'done':''}" style="${locked?'opacity:.55':''}"><div class="row spread"><h4>${T.name} <span class="meta">· level ${T.lvl}</span></h4>${cur?`<span class="badge g">${SPEC_TIERS[ti].opts.find(o=>o[0]===cur)[1]}</span>`:locked?'<span class="meta">Locked</span>':'<span class="badge">Choose one</span>'}</div>
-     <div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(180px,1fr));margin-top:6px">${T.opts.map(o=>{ const on=cur===o[0];
-       return `<button class="spec ${on?'on':''}" data-act="spec" data-k="${ti}:${o[0]}" ${locked||on||(cur&&S.money<specFee(ti))?'disabled':''}><b>${o[1]}</b><span class="up">▲ ${o[2]}</span><span class="down">▼ ${o[3]}</span>${cur&&!on&&!locked?`<span class="meta">Switch · ${fmt(specFee(ti))} coins</span>`:''}</button>`; }).join('')}</div></div>`; };
   P.innerHTML=`<div class="row spread"><div><h2>Skills</h2><p class="sub">Two kinds of growth. <b>Paths</b> are big specialties, one per tier. <b>Skills</b> are small steady gains, and each one unlocks a special effect when fully learned. Skill points come from levels, feats and your Fish Log (1 for every 25 species, 2 for every water you complete).</p></div>
    <div class="row"><div style="text-align:right"><div class="pts">${free}</div><div class="sub">skill points</div></div><button class="btn alt" data-act="respec" ${ptsSpent()&&S.money>=cost?'':'disabled'}>Reset skills · <span class="coin">${fmt(cost)}</span></button></div></div>
    <div class="grid">`+Object.entries(PERKS).map(([k,p])=>{ const r=pr(k), mx=r>=p.max;
@@ -4488,10 +4482,6 @@ function playClaw(){ const tot=CLAW_PRIZES.reduce((a,p)=>a+p[2],0); let x=Math.r
   if(p[0]==='tickets') txt+=': +'+addTickets(rint(15,40))+' tickets'; if(p[0]==='tickets2') txt+=': +'+addTickets(rint(60,120))+' tickets'; if(p[0]==='scales'){ const n=rint(6,15); S.scales+=n; txt+=': +'+n+' Scales'; }
   if(p[0]==='crate') S.tokens.small++; if(p[0]==='plush'){ if(!S.owned.hats.includes('clawplush')){ S.owned.hats.push('clawplush'); } else { txt='Another plush crab! Swapped for 150 tickets'; addTickets(150); } }
   if(p[0]!=='nothing'){ S.gstats.claw=(S.gstats.claw||0)+1; sfx.coin(); } else sfx.lost(); claw={txt, t:performance.now(), win:p[0]!=='nothing'}; taskProgress('game',1); }
-function clawHTML(){ return `<div class="tile bwt" style="--c:#ff7ab0"><h4>Claw machine</h4><div class="meta">A glass box full of plushies, tickets and secrets. The claw is… mostly honest.</div>
-  <canvas id="clawcv" width="420" height="260" style="width:100%;height:auto;cursor:default;border-radius:10px;background:#1a2a3a"></canvas>
-  ${claw?`<div class="val" style="text-align:center;color:${claw.win?'var(--gold)':'var(--muted)'}">${esc(claw.txt)}</div>`:''}
-  <button class="btn" data-act="claw" ${S.money>=clawCost()?'':'disabled'}>Drop the claw · <span class="coin">${fmt(clawCost())}</span></button></div>`; }
 function paintClaw(){ const c=$('clawcv'); if(!c) return; const x=c.getContext('2d'), w=c.width, h=c.height; x.clearRect(0,0,w,h);
   x.fillStyle='#24384a'; x.fillRect(0,0,w,h); x.fillStyle='rgba(255,255,255,.06)'; x.fillRect(16,10,8,h-20);
   const cols=['#ff9ad0','#7fc8a9','#ffd84a','#5aa9ff','#c38bff','#ff7a5a']; for(let i=0;i<16;i++){ const px=30+((i*53)%(w-60)), py=h-24-((i*29)%60); x.fillStyle=cols[i%6]; x.beginPath(); x.arc(px,py,14,0,7); x.fill(); x.fillStyle='#1a1a1a'; x.beginPath(); x.arc(px-4,py-3,1.6,0,7); x.arc(px+4,py-3,1.6,0,7); x.fill(); }
@@ -7539,7 +7529,7 @@ function a3Legs(lk,D){ const o=lk.outfit; if(o==='wetsuit') return D('#1c1c26');
 // ---------- 0.3 angler body: rounded, lit limbs that bend, eased poses, a rim light from the sky ----------
 // eased pose state for the angler on the water (other previews draw a still pose)
 const A3={lean:0,crouch:0,stance:0,tilt:0,hx:9,hy:-35,lt:-1};
-const A3OFF=new WeakMap();
+const A3OFF=new WeakMap(), A3SCR=new Map();
 // two-bone reach: joint between a and b with segment lengths l1, l2; pick the bend whose joint lies on the 'side' (+1 = larger y / lower, -1 = larger x / forward)
 function a3IK(ax,ay,bx,by,l1,l2,side){ const dx=bx-ax, dy=by-ay, d=Math.max(.01,Math.min(Math.hypot(dx,dy),l1+l2-.02)), a=Math.atan2(dy,dx), k=Math.acos(clamp((l1*l1+d*d-l2*l2)/(2*l1*d),-1,1));
   const j1={x:ax+Math.cos(a+k)*l1,y:ay+Math.sin(a+k)*l1}, j2={x:ax+Math.cos(a-k)*l1,y:ay+Math.sin(a-k)*l1};
@@ -7578,7 +7568,9 @@ function drawAngler3(c,x,y,s,lk,o={}){
   const live=o.t!=null && c===g && !o.forceSt;
   const m=c.getTransform(), ps=Math.max(.4,Math.hypot(m.a,m.b)*s), BX=40, BT=108, BB=18, w=Math.ceil(BX*2*ps), h=Math.ceil((BT+BB)*ps);
   if(w*h>5e6){ const r=a3Body(c,x,y,s,lk,o,live); if(o.t!=null&&typeof wearFxDraw==='function') wearFxDraw(c,lk,o.t,p=>p,1); A3REEL=live&&r.reel?r.reel:null; return {x:r.hand.x,y:r.hand.y,back:r.back,reel:r.reel,fingers:()=>a3Fingers(c,r.hand,r.back,r.ra,s,r.sk,r.skD)}; }
-  let O=A3OFF.get(c); if(!O){ O={a:document.createElement('canvas'),b:document.createElement('canvas')}; A3OFF.set(c,O); }
+  /* scratch canvases: the angler on the water keeps its own (its picture is reused between frames); every other picture (wardrobe,
+     previews, thumbnails) shares one set per size (2026-11-20, #151: one new set of about 3 MB for every preview ran the iPhone out of memory) */
+  let O=live?A3OFF.get(c):A3SCR.get(w+'x'+h); if(!O){ O={a:document.createElement('canvas'),b:document.createElement('canvas')}; if(live) A3OFF.set(c,O); else { if(A3SCR.size>=6) A3SCR.delete(A3SCR.keys().next().value); A3SCR.set(w+'x'+h,O); } }
   if(O.a.width!==w||O.a.height!==h){ O.a.width=O.b.width=w; O.a.height=O.b.height=h; }
   /* phones only (director, 2026-11-18: Android 25-38 fps at 60): the lit picture below costs two offscreen canvases and ~8 blend
      passes, which Android graphics chips pay for with a flush each. On phones it is redrawn at most every 33 ms and reused in between
@@ -15475,7 +15467,6 @@ const PATH_FX = {
 const PATH_RANKS=[50,150,400,1000,2500], PATH_RN=['','I','II','III','IV','V'];
 const pathRank = id => { const n=(S.pathXP&&S.pathXP[id])||0; let r=0; while(r<5&&n>=PATH_RANKS[r]) r++; return r; };
 const pathPow = id => 1+.1*pathRank(id);
-function pathOn(id){ return spec(id); }
 function pathChosen(){ return S.specs ? Object.values(S.specs).filter(Boolean) : []; }
 function pathMul(k){ let m=1; if(!S||!S.specs) return 1; for(const id of pathChosen()){ const fx=PATH_FX[id]; if(!fx||!fx.mul||fx.mul[k]==null||(fx.when&&!fx.when())) continue; m*=1+(fx.mul[k]-1)*pathPow(id); } return Math.max(.05,m); }
 function pathAdd(k){ let v=0; if(!S||!S.specs) return 0; for(const id of pathChosen()){ const fx=PATH_FX[id]; if(fx&&fx.addv&&fx.addv[k]!=null) v+=fx.addv[k]*(k==='nibplus'?1:pathPow(id)); } return v; }
@@ -20036,12 +20027,15 @@ PATCHES.unshift({v:'0.4.9', name:'Work in progress', items:phoneNotes([
   'Fights are about timing now: a fresh fish has to be tired out before it comes in, and reeling straight through a rare fish’s runs snaps the line, whatever your gear. Let go when it runs, reel when it rests.',
   'Strong gear and skills still make fights faster, down to a floor: a few seconds for common fish, half a minute or more for mythics.',
   'Oddities, hotspots and shinies have sensible limits however much you stack them.',
+  'Menus use much less memory: pictures a page no longer shows are let go at once, and outfit previews share their drawing space (iPhones could run short of memory after opening many pages).',
   'A few fish that shared a name with another now have names of their own (your Fish Log keeps every catch). Tall creatures show whole in their pictures, and picking an option in a menu no longer makes the page jump.'])});
 // Phone test notes, Android and iPhone in one file (since 2026-11-20). Preview builds only; the live game never shows them.
 // Grouped by test build, newest first (director, 2026-11-20): new lines go under '## New in this build'; when that build is published the heading becomes '## Test build <stamp>' at the next round. Curly apostrophes only. The card opens once per device whenever the
 // text changes. Released notes live in notes_release.js.
 const TEST_NOTES={v:'test', label:'Test build · '+(window.DL_BUILD==='ios'?'iPhone':'Android'), name:'0.4.9 test build (newest first)', items:[
   '## New in this build',
+  'Menus use much less memory: pictures a page no longer shows are let go at once, and outfit previews share their drawing space. On the iPhone, Run every check ran out of memory during the test suite; it should now finish (the suite itself uses about a quarter of the memory it did, and lets go of each test’s pictures).',
+  '## Test build 1832',
   'Tester tools › Run every check: it now runs only this device’s checks (pick iPhone, Android or PC at the top; the game picks for you), carries on if the phone reloads the page partway (before, the run quietly started over and never finished), keeps the screen awake, and Copy report works at any time (it copies what is done so far).',
   '## Test build 1402',
   'Hair: Curly is back to its hand-drawn curls. Under every hat hair now tucks in: nothing bulges out around the brim or pokes up beside the party hat, and big hair sits flat under it. Every style has a light strand texture instead of a flat painted look.',
@@ -20108,13 +20102,15 @@ addTestNotes(TEST_NOTES);
 // =====================================================================
 if(/[?&]test\b/.test(location.search)) (function(){
 const QA={R:[], sys:''};
+/* memory per test (2026-11-20, the iPhone ran out of memory during __qa, #151): drawing memory each test allocates (canvas width x height x 4 bytes, counted once per canvas when it is first drawn on) */
+window.__cvBytes=0; window.__cvAll=[]; { const ce=Document.prototype.createElement; Document.prototype.createElement=function(n){ const e=ce.apply(this,arguments); if(e.tagName==="CANVAS") e.__prog=1; return e; }; } /* canvases made in code are caches (kept); canvases from page HTML that left the page are garbage */ window.__cvFree=from=>{ for(let i=from;i<window.__cvAll.length;i++){ const c=window.__cvAll[i].deref(); if(c&&!c.__prog&&!c.isConnected&&c.width){ c.width=0; c.height=0; } } }; window.__cvHeld=()=>window.__cvAll.reduce((a,r)=>{ const c=r.deref(); return a+(c&&!c.isConnected&&c.width?c.width*c.height*4:0); },0)/1048576; /* weak references: measuring must not keep pictures alive */ { const seen=new WeakSet(), gc=HTMLCanvasElement.prototype.getContext; HTMLCanvasElement.prototype.getContext=function(){ if(!seen.has(this)){ seen.add(this); window.__cvBytes+=this.width*this.height*4; window.WeakRef&&window.__cvAll.push(new WeakRef(this)); } return gc.apply(this,arguments); }; if(window.OffscreenCanvas){ const og=OffscreenCanvas.prototype.getContext; OffscreenCanvas.prototype.getContext=function(){ if(!seen.has(this)){ seen.add(this); window.__cvBytes+=this.width*this.height*4; } return og.apply(this,arguments); }; } }
 const snap=()=>JSON.stringify(S);
 function restore(s){ const o=JSON.parse(s); for(const k of Object.keys(S)) delete S[k]; Object.assign(S,o); }
 /* every page a player can open: side-panel sections, More, AND the pages reached from the top bar (Cooler, Aquarium, Home, Fish Log...), which belong to no section on phones (2026-11-19: checks that walked only MENU_SECS never saw the pages in the director's screenshots). Shared by __qa and __contentQC. */
 const qaAllPages=()=>[...new Set([...MENU_SECS.flatMap(s=>s.tabs),...MENU_MORE.tabs,...[...$('tabs').querySelectorAll(':scope > [data-tab]')].map(b=>b.dataset.tab),'trophy','home'])].filter(t=>t&&t!=='dash');
-function T(name,fn){ const s0=snap(); const g0={st:G.st}; let r; try{ r=fn(); }catch(e){ r={ok:false, detail:'THREW '+(e&&e.message)+' '+String(e&&e.stack||'').split('\n')[1]}; }
-  finally{ try{ restore(s0); G.st=g0.st==='idle'?'idle':G.st; }catch(e){} }
-  const ok=r===true||!!(r&&r.ok===true); QA.R.push({sys:QA.sys, name, ok, detail:r===true?'':(r&&r.detail!=null?String(r.detail):String(r))}); return ok; }
+function T(name,fn){ const s0=snap(); const g0={st:G.st}; let r; const cv0=window.__cvBytes, t0=performance.now(), cvN=window.__cvAll.length; try{ r=fn(); }catch(e){ r={ok:false, detail:'THREW '+(e&&e.message)+' '+String(e&&e.stack||'').split('\n')[1]}; }
+  finally{ try{ restore(s0); G.st=g0.st==="idle"?"idle":G.st; }catch(e){} try{ window.__cvFree(cvN); }catch(e){} /* #151: the pictures this test drew and dropped are released before the next test */ }
+  const ok=r===true||!!(r&&r.ok===true); QA.R.push({sys:QA.sys, name, ok, detail:r===true?'':(r&&r.detail!=null?String(r.detail):String(r)), cvMB:+((window.__cvBytes-cv0)/1048576).toFixed(1), ms:Math.round(performance.now()-t0)}); return ok; }
 /* the top bar as the page finished loading (before any timer ran): checked against the settled bar by "top bar is complete from the first frame" */
 const BAR_SEL=['.hud > .st-cool','.hud > .st-aq','.hud > #mbhome','.hud > .st-log','.hud #settingsbtn','#mbbait','.hud > .mb-stat8','#pchead .pch-stats > .st-cool','#pchead .pch-stats > .st-aq','#pchead .pch-stats > .st-log','#pchead [data-pch="settings"]','#pcscene > .stat.loc','#catdock .cdb'];
 let BAR0=null; addEventListener('DOMContentLoaded',()=>{ BAR0=BAR_SEL.filter(q=>document.querySelector(q)); },{once:true});
@@ -20441,7 +20437,7 @@ ui(){ QA.sys='UI';
     S.unlocked.push('trench'); S.stats.runEarned=1e9; G.st='idle'; if(!canRetire()) e.push('Trench no longer the voyage goal');
     return e.length?{ok:false,detail:e.join(' | ')}:{ok:true,detail:LOCS.length+' waters, '+SP.length+' species'}; });
   T('C32 hair: under every covering hat no hair shows above that hat’s lower edge (every style, the band 4 head units above it), big hair is pressed to the head, curly draws its hand-drawn curl clusters again (coils too), the strand texture is on',()=>{ const e=[]; const cw=120,ch=180, sc=cw/24, foot=ch*.5+58*sc;
-    const mk=lk=>{ const c=document.createElement('canvas'); c.width=cw; c.height=ch; const x=c.getContext('2d'); drawAngler3(x,cw*.48,foot,sc,Object.assign({},S.look,{beard:'none'},lk),{t:1.3}); /* framed on the head, as __lookSheet does */ return x.getImageData(0,0,cw,ch).data; };
+    const mkc=document.createElement('canvas'); mkc.width=cw; mkc.height=ch; const mkx=mkc.getContext('2d',{willReadFrequently:true}); /* one canvas for every picture (#151: a new one each time ran the iPhone out of memory) */ const mk=lk=>{ const x=mkx; x.setTransform(1,0,0,1,0,0); x.clearRect(0,0,cw,ch); drawAngler3(x,cw*.48,foot,sc,Object.assign({},S.look,{beard:'none'},lk),{t:1.3}); /* framed on the head, as __lookSheet does */ return x.getImageData(0,0,cw,ch).data; };
     const diff=(a,b,r0,r1)=>{ let n=0; for(let i=Math.max(0,r0)*cw*4, e2=Math.min(ch,r1)*cw*4;i<e2;i+=4) if(Math.abs(a[i]-b[i])+Math.abs(a[i+1]-b[i+1])+Math.abs(a[i+2]-b[i+2])>40) n++; return n; };
     const hats=HATS.map(h=>h[0]||h.id).filter(h=>h&&h!=='none'&&!A3_HAT_FULL.has(h)&&!A3_HAT_OPEN.has(h)); let worst=0;
     /* the hat's edge is read from the picture, not from the game's own cut line: the hat's pixels are where a bald angler with the hat differs
@@ -20588,6 +20584,13 @@ T('page tabs: a part hidden by a page tab never stays on screen (a forced style 
   T('PC: the PC layout stays on in full screen (players who play full screen get the same header, strip and pages)',()=>{ if(!document.body.classList.contains('plat-pc')||innerWidth<800||innerHeight<560) return {ok:true,detail:'not a PC-size window'}; const d=Object.getOwnPropertyDescriptor(Document.prototype,'fullscreenElement'); let v; try{ Object.defineProperty(Document.prototype,'fullscreenElement',{configurable:true,get(){ return document.documentElement; }}); v=PC_APP(); } finally{ if(d) Object.defineProperty(Document.prototype,'fullscreenElement',d); else delete Document.prototype.fullscreenElement; } return v?{ok:true,detail:'PC layout in full screen'}:{ok:false,detail:'full screen switches the PC layout off'}; });
   T('short numbers (K, M, B...) never round up past the real amount',()=>{ const e=[]; const mul={K:1e3,M:1e6,B:1e9,T:1e12,Qa:1e15}; const vals=[99999,100000,999999,1e6-1,1e6,9999999,1e7,99999999,999999999,1e9,9.999e9,999.99e9,1e12,7.7e12,999999e9]; for(let i=0;i<300;i++) vals.push(Math.floor(Math.pow(10,5+Math.random()*10)));
     for(const v of vals){ const s=fmtShort(v), m=s.match(/^([\d.]+)(K|M|B|T|Qa)$/); if(!m){ if(v>=100000) e.push(v+' -> '+s); continue; } const back=parseFloat(m[1])*mul[m[2]]; if(back>v*(1+1e-9)) e.push(v+' -> '+s); if(parseFloat(m[1])>=1000) e.push(v+' -> '+s); } return e.length?{ok:false,detail:e.slice(0,6).join(' | ')}:{ok:true,detail:vals.length+' numbers'}; });
+  T('memory (#151, the iPhone ran out of memory): pictures a page redraw drops are released, and angler previews share their scratch canvases',()=>{ const e=[];
+    setTab('journal'); const a=[...$('panel').getElementsByTagName('canvas')]; if(!a.length) e.push('the Fish Log drew no pictures to test with');
+    setTab('settings'); setTab('journal'); const kept=a.filter(c=>!c.isConnected&&c.width>0).length; if(kept) e.push(kept+' of '+a.length+' dropped Fish Log pictures still hold their memory');
+    const made=[]; const ce=document.createElement; document.createElement=function(n){ const el=ce.apply(document,arguments); if(String(n).toLowerCase()==='canvas') made.push(el); return el; };
+    try{ for(let i=0;i<12;i++){ const c=ce.call(document,'canvas'); c.width=120; c.height=180; drawAngler3(c.getContext('2d'),60,160,1.6,S.look,{}); c.width=0; } } finally{ document.createElement=ce; }
+    if(made.length>3) e.push('12 angler previews made '+made.length+' scratch canvases (at most 3: shared)');
+    return {ok:!e.length, detail:e.join('; ')||a.length+' pictures released, '+made.length+' scratch canvases for 12 previews'}; });
   T('menu opens and closes: state, focus, the line waits',()=>{ closeMenu(); G.st='waiting'; G.waitT=1.234; openMenu('rods'); const o=__ui.isOpen(); update(.5); update(.5); const w=G.waitT; closeMenu(); const c=!__ui.isOpen(); G.st='idle'; return (o&&c&&w===1.234)?true:{ok:false,detail:'open '+o+' closed '+c+' waitT '+w}; });
 },
 fuzz(){ QA.sys='Adversarial';
@@ -20881,7 +20884,6 @@ $('card').addEventListener('pointerdown',e=>{ e.stopPropagation(); hideCard(); }
 // ---------- bounties ----------
 // 0.3: every water keeps its own board of bounties, so progress (and rare bounties) stay with that water
 const BOUNTIES_PER_WATER = 3;
-const bountySlots = () => BOUNTIES_PER_WATER*S.unlocked.length;
 let bLoc=null;
 function makeBounty(L){ L=L||S.loc;
   if(Math.random()<.08){ const lp=SP.filter(s=>s.loc===L&&s.r===4); if(lp.length){ const sp=pick(lp); return {sp:sp.id, loc:L, type:'count', n:1, have:0, reward:Math.round(sp.base*3), legend:1}; } }
@@ -20901,7 +20903,12 @@ let confirmBox = null, encLoc = null, encSel = null;
 function setTab(t){ if(S.tab!==t) confirmBox=null; S.tab=t; for(const b of $('tabs').children) b.setAttribute('aria-selected', b.dataset.tab===t?'true':'false'); renderPanel(); }
 $('tabs').addEventListener('click',e=>{ const b=e.target.closest('[data-tab]'); if(b){ setTab(b.dataset.tab); save(); b.scrollIntoView({block:'nearest',inline:'nearest'}); } });
 $('panel').addEventListener('click',e=>{ const b=e.target.closest('[data-tabgo]'); if(b){ setTab(b.dataset.tabgo); save(); } });
-function renderPanel(){ const P=$('panel'); const fn={cooler:renderCooler, shop:renderShop, skills:renderSkills2, aquarium:renderAquarium, bounties:renderBounties, feats:renderFeats, journal:renderJournal, map:renderMap, style:renderStyle, pets:renderPets, save:renderSave, games:renderBoardwalk, settings:renderSettings, rods:renderRods, paths:renderPaths, home:renderHome, pass:renderPass}[S.tab]||renderCooler; fn(P); }
+/* pictures a page redraw threw away are released at once (2026-11-20, #151): iPhone Safari keeps a removed picture's memory until it
+   gets round to cleaning up, and opening pages again and again ran it out of memory. Each redraw releases the pictures the last one
+   removed (also right after it, once the page is idle); only pictures no longer on the page are touched. */
+var rpOld=null, rpT=0; /* var: a page drawn while the game is still loading must not hit a not-yet-defined name (#130) */
+function rpRelease(){ clearTimeout(rpT); if(rpOld) for(const c of rpOld) if(!c.isConnected&&c.width){ c.width=0; c.height=0; } rpOld=null; }
+function renderPanel(){ const P=$('panel'); rpRelease(); rpOld=[...P.getElementsByTagName('canvas')]; rpT=setTimeout(rpRelease,0); const fn={cooler:renderCooler, shop:renderShop, skills:renderSkills2, aquarium:renderAquarium, bounties:renderBounties, feats:renderFeats, journal:renderJournal, map:renderMap, style:renderStyle, pets:renderPets, save:renderSave, games:renderBoardwalk, settings:renderSettings, rods:renderRods, paths:renderPaths, home:renderHome, pass:renderPass}[S.tab]||renderCooler; fn(P); }
 const tags = f => (f.sh===2?' <span class="sh" style="color:'+PRISM[f.pv||'rainbow'].c+'">✦✦ '+PRISM[f.pv||'rainbow'].n+' prismatic</span>':f.sh?' <span class="sh">✦ Shiny</span>':'')+(f.hy?' · <span class="sh">Hybrid</span>':'')+(f.tr?' · Trophy':'');
 const aqTxt = f => { const L=aqBuffsOf(f), sp=SPI[f.id]; return L.length ? L.map(e=>fmtB(e.k,e.v)+(sp&&e.t!==sp.r?' ('+RAR[e.t].k+' boost)':'')).join(' + ') : 'no special effect'; };
 
