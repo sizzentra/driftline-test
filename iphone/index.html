@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="DL Test iPhone">
 <script>
-window.DL_BUILD='ios'; window.DL_PREVIEW=true; if(/[?&]sweep\b/.test(location.search)){ window.__bootErr=[]; addEventListener("error",function(e){ __bootErr.push(String(e.message||e)+(e.lineno?" (line "+e.lineno+")":"")); }); addEventListener("unhandledrejection",function(e){ __bootErr.push("promise: "+String(e.reason&&e.reason.message||e.reason)); }); window.requestAnimationFrame=function(f){ return setTimeout(function(){ f(performance.now()); },16); }; window.cancelAnimationFrame=function(i){ clearTimeout(i); }; } window.DL_VERSION='2026.11.21-0720';
+window.DL_BUILD='ios'; window.DL_PREVIEW=true; if(/[?&]sweep\b/.test(location.search)){ window.__bootErr=[]; addEventListener("error",function(e){ __bootErr.push(String(e.message||e)+(e.lineno?" (line "+e.lineno+")":"")); }); addEventListener("unhandledrejection",function(e){ __bootErr.push("promise: "+String(e.reason&&e.reason.message||e.reason)); }); window.requestAnimationFrame=function(f){ return setTimeout(function(){ f(performance.now()); },16); }; window.cancelAnimationFrame=function(i){ clearTimeout(i); }; } window.DL_VERSION='2026.11.21-1549';
 window.addEventListener('beforeinstallprompt',function(e){ e.preventDefault(); window.__dlInstallPrompt=e; });
 </script>
 </head>
@@ -462,6 +462,7 @@ const PLAT={
   movingDecorMs:()=>0,         // moving dock decorations: 0 = drawn fresh every frame, else cached for this long (cd_efficiency)
   quietTabSwitch:()=>false,    // tab switches skip the per-card entry animation and its forced layout (af_smooth, aw_menu035, bm_ui04)
   fpsText:null,                // (fps)=>text for the frame counter, null = default text (bm_ui04)
+  detail:()=>1,                // how much finer moving detail is drawn (particles, ripples, stars): PC full screen draws more (src/pc/ui_display.js)
   touch:()=>!!(window.matchMedia&&matchMedia('(pointer:coarse)').matches) // touch wording: Tap / Let go and no keys, written beside the mouse wording at the source (e_ui, ai_cooler); phones: always
 };
 // ---------- data ----------
@@ -2685,6 +2686,8 @@ function drawPet(c,id,x,y,s,t,night=0,lk=null){ if(V3ON && id!=='lily' && id!=='
 
 // ---------- drawing: the scene ----------
 let stars=null, drops=null, flakes=null, WXA=1;
+/* rain that fits the water (map standard rule 9): what falls instead of rain drops where rain makes no sense */
+const WX_RAINLOOK={buffet:['#ff5a8a','#5ad0ff','#ffe060','#7ae07a','#ffffff'], starfall:['#ffffff','#d8c8ff','#9ae8ff'], olympus:['#fff4c0','#ffe08a','#ffffff']};
 function nightness(p){ let n=0; if(p>=.45&&p<.55) n=(p-.45)/.1; else if(p>=.55&&p<.95) n=1; else if(p>=.95) n=1-(p-.95)/.1; else if(p<.05) n=1-(p+.05)/.1; n=clamp(n,0,1); return n*n*(3-2*n); } /* 0.3.4: eased, so dusk and dawn start and finish gently */
 function tree(x,y,h,col,snow){ g.fillStyle=col; g.beginPath(); g.moveTo(x,y-h); g.lineTo(x-h*.32,y); g.lineTo(x+h*.32,y); g.fill(); if(snow){ g.fillStyle='#f4f8fa'; g.beginPath(); g.moveTo(x,y-h); g.lineTo(x-h*.12,y-h*.62); g.lineTo(x+h*.12,y-h*.62); g.fill(); } }
 function drawFar(L,t,night,hz,wx){
@@ -2860,8 +2863,11 @@ function draw(now){
   const FX=S.settings.effects;
   if(FX && (wx.k==='Rain'||wx.k==='Storm') && wa>.01){ const N = wx.k==='Storm'?140:80; if(!drops||drops.length!==140) drops=Array.from({length:140},()=>[Math.random(),Math.random(),.6+Math.random()*.6]);
     // rain starts as a few light drops and picks up (and thins out again before it stops)
-    const n=Math.round(N*wa); g.strokeStyle='rgba(200,220,235,'+(.12+.23*wa)+')'; g.lineWidth=1; g.beginPath(); const slant = wx.k==='Storm'? 10 : 4;
-    for(let i=0;i<n;i++){ const d=drops[i]; const x=((d[0]*W + t*slant*20*d[2])%W), y=((d[1]*H + t*700*d[2])%H); g.moveTo(x,y); g.lineTo(x-slant,y+14); } g.stroke(); }
+    const n=Math.round(N*wa), slant = wx.k==='Storm'? 10 : 4, RL=WX_RAINLOOK[L.id];
+    if(RL){ /* map standard rule 9 (weather that fits the water): sprinkles at the Buffet, falling stardust above the clouds; slower and tumbling */
+      for(let i=0;i<n;i++){ const d=drops[i], x=((d[0]*W + t*slant*6*d[2] + Math.sin(t*2+i)*6)%W+W)%W, y=((d[1]*H + t*160*d[2])%H); g.globalAlpha=.35+.5*wa; g.fillStyle=RL[i%RL.length]; if(i%2) g.fillRect(x,y,2.2,2.2); else { g.save(); g.translate(x,y); g.rotate(t*3+i); g.fillRect(-3,-1,6,2); g.restore(); } } g.globalAlpha=1; }
+    else { g.strokeStyle='rgba(200,220,235,'+(.12+.23*wa)+')'; g.lineWidth=1; g.beginPath();
+      for(let i=0;i<n;i++){ const d=drops[i]; const x=((d[0]*W + t*slant*20*d[2])%W), y=((d[1]*H + t*700*d[2])%H); g.moveTo(x,y); g.lineTo(x-slant,y+14); } g.stroke(); } }
   if(FX && L.id==='frost' && !V3ON){ if(!flakes) flakes=Array.from({length:70},()=>[Math.random(),Math.random(),.5+Math.random()]); g.fillStyle='rgba(255,255,255,.8)';
     for(const f of flakes){ const x=((f[0]*W + Math.sin(t*.8+f[1]*9)*20 + t*8*f[2])%W+W)%W, y=((f[1]*H + t*30*f[2])%H); g.fillRect(x,y,1.6*f[2],1.6*f[2]); } }
   if(wx.k==='Fog'&&wa>.01){ const fg=g.createLinearGradient(0,hz-60,0,H); fg.addColorStop(0,'rgba(210,220,225,0)'); fg.addColorStop(.25,'rgba(210,220,225,'+(.38*wa)+')'); fg.addColorStop(1,'rgba(210,220,225,'+(.12*wa)+')'); g.fillStyle=fg; g.fillRect(0,0,W,H); }
@@ -5420,6 +5426,17 @@ const V3POND = {
     // fireflies (dusk, night) or dragonflies (day)
     if(FX){ if(lit>.15){ for(let i=0;i<12;i++){ const rr=v3rng(i*31+3); const bx=W*(.08+rr()*.6), by=hz-H*.02+rr()*H*.3; const fx=bx+Math.sin(t*.4+i*1.3)*W*.03, fy=by+Math.sin(t*.55+i*2.1)*H*.025; const a=lit*(.5+.5*Math.sin(t*2.2+i*1.9)); if(a<.05) continue; v3glow(g,fx,fy,H*.022,'rgba(255,240,150,.9)',a*.8); g.fillStyle=v3rgba('#fff6b8',a); g.fillRect(fx-1,fy-1,2,2); } }
       else if(night<.2){ for(let i=0;i<2;i++){ const k=t*.35+i*3.1, fx=W*(.42+.25*Math.sin(k)+i*.12), fy=hz+H*(.12+.06*Math.sin(k*1.7+i)), s=H*.012; g.strokeStyle='#2a8a8a'; g.lineWidth=1.6; g.beginPath(); g.moveTo(fx-s,fy); g.lineTo(fx+s,fy); g.stroke(); g.fillStyle='rgba(220,250,255,.5)'; const fl=Math.sin(t*40+i)*.4; g.beginPath(); g.ellipse(fx,fy-s*.4,s*.7,s*.22*(1+fl),-.3,0,7); g.ellipse(fx,fy+s*.4,s*.7,s*.22*(1-fl),.3,0,7); g.fill(); } } }
+    // the moment, every 50 s (map standard, 2026-11-21): by day a mother duck leads her ducklings across the far water, in from behind
+    // the willow and out past the cabin (three to five of them, a little different each time); at night a tawny owl glides low over the pond
+    { const per=50, q=t%per, n=Math.floor(t/per), r=v3rng(n*41+3);
+      if(night<.55){ if(q<26){ const e=q/26, nd=3+Math.floor(r()*3), yy=hz+H*(.05+r()*.02), s0=H*.011, N=c0=>mix(c0,P.front,night*.6);
+        for(let i=0;i<=nd;i++){ const big=i===0, s=big?s0:s0*.55, px=W*(1.04-e*1.12)+i*s0*2.3+(big?0:s0*.8), py=yy+(big?0:s0*.15), bob=Math.sin(t*2.4+i*1.3)*s*.12; if(px<-s*4||px>W+s*4) continue;
+          g.strokeStyle=v3rgba(mix(P.wTop,'#ffffff',.6),.3); g.lineWidth=1; g.beginPath(); g.moveTo(px+s*1.1,py+s*.35); g.lineTo(px+s*2.6,py+s*.15); g.moveTo(px+s*1.1,py+s*.45); g.lineTo(px+s*2.6,py+s*.75); g.stroke();
+          g.fillStyle=N(big?'#8a6a48':'#c8a850'); g.beginPath(); g.ellipse(px+s*.3,py+bob,s*1.05,s*.48,0,Math.PI,0); g.quadraticCurveTo(px+s*.3,py+bob+s*.35,px-s*.75,py+bob); g.fill(); g.beginPath(); g.moveTo(px+s*1.2,py+bob); g.lineTo(px+s*1.65,py+bob-s*.35); g.lineTo(px+s*1.2,py+bob-s*.2); g.fill();
+          g.fillStyle=N(big?'#6a5038':'#d8b858'); g.beginPath(); g.arc(px-s*.55,py+bob-s*.62,s*.36,0,7); g.fill(); g.fillStyle=N('#e8a030'); g.beginPath(); g.moveTo(px-s*.85,py+bob-s*.66); g.lineTo(px-s*1.2,py+bob-s*.56); g.lineTo(px-s*.85,py+bob-s*.5); g.fill();
+          g.fillStyle='#1a1410'; g.fillRect(px-s*.65,py+bob-s*.72,1.2,1.2); } } }
+      else if(q<7){ const e=q/7, ox=W*(1.06-e*1.14), oy=hz-H*(.03+.05*Math.sin(e*Math.PI)), s=H*.007, N=c0=>mix(c0,P.front,.35); v3owlFly(ox,oy,s,t,N('#6a5440'),N('#8a7058'),N('#6a5440'),'#f0c040');
+        if(oy>hz-H*.045){ g.fillStyle=v3rgba('#000000',.12); g.beginPath(); g.ellipse(ox,hz+H*.01,s*1.6,s*.25,0,0,7); g.fill(); } } }
   },
 
   willow(P,t,hz){ v3willow(P,t,hz); },
@@ -5448,6 +5465,10 @@ const V3POND = {
 
 // the lantern's reflection: short soft streaks that wobble and thin out with depth, never a solid block
 // a soft oval pool of lantern light on a deck (rgb as 'r,g,b')
+/* an owl flying left, side on (map standard: drawn from the side): body, short tail, round head in front, the near wing rising and falling */
+function v3owlFly(ox,oy,s,t,body,wing,head,eye){ const f=Math.sin(t*4.2)*.35; g.save(); g.translate(ox,oy); g.fillStyle=body; g.beginPath(); g.ellipse(0,0,s*1.5,s*.6,0,0,7); g.fill(); g.beginPath(); g.moveTo(s*1.3,-s*.1); g.lineTo(s*2.1,-s*.25); g.lineTo(s*2.1,s*.2); g.lineTo(s*1.3,s*.25); g.fill();
+  g.fillStyle=head; g.beginPath(); g.arc(-s*1.45,-s*.25,s*.6,0,7); g.fill(); g.fillStyle=eye; g.fillRect(-s*1.85,-s*.38,1.6,1.6);
+  g.fillStyle=wing; g.beginPath(); g.moveTo(-s*.7,-s*.35); g.quadraticCurveTo(-s*.2,-s*(1.2+2.2*f),s*1.4,-s*(.6+2.6*f)); g.quadraticCurveTo(s*.6,-s*.3,s*.8,-s*.2); g.closePath(); g.fill(); g.restore(); }
 function v3lightPool(x,y,R,rgb,a){ if(a<.01) return; g.save(); g.translate(x,y); g.scale(1,.3); const pg=g.createRadialGradient(0,0,0,0,0,R); pg.addColorStop(0,'rgba('+rgb+','+a+')'); pg.addColorStop(.6,'rgba('+rgb+','+(a*.33)+')'); pg.addColorStop(1,'rgba('+rgb+',0)'); g.fillStyle=pg; g.beginPath(); g.arc(0,0,R,0,7); g.fill(); g.restore(); }
 function v3lanternReflect(x,y0,lit,t,rgb){ if(lit<.05) return; const L=H*.13, sc=clamp(H/420,.7,1.25); rgb=rgb||'255,210,130';
   for(let i=0;i<9;i++){ const k=i/8, y=y0+k*L, w=(7-k*4.5)*sc*(1+.25*Math.sin(t*2.1+i*1.7)), dx=Math.sin(t*1.3+i*2.3)*2*sc*k, a=lit*.28*(1-k)*(.65+.35*Math.sin(t*3+i));
@@ -5804,6 +5825,13 @@ V3SCENES.coast = {
     if(night<.7){ for(let i=0;i<3;i++){ const per=24+i*7, k=((t+i*9)%per)/per, gx=W*(1.1-k*1.3), gy=hz*(.35+i*.14)+Math.sin(t*.8+i)*hz*.03, s=H*(.006+i*.0015), fl=Math.sin(t*(3+i)+i)*.7;
         g.strokeStyle=v3rgba(mix('#ffffff',P.top,night*.8),.9); g.lineWidth=Math.max(1,s*.5); g.beginPath(); g.moveTo(gx-s*2.2,gy-s*fl*.8); g.quadraticCurveTo(gx-s,gy-s*(.4+fl*.6),gx,gy); g.quadraticCurveTo(gx+s,gy-s*(.4+fl*.6),gx+s*2.2,gy-s*fl*.8); g.stroke(); } }
     v3fishRing(P,t,hz,7.3,.42,.85);
+    // the moment, every 42 s (map standard, 2026-11-21): a pod of porpoises rolls past out on the far water, backs and fins arcing up
+    // and under, each a little apart; the pod is three or four strong and takes its own line each time
+    { const per=42, q=t%per, n=Math.floor(t/per); if(q<9){ const r=v3rng(n*53+9), np=3+(r()<.5?1:0), yy=hz+H*(.07+r()*.03), col=mix('#3a4652',P.wMid,.25+night*.5), s=H*.011*(1+(yy-hz)/H*2);
+      for(let i=0;i<np;i++){ const e=(q-i*.55)/9; if(e<0||e>1) continue; const cx=W*(.95-e*.5)+i*s*3, k=((q*.9+i*.37)%1.6)/1.6, up=k<.5?Math.sin(k/.5*Math.PI):0, by=yy+i*H*.004;
+        if(up>.02){ g.save(); g.beginPath(); g.rect(0,0,W,by); g.clip(); g.fillStyle=col; g.beginPath(); g.ellipse(cx,by+s*(1.2-up*1.6),s*2.6,s*1.1,0,Math.PI,0); g.fill();
+          g.beginPath(); g.moveTo(cx-s*.2,by-s*(up*1.6-1.2)-s*.9); g.lineTo(cx+s*.5,by-s*(up*1.6-1.2)-s*1.9); g.lineTo(cx+s*.9,by-s*(up*1.6-1.2)-s*.9); g.fill(); g.restore(); }
+        if(FX&&k<.62){ const kk=k/.62; g.strokeStyle=v3rgba(mix(P.wTop,'#ffffff',.6),.45*(1-kk)); g.lineWidth=1; g.beginPath(); g.ellipse(cx,by,s*(2+kk*3),s*(.35+kk*.4),0,0,7); g.stroke(); } } } }
   },
   fore(P,t){ // a sandy corner with marram grass bending in the wind
     const b=H+2, wind=Math.sin(t*1.3)*.5+Math.sin(t*2.9)*.2;
@@ -6233,7 +6261,7 @@ V3SCENES.deep = {
       g.strokeStyle=v3rgba(foam,.4*a); g.lineWidth=Math.max(1,u*3); g.beginPath(); for(let X=0;X<=W;X+=7){ if(V3CN((X+off)*.011+r0*1.7+t*.08)>.45){ g.moveTo(X,wy(X)); g.lineTo(X+7,wy(X+7)); } } g.stroke();
       if(FX&&u>.4){ g.fillStyle=v3rgba(foam,.45*a); for(let i=0;i<10;i++){ const X=((i*151+off+t*W*.03)%W), k=((t*1.6+i*.31)%1); g.globalAlpha=(1-k)*a*.8; g.beginPath(); g.arc(X-k*W*.02,wy(X)-k*amp*1.6+k*k*amp,1+u*1.4,0,7); g.fill(); } g.globalAlpha=1; } }
     // a whale's tail lifts out of the swell, pours water, and slides back under
-    { const per=23, k=(t%per)/per; if(k<.22){ const e=k/.22, up=Math.sin(e*Math.PI), wx=W*.7, wy=hz+H*.16, s=H*.02, wc=mix('#3a4652',P.wMid,.3+P.night*.3);
+    { const per=23, k=(t%per)/per; if(k<.22){ const e=k/.22, up=Math.sin(e*Math.PI), wx=W*.7, wy=hz+H*.16, s=H*.024, wc=mix('#26303a',P.wMid,.12+P.night*.3);
         g.save(); g.beginPath(); g.rect(0,0,W,wy); g.clip(); g.translate(wx,wy+(1-up)*s*7); g.rotate((e-.5)*.4); g.fillStyle=wc;
         g.beginPath(); g.moveTo(-s*.8,s*2); g.quadraticCurveTo(-s*.5,-s*1.5,0,-s*2.2); g.quadraticCurveTo(s*.5,-s*1.5,s*.8,s*2); g.fill();
         g.beginPath(); g.moveTo(0,-s*2); g.quadraticCurveTo(-s*2.5,-s*2.6,-s*4.6,-s*4.2); g.quadraticCurveTo(-s*3.2,-s*2.2,-s*1.6,-s*2.3); g.quadraticCurveTo(-s*.6,-s*1.8,0,-s*2.3); g.quadraticCurveTo(s*.6,-s*1.8,s*1.6,-s*2.3); g.quadraticCurveTo(s*3.2,-s*2.2,s*4.6,-s*4.2); g.quadraticCurveTo(s*2.5,-s*2.6,0,-s*2); g.fill();
@@ -6333,7 +6361,7 @@ V3SCENES.trench = {
     g.restore();
     // eyes in the deep: now and then, something down there opens its eyes, looks, and closes them
     { const per=29, k=(t%per)/per; if(k<.3){ const n=Math.floor(t/per), r=m34rng(n*17+3), NP=1+Math.floor(r()*3.2); /* 0.3.4: one to four pairs, each its own size, place, color and timing */
-      for(let pi=0;pi<Math.min(4,NP);pi++){ const st=r()*.1, e=(k-st)/(.13+r()*.07); const ex=W*(.3+r()*.62), ey=hz+H*(.2+r()*.22), s=H*(.0035+r()*.0085)*(.7+(ey-hz)/H*1.4), cols=[['#e8ff9a','220,255,140'],['#b8fff4','150,255,240'],['#ffd27a','255,200,110'],['#ff9a8a','255,130,110']], cl=cols[Math.floor(r()*4)], gap=2.4+r()*1.6, blink=r()<.5?.55:-1; if(e<0||e>1) continue;
+      for(let pi=0;pi<Math.min(4,NP);pi++){ const st=r()*.1, e=(k-st)/(.13+r()*.07); const ex=W*(.3+r()*.62), ey=hz+H*(.2+r()*.22), s=H*(.005+r()*.01)*(.7+(ey-hz)/H*1.4), cols=[['#e8ff9a','220,255,140'],['#b8fff4','150,255,240'],['#ffd27a','255,200,110'],['#ff9a8a','255,130,110']], cl=cols[Math.floor(r()*4)], gap=2.4+r()*1.6, blink=r()<.5?.55:-1; if(e<0||e>1) continue;
         let open=Math.min(1,Math.sin(e*Math.PI)*1.8); if(blink>0&&Math.abs(e-blink)<.04) open*=.1; const look=Math.sin(e*6+pi)*s*.3;
         for(const sd of [-1,1]){ v3glow(g,ex+sd*s*gap,ey,s*4,'rgba('+cl[1]+',.9)',.3*open); g.fillStyle=v3rgba(cl[0],.85*open); g.beginPath(); g.ellipse(ex+sd*s*gap,ey,s*1.4,s*.9*open,0,0,7); g.fill(); g.fillStyle='rgba(0,0,0,.9)'; g.beginPath(); g.ellipse(ex+sd*s*gap+look,ey,s*.25,s*.7*open,0,0,7); g.fill(); } } } }
     v3fishRing(P,t,hz,9.1,.3,.85);
@@ -6425,6 +6453,17 @@ V3SCENES.ember = {
     // embers drifting up everywhere, flickering
     g.save(); g.globalCompositeOperation='lighter'; const nE=FX?40:15; for(let i=0;i<nE;i++){ const sp=.4+((i*13)%10)/15, X=((i*89.3+Math.sin(t*.8+i)*W*.02)%W), Y=H-((t*H*.06*sp+i*57.7)%(H*1.05)), a=.4+.6*Math.abs(Math.sin(t*4+i*1.7)); g.fillStyle=v3rgba(i%3?P.lava2:P.lava,a*(.5+night*.5)); g.fillRect(X,Y,1.6,1.6); } g.restore();
     v3fishRing(P,t,hz,7.1,.4,.85);
+    // the moment, every 45 s: a geyser at the foot of the hill bubbles, erupts (a little higher or lower each time), then falls back as drifting steam
+    { const per=45, q=t%per, n=Math.floor(t/per), hk=.75+v3rng(n*31+7)()*.5, gx=W*.29, gb=embHillY(hz,gx)+H*.004;
+      if(q<12){ const up=q<2?0:q<4?(q-2)/2:q<9?1:Math.max(0,1-(q-9)/2), hh=H*.2*hk*up*(1+.06*Math.sin(t*9));
+        if(q<2.5){ for(let i=0;i<4;i++){ const k=((t*3+i*.25)%1); g.fillStyle=v3rgba('#ffffff',.5*(1-k)); g.beginPath(); g.arc(gx+(i-1.5)*H*.006,gb-k*H*.012,H*.003,0,7); g.fill(); } }
+        if(hh>1){ const cg=g.createLinearGradient(0,gb-hh,0,gb); cg.addColorStop(0,'rgba(255,255,255,0)'); cg.addColorStop(.25,v3rgba(mix('#ffffff',P.farHaze,.2),.75)); cg.addColorStop(1,v3rgba(mix('#e8f4f8',P.pool,.3),.9)); g.fillStyle=cg;
+          g.beginPath(); g.moveTo(gx-H*.006,gb); g.quadraticCurveTo(gx-H*.004,gb-hh*.6,gx-H*.014,gb-hh); g.quadraticCurveTo(gx,gb-hh*1.08,gx+H*.014,gb-hh); g.quadraticCurveTo(gx+H*.004,gb-hh*.6,gx+H*.006,gb); g.closePath(); g.fill();
+          if(FX) for(let i=0;i<10;i++){ const k=((t*.9+i*.1)%1), sd=i%2?1:-1, dx=sd*k*H*(.02+i%3*.008), dy=-hh*(1-k)+k*k*hh*.3; g.fillStyle=v3rgba('#ffffff',.6*(1-k)); g.fillRect(gx+dx,gb+dy,1.6,1.6); } }
+        if(q>4&&FX){ for(let i=0;i<4;i++){ const k=Math.min(1,(q-4)/8), sx=gx+W*.02*k+i*H*.01, sy=gb-H*.2*hk*Math.min(1,up+.3)-i*H*.01; v3glow(g,sx,sy,H*(.02+k*.03),v3rgba(mix('#ffffff',P.farHaze,.3),.8),.25*(1-k)); } }
+        g.strokeStyle=v3rgba(mix('#ffffff',P.farHaze,.3),.35*up); g.lineWidth=1; g.beginPath(); g.ellipse(gx,gb,H*.012+up*H*.006,H*.002,0,0,7); g.stroke(); } }
+    // ravens riding the warm air over the valley by day: slow circles, wings held out
+    if(night<.6){ for(let i=0;i<2;i++){ const a=t*.35+i*Math.PI, rx=W*(.46+i*.05)+Math.cos(a)*W*.05, ry=hz*(.42+i*.06)+Math.sin(a)*hz*.05*.4, s=H*.006, f=Math.sin(t*3+i)*.3; g.fillStyle=v3rgba('#141014',1-night); g.beginPath(); g.moveTo(rx-s*2.4,ry-s*f); g.quadraticCurveTo(rx-s*1,ry-s*.6,rx,ry); g.quadraticCurveTo(rx+s*1,ry-s*.6,rx+s*2.4,ry-s*f); g.quadraticCurveTo(rx+s,ry+s*.2,rx,ry+s*.4); g.quadraticCurveTo(rx-s,ry+s*.2,rx-s*2.4,ry-s*f); g.fill(); } }
   },
   fore(P,t){ // glowing moths flutter at the bottom right
     g.save(); g.globalCompositeOperation='lighter'; for(let i=0;i<4;i++){ const mx=W*(.82+i*.04)+Math.sin(t*1.3+i*2)*W*.02, my=H*(.82-i*.04)+Math.sin(t*2.1+i)*H*.02, fl=Math.abs(Math.sin(t*14+i)), s=H*.005;
@@ -6883,7 +6922,7 @@ m33wrap('ember','fore',function(P,t){ const b=H, c=mix(P.rock,P.wBot,.2);
 // STONEBROOK RIVER: a pair of otters that pop up and play (the moored rowboat now sits at the mill jetty, cc_river06.js)
 // ---------------------------------------------------------------------
 m33wrap('river','live',function(P,t,hz){ const night=P.night, FX=S.settings.effects;
-  for(let i=0;i<2;i++){ const per=19, k=((t+i*2.5)%per)/per; if(k>.32) continue; const e=k/.32, up=Math.sin(e*Math.PI), x=W*(.25+i*.035)+e*W*.035, y=hz+H*(.17+i*.012) /* clear water between the dock and the first rock (they swam through it at .36-.44) */, s=H*.005, oc=mix('#5a3a24',P.wMid,.2+night*.5);
+  for(let i=0;i<2;i++){ const per=24, k=((t+i*2.5)%per)/per; if(k>.32) continue; const e=k/.32, up=Math.sin(e*Math.PI), x=W*(.25+i*.035)+e*W*.035, y=hz+H*(.17+i*.012) /* clear water between the dock and the first rock (they swam through it at .36-.44) */, s=H*.005, oc=mix('#5a3a24',P.wMid,.2+night*.5);
     g.save(); g.beginPath(); g.rect(0,0,W,y); g.clip(); g.fillStyle=oc; g.beginPath(); g.ellipse(x,y+s*2*(1-up),s*1.6,s*2.6*up+.1,.2,0,7); g.fill(); g.beginPath(); g.ellipse(x+s*.6,y-s*2.4*up+s*2*(1-up),s*1.5,s*1.2*up+.1,0,0,7); g.fill(); g.fillStyle=mix('#c8a880',P.wMid,.2+night*.5); g.beginPath(); g.ellipse(x+s*1.2,y-s*2*up+s*2*(1-up),s*.8,s*.6*up+.05,0,0,7); g.fill(); m33dot(g,x+s*1.1,y-s*2.9*up+s*2*(1-up),s*.28*up,'#14100c'); g.restore();
     if(FX){ g.strokeStyle=v3rgba(mix(P.wTop,'#ffffff',.6),.5*up); g.lineWidth=1; g.beginPath(); g.ellipse(x,y+1,s*(2.6+e*4),s*(.6+e*.8),0,0,7); g.stroke(); } }
 });
@@ -7446,7 +7485,13 @@ function starSignature(P,t,hz,sa){ const per=26, k=(t%per)/per, cx=W*.74, cy=hz*
   g.save(); g.lineCap='round'; g.lineJoin='round';
   // glow under the stroke, then the stroke itself with width following the pen's pace
   g.globalCompositeOperation='lighter'; g.strokeStyle=v3rgba(P.cry2,.12*a); g.lineWidth=7; g.beginPath(); for(let i=0;i<=n;i++){ const [x,y]=pts[i]; i?g.lineTo(x,y):g.moveTo(x,y); } g.stroke(); g.globalCompositeOperation='source-over';
-  for(let i=1;i<=n;i++){ const [x0,y0,q0]=pts[i-1], [x1,y1,q1]=pts[i], d=Math.hypot(x1-x0,y1-y0)||1, pace=(q1-q0)/d*W*.07, w=Math.min(2.2,.7+pace*.9)*(i>n-6?1:1); g.strokeStyle=v3rgba(mix(P.cry2,'#ffffff',.35),.55*a); g.lineWidth=w; g.beginPath(); g.moveTo(x0,y0); g.lineTo(x1,y1); g.stroke(); }
+  /* the stroke never changes shape, so its ~160 pieces are drawn once into a stored picture (per size and color) and laid on with
+     the breathing alpha; map standard rule 13, 2026-11-21: Starfall was the heaviest water, this was its biggest single cost */
+  { const col=mix(P.cry2,'#ffffff',.35), sk=key+'|'+col+'|'+n, DP=Math.min(DPR||1,2); if(SIG.ck!==sk){ const pad=8, xs=pts.map(p=>p[0]), ys=pts.map(p=>p[1]), x0=Math.min(...xs)-pad, y0=Math.min(...ys)-pad, cw=Math.max(...xs)+pad-x0, chh=Math.max(...ys)+pad-y0;
+      const c=SIG.cv||document.createElement('canvas'); c.width=Math.ceil(cw*DP); c.height=Math.ceil(chh*DP); const m=c.getContext('2d'); m.setTransform(DP,0,0,DP,-x0*DP,-y0*DP); m.lineCap='round'; m.lineJoin='round'; m.strokeStyle=v3rgba(col,.55);
+      for(let i=1;i<=n;i++){ const [xa,ya,qa]=pts[i-1], [xb,yb,qb]=pts[i], d=Math.hypot(xb-xa,yb-ya)||1, pace=(qb-qa)/d*W*.07; m.lineWidth=Math.min(2.2,.7+pace*.9); m.beginPath(); m.moveTo(xa,ya); m.lineTo(xb,yb); m.stroke(); }
+      SIG.cv=c; SIG.ck=sk; SIG.box=[x0,y0,cw,chh]; }
+    g.globalAlpha=a; g.drawImage(SIG.cv,SIG.box[0],SIG.box[1],SIG.box[2],SIG.box[3]); g.globalAlpha=1; }
   // stars light as the pen passes them
   SIG.C.forEach((p,i)=>{ const reached=pts.findIndex(q=>Math.round(q[0])===Math.round(p[0])&&Math.round(q[1])===Math.round(p[1])), at=reached>=0?pts[reached][2]:i/(SIG.C.length-1), fi=Math.min(1,Math.max(0,(draw-at)/.05)); if(fi<=0) return; const ai=a*v3s(fi)*(.65+.35*Math.sin(t*1.6+i*1.9)); v3glow(g,p[0],p[1],H*.026,'rgba(200,240,255,.9)',.7*ai); g.fillStyle=v3rgba('#ffffff',ai); g.beginPath(); g.arc(p[0],p[1],1.3*fi,0,7); g.fill(); });
   // the pen tip while signing
@@ -11504,7 +11549,7 @@ if(/[?&]test\b/.test(location.search)) window.__findWx=(k,ph0=0,ph1=1)=>{ for(le
 // leaves, plankton and glints. Auto picks for you; the choice is saved on this device.
 var GFX_TOUCH = !!(window.matchMedia&&matchMedia('(pointer:coarse)').matches);
 function gfxHigh(){ return true; } /* 0.3.5 (director): High runs better on phones too, so it is the only mode; Balanced is gone */
-function gfxK(){ return gfxHigh()?1.6:1; }
+function gfxK(){ return (gfxHigh()?1.6:1)*PLAT.detail(); }
 const _renderSettings_gfx = renderSettings;
 renderSettings = function(P){ _renderSettings_gfx(P); return; /* 0.3.5: no Graphics choice any more */ const cur=S.settings.gfx||'auto', grid=P.querySelector('.grid'); if(!grid) return;
   const opt=[['auto','Auto ('+(GFX_TOUCH?'Balanced':'High')+' here)'],['high','High'],['balanced','Balanced']];
@@ -16395,7 +16440,7 @@ V3SCENES.farm={
     waMore('farm','shore',x,P,hz); v3water(x,P,hz,cnv,.36); },
   live(P,t,hz,sun){ waMore('farm','live',null,P,hz,t); v3glitter(P,t,hz,sun); const cx=W*.875, cy=hz-H*.02-H*.12, L=H*.05, a=t*.9; g.strokeStyle=mix('#f0e8d8','#303040',P.night*.6); g.lineWidth=Math.max(1.5,H*.004);
     for(let i=0;i<4;i++){ const an=a+i*Math.PI/2; g.beginPath(); g.moveTo(cx,cy); g.lineTo(cx+Math.cos(an)*L,cy+Math.sin(an)*L); g.stroke(); }
-    if(S.settings.effects) for(let i=0;i<3;i++){ const q=((t*.05+i*.33)%1), x=W*(-.05+q*1.1), y=hz*(.25+i*.1), f=Math.sin(t*6+i)*.6, s=H*.006; g.strokeStyle='rgba(40,40,50,.7)'; g.lineWidth=1.2; g.beginPath(); g.moveTo(x-s*2,y-s*f); g.quadraticCurveTo(x-s,y-s,x,y); g.quadraticCurveTo(x+s,y-s,x+s*2,y-s*f); g.stroke(); } },
+    if(S.settings.effects&&P.night<.6) for(let i=0;i<3;i++){ const q=((t*.05+i*.33)%1), x=W*(-.05+q*1.1), y=hz*(.25+i*.1), f=Math.sin(t*6+i)*.6, s=H*.006; g.strokeStyle='rgba(40,40,50,.7)'; g.lineWidth=1.2; g.beginPath(); g.moveTo(x-s*2,y-s*f); g.quadraticCurveTo(x-s,y-s,x,y); g.quadraticCurveTo(x+s,y-s,x+s*2,y-s*f); g.stroke(); } },
   fore(P,t){ g.save(); for(let i=0;i<3;i++){ const x=W*(.9+i*.04), y=H*(.62+i*.06), sw=Math.sin(t*.9+i)*3; g.strokeStyle=mix('#3a7a2a',P.top,P.night*.5); g.lineWidth=H*.006; g.beginPath(); g.moveTo(x,H); g.lineTo(x+sw,y); g.stroke();
     g.fillStyle=mix('#f8c820',P.top,P.night*.6); for(let k=0;k<10;k++){ const an=k/10*Math.PI*2; g.beginPath(); g.ellipse(x+sw+Math.cos(an)*H*.022,y+Math.sin(an)*H*.022,H*.014,H*.006,an,0,7); g.fill(); } g.fillStyle=mix('#5a3a1a',P.top,P.night*.5); g.beginPath(); g.arc(x+sw,y,H*.016,0,7); g.fill(); } g.restore(); }
 };
@@ -16531,7 +16576,7 @@ const WA_MORE={
         for(let i=0;i<14;i++){ const a=i*2.4, r=H*(.012+.004*(i%4)), fx=cx+Math.cos(a+t*.6)*r*2.6, fy=cy+Math.sin(a*1.3+t*.5)*r*.9, s=H*.0065; g.beginPath(); g.ellipse(fx,fy,s*1.6,s*.55,0,0,7); g.fill(); g.beginPath(); g.moveTo(fx-dirx*s*1.5,fy); g.lineTo(fx-dirx*s*2.4,fy-s*.6); g.lineTo(fx-dirx*s*2.4,fy+s*.6); g.fill(); } g.restore(); }
       { const q=((t*.006)%1), sx=W*(.25+.5*(.5+.5*Math.sin(q*Math.PI*2))), sy=hz+H*.035, s=H*.012, N=c0=>mix(c0,P.wMid,P.night*.55); g.fillStyle=N('#f4f0ea'); g.beginPath(); g.moveTo(sx-s*1.6,sy); g.lineTo(sx+s*1.6,sy); g.lineTo(sx+s*1.2,sy+s*.5); g.lineTo(sx-s*1.2,sy+s*.5); g.fill(); g.beginPath(); g.moveTo(sx,sy-s*.1); g.lineTo(sx,sy-s*3.2); g.lineTo(sx+s*1.5,sy-s*.3); g.fill(); g.fillStyle=N('#e8e0d0'); g.beginPath(); g.moveTo(sx-s*.15,sy-s*.2); g.lineTo(sx-s*.15,sy-s*2.6); g.lineTo(sx-s*1.3,sy-s*.3); g.fill(); }
       if(P.night>.3){ const lx=W*.885, ly=hz-H*.014-H*.085-H*.01, a=t*.8, len=W*.35; for(const d of [0,Math.PI]){ const an=a+d, dx=Math.cos(an); if(dx*dx<.02) continue; const gr=g.createLinearGradient(lx,ly,lx+dx*len,ly); gr.addColorStop(0,'rgba(255,240,180,'+(.35*P.night)+')'); gr.addColorStop(1,'rgba(255,240,180,0)'); g.fillStyle=gr; g.beginPath(); g.moveTo(lx,ly); g.lineTo(lx+dx*len,ly-H*.03*Math.abs(dx)); g.lineTo(lx+dx*len,ly+H*.03*Math.abs(dx)); g.closePath(); g.fill(); } }
-      if(FX){ const q=(t%29)/29; if(q<.12){ const e=q/.12; for(let i=0;i<2;i++){ const ee=e-i*.18; if(ee<0||ee>1) continue; const y=hz+H*.1, s=H*.006; waLeaper(W*(.58+i*.03),y,s,ee,mix('#7a8ea0',P.wMid,P.night*.5)); if(ee<.12||ee>.88) waRing(W*.58+(ee<.5?-1:1)*s*7+i*W*.03,y,s,ee<.5?ee/.12:(ee-.88)/.12,.8); } } } } },
+      if(FX){ const q=(t%29)/29; if(q<.12){ const e=q/.12; for(let i=0;i<2;i++){ const ee=e-i*.18; if(ee<0||ee>1) continue; const y=hz+H*.1, s=H*.01; waLeaper(W*(.58+i*.03),y,s,ee,mix('#7a8ea0',P.wMid,P.night*.5)); if(ee<.12||ee>.88) waRing(W*.58+(ee<.5?-1:1)*s*7+i*W*.03,y,s,ee<.5?ee/.12:(ee-.88)/.12,.8); } } } } },
   amazon:{
     shore(x,P,hz){ const N=c0=>mix(c0,P.front,.15+P.night*.55);
       for(const [px,s,d] of [[.66,H*.0055,1],[.7,H*.0045,-1],[.73,H*.005,1]]){ const cx=W*px, cy=hz-H*.003; x.fillStyle=N('#8a5a32'); x.beginPath(); x.ellipse(cx,cy-s*1.5,s*2.4,s*1.4,0,0,7); x.fill(); x.beginPath(); x.ellipse(cx+d*s*2.3,cy-s*2,s*1.2,s*1,0,0,7); x.fill(); x.fillStyle=N('#5a3a20'); x.fillRect(cx-s*1.6,cy-s*.4,s*.5,s*.4); x.fillRect(cx+s*1.1,cy-s*.4,s*.5,s*.4); x.fillStyle='#140c08'; x.fillRect(cx+d*s*2.6,cy-s*2.4,s*.3,s*.3); }
@@ -16541,25 +16586,44 @@ const WA_MORE={
   farm:{
     shore(x,P,hz){ const road=mix('#d8c090',P.hill,.3+P.night*.5); x.strokeStyle=road; x.lineWidth=H*.006; x.beginPath(); x.moveTo(0,hz-H*.034); x.bezierCurveTo(W*.3,hz-H*.044,W*.6,hz-H*.03,W,hz-H*.04); x.stroke();
       for(const [px,sh,d] of [[.12,0,1],[.18,1,1],[.22,1,-1],[.33,0,-1],[.4,1,1],[.53,0,1],[.95,1,-1]]){ x.save(); x.translate(W*px,hz-H*.012); x.scale(d,1); waCow(x,0,0,H*.0042,P,!!sh); x.restore(); } },
-    live(x,P,hz,t){ for(let i=0;i<2;i++){ const ph=t*.02+i*2.6, y=hz+H*(.05+i*.05); waDuck(W*(.5+.25*Math.sin(ph)),y,H*(.006+waK(y,hz)*.012),Math.cos(ph)>=0?1:-1,P,t,i,false); }
-      { const q=(t%61)/61; if(q<.4){ const e=q/.4, tx=W*(-.05+e*1.1), ty=hz-H*.038-Math.sin(e*3.1)*H*.004, s=H*.0045, N=c0=>mix(c0,P.hill,P.night*.55); g.fillStyle=N('#2a8a3a'); g.fillRect(tx-s*2,ty-s*2.2,s*3.2,s*1.4); g.fillRect(tx-s*.4,ty-s*4,s*1.6,s*1.9); g.fillStyle=N('#bfe0f0'); g.fillRect(tx-s*.1,ty-s*3.7,s*1,s*1); g.fillStyle=N('#1a1a1a'); g.beginPath(); g.arc(tx-s*1.2,ty-s*.9,s*1.1,0,7); g.moveTo(tx+s*1.6,ty-s*.6); g.arc(tx+s*1,ty-s*.6,s*.6,0,7); g.fill(); if(S.settings.effects){ g.fillStyle='rgba(90,90,90,.35)'; g.beginPath(); g.arc(tx+s*1.5,ty-s*5-((t*2)%1)*s*2,s*.6,0,7); g.fill(); } } } } },
+    live(x,P,hz,t){ const FX=S.settings.effects;
+      /* map standard (2026-11-21), life after dark: fireflies over the field by the fence, and a barn owl gliding low over the fields now and then */
+      if(FX&&P.night>.3) for(let i=0;i<10;i++){ const fx=W*(.06+((i*.137)%.42))+Math.sin(t*.6+i)*W*.008, fy=hz-H*(.03+((i*7)%5)*.006)+Math.sin(t*.8+i*2)*H*.006, a=P.night*(.5+.5*Math.sin(t*2.6+i*1.9)); v3glow(g,fx,fy,H*.01,'rgba(220,255,140,.9)',a*.55); }
+      if(P.night>.5){ const q=(t%34)/34; if(q<.4){ const e=q/.4, ox=W*(1.06-e*1.14), oy=hz-H*(.19+.03*Math.sin(e*Math.PI*2)), s=H*.0065; v3owlFly(ox,oy,s,t,mix('#e8dcc0',P.hill,.45),mix('#d8c8a0',P.hill,.4),mix('#fff8ec',P.hill,.3),'#1a1410'); } }
+      for(let i=0;i<2;i++){ const ph=t*.02+i*2.6, y=hz+H*(.05+i*.05); waDuck(W*(.5+.25*Math.sin(ph)),y,H*(.006+waK(y,hz)*.012),Math.cos(ph)>=0?1:-1,P,t,i,false); }
+      { const q=(t%55)/55; if(q<.4){ const e=q/.4, tx=W*(-.05+e*1.1), ty=hz-H*.038-Math.sin(e*3.1)*H*.004, s=H*.0045, N=c0=>mix(c0,P.hill,P.night*.55); g.fillStyle=N('#2a8a3a'); g.fillRect(tx-s*2,ty-s*2.2,s*3.2,s*1.4); g.fillRect(tx-s*.4,ty-s*4,s*1.6,s*1.9); g.fillStyle=N('#bfe0f0'); g.fillRect(tx-s*.1,ty-s*3.7,s*1,s*1); g.fillStyle=N('#1a1a1a'); g.beginPath(); g.arc(tx-s*1.2,ty-s*.9,s*1.1,0,7); g.moveTo(tx+s*1.6,ty-s*.6); g.arc(tx+s*1,ty-s*.6,s*.6,0,7); g.fill(); if(S.settings.effects){ g.fillStyle='rgba(90,90,90,.35)'; g.beginPath(); g.arc(tx+s*1.5,ty-s*5-((t*2)%1)*s*2,s*.6,0,7); g.fill(); } } } } },
   buffet:{
     shore(x,P,hz){ const N=c0=>mix(c0,P.farHaze,.15+P.night*.5); x.fillStyle=N('#c8ccd8'); x.save(); x.translate(W*.56,hz-H*.16); x.rotate(.25); x.fillRect(-H*.004,0,H*.008,H*.08); for(let k=0;k<4;k++) x.fillRect(-H*.012+k*H*.008,-H*.03,H*.004,H*.032); x.fillRect(-H*.013,-H*.002,H*.026,H*.006); x.restore();
       const r=v3rng(5); x.fillStyle=N('#5aa83a'); for(let i=0;i<14;i++){ x.beginPath(); x.arc(W*(.3+r()*.6),hz-H*.004+r()*H*.006,H*.004,0,7); x.fill(); } },
     live(x,P,hz,t){ const FX=S.settings.effects, N=c0=>mix(c0,P.farHaze,P.night*.5);
+      /* map standard (2026-11-21), life on the lake: a gummy bear rows a cracker across the far water, oars dipping, a little wake behind */
+      { const per=96, q=(t%per)/per; if(q<.85){ const e=q/.85, rx=W*(1.06-e*1.12), ry=hz+H*.045+Math.sin(t*1.3)*H*.0015, s=H*.009, ro=Math.sin(t*2.2), M=c0=>mix(c0,P.wMid,.1+P.night*.5);
+        g.fillStyle=M('#e0b060'); g.fillRect(rx-s*3,ry-s*.7,s*6,s*.9); g.fillStyle=M('#c89040'); for(let k=0;k<5;k++) g.fillRect(rx-s*2.4+k*s*1.2,ry-s*.45,1.2,1.2); /* the cracker, side on, with its holes */
+        g.fillStyle=v3rgba(M('#ff4a5a'),.9); g.beginPath(); g.ellipse(rx,ry-s*1.9,s*1,s*1.25,0,0,7); g.fill(); g.beginPath(); g.arc(rx-s*.3,ry-s*3.5,s*.75,0,7); g.fill(); g.beginPath(); g.arc(rx-s*.05,ry-s*4.2,s*.28,0,7); g.fill(); /* body, head, ear */
+        g.fillStyle='rgba(255,255,255,.4)'; g.beginPath(); g.ellipse(rx-s*.4,ry-s*2.3,s*.25,s*.5,-.3,0,7); g.fill(); g.fillStyle='#401018'; g.fillRect(rx-s*.85,ry-s*3.65,1.3,1.3);
+        g.strokeStyle=M('#8a5a2a'); g.lineWidth=Math.max(1,s*.25); g.beginPath(); g.moveTo(rx-s*.4,ry-s*2); g.lineTo(rx+s*(1.6+ro*.9),ry+s*(.5-ro*.3)); g.stroke();
+        if(FX){ g.strokeStyle=v3rgba(mix(P.wTop,'#ffffff',.5),.35); g.lineWidth=1; g.beginPath(); g.moveTo(rx+s*3.2,ry+s*.1); g.lineTo(rx+s*6,ry); g.moveTo(rx+s*3.2,ry+s*.3); g.lineTo(rx+s*6,ry+s*.6); g.stroke(); if(ro>.7) waRing(rx+s*2.2,ry+s*.3,s*.6,(ro-.7)/.3,.4); } } }
       { const jx=W*.9, jy=hz-H*.004, w=Math.sin(t*3.2)*.06; g.fillStyle=v3rgba(N('#e83a5a'),.85); g.beginPath(); g.ellipse(jx,jy-H*.02*(1-w),H*.03*(1+w),H*.02*(1-w),0,Math.PI,0); g.fill(); g.fillStyle='rgba(255,255,255,.35)'; g.beginPath(); g.ellipse(jx-H*.01,jy-H*.03*(1-w),H*.008,H*.004,-.3,0,7); g.fill(); }
       for(let i=0;i<3;i++){ const cx=W*.72+(i-1)*H*.02, cy=hz-H*.01-H*.07; g.fillStyle=N('#f4e8d0'); g.fillRect(cx-1,cy,2,H*.01); const fl=1+Math.sin(t*12+i*2)*.15; v3glow(g,cx,cy-H*.004,H*.014,'rgba(255,200,100,.9)',.35+P.night*.3); g.fillStyle='#ffd060'; g.beginPath(); g.ellipse(cx,cy-H*.004,H*.0025,H*.005*fl,0,0,7); g.fill(); }
-      { const q=(t%33)/33; if(q<.2){ const e=q/.2, px=W*(.2+e*.2), py=e<.85?hz-H*.16*(1-Math.pow(e/.85,1.6))+H*.004:hz+H*.01, r=H*.012; if(e<.85){ g.save(); g.translate(px,py-r); g.rotate(e*14); g.fillStyle=N('#7a3a1a'); g.beginPath(); g.arc(0,0,r,0,7); g.fill(); g.fillStyle=N('#5a2a10'); g.beginPath(); g.arc(r*.3,r*.2,r*.3,0,7); g.arc(-r*.4,-r*.3,r*.22,0,7); g.fill(); g.restore(); } else if(FX){ const k=(e-.85)/.15; g.fillStyle=v3rgba(N('#9a5a24'),1-k); for(let i=0;i<6;i++){ const a=-Math.PI*(i+.5)/6; g.beginPath(); g.arc(px+Math.cos(a)*k*H*.04,py+Math.sin(a)*k*H*.03-k*k*H*.0,H*.004,0,7); g.fill(); } waRing(px,py,H*.008,k,.7); } } } } },
+      { const q=(t%33)/33; if(q<.2){ const e=q/.2, px=W*(.2+e*.2), py=e<.85?hz-H*.16*(1-Math.pow(e/.85,1.6))+H*.004:hz+H*.01, r=H*.02; if(e<.85){ g.save(); g.translate(px,py-r); g.rotate(e*14); g.fillStyle=N('#7a3a1a'); g.beginPath(); g.arc(0,0,r,0,7); g.fill(); g.fillStyle=N('#5a2a10'); g.beginPath(); g.arc(r*.3,r*.2,r*.3,0,7); g.arc(-r*.4,-r*.3,r*.22,0,7); g.fill(); g.restore(); } else if(FX){ const k=(e-.85)/.15; g.fillStyle=v3rgba(N('#9a5a24'),1-k); for(let i=0;i<6;i++){ const a=-Math.PI*(i+.5)/6; g.beginPath(); g.arc(px+Math.cos(a)*k*H*.04,py+Math.sin(a)*k*H*.03-k*k*H*.0,H*.004,0,7); g.fill(); } waRing(px,py,H*.008,k,.7); } } } } },
   corporate:{
     live(x,P,hz,t){ const FX=S.settings.effects, fx=W*.62, fy=hz+H*.13;
+      /* map standard (2026-11-21), life by day: pigeons strut along the top of the ticker band, pecking, now and then turning round */
+      if(P.night<.6) for(let i=0;i<3;i++){ const s=H*.0065, seg=Math.floor(t*.12+i*1.7), r=v3rng(seg*17+i), dir=r()<.5?1:-1, px=W*(.18+i*.27)+Math.sin(t*.12+i*1.7)*W*.03, py=hz-H*.03, peck=Math.max(0,Math.sin(t*3+i*2))>.85?s*.5:0, N=c0=>mix(c0,P.front,.2+P.night*.5);
+        g.save(); g.translate(px,py); g.scale(dir,1); g.fillStyle=N('#5e6474'); g.beginPath(); g.ellipse(0,-s*1.1,s*1.3,s*.75,-.15,0,7); g.fill(); g.beginPath(); g.moveTo(-s*1.1,-s*1); g.lineTo(-s*2,-s*.8); g.lineTo(-s*1.1,-s*.6); g.fill();
+        g.fillStyle=N('#3e4456'); g.beginPath(); g.arc(s*1.05,-s*1.75+peck,s*.48,0,7); g.fill(); g.fillStyle=N('#e8b080'); g.fillRect(s*1.45,-s*1.75+peck,s*.4,1.2); g.fillStyle=N('#5a8a7a'); g.fillRect(s*.6,-s*1.45+peck*.5,s*.6,s*.3);
+        g.strokeStyle=N('#d07060'); g.lineWidth=1; g.beginPath(); g.moveTo(-s*.2,-s*.4); g.lineTo(-s*.2,0); g.moveTo(s*.3,-s*.4); g.lineTo(s*.3,0); g.stroke(); g.restore(); }
       g.fillStyle=mix('#c8ccd4',P.wMid,.2+P.night*.5); g.beginPath(); g.ellipse(fx,fy,H*.03,H*.008,0,0,7); g.fill();
       if(FX){ g.fillStyle='rgba(230,245,255,.7)'; for(let i=0;i<16;i++){ const q=((t*.9+i/16)%1), a=(i/16-.5)*1.4, px=fx+Math.sin(a)*q*H*.05, py=fy-Math.sin(q*Math.PI)*H*.06*(1-Math.abs(a)*.4); g.fillRect(px,py,1.6,1.6); } }
-      { const q=(t%25)/25; if(q<.3){ const e=q/.3, px=W*(.2+e*.55), py=hz*.35+e*hz*.5+Math.sin(e*12)*H*.012, s=H*.008; g.save(); g.translate(px,py); g.rotate(.25+Math.cos(e*12)*.25); g.fillStyle='#f8f8f4'; g.beginPath(); g.moveTo(s*1.6,0); g.lineTo(-s,-s*.6); g.lineTo(-s*.6,0); g.lineTo(-s,s*.4); g.closePath(); g.fill(); g.restore(); } }
+      { const q=(t%25)/25; if(q<.3){ const e=q/.3, px=W*(.2+e*.55), py=hz*.35+e*hz*.5+Math.sin(e*12)*H*.012, s=H*.014; g.save(); g.translate(px,py); g.rotate(.25+Math.cos(e*12)*.25); g.fillStyle='#f8f8f4'; g.beginPath(); g.moveTo(s*1.6,0); g.lineTo(-s,-s*.6); g.lineTo(-s*.6,0); g.lineTo(-s,s*.4); g.closePath(); g.fill(); g.restore(); } }
       { const q=(t%53)/53; if(q<.35){ const e=q/.35, px=W*(1.05-e*1.15), py=hz*.22, s=H*.006; g.fillStyle=P.night>.5?'#1a1e28':'#3a404a'; g.beginPath(); g.ellipse(px,py,s*2,s*.9,0,0,7); g.fill(); g.fillRect(px,py-s*.2,s*3.4,s*.35); g.strokeStyle=g.fillStyle; g.lineWidth=1; const r=Math.sin(t*40)*s*3; g.beginPath(); g.moveTo(px-r,py-s*1.3); g.lineTo(px+r,py-s*1.3); g.stroke(); if(P.night>.3){ g.fillStyle=Math.sin(t*6)>0?'#ff4040':'#40ff60'; g.fillRect(px+s*3.2,py-s*.3,1.5,1.5); } } } } },
   nile:{
     shore(x,P,hz){ const N=c0=>mix(c0,P.farHaze,.2+P.night*.4); x.fillStyle=N('#d8b878'); x.beginPath(); x.moveTo(W*.505,hz-H*.006); x.lineTo(W*.509,hz-H*.075); x.lineTo(W*.512,hz-H*.082); x.lineTo(W*.515,hz-H*.075); x.lineTo(W*.519,hz-H*.006); x.fill(); x.fillStyle=N('#b89858'); x.fillRect(W*.513,hz-H*.075,W*.006,H*.069); },
     water(x,P,hz){ const r=v3rng(19); for(const [cx,cy,n] of [[.66,.04,4],[.74,.07,3],[.4,.18,3]]) for(let i=0;i<n;i++){ const yy=hz+H*cy+(r()-.5)*H*.015, s=H*(.008+waK(yy,hz)*.04)*(.7+r()*.4); waLily(x,W*cx+(r()-.5)*W*.05,yy,s,P,700+i+Math.round(cx*100),r()<.5?(r()<.5?'#8ab8ff':'#fff8f0'):null); } },
     live(x,P,hz,t){ const FX=S.settings.effects, N=c0=>mix(c0,P.farHaze,P.night*.6);
+      /* map standard (2026-11-21), life after dark: fruit bats flit over the palms, darting and turning */
+      if(P.night>.4) for(let i=0;i<4;i++){ const seg=Math.floor(t*.5+i*2.3), k=(t*.5+i*2.3)-seg, r1=v3rng(seg*7+i), r0=v3rng((seg-1)*7+i), ax=W*(.15+r1()*.7), ay=hz*(.45+r1()*.4), bx=W*(.15+r0()*.7), by=hz*(.45+r0()*.4), e=k*k*(3-2*k), x0=bx+(ax-bx)*e, y0=by+(ay-by)*e, s=H*.005, f=Math.sin(t*16+i*2);
+        g.fillStyle=v3rgba('#141018',P.night); g.beginPath(); g.moveTo(x0,y0); g.quadraticCurveTo(x0-s*1.2,y0-s*1.6*f,x0-s*2.6,y0-s*.6*f); g.lineTo(x0-s*1.4,y0+s*.3); g.lineTo(x0,y0+s*.5); g.lineTo(x0+s*1.4,y0+s*.3); g.lineTo(x0+s*2.6,y0-s*.6*f); g.quadraticCurveTo(x0+s*1.2,y0-s*1.6*f,x0,y0); g.fill(); }
       { const per=110, q=(t%per)/per, base=W*(1.08-q*1.25); for(let i=0;i<4;i++){ const cx=base+i*H*.035, cy=hz-H*.027, s=H*.0035, st=Math.sin(t*3+i)*s*.5; g.fillStyle=N('#a07a4a'); g.strokeStyle=g.fillStyle; g.lineWidth=Math.max(1,s*.5); g.beginPath(); g.moveTo(cx-s*1.5,cy); g.lineTo(cx-s*1.5+st,cy+s*3.4); g.moveTo(cx+s*1.4,cy); g.lineTo(cx+s*1.4-st,cy+s*3.4); g.stroke(); g.beginPath(); g.ellipse(cx,cy-s*.4,s*2.2,s*1.2,0,0,7); g.fill(); g.beginPath(); g.ellipse(cx,cy-s*1.5,s*.9,s*.8,0,0,7); g.fill(); g.beginPath(); g.moveTo(cx-s*2,cy-s*.6); g.quadraticCurveTo(cx-s*3.4,cy-s*2.5,cx-s*3.2,cy-s*3.2); g.lineTo(cx-s*3.8,cy-s*3.2); g.quadraticCurveTo(cx-s*3,cy-s*1.6,cx-s*1.6,cy); g.fill(); if(i===0){ g.fillStyle=N('#f4f0e8'); g.fillRect(cx-s*.4,cy-s*3.8,s*.9,s*1.8); } } }
       if(FX&&P.night<.5) for(let i=0;i<3;i++){ const q=((t*.03+i*.3)%1), bx=W*(-.05+q*1.1), by=hz*(.3+i*.08)+Math.sin(t+i)*5, f=Math.sin(t*5+i)*.6, s=H*.007; g.strokeStyle='rgba(250,250,250,.9)'; g.lineWidth=1.3; g.beginPath(); g.moveTo(bx-s*2,by-s*f); g.quadraticCurveTo(bx-s,by-s,bx,by); g.quadraticCurveTo(bx+s,by-s,bx+s*2,by-s*f); g.stroke(); g.strokeStyle='#1a1a1a'; g.beginPath(); g.moveTo(bx,by); g.quadraticCurveTo(bx+s*1.2,by+s*.2,bx+s*1.6,by+s*.8); g.stroke(); }
       { const q=(t%21)/21; if(q<.25){ const e=q/.25, up=Math.min(1,Math.sin(e*Math.PI)*1.6), y=hz+H*.09, s=H*.006, cx=W*.46+e*W*.04, col=mix('#4a5a3a',P.wMid,.25+P.night*.5); g.save(); g.beginPath(); g.rect(0,0,W,y); g.clip(); g.fillStyle=col; g.beginPath(); g.ellipse(cx,y+s*(1-up)*1.5,s*4,s*.7*up+.05,0,Math.PI,0); g.fill(); for(const ox of [-1.6,-1.1]){ g.beginPath(); g.arc(cx+ox*s*2,y-s*.5*up+s*(1-up),s*.45,0,7); g.fill(); g.fillStyle='#e8d040'; g.fillRect(cx+ox*s*2-.6,y-s*.6*up+s*(1-up),1.3,1.3); g.fillStyle=col; } for(let i=0;i<5;i++){ g.beginPath(); g.arc(cx+s*(.6+i*.8),y-s*.3*up+s*(1-up),s*.25,0,7); g.fill(); } g.restore(); if(FX) waRing(cx,y+1,s*2,e,.4); } } } },
@@ -17679,6 +17743,10 @@ document.head.insertAdjacentHTML('beforeend',`<style>
 // Fish Log, Aquarium and Home layouts) and decides how many tabs share a row (PG_COLS).
 // =====================================================================
 const PAGES_SKIP=new Set(), PAGES={before(){}, after(){}}; /* each platform wraps renderPanel: PAGES.before(); draw; PAGES.after() */
+/* Clean Pages (2026-11-21): a page's own finishing touches, run in order at the very end of PAGES.after (after the page engine has
+   laid the page out, or skipped it), so a platform file adds them with pageDone('settings',fn) instead of wrapping renderPanel again */
+const PAGE_DONE={}; function pageDone(tab,fn){ (PAGE_DONE[tab]=PAGE_DONE[tab]||[]).push(fn); }
+function pageDoneRun(){ const P=$('panel'), L=PAGE_DONE[S.tab]; if(P&&L) for(const f of L) try{ f(P); }catch(e){ console.error(e); } }
 { const h=(tag,cls,html)=>{ const e=document.createElement(tag); if(cls) e.className=cls; if(html!=null) e.innerHTML=html; return e; };
   const num=(t,re,i=1)=>{ const m=String(t||'').match(re); return m?m[i]:null; };
   const txt=e=>e?(e.textContent||'').replace(/\s+/g,' ').trim():'';
@@ -17724,7 +17792,7 @@ const PAGES_SKIP=new Set(), PAGES={before(){}, after(){}}; /* each platform wrap
     };
   PAGES.after=function(){
     try{ const P=$('panel'), tab=S.tab, cfg=CFG[tab]; if(!P) return;
-      if(!cfg||PAGES_SKIP.has(tab)){ P.classList.remove('pg08','pg08-nostage'); delete P.dataset.pgTab; if(S.tab!=='aquarium'&&!P.classList.contains('dk08')) P.classList.remove('aq07','aq07-open'); return; }
+      if(!cfg||PAGES_SKIP.has(tab)){ P.classList.remove('pg08','pg08-nostage'); delete P.dataset.pgTab; if(S.tab!=='aquarium'&&!P.classList.contains('dk08')) P.classList.remove('aq07','aq07-open'); pageDoneRun(); return; }
       const kids=[...P.children].filter(c=>!c.classList.contains('crumb'));
       /* the page's own header: marked dl-dup when a side-panel tab names the page; pages opened only from the top bar (Cooler, Fish Log)
          have no such tab, so their first header row / title counts too */
@@ -17759,6 +17827,7 @@ const PAGES_SKIP=new Set(), PAGES={before(){}, after(){}}; /* each platform wrap
       const curSec=()=>{ const s=nv&&nv.querySelector('[aria-selected="true"], [aria-pressed="true"], .on'); return s?(s.dataset.sect||s.dataset.k||s.dataset.v||txt(s).replace(/\s*\d+$/,'')):''; };
       P.dataset.pgSec=curSec(); const was=prev; if(was&&was.tab===tab&&was.top>0&&was.sec===P.dataset.pgSec) queueMicrotask(()=>{ if(body.isConnected) body.scrollTop=was.top; }); /* after the page is finished: one layout, not two */
       if(nv) nv.addEventListener('click',()=>setTimeout(()=>{ const s=curSec(); if(s!==P.dataset.pgSec){ P.dataset.pgSec=s; body.scrollTop=0; } },0));
+      pageDoneRun();
     }catch(e){ console.error(e); } }; }
 
 /* test builds: window.__menuMap() lists what a player can reach: the sections and their pages, every page's name, and every page's tabs.
@@ -17804,7 +17873,7 @@ const MOB=(()=>{ let v=null; const upd=()=>{ const b=document.body&&document.bod
 
 // 1) a menu covers the whole phone screen, so the fishing scene behind it is not drawn (the aquarium tank, the page and its
 //    scrolling get the whole frame). The line waits while a menu is open, so nothing on the water is missed.
-{ const _dr=draw; draw=function(now){ if(MENU_OPEN&&MOB()){ if(!(typeof DK_SCENE_OK==='function'&&DK_SCENE_OK(now))) return; const f=resize.force; resize.force=true; try{ return _dr.apply(this,arguments); } finally{ resize.force=f; } } return _dr.apply(this,arguments); }; } /* Your home: past the shared "menus draw 4 a second" limit (bm_ui04), which made the live preview choppy */ /* round 8: Your home shows the live scene, so it keeps drawing (30 a second) while that page is open (dock08.js) */
+{ const _dr=draw; draw=function(now){ if(MENU_OPEN&&MOB()){ if(!(typeof DK_SCENE_OK==='function'&&DK_SCENE_OK(now))) return; const f=resize.force; resize.force=true; try{ return _dr.apply(this,arguments); } finally{ resize.force=f; } } return _dr.apply(this,arguments); }; } /* Your home: past the shared "menus draw 4 a second" limit (bm_ui04), which made the live preview choppy */ /* round 8: Your home shows the live scene, so it keeps drawing (30 a second) while that page is open (page_home.js) */
 
 // 2) the aquarium tank: a steady pace on phones (round 7 below), a steady half rate while the page scrolls
 { let lastT=0, scrollUntil=0; const P=$('panel'); if(P) P.addEventListener('scroll',()=>{ scrollUntil=performance.now()+180; },{passive:true});
@@ -17964,74 +18033,6 @@ document.head.insertAdjacentHTML('beforeend',`<style>
 // font down a little until they fit, instead of being cut with "…" ----------
 { const fit=()=>{ const b=document.getElementById('locname'); if(!b||!MOB()) return; b.style.removeProperty('font-size'); let fs=parseFloat(getComputedStyle(b).fontSize)||12.5, n=0; while(b.scrollWidth>b.clientWidth+1&&fs>9.5&&n++<8){ fs-=.5; b.style.setProperty('font-size',fs+'px','important'); } }; /* the phone style sets the size with !important */
   const b0=document.getElementById('locname'); if(b0) new MutationObserver(fit).observe(b0,{childList:true,characterData:true,subtree:true}); addEventListener('resize',()=>setTimeout(fit,60)); setTimeout(fit,300); setTimeout(fit,1500); }
-// =====================================================================
-// Phones, round 6 critique: "Your home" on phones too (round 5 built it for PC only). Every water has a home (dock, pier,
-// boat, trawler, raft, ice camp, beach, stone ledge, crystal shelf); the page offers only what works there: wood where the
-// home has wood, the dock's style only at a dock, hull paint on boats, and the home's own light everywhere.
-// Shared data and drawing: bu_home05.js. This file is only the phone layout.
-// =====================================================================
-{ const L=()=>LOCS.find(x=>x.id===S.loc)||LOCS[0];
-  let lbl=null; const sync=()=>{ try{ const b=menuTabBtn('home'); if(!b) return; if(lbl==null) lbl=b.dataset.label; const want=MOB()?'🏠 Your home':lbl; if(b.dataset.label!==want){ b.dataset.label=want; menuSubKey=''; if(MENU_OPEN) menuSync(); } }catch(e){} };
-  new MutationObserver(sync).observe(document.body,{attributes:true,attributeFilter:['class']}); setTimeout(sync,0); setTimeout(sync,900);
-  const _rp=renderPanel; renderPanel=function(){ const r=_rp.apply(this,arguments); try{ if(S.tab!=='home'||!MOB()) return r; const P=$('panel'); if(P.querySelector('.hm-phone')||P.querySelector(':scope > .hf-mark')) return r; /* format homes have their own elements */
-      const loc=L(), feats=HOME_FEATURES[loc.plat]||['light'], hname=HOME_NAMES[loc.plat]||'home', h5=[...P.querySelectorAll(':scope > h5')];
-      const wood=h5.find(h=>/^Wood/i.test(h.textContent)), style=h5.find(h=>/style/i.test(h.textContent)), deco=h5.find(h=>/^Decorations/i.test(h.textContent));
-      const hide=h=>{ if(!h) return; h.style.display='none'; const n=h.nextElementSibling; if(n&&n.classList.contains('chips')) n.style.display='none'; };
-      if(!feats.includes('wood')) hide(wood); if(!feats.includes('style')) hide(style);
-      let html='<div class="hm-phone">';
-      if(feats.includes('hull')){ const cur=(S.dock&&S.dock.hull)||''; html+=`<h5>${esc(homePaintName(loc.plat))}</h5><div class="chips">${HOME_HULLS.map(([id,n,c])=>`<button type="button" class="chipb" data-home="hull:${id}" aria-pressed="${cur===id}"><span class="hm-sw" style="background:${c||'linear-gradient(135deg,#f2eee2,#9a2e24)'}"></span>${esc(n)}</button>`).join('')}</div>`; }
-      { const cur=(S.dock&&S.dock.light)||''; html+=`<h5>Light</h5><div class="chips">${HOME_LIGHTS.map(([id,n,rgb])=>`<button type="button" class="chipb" data-home="light:${id}" aria-pressed="${cur===id}"><span class="hm-sw hm-glow" style="background:${rgb?'radial-gradient(circle,rgb('+rgb+') 0%,rgba('+rgb+',.35) 55%,transparent 72%)':'radial-gradient(circle,#ffd690 0%,#ffb85a55 55%,transparent 72%)'}"></span>${esc(n)}</button>`).join('')}</div>`; }
-      html+=`<p class="hm-note">${feats.includes('style')?'The wood colors your dock; the style shapes it. ':feats.includes('wood')?'The wood colors the wooden parts of your '+esc(hname)+'. ':''}${feats.includes('hull')?esc(homePaintLine(loc.plat,hname)):''}The light recolors the ${loc.plat==='crystal'?'glow':loc.plat==='sand'?'torch':'lamp'} of your ${esc(hname)}. Free to change.</p></div>`;
-      if(deco) deco.insertAdjacentHTML('beforebegin',html); else P.insertAdjacentHTML('beforeend',html);
-      // the page switches between "Your home" and "Decorations": our block follows the home part, the sort row follows the decorations
-      const hm=P.querySelector('.hm-phone'), tools=P.querySelector(':scope > .shoptools'), grid=P.querySelector(':scope > .grid'), dockbar=P.querySelector(':scope > .dockbar');
-      const follow=()=>{ const homeOn=dockbar?dockbar.style.display!=='none':true; hm.style.display=homeOn?'':'none'; if(tools&&grid) tools.style.display=grid.style.display==='none'?'none':''; };
-      follow(); const nv=P.querySelector(':scope > .bwx-nav'); if(nv) nv.addEventListener('click',()=>setTimeout(follow,0));
-      // words: "home" instead of "dock" where the page talks about every water
-      const intro=P.querySelector('.dl-head'); if(intro){ for(const n of intro.querySelectorAll('*')) if(n.children.length===0&&/Every water has its own dock/.test(n.textContent)) n.textContent='Every water has its own home: here it is your '+hname+'. Pick its look and its decorations: the cozier it gets, the better you fish here.'; }
-      const nav=P.querySelector(':scope > .bwx-nav'); if(nav&&nav.firstElementChild&&/^Dock$/.test(nav.firstElementChild.textContent.trim())) nav.firstElementChild.textContent='Your '+hname;
-    }catch(e){ console.error(e); } return r; };
-  document.addEventListener('click',e=>{ const b=e.target.closest&&e.target.closest('#panel [data-home]'); if(!b||!MOB()) return; e.stopPropagation(); const [k,id]=b.dataset.home.split(':');
-    if(k==='light'&&homeLightOk(id)) S.dock.light=id; else if(k==='hull'&&homeHullOk(id)) S.dock.hull=id; else return;
-    try{ sfx.coin(); }catch(er){} save(); renderPanel(); },true); }
-document.head.insertAdjacentHTML('beforeend',`<style>
-body.phone-app #panel .hm-phone h5,body.phone-land #panel .hm-phone h5{margin:14px 0 6px}
-body.phone-app #panel .hm-sw,body.phone-land #panel .hm-sw{display:inline-block;width:12px;height:12px;border-radius:4px;margin-right:6px;vertical-align:-2px;box-shadow:inset 0 0 0 1px #ffffff33}
-body.phone-app #panel .hm-glow,body.phone-land #panel .hm-glow{border-radius:50%;width:14px;height:14px;box-shadow:none}
-body.phone-app #panel .hm-note,body.phone-land #panel .hm-note{margin:8px 2px 4px;font-size:12.5px;color:#9fb2c8;line-height:1.45}
-</style>`);
-// =====================================================================
-// Phones, round 6: the page combinations PC got in 0.4.8, adapted for phones (director: "PC had some UI combinations that clean up
-// empty space and make things functional together instead of separate, ie aquarium. Was everything run through mobile?").
-//  - Aquarium: one compact header card: a one-line note, the boosts and the earnings with Collect / Feed together, and the long
-//    explanation behind a "How the aquarium works" line you can open
-//  - Cooler: a "Keep, To aquarium, Sell: what they do" line under Sell all that opens a short guide (PC shows it always;
-//    phones keep it folded to save room)
-// =====================================================================
-{ const _rp=renderPanel; renderPanel=function(){ const r=_rp.apply(this,arguments); try{ if(!MOB()) return r; const P=$('panel');
-    if(S.tab==='aquarium'&&!P.querySelector('.mb-aqh')){ const hd=P.querySelector(':scope > .dl-head'), badges=P.querySelector(':scope > .badges');
-      if(hd){ hd.classList.add('mb-aqh'); const sub=hd.querySelector('p.sub'); if(sub){ const full=sub.textContent; sub.textContent='Visitors pay to see your fish, even while you are away. Every fish on display adds its boost.'; sub.insertAdjacentHTML('afterend',`<details class="mb-more"><summary>How the aquarium works</summary><p>${esc(full)}</p><p>Increase your tank size for more fish, more buffs, and more income!</p></details>`); }
-        if(badges){ badges.removeAttribute('style'); badges.classList.add('mb-aqb'); hd.appendChild(badges); } } }
-    if(S.tab==='cooler'&&!P.querySelector('.mb-help')){ const sell=[...P.querySelectorAll('button')].find(b=>/^Sell all/.test(b.textContent.trim()));
-      if(sell){ (sell.closest('.row')||sell).insertAdjacentHTML('afterend',`<details class="mb-help mb-more"><summary>Keep, To aquarium, Sell: what they do</summary><div><p><b>🏛️ Keep</b> mounts the fish in the Trophy Room for good. No income, but it is never lost on a new voyage.</p><p><b>🐠 To aquarium</b> puts it on display: it earns coins every hour, even while you are away, and gives its boost.</p><p><b>🪙 Sell</b> gives coins right now. Sell all sells everything that matches the choices above.</p></div></details>`); } }
-  }catch(e){ console.error(e); } return r; }; }
-document.head.insertAdjacentHTML('beforeend',`<style>
-body.phone-app #panel .mb-aqh,body.phone-land #panel .mb-aqh{display:flex!important;flex-direction:column;align-items:stretch!important;justify-content:flex-start!important;height:auto!important;min-height:0!important;gap:10px;padding:12px 14px;border-radius:16px;background:linear-gradient(180deg,#132238,#0e1a2c);border:1px solid #ffffff14;margin-bottom:10px}
-body.phone-app #panel .mb-aqh p.sub,body.phone-land #panel .mb-aqh p.sub{margin:0;font-size:13px;line-height:1.4;color:#b9cadb}
-body.phone-app #panel .mb-aqh .bank,body.phone-land #panel .mb-aqh .bank{margin:0!important;width:100%;box-sizing:border-box}
-body.phone-app #panel .mb-aqb,body.phone-land #panel .mb-aqb{margin:0!important;display:flex;flex-wrap:wrap;gap:6px}
-body.phone-app #panel .mb-more,body.phone-land #panel .mb-more{border-radius:12px;background:#0a1424;border:1px solid #ffffff12;padding:0}
-body.phone-app #panel .mb-more > summary,body.phone-land #panel .mb-more > summary{list-style:none;cursor:pointer;padding:9px 12px;font:700 13px var(--display,system-ui);color:#7fe3c4;display:flex;align-items:center;gap:8px}
-body.phone-app #panel .mb-more > summary::-webkit-details-marker,body.phone-land #panel .mb-more > summary::-webkit-details-marker{display:none}
-body.phone-app #panel .mb-more > summary::before,body.phone-land #panel .mb-more > summary::before{content:'›';display:inline-block;transition:transform .15s;font-size:16px;line-height:1}
-body.phone-app #panel .mb-more[open] > summary::before,body.phone-land #panel .mb-more[open] > summary::before{transform:rotate(90deg)}
-body.phone-app #panel .mb-more p,body.phone-land #panel .mb-more p{margin:0 12px 10px;font-size:12.5px;line-height:1.45;color:#a9bccf}
-body.phone-app #panel .mb-help,body.phone-land #panel .mb-help{margin:8px 0 10px}
-body.phone-app #panel .mb-help b,body.phone-land #panel .mb-help b{color:#fff}
-</style>`);
-document.head.insertAdjacentHTML('beforeend',`<style>
-body.phone-app #panel .mb-aqh > *,body.phone-land #panel .mb-aqh > *{flex:0 0 auto!important;height:auto!important;min-height:0!important}
-</style>`);
 // =====================================================================
 // Phones, round 7: ONE theme everywhere (director, 2026-11-18: "looking at the UI as a whole it doesn't seem to have a consistent
 // theme on mobile"; picked direction "calm navy", mockup canvas row 2, Theme 1). Android + iPhone, upright and sideways.
@@ -18295,8 +18296,15 @@ document.head.insertAdjacentHTML('beforeend',`<style>
     if(!rows.length) return `<div class="empty">Your Cooler is empty. Fish you catch can go on display from here.</div>`;
     return (full?`<p class="aq07-note">The tank is full (${S.tank.length} of ${aqCap()}). Make room or buy a bigger tank to add more.</p>`:'')+`<div class="list aq07-addlist">`+rows.map(({f,i})=>{ const sp=SPI[f.id];
       return `<div class="fishrow"><canvas width="128" height="64" data-fish="${f.id}" data-sh="${f.sh||0}" data-pv="${f.pv||''}"></canvas><div class="nm"><span style="color:${RAR[sp.r].c}">${esc(sp.name)}</span><small>${RAR[sp.r].k} · ${kgStr(f.kg)} · ${fmt(fishRate(f)*60)} / hour · ${esc(aqTxt(f))}</small></div><div class="acts"><button class="btn sm" data-act="totank" data-i="${i}" ${full?'disabled':''}>To aquarium</button></div></div>`; }).join('')+`</div>`; };
-  const _rp=renderPanel; renderPanel=function(){ const r=_rp.apply(this,arguments); try{ const P=$('panel'); const on=MOB()&&S.tab==='aquarium'; P.classList.toggle('aq07',on); if(!on) return r;
-      const tank=P.querySelector(':scope > .tank'), nav=P.querySelector(':scope > .sect-nav'), bank=P.querySelector('.bank'); if(!tank||!nav) return r;
+  /* Clean Pages (2026-11-21): every phone layer of the Aquarium page lives in this file and runs as one step (the one renderPanel
+     wrapper at the bottom of this block), in the order the old separate layers ran: the header card (was pages06.js), the layout,
+     Decorate, the live tank canvas carried over, then the Tank cell and the tank size line (was polish08.js). */
+  // the header card: a one-line note, the boosts and the earnings together, the long explanation behind "How the aquarium works"
+  const aqHeader=P=>{ if(P.querySelector('.mb-aqh')) return; const hd=P.querySelector(':scope > .dl-head'), badges=P.querySelector(':scope > .badges');
+      if(hd){ hd.classList.add('mb-aqh'); const sub=hd.querySelector('p.sub'); if(sub){ const full=sub.textContent; sub.textContent='Visitors pay to see your fish, even while you are away. Every fish on display adds its boost.'; sub.insertAdjacentHTML('afterend',`<details class="mb-more"><summary>How the aquarium works</summary><p>${esc(full)}</p><p>Increase your tank size for more fish, more buffs, and more income!</p></details>`); }
+        if(badges){ badges.removeAttribute('style'); badges.classList.add('mb-aqb'); hd.appendChild(badges); } } };
+  const aqLayout=P=>{
+      const tank=P.querySelector(':scope > .tank'), nav=P.querySelector(':scope > .sect-nav'), bank=P.querySelector('.bank'); if(!tank||!nav) return;
       const land=document.body.classList.contains('phone-land'); P.dataset.aqLand=land?'1':'0'; P.classList.toggle('aq07-open',AQ_OPEN);
       const kids=[...P.children].filter(c=>!c.classList.contains('crumb')&&c!==tank&&c!==nav);
       const deco=kids.find(c=>c.classList.contains('jsec')), head=kids.find(c=>c.classList.contains('dl-head')||c.classList.contains('mb-aqh'));
@@ -18325,16 +18333,11 @@ document.head.insertAdjacentHTML('beforeend',`<style>
       // the tabs: two now (Add fish lives inside Your tank)
       const showSec=()=>{ const sel=nav.querySelector('[data-sect][aria-selected="true"]'); const isD=!!sel&&sel.dataset.sect==='Decorate'; secT.classList.toggle('aq07-off',isD); secD.classList.toggle('aq07-off',!isD); };
       nav.querySelectorAll('[data-sect]').forEach(b=>b.addEventListener('click',()=>setTimeout(()=>{ showSec(); body.scrollTop=0; },0)));
-      showSec(); paintFish(add);
-    }catch(e){ console.error(e); } return r; };
-  /* turning the phone while the aquarium is open rebuilds it for the new layout (checked after the resize settles) */
-  let rt=0; addEventListener('resize',()=>{ clearTimeout(rt); rt=setTimeout(()=>{ try{ const P=$('panel'); if(!MOB()||S.tab!=='aquarium'||!P.classList.contains('aq07')) return; const l=document.body.classList.contains('phone-land')?'1':'0'; if(P.dataset.aqLand!==l) renderPanel(); }catch(e){} },160); }); }
-
-// ---------- Decorate on phones: tap to try, the try-on bar in the strip, a tried decoration in the most open spot, small cards ----------
-{ const bestGap=()=>{ const placed=S.aq.decor.filter(id=>!(AQ_PV&&AQ_PV.id===id)); const ps=aqPositions(placed); const xs=Object.values(ps).sort((a,b)=>a-b); const pts=[.03,...xs,.97]; let best=.5, gap=-1; for(let i=0;i<pts.length-1;i++){ const g=pts[i+1]-pts[i]; if(g>gap){ gap=g; best=(pts[i]+pts[i+1])/2; } } return Math.min(.95,Math.max(.05,best)); };
-  const _rp=renderPanel; renderPanel=function(){
-    try{ if(MOB()&&S.tab==='aquarium'&&AQ_PV&&AQ_PV.kind==='decor'&&!S.aq.owned.includes(AQ_PV.id)){ S.aq.pos=S.aq.pos||{}; if(S.aq.pos[AQ_PV.id]==null){ const now=aqPositions(S.aq.decor); S.aq.decor.forEach(id=>{ if(S.aq.pos[id]==null) S.aq.pos[id]=now[id]; }); S.aq.pos[AQ_PV.id]=bestGap(); } /* placed decorations keep their spots while one is tried */ } }catch(e){}
-    const r=_rp.apply(this,arguments); try{ const P=$('panel'); if(!MOB()||S.tab!=='aquarium'||!P.classList.contains('aq07')) return r;
+      showSec(); paintFish(add); };
+  // ---------- Decorate on phones: tap to try, the try-on bar in the strip, a tried decoration in the most open spot, small cards ----------
+  const bestGap=()=>{ const placed=S.aq.decor.filter(id=>!(AQ_PV&&AQ_PV.id===id)); const ps=aqPositions(placed); const xs=Object.values(ps).sort((a,b)=>a-b); const pts=[.03,...xs,.97]; let best=.5, gap=-1; for(let i=0;i<pts.length-1;i++){ const g=pts[i+1]-pts[i]; if(g>gap){ gap=g; best=(pts[i]+pts[i+1])/2; } } return Math.min(.95,Math.max(.05,best)); };
+  const aqTryPlace=()=>{ if(AQ_PV&&AQ_PV.kind==='decor'&&!S.aq.owned.includes(AQ_PV.id)){ S.aq.pos=S.aq.pos||{}; if(S.aq.pos[AQ_PV.id]==null){ const now=aqPositions(S.aq.decor); S.aq.decor.forEach(id=>{ if(S.aq.pos[id]==null) S.aq.pos[id]=now[id]; }); S.aq.pos[AQ_PV.id]=bestGap(); } /* placed decorations keep their spots while one is tried */ } };
+  const aqDecorate=P=>{ if(!P.classList.contains('aq07')) return;
       const cv=$('tankcv'); if(cv) cv.scrollIntoView=function(){}; /* the tank is always on screen here: no jump */
       const bar=P.querySelector('.aq07-bar'), pv=P.querySelector('.pvbar:not(.pvhint)');
       if(bar&&pv){ pv.classList.add('aq07-try'); const nm=pv.querySelector('b'), lbl=pv.querySelector('span'); if(lbl&&nm) lbl.innerHTML='Trying: <b>'+nm.innerHTML+'</b>'; bar.prepend(pv); bar.classList.add('aq07-trying-on'); }
@@ -18344,12 +18347,31 @@ document.head.insertAdjacentHTML('beforeend',`<style>
           t.classList.toggle('aq07-trying',!!trying); t.classList.toggle('aq07-placed',placed);
           const st=document.createElement('span'); st.className='aq07-st'; st.innerHTML= own?(placed?((S.aq.hid||[]).includes(id)?'Hidden · bonus still counts · tap to remove':'In your tank · tap to remove'):'Owned · tap to place'):(d&&d.price?(trying?'Trying · buy below the tank':'<span class="coin">'+fmt(d.price)+'</span> · tap to try'):'Crates and prizes only'); t.appendChild(st);
           t.querySelectorAll(':scope > .row, :scope > .btn').forEach(x=>x.classList.add('aq07-hide'));
-          if(own&&useB||(!own&&pvB)){ t.setAttribute('role','button'); t.tabIndex=0; t.addEventListener('click',e=>{ if(e.target.closest('button')) return; if(own) useB.click(); else if(!trying) pvB.click(); }); } }); }
-    }catch(e){ console.error(e); } return r; }; }
-
-// ---------- the tank keeps running through every re-render (the live canvas is carried into the new page) ----------
-{ const _rp=renderPanel; renderPanel=function(){ const keep=(MOB()&&S.tab==='aquarium')?$('tankcv'):null; const r=_rp.apply(this,arguments);
-    try{ if(keep){ const fresh=$('tankcv'); if(fresh&&fresh!==keep){ fresh.replaceWith(keep); keep.scrollIntoView=function(){}; } } }catch(e){} return r; }; }
+          if(own&&useB||(!own&&pvB)){ t.setAttribute('role','button'); t.tabIndex=0; t.addEventListener('click',e=>{ if(e.target.closest('button')) return; if(own) useB.click(); else if(!trying) pvB.click(); }); } }); } };
+  // the tank size (director, 2026-11-18: "Tank doesn't show tank size, upgrade lacks proper description"): a Tank cell in the strip,
+  // "holds N fish" on Your tank's heading, and the upgrade says what you get and what it costs
+  const aqTankSize=P=>{ if(!P.classList.contains('aq07')) return;
+    const cap=aqCap(), n=S.tank.length, bank=P.querySelector('.aq07-bank');
+    if(bank&&!bank.querySelector('.mb-tankcell')){ const cells=[...bank.children].filter(c=>c.tagName==='DIV'); const last=cells[cells.length-1];
+      const cell=document.createElement('div'); cell.className='mb-tankcell'; cell.title='Fish on display / how many your tank holds';
+      cell.innerHTML=`<div class="sub">Tank</div><b>${n} / ${cap}</b>`; if(last) last.after(cell); else bank.prepend(cell); }
+    const hr=P.querySelector('.aq07-sec-tank > .aq07-h'); if(hr&&!hr.querySelector('.mb-tankcap')){ const h2=hr.querySelector('h2'); if(h2) h2.insertAdjacentHTML('beforeend',` <span class="mb-tankcap">· holds ${cap} fish</span>`);
+      const buy=hr.querySelector('[data-act="buytank"]'); const cost=TANK_COST[S.tankSlots];
+      if(buy&&cost!=null){ S.tankSlots++; const nx=aqCap(); S.tankSlots--;
+        buy.innerHTML=`Expand Tank · <span class="coin">${fmt(cost)}</span>`; /* C17 (director + Cam, 2026-11-20) */ buy.title='A bigger tank: '+cap+' → '+nx+' fish';
+        hr.insertAdjacentHTML('afterend',`<p class="meta mb-tankwhy">Next expansion: ${nx} fish${S.money<cost?` · you need <span class="coin">${fmt(cost-S.money)}</span> more`:''}</p>`); }
+      else if(cost==null) hr.insertAdjacentHTML('afterend',`<p class="meta mb-tankwhy">Your tank is as big as it gets: ${cap} fish.</p>`); } };
+  // the one step: the tank's live canvas is carried through every re-render, so it never blinks or restarts
+  const _rp=renderPanel; renderPanel=function(){ const aq=MOB()&&S.tab==='aquarium', keep=aq?$('tankcv'):null;
+    if(aq) try{ aqTryPlace(); }catch(e){}
+    const r=_rp.apply(this,arguments); const P=$('panel'); if(!P) return r;
+    try{ P.classList.toggle('aq07',aq); }catch(e){}
+    if(aq){ for(const step of [aqHeader,aqLayout,aqDecorate]) try{ step(P); }catch(e){ console.error(e); }
+      try{ if(keep){ const fresh=$('tankcv'); if(fresh&&fresh!==keep){ fresh.replaceWith(keep); keep.scrollIntoView=function(){}; } } }catch(e){}
+      try{ aqTankSize(P); }catch(e){ console.error(e); } }
+    return r; };
+  /* turning the phone while the aquarium is open rebuilds it for the new layout (checked after the resize settles) */
+  let rt=0; addEventListener('resize',()=>{ clearTimeout(rt); rt=setTimeout(()=>{ try{ const P=$('panel'); if(!MOB()||S.tab!=='aquarium'||!P.classList.contains('aq07')) return; const l=document.body.classList.contains('phone-land')?'1':'0'; if(P.dataset.aqLand!==l) renderPanel(); }catch(e){} },160); }); }
 
 document.head.insertAdjacentHTML('beforeend',`<style>
 /* ---- layout: the page itself does not scroll; the tank grows, the panel's body scrolls ---- */
@@ -18417,6 +18439,25 @@ html body.phone-app #menuov #panel.aq07 .aq07-trying .aq07-st,html body.phone-la
   html body.phone-land #menuov #panel.aq07 .aq07-bank{grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;row-gap:4px!important}
   html body.phone-land #menuov #panel.aq07 .aq07-bank .btn{width:100%;min-height:30px!important}
 }
+</style>`);
+document.head.insertAdjacentHTML('beforeend',`<style>
+/* ---- the header card and the tank size (moved here from pages06.js and polish08.js, Clean Pages 2026-11-21) ---- */
+body.phone-app #panel .mb-more,body.phone-land #panel .mb-more{border-radius:12px;background:#0a1424;border:1px solid #ffffff12;padding:0}
+body.phone-app #panel .mb-more > summary,body.phone-land #panel .mb-more > summary{list-style:none;cursor:pointer;padding:9px 12px;font:700 13px var(--display,system-ui);color:#7fe3c4;display:flex;align-items:center;gap:8px}
+body.phone-app #panel .mb-more > summary::-webkit-details-marker,body.phone-land #panel .mb-more > summary::-webkit-details-marker{display:none}
+body.phone-app #panel .mb-more > summary::before,body.phone-land #panel .mb-more > summary::before{content:'›';display:inline-block;transition:transform .15s;font-size:16px;line-height:1}
+body.phone-app #panel .mb-more[open] > summary::before,body.phone-land #panel .mb-more[open] > summary::before{transform:rotate(90deg)}
+body.phone-app #panel .mb-more p,body.phone-land #panel .mb-more p{margin:0 12px 10px;font-size:12.5px;line-height:1.45;color:#a9bccf}
+body.phone-app #panel .mb-aqh,body.phone-land #panel .mb-aqh{display:flex!important;flex-direction:column;align-items:stretch!important;justify-content:flex-start!important;height:auto!important;min-height:0!important;gap:10px;padding:12px 14px;border-radius:16px;background:linear-gradient(180deg,#132238,#0e1a2c);border:1px solid #ffffff14;margin-bottom:10px}
+body.phone-app #panel .mb-aqh p.sub,body.phone-land #panel .mb-aqh p.sub{margin:0;font-size:13px;line-height:1.4;color:#b9cadb}
+body.phone-app #panel .mb-aqh .bank,body.phone-land #panel .mb-aqh .bank{margin:0!important;width:100%;box-sizing:border-box}
+body.phone-app #panel .mb-aqb,body.phone-land #panel .mb-aqb{margin:0!important;display:flex;flex-wrap:wrap;gap:6px}
+body.phone-app #panel .mb-aqh > *,body.phone-land #panel .mb-aqh > *{flex:0 0 auto!important;height:auto!important;min-height:0!important}
+html body.phone-app #menuov #panel.aq07 .aq07-bank:has(.mb-tankcell),html body.phone-land #menuov #panel.aq07 .aq07-bank:has(.mb-tankcell){grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,.8fr) auto auto!important}
+html body.phone-app #menuov #panel.aq07 .aq07-bank .mb-tankcell b,html body.phone-land #menuov #panel.aq07 .aq07-bank .mb-tankcell b{font:800 14px var(--display)!important;color:var(--ink)}
+@media (orientation:landscape) and (max-height:560px) and (max-width:760px){ html body.phone-land #menuov #panel.aq07 .aq07-bank:has(.mb-tankcell){grid-template-columns:repeat(6,minmax(0,1fr))!important} html body.phone-land #menuov #panel.aq07 .aq07-bank:has(.mb-tankcell) > div{grid-column:span 2} html body.phone-land #menuov #panel.aq07 .aq07-bank:has(.mb-tankcell) > .btn{grid-column:span 3} }
+html body.phone-app #menuov #panel.aq07 .mb-tankcap,html body.phone-land #menuov #panel.aq07 .mb-tankcap{font:700 13px var(--display);color:#9fb3c8;white-space:nowrap}
+html body.phone-app #menuov #panel.aq07 .mb-tankwhy,html body.phone-land #menuov #panel.aq07 .mb-tankwhy{margin:2px 0 8px!important;font-size:12.5px!important;line-height:1.4;color:#b8c8d6}
 </style>`);
 // =====================================================================
 // Phones, round 7 performance (director, 2026-11-18, Pixel 10: "storms can still majorly drop frames on Android, even more so on
@@ -18699,10 +18740,10 @@ if(window.DL_PREVIEW){
 // the tab used to hold every update's full text in one block (~1,850 px inside the scrolling menu). Now it is a short list, newest
 // first; tapping one opens the same card as the first opening (finger scrolling, button always on screen).
 { const list=()=>(S.owned.pets.includes('lily')?[LILY_PATCH]:[]).concat(S.owned.pets.includes('daxniko')?[PAIR_PATCH]:[]).concat(PATCHES);
-  const _rp=renderPanel; renderPanel=function(){ const r=_rp.apply(this,arguments); try{ if(!MOB()||S.tab!=='settings') return r;
-      const t=[...document.querySelectorAll('#panel .tile')].find(x=>{ const h=x.querySelector(':scope > h4'); return h&&h.textContent.trim()==='Patch notes'; }); if(!t||t.classList.contains('pn9')) return r;
+  pageDone('settings',()=>{ /* a finishing touch of the Settings page (Clean Pages 2026-11-21: was its own renderPanel wrapper) */
+      const t=[...document.querySelectorAll('#panel .tile')].find(x=>{ const h=x.querySelector(':scope > h4'); return h&&h.textContent.trim()==='Patch notes'; }); if(!t||t.classList.contains('pn9')) return;
       t.classList.add('pn9'); t.innerHTML=`<h4>Patch notes</h4><div class="meta">You’re on Driftline ${esc(GAME_VERSION)}. Tap an update to read it.</div><div class="pn9-list">${list().map((p,i)=>`<button type="button" class="pn9-row${i>=10?" pn9-old":""}" data-pn9="${i}"><span class="pn9-v">${p.label?esc(p.label):'Update '+esc(p.v)}</span><b>${esc(p.name)}</b></button>`).join('')}</div>${list().length>10?`<button type="button" class="btn alt sm pn9-more">Show ${list().length-10} older updates</button>`:''}`;
-    }catch(e){} return r; };
+    });
   document.addEventListener('click',e=>{ const m=e.target.closest&&e.target.closest('.pn9-more'); if(m&&MOB()){ e.stopPropagation(); const t=m.closest('.pn9'); t.classList.add('pn9-all'); m.remove(); return; } const b=e.target.closest&&e.target.closest('[data-pn9]'); if(!b||!MOB()) return; e.stopPropagation(); const p=list()[+b.dataset.pn9]; if(!p) return; try{ closeMenu(); }catch(er){} showPatchNotes(p); },true);
   document.head.insertAdjacentHTML('beforeend',`<style>
 body.phone-app #panel .pn9-list,body.phone-land #panel .pn9-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:6px;margin:8px 0}
@@ -18812,8 +18853,44 @@ html.dl-tablet body.phone-land #menuov .mo-in{padding-top:max(6px,env(safe-area-
 //  - Decorations: small cards like Decorate. Tap a card to try it (owned cards place / remove); while trying, the Buy / Stop bar
 //    takes the strip's place, exactly like the aquarium.
 //  - The view's canvas is carried through every re-render (no blink) and keeps the dock's zoom whatever the shape of the screen.
-// Android + iPhone (and tablets, which use the phone layouts).
+// Android + iPhone (and tablets, which use the phone layouts). Every phone layer of the Home page is in this file (Clean Pages 2026-11-21).
 // =====================================================================
+let homeClassic=null, homeFitWatch=null; /* set below: the classic homes' look choices, the canvas size watcher */
+// ---------- the classic homes (was home06.js; Clean Pages 2026-11-21) ----------
+// Phones, round 6 critique: "Your home" on phones too (round 5 built it for PC only). Every water has a home (dock, pier,
+// boat, trawler, raft, ice camp, beach, stone ledge, crystal shelf); the page offers only what works there: wood where the
+// home has wood, the dock's style only at a dock, hull paint on boats, and the home's own light everywhere.
+// Shared data and drawing: bu_home05.js.
+{ const L=()=>LOCS.find(x=>x.id===S.loc)||LOCS[0];
+  let lbl=null; const sync=()=>{ try{ const b=menuTabBtn('home'); if(!b) return; if(lbl==null) lbl=b.dataset.label; const want=MOB()?'🏠 Your home':lbl; if(b.dataset.label!==want){ b.dataset.label=want; menuSubKey=''; if(MENU_OPEN) menuSync(); } }catch(e){} };
+  new MutationObserver(sync).observe(document.body,{attributes:true,attributeFilter:['class']}); setTimeout(sync,0); setTimeout(sync,900);
+  /* the classic homes' look choices (wood, style, hull paint, light); run first in the Home page's one step below */
+  homeClassic=P=>{ if(P.querySelector('.hm-phone')||P.querySelector(':scope > .hf-mark')) return; /* format homes have their own elements */
+      const loc=L(), feats=HOME_FEATURES[loc.plat]||['light'], hname=HOME_NAMES[loc.plat]||'home', h5=[...P.querySelectorAll(':scope > h5')];
+      const wood=h5.find(h=>/^Wood/i.test(h.textContent)), style=h5.find(h=>/style/i.test(h.textContent)), deco=h5.find(h=>/^Decorations/i.test(h.textContent));
+      const hide=h=>{ if(!h) return; h.style.display='none'; const n=h.nextElementSibling; if(n&&n.classList.contains('chips')) n.style.display='none'; };
+      if(!feats.includes('wood')) hide(wood); if(!feats.includes('style')) hide(style);
+      let html='<div class="hm-phone">';
+      if(feats.includes('hull')){ const cur=(S.dock&&S.dock.hull)||''; html+=`<h5>${esc(homePaintName(loc.plat))}</h5><div class="chips">${HOME_HULLS.map(([id,n,c])=>`<button type="button" class="chipb" data-home="hull:${id}" aria-pressed="${cur===id}"><span class="hm-sw" style="background:${c||'linear-gradient(135deg,#f2eee2,#9a2e24)'}"></span>${esc(n)}</button>`).join('')}</div>`; }
+      { const cur=(S.dock&&S.dock.light)||''; html+=`<h5>Light</h5><div class="chips">${HOME_LIGHTS.map(([id,n,rgb])=>`<button type="button" class="chipb" data-home="light:${id}" aria-pressed="${cur===id}"><span class="hm-sw hm-glow" style="background:${rgb?'radial-gradient(circle,rgb('+rgb+') 0%,rgba('+rgb+',.35) 55%,transparent 72%)':'radial-gradient(circle,#ffd690 0%,#ffb85a55 55%,transparent 72%)'}"></span>${esc(n)}</button>`).join('')}</div>`; }
+      html+=`<p class="hm-note">${feats.includes('style')?'The wood colors your dock; the style shapes it. ':feats.includes('wood')?'The wood colors the wooden parts of your '+esc(hname)+'. ':''}${feats.includes('hull')?esc(homePaintLine(loc.plat,hname)):''}The light recolors the ${loc.plat==='crystal'?'glow':loc.plat==='sand'?'torch':'lamp'} of your ${esc(hname)}. Free to change.</p></div>`;
+      if(deco) deco.insertAdjacentHTML('beforebegin',html); else P.insertAdjacentHTML('beforeend',html);
+      // the page switches between "Your home" and "Decorations": our block follows the home part, the sort row follows the decorations
+      const hm=P.querySelector('.hm-phone'), tools=P.querySelector(':scope > .shoptools'), grid=P.querySelector(':scope > .grid'), dockbar=P.querySelector(':scope > .dockbar');
+      const follow=()=>{ const homeOn=dockbar?dockbar.style.display!=='none':true; hm.style.display=homeOn?'':'none'; if(tools&&grid) tools.style.display=grid.style.display==='none'?'none':''; };
+      follow(); const nv=P.querySelector(':scope > .bwx-nav'); if(nv) nv.addEventListener('click',()=>setTimeout(follow,0));
+      // words: "home" instead of "dock" where the page talks about every water
+      const intro=P.querySelector('.dl-head'); if(intro){ for(const n of intro.querySelectorAll('*')) if(n.children.length===0&&/Every water has its own dock/.test(n.textContent)) n.textContent='Every water has its own home: here it is your '+hname+'. Pick its look and its decorations: the cozier it gets, the better you fish here.'; }
+      const nav=P.querySelector(':scope > .bwx-nav'); if(nav&&nav.firstElementChild&&/^Dock$/.test(nav.firstElementChild.textContent.trim())) nav.firstElementChild.textContent='Your '+hname; };
+  document.addEventListener('click',e=>{ const b=e.target.closest&&e.target.closest('#panel [data-home]'); if(!b||!MOB()) return; e.stopPropagation(); const [k,id]=b.dataset.home.split(':');
+    if(k==='light'&&homeLightOk(id)) S.dock.light=id; else if(k==='hull'&&homeHullOk(id)) S.dock.hull=id; else return;
+    try{ sfx.coin(); }catch(er){} save(); renderPanel(); },true); }
+document.head.insertAdjacentHTML('beforeend',`<style>
+body.phone-app #panel .hm-phone h5,body.phone-land #panel .hm-phone h5{margin:14px 0 6px}
+body.phone-app #panel .hm-sw,body.phone-land #panel .hm-sw{display:inline-block;width:12px;height:12px;border-radius:4px;margin-right:6px;vertical-align:-2px;box-shadow:inset 0 0 0 1px #ffffff33}
+body.phone-app #panel .hm-glow,body.phone-land #panel .hm-glow{border-radius:50%;width:14px;height:14px;box-shadow:none}
+body.phone-app #panel .hm-note,body.phone-land #panel .hm-note{margin:8px 2px 4px;font-size:12.5px;color:#9fb2c8;line-height:1.45}
+</style>`);
 { let DK_OPEN=true; try{ DK_OPEN=localStorage.getItem('dl-dk-open')!=='0'; }catch(e){}
   const saveOpen=()=>{ try{ localStorage.setItem('dl-dk-open',DK_OPEN?'1':'0'); }catch(e){} };
   const h=(tag,cls,html)=>{ const e=document.createElement(tag); if(cls) e.className=cls; if(html!=null) e.innerHTML=html; return e; };
@@ -18824,8 +18901,8 @@ html.dl-tablet body.phone-land #menuov .mo-in{padding-top:max(6px,env(safe-area-
     tog.addEventListener('click',e=>{ e.preventDefault(); e.stopPropagation(); DK_OPEN=!DK_OPEN; saveOpen(); P.classList.toggle("aq07-open",DK_OPEN); paintTog(); fit($("homecv")); }); };
   let RO=null; const fit=c=>{ const v=c&&c.parentElement; if(!v) return; if(typeof cv!=='undefined'&&cv&&cv.width>40&&W>40){ try{ paintHome(); }catch(e){} return; } /* live scene view: paintHome sizes the canvas itself */ const r=v.getBoundingClientRect(); if(r.width<40||r.height<40) return; const H2=Math.max(200,Math.min(1600,Math.round(900*r.height/r.width)));
     if(c.width!==900||c.height!==H2){ c.width=900; c.height=H2; try{ paintHome(); }catch(e){} } };
-  const _rp=renderPanel; renderPanel=function(){ const r=_rp.apply(this,arguments); try{ const P=$('panel'); const on=MOB()&&S.tab==='home'; if(!on){ P.classList.remove('dk08'); return r; }
-      const cv=P.querySelector('#homecv'), tile=cv&&cv.closest('.tile'), nav=P.querySelector(':scope > .sect-nav'); if(!tile||!nav) return r;
+  const homeLayout=P=>{
+      const cv=P.querySelector('#homecv'), tile=cv&&cv.closest('.tile'), nav=P.querySelector(':scope > .sect-nav'); if(!tile||!nav) return;
       /* a home in the home format (docs/HOME_STANDARD.md): the close-up of the home, a strip, and its 5 elements as the tabs */
       if(P.querySelector(':scope > .hf-mark')){ const sp=hfSpec(S.loc), land=document.body.classList.contains('phone-land'); P.dataset.dkLand=land?'1':'0';
         P.classList.add('aq07','dk08'); P.classList.toggle('aq07-open',DK_OPEN);
@@ -18838,7 +18915,7 @@ html.dl-tablet body.phone-land #menuov .mo-in{padding-top:max(6px,env(safe-area-
         [...P.children].forEach(ch=>{ if(ch!==stage&&ch!==bar&&ch!==sheet&&!ch.classList.contains('crumb')&&!ch.classList.contains('hf-mark')) ch.remove(); });
         nav.addEventListener('click',()=>{ body.scrollTop=0; });
         if(!RO&&window.ResizeObserver) RO=new ResizeObserver(()=>{ const k=$('homecv'); if(k&&MOB()&&S.tab==='home') fit(k); });
-        if(RO){ RO.disconnect(); RO.observe(tile); } fit(cv); return r; }
+        if(RO){ RO.disconnect(); RO.observe(tile); } fit(cv); return; }
       const loc=LOCS[locIdx(S.loc)]||LOCS[0], feats=HOME_FEATURES[loc.plat]||['light'], hname=HOME_NAMES[loc.plat]||'home', Hn=hname.charAt(0).toUpperCase()+hname.slice(1);
       const land=document.body.classList.contains('phone-land'); P.dataset.dkLand=land?'1':'0';
       P.classList.add('aq07','dk08'); P.classList.toggle('aq07-open',DK_OPEN);
@@ -18887,11 +18964,17 @@ html.dl-tablet body.phone-land #menuov .mo-in{padding-top:max(6px,env(safe-area-
       showSec();
       // the view keeps the dock's zoom whatever the shape of the space (no stretching)
       if(!RO&&window.ResizeObserver) RO=new ResizeObserver(()=>{ const k=$('homecv'); if(k&&MOB()&&S.tab==='home') fit(k); });
-      if(RO){ RO.disconnect(); RO.observe(tile); } fit(cv);
-    }catch(e){ console.error(e); } return r; };
+      if(RO){ RO.disconnect(); RO.observe(tile); } fit(cv); };
   /* the live view is carried through every re-render, so it never blinks */
-  const _rp2=renderPanel; renderPanel=function(){ const keep=(MOB()&&S.tab==='home')?$('homecv'):null; const r=_rp2.apply(this,arguments);
-    try{ if(keep){ const fresh=$('homecv'); if(fresh&&fresh!==keep){ fresh.replaceWith(keep); keep.removeAttribute('style'); } } }catch(e){} return r; };
+  /* Clean Pages (2026-11-21): the Home page's one step, in the order its old separate layers ran: the classic homes' look choices
+     (was home06.js), the layout, the live view carried over, then the canvas size watcher */
+  const _rp=renderPanel; renderPanel=function(){ const on=MOB()&&S.tab==='home', keep=on?$('homecv'):null; const r=_rp.apply(this,arguments); const P=$('panel'); if(!P) return r;
+    if(!on){ P.classList.remove('dk08'); return r; }
+    try{ homeClassic(P); }catch(e){ console.error(e); }
+    try{ homeLayout(P); }catch(e){ console.error(e); }
+    try{ if(keep){ const fresh=$('homecv'); if(fresh&&fresh!==keep){ fresh.replaceWith(keep); keep.removeAttribute('style'); } } }catch(e){}
+    try{ if(homeFitWatch) homeFitWatch(); }catch(e){}
+    return r; };
   /* turning the phone while the Dock is open rebuilds it for the new layout */
   let rt=0; addEventListener('resize',()=>{ clearTimeout(rt); rt=setTimeout(()=>{ try{ const P=$('panel'); if(!MOB()||S.tab!=='home'||!P.classList.contains('dk08')) return; const l=document.body.classList.contains('phone-land')?'1':'0'; if(P.dataset.dkLand!==l) renderPanel(); }catch(e){} },160); }); }
 
@@ -18939,7 +19022,7 @@ function DK_SCENE_OK(now){ if(S.tab!=='home'||!MOB()) return false; const c=$('h
     c.addEventListener('pointermove',mv); c.addEventListener('pointerup',up); c.addEventListener('pointercancel',up); },true);
   /* the canvas follows the view's size (sharp at any size) */
   const _fitRO=window.ResizeObserver?new ResizeObserver(()=>{ try{ if(S.tab==='home'&&MOB()) paintHome(); }catch(e){} }):null;
-  const _rp=renderPanel; renderPanel=function(){ const r=_rp.apply(this,arguments); try{ const c=$('homecv'); if(_fitRO&&c&&MOB()&&S.tab==='home'&&c.parentElement){ _fitRO.disconnect(); _fitRO.observe(c.parentElement); } }catch(e){} return r; }; }
+  homeFitWatch=()=>{ const c=$('homecv'); if(_fitRO&&c&&c.parentElement){ _fitRO.disconnect(); _fitRO.observe(c.parentElement); } }; }
 /* 0.4.9: the cozy name shortens with "…" so a two-digit cozy never pushes out of its cell (cozy can reach 60 with the Homebody path) */
 document.head.insertAdjacentHTML('beforeend','<style>#panel .dk08-bank > div{min-width:0}#panel .dk08-bank > div > .sub{display:block;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}</style>');
 // =====================================================================
@@ -18996,29 +19079,6 @@ html body.phone-land #menuov #panel.pg08[data-pg-tab="prestige"] .jsec > h2,html
 document.head.insertAdjacentHTML('beforeend',`<style>
 html body.phone-land #menuov #panel.pg08[data-pg-tab="prestige"] .pg08-body .grid:not(.sect-one),html body.phone-app #menuov #panel.pg08[data-pg-tab="prestige"] .pg08-body .grid:not(.sect-one){grid-template-columns:repeat(auto-fill,minmax(300px,1fr))!important}
 </style>`);
-/* Cooler (director: "very large, the filter takes up way too much space, consider a rework"):
-   - the Sell all filter is one slim line: "Sell all:" then rarity, max price and a Shinies switch
-   - the fishmonger's wish is a one-line banner
-   - no intro line or help box (every row already shows what a fish earns in the tank; the buttons explain themselves on long-press)
-   - fish sit two a row on wider phones */
-{ const _rp=renderPanel; renderPanel=function(){ const r=_rp.apply(this,arguments); try{ if(!MOB()||S.tab!=='cooler') return r; const P=$('panel'); if(!P) return r;
-      const t=P.querySelector('.sellf .fld-title'); if(t) t.textContent='Sell all:';
-      const inp=P.querySelector('.sellf [data-sp]'); if(inp) inp.placeholder='Max price';
-      const sh=P.querySelector('.sellf [data-ssh]'); if(sh&&!sh.dataset.mb8){ sh.dataset.mb8='1'; sh.innerHTML='<span class="ssh-star" aria-hidden="true">✦</span> Shinies'; }
-      const dm=[...P.querySelectorAll('.tile')].find(x=>/fishmonger wants/i.test(x.textContent)); if(dm) dm.classList.add('cl8-dm');
-    }catch(e){ console.error(e); } return r; }; }
-document.head.insertAdjacentHTML('beforeend',`<style>
-html body.phone-land #menuov #panel.pg08[data-pg-tab="cooler"] .pg08-body > .pg08-note,html body.phone-land #menuov #panel.pg08[data-pg-tab="cooler"] .mb-help,html body.phone-app #menuov #panel.pg08[data-pg-tab="cooler"] .pg08-body > .pg08-note,html body.phone-app #menuov #panel.pg08[data-pg-tab="cooler"] .mb-help{display:none!important}
-html body.phone-land #menuov #panel.pg08[data-pg-tab="cooler"] .sellf,html body.phone-app #menuov #panel.pg08[data-pg-tab="cooler"] .sellf{display:flex!important;flex-direction:row!important;align-items:center!important;flex-wrap:wrap!important;gap:6px 8px!important;padding:6px 10px!important;margin:0 0 8px!important;min-height:0!important}
-html body.phone-land #menuov #panel.pg08[data-pg-tab="cooler"] .sellf .fld-title,html body.phone-app #menuov #panel.pg08[data-pg-tab="cooler"] .sellf .fld-title{font:800 12px var(--display,system-ui)!important;margin:0!important;white-space:nowrap;color:#cfe0ee;flex:0 0 auto!important;width:auto!important;display:block!important}
-html body.phone-land #menuov #panel.pg08[data-pg-tab="cooler"] .sellf .fld,html body.phone-app #menuov #panel.pg08[data-pg-tab="cooler"] .sellf .fld{display:flex!important;flex-direction:row!important;align-items:center!important;margin:0!important;padding:0!important;gap:0!important;min-width:0}
-html body.phone-land #menuov #panel.pg08[data-pg-tab="cooler"] .sellf .fld-l,html body.phone-app #menuov #panel.pg08[data-pg-tab="cooler"] .sellf .fld-l{display:none!important}
-html body.phone-land #menuov #panel.pg08[data-pg-tab="cooler"] .sellf select,html body.phone-land #menuov #panel.pg08[data-pg-tab="cooler"] .sellf input,html body.phone-land #menuov #panel.pg08[data-pg-tab="cooler"] .sellf .chipb,html body.phone-app #menuov #panel.pg08[data-pg-tab="cooler"] .sellf select,html body.phone-app #menuov #panel.pg08[data-pg-tab="cooler"] .sellf input,html body.phone-app #menuov #panel.pg08[data-pg-tab="cooler"] .sellf .chipb{height:32px!important;min-height:32px!important;margin:0!important;font-size:12.5px!important}
-html body.phone-land #menuov #panel.pg08[data-pg-tab="cooler"] .sellf input,html body.phone-app #menuov #panel.pg08[data-pg-tab="cooler"] .sellf input{width:96px!important}
-html body.phone-land #menuov #panel.pg08[data-pg-tab="cooler"] .tile.cl8-dm,html body.phone-app #menuov #panel.pg08[data-pg-tab="cooler"] .tile.cl8-dm{padding:6px 10px!important;margin:0 0 8px!important;gap:10px!important;min-height:0!important}
-html body.phone-land #menuov #panel.pg08[data-pg-tab="cooler"] .tile.cl8-dm .meta,html body.phone-app #menuov #panel.pg08[data-pg-tab="cooler"] .tile.cl8-dm .meta{font-size:11.5px!important}
-html body.phone-land #menuov #panel.pg08[data-pg-tab="cooler"] .pg08-body > .list,html body.phone-app #menuov #panel.pg08[data-pg-tab="cooler"] .pg08-body > .list{display:grid!important;grid-template-columns:repeat(auto-fill,minmax(330px,1fr))!important;gap:6px!important}
-</style>`);
 /* ODDITIES: its own page in Collection (director, 2026-11-18: "oddities belong in collection, as its own location inside"), and the
    Fish Log is fish only. FISH LOG: the waters (and the Show choices) wrap into neat rows instead of one long sideways-scrolling strip
    with arrows ("mobile fish log has side scrolling and it doesn't look good at all"). */
@@ -19032,6 +19092,33 @@ html body.phone-land #menuov #panel.pg08[data-pg-tab="journal"] .chips > .chipb,
 document.head.insertAdjacentHTML('beforeend',`<style>html body.phone-land #menuov #panel.pg08[data-pg-tab="oddities"] .od8 > h2,html body.phone-app #menuov #panel.pg08[data-pg-tab="oddities"] .od8 > h2{display:none!important} #menuov #panel .od8 > .meta{margin:0 0 8px!important}</style>`); /* the tab names each part */
 document.head.insertAdjacentHTML('beforeend',`<style>
 html body.phone-land #menuov #panel.pg08[data-pg-tab="bait"] .bt8 > h2,html body.phone-app #menuov #panel.pg08[data-pg-tab="bait"] .bt8 > h2{display:none!important}
+</style>`);
+// =====================================================================
+// Phones: the Cooler page (Android + iPhone; every phone layer of the Cooler in one place, Clean Pages 2026-11-21: moved here from
+// waters08.js; the help box that pages06.js built and this page hid is gone). The shared Keep buttons come from ax_trophy035.js.
+// =====================================================================
+/* Cooler (director: "very large, the filter takes up way too much space, consider a rework"):
+   - the Sell all filter is one slim line: "Sell all:" then rarity, max price and a Shinies switch
+   - the fishmonger's wish is a one-line banner
+   - no intro line (every row already shows what a fish earns in the tank; the buttons explain themselves on long-press)
+   - fish sit two a row on wider phones */
+{ const _rp=renderPanel; renderPanel=function(){ const r=_rp.apply(this,arguments); try{ if(!MOB()||S.tab!=='cooler') return r; const P=$('panel'); if(!P) return r;
+      const t=P.querySelector('.sellf .fld-title'); if(t) t.textContent='Sell all:';
+      const inp=P.querySelector('.sellf [data-sp]'); if(inp) inp.placeholder='Max price';
+      const sh=P.querySelector('.sellf [data-ssh]'); if(sh&&!sh.dataset.mb8){ sh.dataset.mb8='1'; sh.innerHTML='<span class="ssh-star" aria-hidden="true">✦</span> Shinies'; }
+      const dm=[...P.querySelectorAll('.tile')].find(x=>/fishmonger wants/i.test(x.textContent)); if(dm) dm.classList.add('cl8-dm');
+    }catch(e){ console.error(e); } return r; }; }
+document.head.insertAdjacentHTML('beforeend',`<style>
+html body.phone-land #menuov #panel.pg08[data-pg-tab="cooler"] .pg08-body > .pg08-note,html body.phone-app #menuov #panel.pg08[data-pg-tab="cooler"] .pg08-body > .pg08-note{display:none!important}
+html body.phone-land #menuov #panel.pg08[data-pg-tab="cooler"] .sellf,html body.phone-app #menuov #panel.pg08[data-pg-tab="cooler"] .sellf{display:flex!important;flex-direction:row!important;align-items:center!important;flex-wrap:wrap!important;gap:6px 8px!important;padding:6px 10px!important;margin:0 0 8px!important;min-height:0!important}
+html body.phone-land #menuov #panel.pg08[data-pg-tab="cooler"] .sellf .fld-title,html body.phone-app #menuov #panel.pg08[data-pg-tab="cooler"] .sellf .fld-title{font:800 12px var(--display,system-ui)!important;margin:0!important;white-space:nowrap;color:#cfe0ee;flex:0 0 auto!important;width:auto!important;display:block!important}
+html body.phone-land #menuov #panel.pg08[data-pg-tab="cooler"] .sellf .fld,html body.phone-app #menuov #panel.pg08[data-pg-tab="cooler"] .sellf .fld{display:flex!important;flex-direction:row!important;align-items:center!important;margin:0!important;padding:0!important;gap:0!important;min-width:0}
+html body.phone-land #menuov #panel.pg08[data-pg-tab="cooler"] .sellf .fld-l,html body.phone-app #menuov #panel.pg08[data-pg-tab="cooler"] .sellf .fld-l{display:none!important}
+html body.phone-land #menuov #panel.pg08[data-pg-tab="cooler"] .sellf select,html body.phone-land #menuov #panel.pg08[data-pg-tab="cooler"] .sellf input,html body.phone-land #menuov #panel.pg08[data-pg-tab="cooler"] .sellf .chipb,html body.phone-app #menuov #panel.pg08[data-pg-tab="cooler"] .sellf select,html body.phone-app #menuov #panel.pg08[data-pg-tab="cooler"] .sellf input,html body.phone-app #menuov #panel.pg08[data-pg-tab="cooler"] .sellf .chipb{height:32px!important;min-height:32px!important;margin:0!important;font-size:12.5px!important}
+html body.phone-land #menuov #panel.pg08[data-pg-tab="cooler"] .sellf input,html body.phone-app #menuov #panel.pg08[data-pg-tab="cooler"] .sellf input{width:96px!important}
+html body.phone-land #menuov #panel.pg08[data-pg-tab="cooler"] .tile.cl8-dm,html body.phone-app #menuov #panel.pg08[data-pg-tab="cooler"] .tile.cl8-dm{padding:6px 10px!important;margin:0 0 8px!important;gap:10px!important;min-height:0!important}
+html body.phone-land #menuov #panel.pg08[data-pg-tab="cooler"] .tile.cl8-dm .meta,html body.phone-app #menuov #panel.pg08[data-pg-tab="cooler"] .tile.cl8-dm .meta{font-size:11.5px!important}
+html body.phone-land #menuov #panel.pg08[data-pg-tab="cooler"] .pg08-body > .list,html body.phone-app #menuov #panel.pg08[data-pg-tab="cooler"] .pg08-body > .list{display:grid!important;grid-template-columns:repeat(auto-fill,minmax(330px,1fr))!important;gap:6px!important}
 </style>`);
 // =====================================================================
 // Phones and tablets, round 8: QUESTS (director, 2026-11-18: "goal shouldn't be on the top header ... rework goal into its own side
@@ -19239,13 +19326,13 @@ const deDockText=s=>{ if(!s||s.indexOf('ock')<0) return s; let t=s; for(const [r
   new MutationObserver(ms=>{ if(!MOB()) return; for(const m of ms) for(const a of m.addedNodes) if(a.nodeType===1) walk(a); }).observe(document.body,{childList:true,subtree:false});
   document.addEventListener('input',()=>{ if(MOB()) setTimeout(()=>{ const sv=document.getElementById('searchov'); if(sv) walk(sv); },0); },true); }
 /* Save > App on phones: how to install Driftline on THIS phone (the Windows program was the only thing offered) */
-{ const _rp=renderPanel; renderPanel=function(){ const r=_rp.apply(this,arguments); try{ if(!MOB()||S.tab!=='save') return r; const P=$('panel');
-      const tile=[...P.querySelectorAll('.tile')].find(t=>/Windows desktop app/.test(t.textContent)); if(!tile||tile.dataset.mb) return r; tile.dataset.mb='1';
+pageDone('save',P=>{ /* a finishing touch of the Save page (Clean Pages 2026-11-21: was its own renderPanel wrapper) */
+      const tile=[...P.querySelectorAll('.tile')].find(t=>/Windows desktop app/.test(t.textContent)); if(!tile||tile.dataset.mb) return; tile.dataset.mb='1';
       const ip=typeof IS_IPHONE==='function'&&IS_IPHONE(), app=window.matchMedia&&(matchMedia('(display-mode: standalone)').matches||matchMedia('(display-mode: fullscreen)').matches)||navigator.standalone;
       tile.innerHTML=app?`<h4>Installed</h4><p class="meta">You are playing the Driftline app on this ${ip?'iPhone':'phone'}. It opens full screen and keeps your progress here.</p>`
         :`<h4>Play it like an app</h4><p class="meta">${ip?'In Safari, tap <b>Share</b>, then <b>Add to Home Screen</b>.':'Open the browser menu <b>⋮</b> and tap <b>Install app</b> (or <b>Add to Home screen</b>).'} Driftline then opens full screen from its own icon and keeps your progress.</p>`;
       tile.insertAdjacentHTML('beforeend','<p class="meta" style="margin-top:8px">Playing on a computer too? There is a Windows app; bring your progress with <b>Move progress</b>.</p>');
-    }catch(e){ console.error(e); } return r; }; }
+    });
 /* badges never cut off or covering a neighbour (director, 2026-11-18, screenshot: the side rail's "2" on Fishing was cut off at the
    top, the "1" for Upgrades sat over the button above). In menus the rail is a scrolling box, and its badges poked 12 px above each
    button: the first one was clipped, the others covered the button above. Rail badges now sit inside their button, as a count at
@@ -19487,32 +19574,15 @@ try{ if(typeof SECT==='object'&&SECT.settings==='Save & codes') delete SECT.sett
   setTimeout(hook,0); setTimeout(hook,1500); }
 
 /* Settings: no "Save & codes" section; Save > Save codes gets the gift code and the erase / backup tools */
-{ const _rp=renderPanel; renderPanel=function(){ const r=_rp.apply(this,arguments); try{ if(!MOB()) return r; const P=$('panel'); if(!P) return r;
-    if(S.tab==='settings'){ const nav=P.querySelector('.aq07-sheet > .bwx-nav, .bwx-nav.sect-nav'); const b=nav&&nav.querySelector('[data-sect="Save & codes"]');
+/* (Clean Pages 2026-11-21: finishing touches of the Settings and Save pages, run by the page engine) */
+pageDone('settings',P=>{ { const nav=P.querySelector('.aq07-sheet > .bwx-nav, .bwx-nav.sect-nav'); const b=nav&&nav.querySelector('[data-sect="Save & codes"]');
       if(b){ const was=b.getAttribute('aria-selected')==='true'; b.remove(); const n=nav.querySelectorAll(':scope > button').length; nav.style.setProperty('grid-template-columns',`repeat(${n<=4?n:n<=6?3:4},minmax(0,1fr))`,'important');
         P.querySelectorAll('.pg08-body > .tile, .pg08-body > details').forEach(t=>{ if(/Move progress|Gift code|Danger zone/.test(t.textContent)&&!t.closest('.grid')) t.remove(); });
-        if(was){ const f=nav.querySelector('[data-sect]'); if(f) f.click(); } } }
-    if(S.tab==='save'&&!P.querySelector('#giftin')){ const host=[...P.querySelectorAll('.pg08-body > .grid, .pg08-body > *')].find(x=>/Your save code/.test(x.textContent));
+        if(was){ const f=nav.querySelector('[data-sect]'); if(f) f.click(); } } } });
+pageDone('save',P=>{ if(!P.querySelector('#giftin')){ const host=[...P.querySelectorAll('.pg08-body > .grid, .pg08-body > *')].find(x=>/Your save code/.test(x.textContent));
       if(host){ host.insertAdjacentHTML('beforeend',`<div class="tile mb-gift"><b>🎁 Gift code</b><div class="meta">Got a gift code from a friend? Type it here.</div><div class="row" style="gap:8px;margin-top:8px;flex-wrap:nowrap"><input id="giftin" maxlength="24" placeholder="Gift code" autocapitalize="characters" style="flex:1;min-width:0;background:#0a161d;color:var(--ink);border:1px solid var(--line);border-radius:9px;padding:8px;text-transform:uppercase"><button class="btn sm" data-act="redeem">Redeem</button></div></div>`);
         try{ host.insertAdjacentHTML('beforeend',dangerHTML()); }catch(e){} } }
-  }catch(e){ console.error(e); } return r; }; }
-
-/* Aquarium (director, 2026-11-18: "Tank doesn't show tank size, upgrade lacks proper description"):
-   - the strip under the tank gets a Tank cell: fish on display / how many it holds
-   - Your tank's heading says how many fish it holds, and the upgrade says what you get ("Room for 8 fish") with a line explaining
-     it: how many more fish, what that means for earnings and boosts, and the price */
-{ const _rp=renderPanel; renderPanel=function(){ const r=_rp.apply(this,arguments); try{ if(!MOB()||S.tab!=='aquarium') return r; const P=$('panel'); if(!P||!P.classList.contains('aq07')) return r;
-    const cap=aqCap(), n=S.tank.length, bank=P.querySelector('.aq07-bank');
-    if(bank&&!bank.querySelector('.mb-tankcell')){ const cells=[...bank.children].filter(c=>c.tagName==='DIV'); const last=cells[cells.length-1];
-      const cell=document.createElement('div'); cell.className='mb-tankcell'; cell.title='Fish on display / how many your tank holds';
-      cell.innerHTML=`<div class="sub">Tank</div><b>${n} / ${cap}</b>`; if(last) last.after(cell); else bank.prepend(cell); }
-    const hr=P.querySelector('.aq07-sec-tank > .aq07-h'); if(hr&&!hr.querySelector('.mb-tankcap')){ const h2=hr.querySelector('h2'); if(h2) h2.insertAdjacentHTML('beforeend',` <span class="mb-tankcap">· holds ${cap} fish</span>`);
-      const buy=hr.querySelector('[data-act="buytank"]'); const cost=TANK_COST[S.tankSlots];
-      if(buy&&cost!=null){ S.tankSlots++; const nx=aqCap(); S.tankSlots--;
-        buy.innerHTML=`Expand Tank · <span class="coin">${fmt(cost)}</span>`; /* C17 (director + Cam, 2026-11-20) */ buy.title='A bigger tank: '+cap+' → '+nx+' fish';
-        hr.insertAdjacentHTML('afterend',`<p class="meta mb-tankwhy">Next expansion: ${nx} fish${S.money<cost?` · you need <span class="coin">${fmt(cost-S.money)}</span> more`:''}</p>`); }
-      else if(cost==null) hr.insertAdjacentHTML('afterend',`<p class="meta mb-tankwhy">Your tank is as big as it gets: ${cap} fish.</p>`); }
-  }catch(e){ console.error(e); } return r; }; }
+  });
 
 /* Rods (director, 2026-11-18: "Rod rack looks weird when you switch headers. Consider a rework for it to make a lot more sense and
    look cleaner"). The presets box sat outside the page's sections, so it showed on top of Your rod, Rod rack AND Attachments (the
@@ -19532,14 +19602,14 @@ try{ if(typeof SECT==='object'&&SECT.settings==='Save & codes') delete SECT.sett
   /* 2026-11-19 (director: "Your rods ... should not carry over to the other 2 tabs"): the box was inserted by a second phone block
      after the page's tabs were built, and this block looked for a '.tile.rodnow' that the page no longer has, so the presets showed
      on all three tabs. One block now: the box goes right after the first node of the "Your rods" tab and is shown and hidden with it. */
-  const _rp=renderPanel; renderPanel=function(){ const r=_rp.apply(this,arguments); try{ if(!MOB()||S.tab!=='rods') return r; const P=$('panel'); if(!P) return r;
+  pageDone('rods',P=>{ /* a finishing touch of the Rods page, run by the page engine (Clean Pages 2026-11-21: was its own renderPanel wrapper) */
       /* the page engine moves the tab bar above the page body, so the "Your rods" group is found from its content: the body's first item, before the Rod rack heading */
       const body=P.querySelector('.pg08-body')||P, head=c=>{ const h=c.matches('h2,h4,h5')?c:c.querySelector('h2,h4,h5'); return h?h.textContent.trim():''; };
-      const ks=[...body.children].filter(c=>!c.classList.contains('pg08-note')&&!c.classList.contains('rp-box')&&!c.classList.contains('sect-nav')), rack=ks.findIndex(c=>head(c)==='Rod rack'); const first=rack>0?ks[0]:null; if(!first) return r;
+      const ks=[...body.children].filter(c=>!c.classList.contains('pg08-note')&&!c.classList.contains('rp-box')&&!c.classList.contains('sect-nav')), rack=ks.findIndex(c=>head(c)==='Rod rack'); const first=rack>0?ks[0]:null; if(!first) return;
       let box=P.querySelector('.rp-box'); if(!box){ first.insertAdjacentHTML('afterend',rodPresetsHTML()); box=first.nextElementSibling; } else first.after(box);
       P.querySelectorAll('h2').forEach(h=>{ if(/^(Rod rack|Attachments)$/.test(h.textContent.trim())) h.classList.add('rp8-dup'); }); /* the tab above already names it */
-      const sync=()=>{ box.style.display=first.style.display; }; sync(); new MutationObserver(sync).observe(first,{attributes:true,attributeFilter:['style']}); /* shown and hidden with Your rods */
-    }catch(e){ console.error(e); } return r; }; }
+      /* shown and hidden with Your rods: synced when a tab is picked (it was a new watcher on every redraw, never released) */
+      const sync=()=>{ box.style.display=first.style.display; }; sync(); const nv=P.querySelector('.sect-nav'); if(nv) nv.addEventListener('click',()=>setTimeout(sync,0)); }); }
 
 document.head.insertAdjacentHTML('beforeend',`<style>
 html body.phone-land #menuov #panel h2.rp8-dup,html body.phone-app #menuov #panel h2.rp8-dup{display:none!important}
@@ -19556,11 +19626,6 @@ html body.phone-land #menuov #panel .rp8 .rp8-info em,html body.phone-app #menuo
 html body.phone-land #menuov #panel .rp8 .rp-n,html body.phone-app #menuov #panel .rp8 .rp-n{display:flex;align-items:center;gap:6px}
 html body.phone-land #menuov #panel .rp8 .rp8-tag,html body.phone-app #menuov #panel .rp8 .rp8-tag{padding:1px 7px;border-radius:999px;background:linear-gradient(180deg,#ffd36a,#f0b43c);color:#2a1a04;font:800 10px var(--display,system-ui);letter-spacing:.04em}
 html body.phone-land #menuov #panel .rp8 .rp8-acts,html body.phone-app #menuov #panel .rp8 .rp8-acts{display:flex;gap:6px;flex:0 0 auto;align-items:center}
-html body.phone-app #menuov #panel.aq07 .aq07-bank:has(.mb-tankcell),html body.phone-land #menuov #panel.aq07 .aq07-bank:has(.mb-tankcell){grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,.8fr) auto auto!important}
-html body.phone-app #menuov #panel.aq07 .aq07-bank .mb-tankcell b,html body.phone-land #menuov #panel.aq07 .aq07-bank .mb-tankcell b{font:800 14px var(--display)!important;color:var(--ink)}
-@media (orientation:landscape) and (max-height:560px) and (max-width:760px){ html body.phone-land #menuov #panel.aq07 .aq07-bank:has(.mb-tankcell){grid-template-columns:repeat(6,minmax(0,1fr))!important} html body.phone-land #menuov #panel.aq07 .aq07-bank:has(.mb-tankcell) > div{grid-column:span 2} html body.phone-land #menuov #panel.aq07 .aq07-bank:has(.mb-tankcell) > .btn{grid-column:span 3} }
-html body.phone-app #menuov #panel.aq07 .mb-tankcap,html body.phone-land #menuov #panel.aq07 .mb-tankcap{font:700 13px var(--display);color:#9fb3c8;white-space:nowrap}
-html body.phone-app #menuov #panel.aq07 .mb-tankwhy,html body.phone-land #menuov #panel.aq07 .mb-tankwhy{margin:2px 0 8px!important;font-size:12.5px!important;line-height:1.4;color:#b8c8d6}
 html body.phone-land .hud > .st-lvl[data-mbtap],html body.phone-app .hud > .st-lvl[data-mbtap]{background:linear-gradient(180deg,#1f8a86,#14666a)!important;border:1px solid #7fe3c4!important;box-shadow:0 3px 10px #0007!important;color:#fff!important;cursor:pointer}
 html body.phone-land .hud > .st-lvl[data-mbtap] .lbl,html body.phone-app .hud > .st-lvl[data-mbtap] .lbl{color:#c8fff0!important}
 html body.phone-land .hud > .st-lvl[data-mbtap]:active,html body.phone-app .hud > .st-lvl[data-mbtap]:active{transform:translateY(1px)}
@@ -20351,7 +20416,9 @@ PATCHES.unshift({v:'0.4.9', name:'Work in progress', items:phoneNotes([
   'Hollow Trench now lists its true depth, and its fish fight harder than Midnight Deep’s.',
   'The fishing screen is quieter: no notices about the weather, live events, coming special weather or a challenge you started (the badges show them). Messages about what you just did stay.',
   'Florida Keys: a bigger bridge with traffic, beaches, speedboats and sport-fishing boats, and a school of fish under the water.',
-  'Amazon Rainforest: a deeper jungle, a better waterfall, roots and lily pads, and much more wildlife, from dragonflies and macaws to a caiman, frogs and a few surprises. The stilt deck stands in the water now.',
+  'Every water came alive a little more: a mother duck and her ducklings at Willow Pond (an owl at night), porpoises off Saltmarsh Coast, a geyser and ravens at Ember Springs, a barn owl and fireflies on the farm at night, bats over the Nile, pigeons at Corporate Pond, and someone rowing across The Buffet. Each water’s special moment is easier to spot.',
+  'Rain fits where it falls: sprinkles at The Buffet, stardust above the clouds.',
+  'Starfall Lake draws faster.',  'Amazon Rainforest: a deeper jungle, a better waterfall, roots and lily pads, and much more wildlife, from dragonflies and macaws to a caiman, frogs and a few surprises. The stilt deck stands in the water now.',
   'End-game waters stay uncharted until you reach their voyage; then they open for coins and stay open for good. Waters you already have stay open.',
   'Cooler: Scrap all sits beside Sell all, and you can sort by rarity. Settings: distances and depths in metres or feet.',
   'The Bounties badge no longer shows a number when there is nothing to claim. Map pictures appear at once after a restart. Feeding a Nibble no longer makes the screen jump. Pets › Customize keeps its color rows in place.',
@@ -20371,7 +20438,13 @@ PATCHES.unshift({v:'0.4.9', name:'Work in progress', items:phoneNotes([
 // text changes. Released notes live in notes_release.js.
 const TEST_NOTES={v:'test', label:'Test build · '+(window.DL_BUILD==='ios'?'iPhone':'Android'), name:'0.4.9 test build (newest first)', items:[
   '## New in this build',
-  'Quests › Goals now shows the live event when one is on (it never appeared before).',
+  'Living maps, every water held to the map standard: Willow Pond, a mother duck leads 3 to 5 ducklings across the far water by day and a tawny owl glides low over the pond at night (every 50 s). Saltmarsh Coast, a pod of porpoises rolls past (every 42 s). Ember Springs, a geyser at the foot of the hill erupts (every 45 s, a little higher or lower each time) and ravens circle by day. Animal Farm, fireflies by the fence and a barn owl at night, birds only by day, the tractor every 55 s. The Nile, fruit bats at night. Corporate Pond, pigeons strut on the ticker by day. The Buffet, a gummy bear rows a cracker across the lake. Stonebrook otters every 24 s.',
+  'Moments made bigger so they read on a phone: the leaping fish at Florida Keys, the meatball at The Buffet, the paper plane at Corporate Pond, the whale tail at Midnight Deep and the eyes at Hollow Trench.',
+  'Rain that fits the water: sprinkles fall at The Buffet, stardust at Starfall Lake and Mount Olympus (rain and storms elsewhere as before).',
+  'Starfall Lake draws almost twice as fast (its fish constellation is drawn once instead of every frame). Looks the same.',
+  'Behind the scenes, no look change: the Aquarium, Cooler, Settings, Save, Your home and Rods pages are each built in one place now. The Cooler no longer builds a hidden help box, and Rods no longer adds a new watcher on every redraw. Tell us if anything on these pages looks or acts differently.',
+  'Tester tools › Run every check: time limits stretch on slower phones (the report says by how much), and a new Maps check runs every water at dawn, day, dusk and night in every weather.',
+  '## Test build 0720',  'Quests › Goals now shows the live event when one is on (it never appeared before).',
   'Feats: each category heading says what finishing it gives.',
   'Bounties: the daily tasks card no longer shows under the other tabs on wide screens.',
   'Quiet Waters: no more notices on the fishing screen when the weather changes, an event goes live, special weather is coming or a challenge starts (the badges and LIVE marker show them). Messages about what you just did stay, jokes included. The Weather pop-ups setting is gone with them.',
@@ -21294,6 +21367,56 @@ if(/[?&]test\b/.test(location.search)) window.__textInv=()=>{ const out={}, add=
   try{ for(const m of (window.__qaToasts||[])) add('popup',m); }catch(e){}
   const sum={}; for(const [k,L] of Object.entries(out)){ const ns=L.map(x=>x.n).sort((a,b)=>a-b); sum[k]={count:L.length, median:ns[ns.length>>1], p90:ns[Math.floor(ns.length*.9)], max:ns[ns.length-1]}; }
   return {sum, out}; };
+
+// ---------- map standard check (docs/MAP_STANDARD.md, 2026-11-21): every water draws at dawn, day, dusk and night and in every weather
+// without errors; has at least 3 moving things and life after dark; its moment comes every 20-60 s and visibly draws something; and its
+// frame cost stays under the ceiling (rule 13: a ceiling just above today's heaviest smooth water, as a multiple of the median water).
+// m: [period, from, to] seconds of the moment's window (the drawing code's own timing); life/night: what moves (counted from the code).
+const MAP_STD={
+  pond:{m:[50,2,24], life:['ducks','frog','deer','dragonflies','willow leaves','ducklings'], night:['fireflies','owl']},
+  river:{m:[24,0,7.6], life:['otters','heron','kingfisher','waterwheel','leaves'], night:['otters','waterwheel']},
+  coast:{m:[42,0,9], life:['gulls','seal','sandpipers','sailboat','crab','porpoises'], night:['seal','sailboat','porpoises']},
+  frost:{m:[40,0,28], life:['arctic fox','owl','seal','ice floes','tip-up flags'], night:['owl','fox','seal']},
+  reef:{m:[24,0,9.6], life:['gannet','ray','turtle','parrots','fish school'], night:['ray','turtle','bait ball']},
+  shelf:{m:[38,0,11.4], life:['whale','flying fish','albatross','cargo ship','tall ship','bell buoy'], night:['whale','ships']},
+  deep:{m:[23,0,5], eye:'the whole view rocks with the swell and its rain never stops, so the whale tail is judged by eye', life:['whale tail','cargo ship','ghost ship','spray'], night:['whale tail','ghost ship']},
+  trench:{m:[29,0,8.7], life:['eyes in the deep','jellyfish','plankton','wreck lantern'], night:['jellyfish','plankton','eyes']},
+  ember:{m:[45,2,11], life:['geyser','ravens','moths','lava bombs','embers'], night:['moths','embers']},
+  starfall:{m:null, life:['star whale','lanterns','star-blossoms','floating islands','wisps'], night:['star whale','lanterns'],
+    inT:()=>{ for(let t=600;t<1200;t+=.5){ const E=sfEvent(t); if(E.into>3&&E.into<4) return t; } return 600; }, outT:j=>{ let t=700+j*9; while(sfEvent(t).into<=SF_DUR+.5) t+=.7; return t; }},
+  blossom:{m:[47,0,7], life:['ducks','petals','paper lanterns','petal gust'], night:['paper lanterns','ducks']},
+  rockies:{m:[37,0,16.6], life:['beavers','moose','geese','canoe','waterfall'], night:['beavers','canoe']},
+  keys:{m:[29,0,3.5], life:['traffic','speedboats','pelicans','gulls','fish school','leaping fish'], night:['traffic','lighthouse']},
+  amazon:{m:[60,20,32], life:['macaws','dragonflies','caiman','frogs','branches'], night:['fireflies','caiman','frogs']},
+  farm:{m:[55,0,22], life:['ducks','windmill','birds','tractor'], night:['fireflies','barn owl','ducks']},
+  buffet:{m:[33,0,6.6], life:['gummy raft','jelly','candles','sprinkles'], night:['gummy raft','candles']},
+  corporate:{m:[25,0,7.5], life:['pigeons','paper plane','helicopter','fountain','ticker'], night:['window lights','ticker','helicopter']},
+  nile:{m:[21,0,5.2], life:['crocodile','felucca','caravan','birds'], night:['bats','felucca']},
+  circuit:{m:[31,0,.4], life:['flying cars','neon rain','drones'], night:['flying cars','neon rain']},
+  olympus:{m:[41,0,12.3], life:['pegasus','owl','sparkles','thunderbolts'], night:['owl','sparkles']},
+};
+const MAP_COST_CEIL=3.2; // rule 13: no water may cost more than this many times the median water (measured 2026-11-21; heaviest today below it)
+window.__mapQC=async(o={})=>{ const keep={loc:S.loc,off:window.__off,np:window.__noPar}; window.__noPar=true; const cv=document.getElementById('cv'), oc=document.createElement('canvas'), w=Math.max(240,Math.round(innerWidth/4)), h=Math.max(110,Math.round(innerHeight/4)), cellK=w*h/(240*135); /* a quarter of the screen: thin strokes survive at every size */ oc.width=w; oc.height=h; const ox=oc.getContext('2d',{willReadFrequently:true});
+  const errs=[], oe=console.error; console.error=(...a)=>{ errs.push(String((a[0]&&a[0].stack)||a[0]).slice(0,160)); };
+  const frame=T=>{ M33.err=0; draw(T*1000); ox.drawImage(cv,0,0,w,h); return ox.getImageData(0,0,w,h).data; };
+  const out=[], costs={}, ids=o.ids||LOCS.map(l=>l.id);
+  try{ for(const id of ids){ const R={id,issues:[]}, D=MAP_STD[id]; out.push(R); if(!S.unlocked.includes(id)) S.unlocked.push(id); S.loc=id;
+      if(!D){ R.issues.push('no map standard entry in MAP_STD'); continue; }
+      if(D.life.length<3) R.issues.push('fewer than 3 moving things'); if(!D.night||!D.night.length) R.issues.push('nothing alive at night');
+      if(D.m&&(D.m[0]<20||D.m[0]>60)) R.issues.push('moment every '+D.m[0]+' s (must be 20-60)');
+      for(const ph of [.98,.3,.5,.85]){ await window.__setPhase(ph); for(const T of [101,137.3]){ errs.length=0; try{ frame(T); }catch(e){ errs.push(e.message); } if(errs.length) R.issues.push('error at phase '+ph+': '+errs[0]); } }
+      for(const W0 of WEATHERS){ if(window.__setWeather(W0.k)==='none') continue; errs.length=0; try{ frame(120); }catch(e){ errs.push(e.message); } if(errs.length) R.issues.push('error in '+W0.k+': '+errs[0]); }
+      // the moment: frames outside its window make an envelope of what normally moves; the frame inside it must clearly break out
+      try{ await window.__setPhase(.3); const per=D.m?D.m[0]:0, n0=10, inT=D.inT?D.inT():n0*per+(D.m[1]+D.m[2])/2, outT=j=>D.outT?D.outT(j):n0*per+D.m[2]+(per-D.m[2]+D.m[1])*(j+.5)/10;
+      const lo=new Uint8ClampedArray(w*h*4).fill(255), hi=new Uint8ClampedArray(w*h*4); for(let j=0;j<16;j++){ const d=frame(outT(j*10/16)); for(let i=0;i<d.length;i++){ if(d[i]<lo[i]) lo[i]=d[i]; if(d[i]>hi[i]) hi[i]=d[i]; } }
+      /* score = the most changed pixels in any 12x9 cell: a moment is one solid new shape, ordinary motion is scattered */
+      const over=d=>{ const cells=new Uint16Array(400); for(let y=0;y<h;y++) for(let x=0;x<w;x++){ const i=(y*w+x)*4; let m=0; for(let k=0;k<3;k++){ const v=d[i+k]; m=Math.max(m,v-hi[i+k],lo[i+k]-v); } if(m>36) cells[Math.min(14,Math.floor(y/h*15))*20+Math.min(19,Math.floor(x/w*20))]++; } const top=[...cells].sort((a,b)=>b-a); return Math.round((top[0]+top[1]+top[2])/cellK); }; /* the three busiest cells: a compact shape or a spread one like a gust of petals */
+      const span=D.m?D.m[2]-D.m[1]:1, ins=D.inT?[inT]:[.3,.5,.7].map(f=>n0*per+D.m[1]+span*f);
+      const bs=[.33,2.4,5.33,7.1,9.1].map(f=>over(frame(outT(f)))).sort((a,b)=>a-b), base=bs[2], mom=Math.max(...ins.map(T=>over(frame(T)))); R.moment={base,mom}; if(D.eye) R.moment.eye=D.eye; else if(!(mom>=Math.max(14,base*1.6+3))) R.issues.push('moment not visible ('+mom+' vs '+base+' normally, changed pixels in one spot)');
+      { let best=1e9; for(let rep=0;rep<2;rep++){ const t0=performance.now(); for(let i=0;i<12;i++) draw((200+i*.1)*1000); best=Math.min(best,(performance.now()-t0)/12); } costs[id]=best; } }catch(e){ R.issues.push('error while checking the moment: '+e.message); } }
+    const cs=Object.values(costs).sort((a,b)=>a-b), med=cs[cs.length>>1]||1; for(const R of out){ if(costs[R.id]==null) continue; R.cost=+(costs[R.id]/med).toFixed(2); if(R.cost>MAP_COST_CEIL) R.issues.push('frame cost '+R.cost+'x the median water (ceiling '+MAP_COST_CEIL+'x)'); }
+  } finally { console.error=oe; S.loc=keep.loc; window.__off=keep.off; window.__noPar=keep.np; }
+  const bad=out.filter(R=>R.issues.length); return {ok:!bad.length, n:out.length, bad, all:o.all?out:undefined}; };
 
 // ---------- loop ----------
 let last=performance.now();
