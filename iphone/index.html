@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="DL Test iPhone">
 <script>
-window.DL_BUILD='ios'; window.DL_PREVIEW=true; if(/[?&]sweep\b/.test(location.search)){ window.__bootErr=[]; addEventListener("error",function(e){ __bootErr.push(String(e.message||e)+(e.lineno?" (line "+e.lineno+")":"")); }); addEventListener("unhandledrejection",function(e){ __bootErr.push("promise: "+String(e.reason&&e.reason.message||e.reason)); }); window.requestAnimationFrame=function(f){ return setTimeout(function(){ f(performance.now()); },16); }; window.cancelAnimationFrame=function(i){ clearTimeout(i); }; } window.DL_VERSION='2026.11.21-2108';
+window.DL_BUILD='ios'; window.DL_PREVIEW=true; if(/[?&]sweep\b/.test(location.search)){ window.__bootErr=[]; addEventListener("error",function(e){ __bootErr.push(String(e.message||e)+(e.lineno?" (line "+e.lineno+")":"")); }); addEventListener("unhandledrejection",function(e){ __bootErr.push("promise: "+String(e.reason&&e.reason.message||e.reason)); }); window.requestAnimationFrame=function(f){ return setTimeout(function(){ f(performance.now()); },16); }; window.cancelAnimationFrame=function(i){ clearTimeout(i); }; } window.DL_VERSION='2026.11.21-2301';
 window.addEventListener('beforeinstallprompt',function(e){ e.preventDefault(); window.__dlInstallPrompt=e; });
 </script>
 </head>
@@ -1701,8 +1701,11 @@ const hashStr = s => { let h=2166136261; for(let i=0;i<s.length;i++){ h^=s.charC
 function buffSum(k){ const t=Date.now(); let s=0; for(const b of S.buffs) if(b.k===k && b.until>t) s+=b.v; return s; }
 const aqCache = {};
 function aqBase(id){ if(!(id in aqCache)){ const sp=SPI[id]; aqCache[id] = sp.r ? {k:AQ_KEYS[hashStr(id)%AQ_KEYS.length], v:AQ_MAG[sp.r]} : null; } return aqCache[id]; }
-function aqEff(f){ return aqBuffsOf(f)[0]||null; }
-function aqSum(k){ const aura=1+titleAura(); let s=0; for(const f of S.tank){ const m=f.sh===2?1:aura; for(const e of aqBuffsOf(f)) if(e.k===k) s+=e.v*m; } return s; } /* [18] titled shinies lift every other fish */
+/* one owner for what a fish really gives in the aquarium (batch 2, 2026-11-21): its own boosts times the titled-shiny lift
+   (titled shinies lift every other fish, not themselves). Every total, line and badge reads this, so shown = applied. */
+function aqNet(f){ const L=aqBuffsOf(f); const m=f.sh===2?1:1+titleAura(); return m===1?L:L.map(e=>Object.assign({},e,{v:e.v*m})); }
+function aqEff(f){ return aqNet(f)[0]||null; }
+function aqSum(k){ let s=0; for(const f of S.tank) for(const e of aqNet(f)) if(e.k===k) s+=e.v; return s; } /* [18] titled shinies lift every other fish */
 const petVal = (id=S.pet) => { const p=PETI[id]; return p ? p.v*(1+.1*pr('petpal'))*(1+.05*bondLevel(id)) : 0; };
 function petSum(k){ const p=PETI[S.pet], q=S.pet2&&PETI[S.pet2]; return (p && p.k===k ? petVal() : 0) + (q && q.k===k ? petVal(S.pet2)*compShare() : 0); }
 const compShare = () => .5+.02*bondLevel(S.pet2);
@@ -1903,7 +1906,7 @@ function landFish(){
   const b=[]; if(f.shiny===2){ b.push(['g',PRISM[f.pv].n+' prismatic ×'+PRISM_VALUE+' value']); const T=TITLE_BUFFS[f.pv]; if(T) b.push(['g','In your aquarium: +'+T.keys.map(k=>BK[k]).join(', +')+', and every other fish’s bonuses +'+Math.round(T.aura*100)+'%']); if(titleNew) b.push(['g','New title: +'+Math.round(TITLE_COIN*100)+'% coins on every voyage'+(titleLegacy()>=TITLE_COIN_CAP?' (at the +'+Math.round(TITLE_COIN_CAP*100)+'% cap)':'')]); } else if(f.shiny) b.push(['g','Shiny ×4 value']); if(f.hy) b.push(['g','Hybrid: the weight of a '+SPI[f.hy].name+(f.hx?' and still its own size: ×'+f.hx+' value and aquarium income':'')]); if(hyNew) b.push(['g','First hybrid of this fish']); b.push(...preyB); if(f.ate) b.push(['g','Swallowed your catch: ×1.5 coins']); if(f.trophy) b.push(['g','Trophy size ×1.5']); if(f.hot) b.push(['k','Hotspot catch']);
   if(f.demand) b.push(['g','Fishmonger wants it: ×2 if sold now']); if(G.perfect) b.push(['','Perfect hook']); if(S.streak>=2) b.push(['','Streak '+S.streak+' · +'+Math.round(streakBonus*100)+'% XP']);
   if(scl) b.push(['k','+'+scl+' Scales']); if(tok) b.push(['g','+1 '+(tok==='big'?'big':'small')+' Mystery Crate']);
-  if(isNew) b.push(['','New species']); if(record) b.push(['g','Personal record']); const ae=aqBase(sp.id); if(ae && isNew) b.push(['k','In the aquarium: '+fmtB(ae.k,ae.v)]);
+  if(isNew) b.push(['','New species']); if(record) b.push(['g','Personal record']); const ae=G.lastEntry&&!G.lastEntry.hy&&aqEff(G.lastEntry); if(ae && isNew) b.push(['k','In the aquarium: '+fmtB(ae.k,ae.v)]);
   const ms=mastery(sp.id); if(ms && [3,10,30,100][ms-1]===S.journal[sp.id].n) b.push(['g','Mastery '+'★'.repeat(ms)+': +'+ms*10+'% value for this fish']);
   const rk=checkRank(); if(rk) b.push(['g',rk]);
   if(lvUps) b.push(['g','Level up! Lv '+S.lvl+' · +'+lvUps+' skill point']); bdone.forEach(()=>b.push(['g','Bounty ready'])); if(setNow) b.push(['g',LOCS[locIdx(sp.loc)].name+' complete: +'+fmt(setNow)]);
@@ -10521,12 +10524,12 @@ function bwGamesHTML(){ const tk=S.tokens, base=bestLoot(), nextIn=Math.max(0,Ma
      `<div class="wheelwrap"><div class="wheelring"><canvas id="wheelcv" width="520" height="520"></canvas></div>${WH.result?`<div class="val bwx-res">${esc(WH.result)}</div>`:''}</div>`,
      S.freeSpins>0?`<button class="btn" data-act="spin" data-k="free" ${WH.spinning?'disabled':''}>Free spin (${S.freeSpins} left)</button>`:`<button class="btn" data-act="spin" ${WH.spinning||S.money<wheelCost()?'disabled':''}>Spin · <span class="coin">${fmtShort(wheelCost())}</span></button>`)}
    ${bwCard('🎁','#b9a2ff','Mystery crates','Clothes, decor, lures and pets you can’t get anywhere else, plus Boardwalk-only wear.',
-     crateRow('small','Small crate','Mostly clothes and lures. Sometimes decor or a pet.')+crateRow('big','Big crate','Clothes, Boardwalk-only wear, decor and the rarer pets.')+crateRow('legend','Legendary crate','The really good stuff.')+(crateRes?`<div class="reveal bwx-res"><canvas width="240" height="180" id="crateprev"></canvas><div class="val">${esc(crateRes.title)}</div></div>`:''),'')}
+     (crateRes?'':'<div class="bwx-art">🎁 🎁 🎁</div>')+crateRow('small','Small crate','Mostly clothes and lures. Sometimes decor or a pet.')+crateRow('big','Big crate','Clothes, Boardwalk-only wear, decor and the rarer pets.')+crateRow('legend','Legendary crate','The really good stuff.')+(crateRes?`<div class="reveal bwx-res"><canvas width="240" height="180" id="crateprev"></canvas><div class="val">${esc(crateRes.title)}</div></div>`:''),'')}
    ${bwCard('🦆','#5ad8e8','Duck pond','Pick a rubber duck. Every duck wins tickets, and a few hide a crate or something to wear.',
      duck?`<div class="ducks">${ducks}</div>${duck.pick>=0?`<div class="val bwx-res">${esc(duck.msg||'')}</div>`:''}`:'<div class="bwx-art">🦆 🦆 🦆</div>',
      `<button class="btn${duck&&duck.pick<0?' alt':''}" data-act="duckagain" ${S.money>=base&&!(duck&&duck.pick<0)?'':'disabled'}>${duck?'Play again':'Play'} · <span class="coin">${fmtShort(base)}</span></button>`)}
    ${bwCard('🃏','#7fe3c4','Higher or lower','Guess the next fish card. Every right guess grows the ticket pot by half. Cash out any time.',
-     hilo&&!hilo.done?`<div class="hilocard"><b>${hilo.card}</b><span>${CARD_FISH[hilo.card]}</span></div><div class="val bwx-res">Pot 🎟 ${fmt(hilo.pot)} tickets · streak ${hilo.streak}</div>`:`${hilo&&hilo.done?`<div class="val bwx-res">${esc(hilo.msg)}</div>`:'<div class="bwx-art">🂠 🂡</div>'}`,
+     hilo&&!hilo.done?`<div class="hilocard"><b>${hilo.card}</b><span>${CARD_FISH[hilo.card]}</span></div><div class="val bwx-res">Pot 🎟 ${fmt(hilo.pot)} tickets · streak ${hilo.streak}</div>`:`<div class="bwx-art">🂠 🂡</div>${hilo&&hilo.done?`<div class="val bwx-res">${esc(hilo.msg)}</div>`:''}`,
      hilo&&!hilo.done?`<button class="btn sm" data-act="hilo" data-k="hi">Higher ▲</button><button class="btn sm" data-act="hilo" data-k="lo">Lower ▼</button><button class="btn alt sm" data-act="hilocash" ${hilo.streak?'':'disabled'}>Cash out</button>`:`<button class="btn" data-act="hilostart" ${S.money>=base*2?'':'disabled'}>Deal · <span class="coin">${fmtShort(base*2)}</span></button>`)}
    ${bwCard('🪙','#ffd36a','Coin flip','Heads you double it, tails the Fishmonger keeps it. '+S.gstats.flips+' flips, '+S.gstats.flipWins+' won.',
      flipRes?`<div class="val bwx-res" style="color:${flipRes.win?'var(--gold)':'var(--muted)'}">${esc(flipRes.txt)}</div>`:'<div class="bwx-art">🪙</div>', betBtn(.1)+betBtn(.25)+betBtn(.5))}
@@ -11510,14 +11513,20 @@ statsHTML = function(){ const h=_statsHTML_04(); if(statSec!=='overview') return
   return `<div class="tile st-play"><h4>Time played</h4>${statRow('On this save',playTimeStr(S.stats.playS))}${statRow('Fish caught',fmt(S.stats.caught||0))}${statRow('Coins earned',fmt(S.stats.earned||0))}</div>`+h; };
 
 // ---------- scrollbars: thin, no track, and only visible while you scroll or hover over a list ----------
+/* mouse screens only (batch 2, 2026-11-21): on touch screens the fading colour repainted the whole list on every fade, and the fish
+   pictures in it blanked for a frame each time (Cam's video, Cooler on a Pixel). Touch screens keep their own scroll bar, which
+   fades by itself without repainting anything. */
+const SB_FINE=matchMedia('(hover:hover) and (pointer:fine)');
 document.head.insertAdjacentHTML('beforeend',`<style>
+@media (hover:hover) and (pointer:fine){
 *{scrollbar-width:thin;scrollbar-color:transparent transparent;transition:scrollbar-color .45s ease}
 *:hover{scrollbar-color:rgba(170,205,235,.16) transparent}
 .sb-on,.sb-on:hover{scrollbar-color:rgba(190,220,245,.42) transparent}
+}
 .st-play{margin-bottom:10px}
 .badge{white-space:nowrap}
 </style>`);
-document.addEventListener('scroll',e=>{ const el=e.target===document?document.documentElement:e.target; if(!el||!el.classList) return; el.classList.add('sb-on'); clearTimeout(el._sbT); el._sbT=setTimeout(()=>el.classList.remove('sb-on'),900); },true);
+document.addEventListener('scroll',e=>{ if(!SB_FINE.matches) return; const el=e.target===document?document.documentElement:e.target; if(!el||!el.classList) return; el.classList.add('sb-on'); clearTimeout(el._sbT); el._sbT=setTimeout(()=>el.classList.remove('sb-on'),900); },true);
 
 // ---------- notification numbers: newly completed feats on the Feats tab (with a NEW mark inside), and the skill
 // sections that have something you can spend a point on (set in x_sections). Same little orange counter as the other tabs.
@@ -11605,7 +11614,8 @@ function sellFilterOn(){ const s=S.settings; return (s.sellR&&s.sellR!=='all')||
 // a fish stays in the cooler when it is protected (Protect rare fish setting) or does not match the filter
 // shinies: the "Sell shinies too" box decides on its own (it starts as before: off while Protect rare fish is on)
 function sellShinyOn(){ const s=S.settings; return s.sellShiny!=null ? !!s.sellShiny : !s.protectRare; }
-function sellKeep(f){ const s=S.settings, sp=SPI[f.id]; if(!sp) return true; if(f.sh) { if(!sellShinyOn()) return true; } else if(isProtected(f)) return true;
+function sellHybridOn(){ const s=S.settings; return s.sellHybrid!=null ? !!s.sellHybrid : !s.protectRare; } /* batch 2: the Hybrid switch beside Shinies starts the same way */
+function sellKeep(f){ const s=S.settings, sp=SPI[f.id]; if(!sp) return true; if(f.hy && !sellHybridOn()) return true; if(f.sh) { if(!sellShinyOn()) return true; } else if(isProtected(f)) return true;
   if(f.sh && s.protectRare && sp.r>=3) return true;
   if(s.sellR&&s.sellR!=='all'&&sp.r>+s.sellR) return true; if(+s.sellP>0&&salePrice(f)>=+s.sellP) return true; return false; }
 const _renderCooler_034 = renderCooler;
@@ -11613,8 +11623,8 @@ renderCooler = function(P){ _renderCooler_034(P); const btn=P.querySelector('[da
   const sel=(k,list,cur)=>`<select data-sf="${k}">${list.map(([v,n])=>`<option value="${v}" ${String(cur)===String(v)?'selected':''}>${n}</option>`).join('')}</select>`;
   // 0.3.4.3: the price is typed in (plain numbers or 50k / 1.2m); empty means any price
   const pv=+s.sellP>0?fmtShort(+s.sellP):'';
-  btn.insertAdjacentHTML('beforebegin',`<div class="sellf"><span class="meta">Sell</span>${sel('sellR',SELL_RAR,s.sellR||'all')}<label class="sellp"><span>under</span><input data-sp type="text" inputmode="decimal" autocomplete="off" placeholder="any price" value="${pv}" aria-label="Only sell fish worth less than this"></label>${+s.sellP>0?'<button class="btn alt sm" data-spclear title="Clear the price limit">×</button>':''}<button class="chipb sellsh" data-ssh aria-pressed="${sellShinyOn()}" title="When on, Sell all also sells shiny fish"><span class="ssh-star" aria-hidden="true">✦</span> Sell shinies too</button></div>`); { const n=S.cooler.filter(f=>!sellKeep(f)).length; btn.insertAdjacentHTML('afterend',`<button class="btn alt" data-act="scrapall" ${n?'':'disabled'} title="Scrap every fish Sell all would sell, for Fish Nibbles">Scrap ${sellFilterOn()?'matching':'all'} (${n})</button>`); } /* Cam's list #7: Scrap all sits right beside Sell all, the same size */ /* C11: Scrap all lives in the filter row, so it uses the same filters and travels with them on every layout */
-  const ssh=P.querySelector('[data-ssh]'); if(ssh) ssh.onclick=()=>{ S.settings.sellShiny=!sellShinyOn(); save(); renderPanel(); };
+  btn.insertAdjacentHTML('beforebegin',`<div class="sellf"><span class="meta">Sell</span>${sel('sellR',SELL_RAR,s.sellR||'all')}<label class="sellp"><span>under</span><input data-sp type="text" inputmode="decimal" autocomplete="off" placeholder="any price" value="${pv}" aria-label="Only sell fish worth less than this"></label>${+s.sellP>0?'<button class="btn alt sm" data-spclear title="Clear the price limit">×</button>':''}<button class="chipb sellsh" data-ssh aria-pressed="${sellShinyOn()}" title="When on, Sell all also sells shiny fish"><span class="ssh-star" aria-hidden="true">✦</span> Sell shinies too</button><button class="chipb sellsh" data-shy aria-pressed="${sellHybridOn()}" title="When on, Sell all also sells hybrid fish"><span class="ssh-star" aria-hidden="true">×</span> Sell hybrids too</button></div>`); { const n=S.cooler.filter(f=>!sellKeep(f)).length; btn.insertAdjacentHTML('afterend',`<button class="btn alt" data-act="scrapall" ${n?'':'disabled'} title="Scrap every fish Sell all would sell, for Fish Nibbles">Scrap ${sellFilterOn()?'matching':'all'} (${n})</button>`); } /* Cam's list #7: Scrap all sits right beside Sell all, the same size */ /* C11: Scrap all lives in the filter row, so it uses the same filters and travels with them on every layout */
+  const ssh=P.querySelector('[data-ssh]'); if(ssh) ssh.onclick=()=>{ S.settings.sellShiny=!sellShinyOn(); save(); renderPanel(); }; const shy=P.querySelector('[data-shy]'); if(shy) shy.onclick=()=>{ S.settings.sellHybrid=!sellHybridOn(); save(); renderPanel(); };
   P.querySelectorAll('[data-sf]').forEach(el=>el.onchange=()=>{ S.settings[el.dataset.sf]=el.value; save(); renderPanel(); });
   const inp=P.querySelector('[data-sp]'); if(inp){ const apply=()=>{ const v=sellParse(inp.value); if(v===+S.settings.sellP||(!v&&!(+S.settings.sellP))){ inp.value=v?fmtShort(v):''; return; } S.settings.sellP=v; save(); renderPanel(); };
     inp.addEventListener('change',apply); inp.addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); inp.blur(); } }); }
@@ -12576,7 +12586,7 @@ function uiTidy(P){ if(!P) return; const t=S.tab;
   if(t==='cooler'){ const f=P.querySelector('.sellf'); if(f&&!f.classList.contains('lab')){ f.classList.add('lab'); const s=f.querySelector(':scope > .meta'); if(s) s.remove();
       const wrap=(el,l)=>{ if(!el) return; const d=document.createElement('div'); d.className='fld'; d.innerHTML=`<span class="fld-l">${l}</span>`; el.parentNode.insertBefore(d,el); d.appendChild(el); };
       wrap(f.querySelector('[data-sf="sellR"]'),'Rarity'); const pr=f.querySelector('.sellp'); if(pr){ const sp=pr.querySelector('span'); if(sp) sp.remove(); wrap(pr,'Price under'); const x=f.querySelector('[data-spclear]'); if(x) pr.parentNode.appendChild(x); }
-      wrap(f.querySelector('[data-ssh]'),'Shinies');
+      wrap(f.querySelector('[data-ssh]'),'Shinies'); wrap(f.querySelector('[data-shy]'),'Hybrids');
       f.insertAdjacentHTML('afterbegin','<div class="fld-title">Sell all: what to sell</div>'); } }
   // any text box without a name gets one read out by screen readers and shown as a title
   P.querySelectorAll('input[type=text]:not([aria-label]):not([id])').forEach(i=>{ if(!i.closest('label')&&!(i.previousElementSibling&&/LABEL|SPAN|B/.test(i.previousElementSibling.tagName))) i.setAttribute('aria-label',i.placeholder||'Text'); }); }
@@ -12654,7 +12664,7 @@ if(/[?&]test\b/.test(location.search)) window.__search=q=>searchFind(q).map(e=>e
 
 document.head.insertAdjacentHTML('beforeend',`<style>
 .ctl-l{display:block;font:800 11px var(--display,system-ui);letter-spacing:.08em;text-transform:uppercase;color:#97abc2;margin:10px 0 6px}
-.sellf.lab{display:grid;grid-template-columns:auto auto auto;align-items:end;gap:10px 14px;margin:6px 0 10px;padding:10px 12px;border:1px solid var(--line,#26385180);border-radius:14px;background:#0e1828}
+.sellf.lab{display:grid;grid-template-columns:auto auto auto auto;align-items:end;gap:10px 14px;margin:6px 0 10px;padding:10px 12px;border:1px solid var(--line,#26385180);border-radius:14px;background:#0e1828}
 .sellf.lab .fld-title{grid-column:1/-1;font:800 13px var(--display,system-ui);color:var(--ink,#eef3f8)}
 .sellf.lab .fld{display:flex;flex-direction:column;gap:5px;min-width:0}
 .sellf.lab .fld-l{font:800 10.5px var(--display,system-ui);letter-spacing:.08em;text-transform:uppercase;color:#97abc2}
@@ -13968,7 +13978,6 @@ document.head.insertAdjacentHTML('beforeend',`<style>
 #catdock .cddot{position:absolute!important;top:-6px!important;right:calc(50% - 25px)!important;left:auto!important;min-width:18px!important;height:18px!important;padding:0 5px!important;box-sizing:border-box;border-radius:999px;background:linear-gradient(180deg,#ffb36a,#ff7a4a);color:#2a1206;font:800 10.5px/18px var(--display,system-ui)!important;text-align:center;box-shadow:0 0 8px #ff8a5c88}
 #catdock .cddot[hidden]{display:none!important}
 #catdock .cdb.live::before{content:"";position:absolute;top:5px;left:calc(50% - 21px);width:8px;height:8px;border-radius:50%;background:#ff5a6a;box-shadow:0 0 8px #ff5a6a;animation:livepulse 1.6s ease-in-out infinite}
-body.card-open #catdock{opacity:0;pointer-events:none}
 /* the tip line and the Rest button sit clear of the bar */
 body.dl-fish .wrap > #hint,body.dl-fish #stage > #hint{bottom:70px!important}
 /* PC and tablets: icon and name side by side */
@@ -14478,6 +14487,16 @@ document.head.insertAdjacentHTML('beforeend',`<style>@media (max-width:560px){
  #menuov #panel .bwx-pf{flex-wrap:wrap;justify-content:stretch;gap:5px}
  #menuov #panel .bwx-pf .btn{flex:1 1 auto;min-width:0;padding-left:6px;padding-right:6px}
 }</style>`);
+// Fishmonger's Gamble on phones (batch 2, 2026-11-21): after a play the result line pushed the fish buttons down until the card
+// was taller than the screen, and the centred line sat over left-aligned buttons. The buttons now sit two to a row (never more than
+// two rows: a long name wraps inside its button, never cut), the result line lines up with them, and an empty cooler shows the card's idle picture.
+document.head.insertAdjacentHTML('beforeend',`<style>
+html body.phone-land #menuov #panel .bwx-gl,html body.phone-app #menuov #panel .bwx-gl{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+html body.phone-land #menuov #panel .bwx-gl .btn,html body.phone-app #menuov #panel .bwx-gl .btn{min-width:0;display:flex;align-items:center;justify-content:center;gap:4px}
+html body.phone-land #menuov #panel .bwx-gl .gn,html body.phone-app #menuov #panel .bwx-gl .gn{min-width:0;white-space:normal;line-height:1.15;text-align:left;overflow-wrap:anywhere} /* names wrap, never cut (TEXT_STANDARD) */
+html body.phone-land #menuov #panel .bwx-gl .coin,html body.phone-app #menuov #panel .bwx-gl .coin{flex:0 0 auto}
+html body.phone-land #menuov #panel .bwx-res:has(+ .bwx-gl),html body.phone-app #menuov #panel .bwx-res:has(+ .bwx-gl){text-align:left}
+</style>`);
 
 // Aquarium on sideways phones and tablets: the tank comes straight under the earnings bar, so the whole tank is on screen
 // (with the side panel collapsed it fills the width); the boosts and the description follow it (director, 2026-11-17)
@@ -15039,7 +15058,7 @@ function homeHullDark(def,defDark){ const k=S&&S.dock&&S.dock.hull, h=k&&HOME_HU
 // =====================================================================
 { const _sc=showCard; showCard=function(o){ const ce=G.lastEntry; _sc(o); try{ if(!ce||!ce.hy) return; const sp=SPI[ce.id], other=SPI[ce.hy]; if(!sp) return; const b=$('cardbadges'); if(!b||b.querySelector('.hy-stats')) return;
       const avg=(sp.min+sp.max)/2, R=ce.kg/avg, bonus=clamp(Math.pow(R,.85)*(1+.6*Math.abs(Math.log(R))),.3,25)/Math.max(.0001,Math.pow(R,.85));
-      const boosts=aqBuffsOf(ce).map(x=>fmtB(x.k,x.v)).join(' and ');
+      const boosts=aqNet(ce).map(x=>fmtB(x.k,x.v)).join(' and ');
       b.insertAdjacentHTML('beforeend',`<span class="badge g hy-stats">${R>=1?'×'+(Math.round(R*10)/10)+' the usual weight':'×'+(Math.round(R*100)/100)+' the usual weight'}</span><span class="badge g hy-stats">Hybrid value ×${(Math.round(bonus*10)/10).toFixed(1)}</span>${boosts?`<span class="badge g hy-stats">Aquarium: ${esc(boosts)}</span>`:''}`); }catch(e){} }; }
 // =====================================================================
 // Water baits (director, 2026-11-18: "make bait listed that are associated with areas they're best at scale proportionally
@@ -15908,7 +15927,7 @@ function chestGive(p){ if(p.k==='tix') return '+'+addTickets(p.n)+' tickets'; if
 if(typeof ACT_OK==='object'){ ACT_OK.gamble=(k,i)=>Number.isInteger(i)&&i>=0&&i<S.cooler.length; ACT_OK.chestbuy=()=>true; ACT_OK.chestpick=(k,i)=>Number.isInteger(i)&&i>=0&&i<3; }
 { const _g=bwGamesHTML; bwGamesHTML=function(){ const h=_g(), L=gambleList();
   const gm=bwCard('🐟','#ff6f91','Fishmonger’s Gamble','Stake a fish from your cooler: half the time the Fishmonger keeps it (you get tickets), otherwise you win 1.8×, 3× or even 8× its price in coins. '+(S.gstats.gambles||0)+' played.',
-    (gamble?`<div class="val bwx-res" style="color:${gamble.win?'var(--gold)':'var(--muted)'}">${esc(gamble.txt)}</div>`:'')+(L.length?`<div class="bwx-gl">${L.map(x=>`<button class="btn alt sm" data-act="gamble" data-i="${x.i}">${esc(SPI[x.f.id].name)} · <span class="coin">${fmtShort(x.p)}</span></button>`).join('')}</div>`:'<div class="meta">Your cooler is empty: catch something to stake.</div>'),'');
+    (gamble?`<div class="val bwx-res" style="color:${gamble.win?'var(--gold)':'var(--muted)'}">${esc(gamble.txt)}</div>`:'')+(L.length?`<div class="bwx-gl">${L.map(x=>`<button class="btn alt sm" data-act="gamble" data-i="${x.i}"><span class="gn">${esc(SPI[x.f.id].name)}</span> · <span class="coin">${fmtShort(x.p)}</span></button>`).join('')}</div>`:'<div class="meta">Your cooler is empty: catch something to stake.</div>'),'');
   const ch=bwCard('🧰','#c8a26a','Treasure chests',CHEST_COST+' tickets: three chests, pick one. Tickets, Scales, Nibbles, favourite foods, sometimes coins, and rarely a pet color you can’t buy.',
     chest?`<div class="ducks">${chest.prizes.map((p,i)=>{ const open=chest.pick>=0; return `<button class="duckb ${open?(i===chest.pick?'picked':'open'):''}" data-act="chestpick" data-i="${i}" ${open?'disabled':''} aria-label="Chest ${i+1}">${open?esc(chestLabel(p)):'🧰'}</button>`; }).join('')}</div>${chest.pick>=0?`<div class="val bwx-res">${esc(chest.msg)}</div>`:''}`:'<div class="bwx-art">🧰 🧰 🧰</div>',
     `<button class="btn${chest&&chest.pick<0?' alt':''}" data-act="chestbuy" ${S.tickets>=CHEST_COST&&!(chest&&chest.pick<0)?'':'disabled'}>${chest?'Another chest':'Open'} · 🎟 ${CHEST_COST}</button>`);
@@ -16019,7 +16038,7 @@ function drawBobSkin(g,x,y,br,id){ const B=BOBI[id||(S.look&&S.look.bob)]; if(!B
 { const _rp2=renderPass; renderPass=function(P){ _rp2(P); try{ P.querySelectorAll("canvas[data-pex]").forEach(cv=>{ const x=cv.getContext("2d"); x.clearRect(0,0,cv.width,cv.height); passArt(x,cv.width,cv.height,+cv.dataset.pex); }); }catch(e){} }; }
 // ---------- Wardrobe: wear what the Pass gave you ----------
 // Wardrobe › Tide Pass tab: picture tiles (the same tiles as the rest of the Wardrobe), locked ones show the level that brings them
-function passWearHTML(){ const grid=(k,list,cur,label)=>{ const own=passOwnList(k); const tile=(id,name,ok,L)=>`<button class="wd-th${ok?'':' pw-lock'}" data-act="passwear" data-k="${k}:${id}" aria-pressed="${(cur||'none')===id}" ${ok?'':'disabled'} title="${ok?'Wear it':'Tide Pass level '+L}"><canvas width="96" height="96" data-pw="${k}:${id}"></canvas><span>${esc(name)}${ok?'':' · Lv '+L}</span></button>`;
+function passWearHTML(){ const grid=(k,list,cur,label)=>{ const own=passOwnList(k); const tile=(id,name,ok,L)=>`<button class="wd-th${ok?'':' pw-lock'}" data-act="passwear" data-k="${k}:${id}" aria-pressed="${(cur||'none')===id}" ${ok?'':'disabled'} title="${ok?'Wear it':'Tide Pass level '+L}"><canvas width="${k==='aura'?144:96}" height="${k==='aura'?144:96}" data-pw="${k}:${id}"></canvas><span>${esc(name)}${ok?'':' · Lv '+L}</span></button>`;
     return `<h5>${label}</h5><div class="wd-thumbs">${tile('none','None',true,0)}${list.map(a=>{ const L=Object.keys(PASS_SPECIAL).find(l=>PASS_SPECIAL[l][0]===k&&PASS_SPECIAL[l][1]===a[0]); return tile(a[0],a[1].replace(/ (aura|Bobber|Line)$/,''),own.includes(a[0]),L); }).join('')}</div>`; };
   return `<p class="sub">Only from the Tide Pass. Auras move around your angler, bobber skins and line colors show on the water.</p>${grid('aura',AURAS,S.look.aura,'Aura')}${grid('bob',BOBS,S.look.bob,'Bobber')}${grid('line',LINES,S.look.line,'Line')}`; }
 function passWearPaint(root){ (root||document).querySelectorAll('canvas[data-pw]').forEach(cv=>{ const [k,id]=cv.dataset.pw.split(':'), x=cv.getContext('2d'), w=cv.width, h=cv.height; x.clearRect(0,0,w,h);
@@ -16028,7 +16047,7 @@ function passWearPaint(root){ (root||document).querySelectorAll('canvas[data-pw]
   else if(k==='bob') drawBobSkin(x,w/2,h*.55,h*.18,id);
   else { const L=LINEI[id]; x.lineWidth=4; x.strokeStyle=L[2]==='star'?'hsl(270,90%,80%)':L[2].replace('A',1); x.beginPath(); x.moveTo(w*.12,h*.2); x.quadraticCurveTo(w*.45,h*.95,w*.86,h*.42); x.stroke(); drawBobSkin(x,w*.86,h*.45,h*.08,null); } }); }
 { const _rs=renderStyle; renderStyle=function(P){ const r=_rs.apply(this,arguments); try{ if(typeof wSec!=='undefined'&&wSec==='tidepass') passWearPaint(P||$('panel')); }catch(e){} return r; }; }
-document.head.insertAdjacentHTML('beforeend','<style>#panel .wd-th.pw-lock{opacity:.5}#panel .wd-th.pw-lock canvas{filter:grayscale(.7) brightness(.7)}</style>');
+document.head.insertAdjacentHTML('beforeend','<style>#panel .wd-th canvas[data-pw^="aura:"]{width:100%!important;height:auto!important;max-width:120px;aspect-ratio:1} /* batch 2: aura previews fill their tile (they were a small figure in a big tile) */#panel .wd-th.pw-lock{opacity:.9}#panel .wd-th.pw-lock span{opacity:.75} /* batch 2: locked previews stay bright (try before you buy); the label says the level */</style>');
 { const _ea=extraAct7; extraAct7=function(b){ if(b.dataset.act==='passwear'){ const [k,id]=String(b.dataset.k||'').split(':'); if(!PASS_NEW_KINDS[k]) return 'skip'; if(id!=='none'&&!passOwnList(k).includes(id)) return 'skip';
     S.look[k]=id==='none'?'none':id; save(); return 'render'; } return _ea(b); }; }
 if(typeof ACT_OK==='object') ACT_OK.passwear=k=>/^(aura|bob|line):[a-z]+$/.test(String(k));
@@ -19105,7 +19124,7 @@ html body.phone-land #menuov #panel.pg08[data-pg-tab="bait"] .bt8 > h2,html body
 { const _rp=renderPanel; renderPanel=function(){ const r=_rp.apply(this,arguments); try{ if(!MOB()||S.tab!=='cooler') return r; const P=$('panel'); if(!P) return r;
       const t=P.querySelector('.sellf .fld-title'); if(t) t.textContent='Sell all:';
       const inp=P.querySelector('.sellf [data-sp]'); if(inp) inp.placeholder='Max price';
-      const sh=P.querySelector('.sellf [data-ssh]'); if(sh&&!sh.dataset.mb8){ sh.dataset.mb8='1'; sh.innerHTML='<span class="ssh-star" aria-hidden="true">✦</span> Shinies'; }
+      const sh=P.querySelector('.sellf [data-ssh]'); if(sh&&!sh.dataset.mb8){ sh.dataset.mb8='1'; sh.innerHTML='<span class="ssh-star" aria-hidden="true">✦</span> Shinies'; } const hy=P.querySelector('.sellf [data-shy]'); if(hy&&!hy.dataset.mb8){ hy.dataset.mb8='1'; hy.innerHTML='<span class="ssh-star" aria-hidden="true">×</span> Hybrids'; }
       const dm=[...P.querySelectorAll('.tile')].find(x=>/fishmonger wants/i.test(x.textContent)); if(dm) dm.classList.add('cl8-dm');
     }catch(e){ console.error(e); } return r; }; }
 document.head.insertAdjacentHTML('beforeend',`<style>
@@ -19928,6 +19947,9 @@ document.head.insertAdjacentHTML('beforeend','<style>html body.phone-land #menuo
 /* C12 (director + Cam, 2026-11-20): a chosen color keeps its own color and gets a gold box around it (the general "chosen chip" gold
    used to fill the whole swatch, so you couldn't see which color you had) */
 document.head.insertAdjacentHTML('beforeend','<style>html body.phone-app #menuov .chips .sw[aria-pressed="true"],html body.phone-land #menuov .chips .sw[aria-pressed="true"]{background:var(--swc)!important;border-color:transparent!important;box-shadow:0 0 0 2px #0b1626,0 0 0 4px #ffd36a!important}</style>');
+pageDone('games',P=>{ /* Fishmonger's Gamble with an empty cooler: the card's idle picture, like the other game cards (batch 2; the rest is in ui_boardwalk.js) */
+  const c=[...P.querySelectorAll('.bwx-card')].find(x=>/Gamble/.test(x.textContent)); const m=c&&[...c.querySelectorAll('.meta')].find(x=>/cooler is empty/i.test(x.textContent));
+  if(m&&!c.querySelector('.bwx-art')) m.insertAdjacentHTML('beforebegin','<div class="bwx-art" aria-hidden="true">🐟 ⚖️ 🪙</div>'); });
 // =====================================================================
 // Phones: the SET MEASUREMENTS (director, 2026-11-18: "I want standards and set measurements for each platform going forward,
 // I'm tired of the same mistakes"). The numbers are written down in docs/PLATFORM_DESIGN.md ("Phone frame: set measurements")
@@ -20432,12 +20454,29 @@ PATCHES.unshift({v:'0.4.9', name:'Work in progress', items:phoneNotes([
   'Quests shows the live event when one is on, and each Feats category says what finishing it gives.',
   'Small iPhones: the top bar keeps every word whole; when room runs out, the chips sit a little closer together instead of cutting the bait name.',
   'Menus use much less memory: pictures a page no longer shows are let go at once, and outfit previews share their drawing space (iPhones could run short of memory after opening many pages).',
-  'A few fish that shared a name with another now have names of their own (your Fish Log keeps every catch). Tall creatures show whole in their pictures, and picking an option in a menu no longer makes the page jump.'])});
+  'A few fish that shared a name with another now have names of their own (your Fish Log keeps every catch). Tall creatures show whole in their pictures, and picking an option in a menu no longer makes the page jump.',
+  '## Fixes',
+  'Aquarium boosts show what you really get: a titled shiny’s lift on the other fish now counts on the Aquarium page, in each fish’s line and on the catch card.',
+  'Catch cards always show what you caught (after a shiny or mythic fish, the next card kept showing that fish), and the side panel stays on screen while one shows.',
+  'Fish pictures in lists no longer blink as the scroll bar fades.',
+  'Cooler: a Hybrids switch beside Shinies in the Sell all filter. An empty Cooler shows a Go fishing button instead of a blank page.',
+  'Boardwalk: Fishmonger’s Gamble keeps its fish buttons two to a row, so the card fits after a play. Mystery crates has a picture, and Higher or lower keeps its picture after a game.',
+  'Wardrobe › Tide Pass: bigger aura previews that stay bright while locked, so you can see each one before you reach it.'
+])});
 // Phone test notes, Android and iPhone in one file (since 2026-11-20). Preview builds only; the live game never shows them.
 // Grouped by test build, newest first (director, 2026-11-20): new lines go under '## New in this build'; when that build is published the heading becomes '## Test build <stamp>' at the next round. Curly apostrophes only. The card opens once per device whenever the
 // text changes. Released notes live in notes_release.js.
 const TEST_NOTES={v:'test', label:'Test build · '+(window.DL_BUILD==='ios'?'iPhone':'Android'), name:'0.4.9 test build (newest first)', items:[
   '## New in this build',
+  'Wardrobe › Tide Pass: the aura previews are bigger and stay bright while locked, so you can see each aura before you reach it.',
+  'Empty Cooler: a picture, what the Cooler is for, and a Go fishing button instead of a mostly blank page.',
+  'Boardwalk: Mystery crates has a picture like the other games, and Higher or lower keeps its picture after a game.',
+  'Fishmonger’s Gamble: after a play the fish buttons sit two to a row and the result lines up with them, so the card no longer grows past the screen (a long name wraps inside its button; the price always shows). With an empty cooler the card shows its picture like the other games.',
+  'Catch cards always show what you caught: after a shiny or mythic fish, the next card (an oddity, say) kept showing that fish.',
+  'Fish pictures in lists (Cooler, Aquarium, Fish Log) no longer blank for a moment when the scroll bar fades: phones use their own scroll bar now.',
+  'The side panel stays on screen while a catch card is showing (it vanished).',
+  'Cooler: a Hybrids switch beside Shinies in the Sell all filter. Off keeps hybrids when you Sell all or Scrap all; it starts like Shinies.',
+  'Aquarium boosts show what you really get: a titled shiny’s lift on the other fish now counts on the Aquarium page, in each fish’s line and on the catch card (they showed less than you got). A new species’ catch card shows that fish’s own boost, not the species’ average.',
   'Settings: the Download for Windows button is gone from test builds (it gave the live app; play the test build in the browser instead).',
   '## Test build 1549',
   'Living maps, every water held to the map standard: Willow Pond, a mother duck leads 3 to 5 ducklings across the far water by day and a tawny owl glides low over the pond at night (every 50 s). Saltmarsh Coast, a pod of porpoises rolls past (every 42 s). Ember Springs, a geyser at the foot of the hill erupts (every 45 s, a little higher or lower each time) and ravens circle by day. Animal Farm, fireflies by the fence and a barn owl at night, birds only by day, the tractor every 55 s. The Nile, fruit bats at night. Corporate Pond, pigeons strut on the ticker by day. The Buffet, a gummy bear rows a cracker across the lake. Stonebrook otters every 24 s.',
@@ -20742,9 +20781,11 @@ ui(){ QA.sys='UI';
     const r=shop[0]; S.rods.owned=S.rods.owned.filter(x=>x!==r.id); S.unlocked=uniq([...S.unlocked,r.need]); S.money=r.price; S.scales=rodScales(r)-1; act('rodbuy',{k:r.id}); if(S.rods.owned.includes(r.id)) e.push('bought without enough Scales');
     S.scales=rodScales(r)+3; act('rodbuy',{k:r.id}); if(!S.rods.owned.includes(r.id)) e.push('not bought with enough Scales'); else if(S.scales!==3) e.push('Scales not taken ('+S.scales+' left)');
     return e.length?{ok:false,detail:e.join(' | ')}:{ok:true,detail:sc.join(', ')}; });
+  T('batch 2: a card after a shiny fish shows its own picture (the sparkle animation of the fish before is let go)',()=>{ const keep=G.fish; try{ const f=rollFish(SP.find(s=>s.r===5)||SP[0],{noPrey:true,noHybrid:true}); f.shiny=1; G.fish=f; landFish(); const a=SPK.has($('cardfish')); hideCard(); G.fish={item:JUNK[0]}; landJunk(); const b=SPK.has($('cardfish')); hideCard(); return {ok:a&&!b, detail:'fish card animated '+a+', oddity card still animated as the fish '+b}; } finally{ G.fish=keep; } });
   T('[18] a titled shiny brings three bonuses of its own, lifts every other fish in the tank (capped), and adds coins on every voyage (capped)',()=>{ const e=[]; const sp=SP.find(s=>s.r===2)||SP[0];
     for(const pv of Object.keys(PRISM)){ const T=TITLE_BUFFS[pv]; if(!T||T.keys.length!==3) { e.push(pv+' has no title bonuses'); continue; } const bs=aqBuffsOf({id:sp.id,kg:sp.min,value:100,sh:2,pv}).filter(b=>b.title); if(bs.length!==3) e.push(pv+': '+bs.length+' title bonuses'); }
     const other={id:sp.id,kg:sp.max,value:100,sh:0,ab:{k:'bite',t:2,w:1}}; S.tank=[other]; const a=aqSum('bite'); S.tank=[other,{id:sp.id,kg:sp.min,value:100,sh:2,pv:'ancient'}]; const b=aqSum('bite')-aqBuffsOf(S.tank[1]).filter(x=>x.k==='bite').reduce((s,x)=>s+x.v,0); if(Math.abs(b-a*1.10)>1e-9) e.push('aura: '+a.toFixed(4)+' → '+b.toFixed(4)+' (want ×1.10)');
+    { const big=Object.assign({},other,{kg:sp.max*40}); S.tank=[big,S.tank[1]]; const lift=fmtB('bite',aqBuffsOf(big)[0].v*1.10), plain=fmtB('bite',aqBuffsOf(big)[0].v); if(lift!==plain && aqTxt(big).indexOf(lift)!==0) e.push('shown boost leaves out the lift: '+aqTxt(big)+' (want '+lift+')'); } /* batch 2: shown = applied */
     S.tank=[other,...Array(6).fill(0).map(()=>({id:sp.id,kg:sp.min,value:100,sh:2,pv:'ancient'}))]; if(titleAura()!==TITLE_AURA_CAP) e.push('aura not capped: '+titleAura());
     const c0=coinMult(); S.titled={}; const c1=coinMult(); S.titled={a:1,b:1,c:1}; if(Math.abs(coinMult()-c1-.03)>1e-9) e.push('3 titles add '+(coinMult()-c1).toFixed(3)); S.titled=Object.fromEntries(Array(40).fill(0).map((_,i)=>['k'+i,1])); if(Math.abs(coinMult()-c1-TITLE_COIN_CAP)>1e-9) e.push('title coins not capped');
     const o=JSON.parse(JSON.stringify(S)); delete o.titled; o.journal={[sp.id]:{n:1,best:1,pr:true}}; const m=migrate(o); if(Object.keys(m.titled).length!==1) e.push('old save titles '+JSON.stringify(m.titled));
@@ -21471,7 +21512,9 @@ let toastT=0; function toast(m){ const el=$('toast'); el.textContent=m; el.class
 
 // ---------- catch card ----------
 function showCard(o){
-  o.draw($('cardfish')); $('cardin').classList.toggle('shiny',!!o.shiny);
+  /* the last card's sparkle animation is let go first: it kept repainting a shiny or mythic fish over the next card's picture
+     (batch 2: a Brass Spyglass card showed the fish caught before it). A fish card attaches its own again. */
+  spkDrop($('cardfish')); o.draw($('cardfish')); $('cardin').classList.toggle('shiny',!!o.shiny);
   $('cardrar').textContent=o.rar; $('cardrar').style.color=o.rarCol; $('cardname').textContent=o.name;
   $('cardnums').innerHTML=o.nums.map(n=>`<div><span>${esc(n[0])}</span><b${n[2]?' class="coin"':''}>${esc(n[1])}</b></div>`).join('');
   if(o.html) $('carddesc').innerHTML=o.desc; else $('carddesc').textContent=o.desc;
@@ -21509,7 +21552,7 @@ var rpOld=null, rpT=0; /* var: a page drawn while the game is still loading must
 function rpRelease(){ clearTimeout(rpT); if(rpOld) for(const c of rpOld) if(!c.isConnected&&c.width){ c.width=0; c.height=0; } rpOld=null; }
 function renderPanel(){ const P=$('panel'); rpRelease(); rpOld=[...P.getElementsByTagName('canvas')]; rpT=setTimeout(rpRelease,0); const fn={cooler:renderCooler, shop:renderShop, skills:renderSkills2, aquarium:renderAquarium, bounties:renderBounties, feats:renderFeats, journal:renderJournal, map:renderMap, style:renderStyle, pets:renderPets, save:renderSave, games:renderBoardwalk, settings:renderSettings, rods:renderRods, paths:renderPaths, home:renderHome, pass:renderPass}[S.tab]||renderCooler; fn(P); }
 const tags = f => (f.sh===2?' <span class="sh" style="color:'+PRISM[f.pv||'rainbow'].c+'">✦✦ '+PRISM[f.pv||'rainbow'].n+' prismatic</span>':f.sh?' <span class="sh">✦ Shiny</span>':'')+(f.hy?' · <span class="sh">Hybrid</span>':'')+(f.tr?' · Trophy':'');
-const aqTxt = f => { const L=aqBuffsOf(f), sp=SPI[f.id]; return L.length ? L.map(e=>fmtB(e.k,e.v)+(sp&&e.t!==sp.r?' ('+RAR[e.t].k+' boost)':'')).join(' + ') : 'no special effect'; };
+const aqTxt = f => { const L=aqNet(f), sp=SPI[f.id]; return L.length ? L.map(e=>fmtB(e.k,e.v)+(sp&&e.t!==sp.r?' ('+RAR[e.t].k+' boost)':'')).join(' + ') : 'no special effect'; };
 
 const isProtected = f => S.settings.protectRare && (f.sh || SPI[f.id].r>=3);
 /* C14 (director + Cam, 2026-11-20): sort the cooler by most/least recent, sell value, aquarium bonus or species. Most recent after
@@ -21519,7 +21562,7 @@ function coolOrder(){ const L=S.cooler.map((f,i)=>({f,i})); const nm=x=>(SPI[x.f
   if(coolSort==='old') return L; if(coolSort==='value') return L.sort((a,b)=>salePrice(b.f)-salePrice(a.f)); if(coolSort==='aq') return L.sort((a,b)=>fishRate(b.f)-fishRate(a.f)); if(coolSort==='species') return L.sort((a,b)=>nm(a).localeCompare(nm(b))||b.i-a.i); if(coolSort==='rarity'){ const rk=x=>(SPI[x.f.id]||{r:-1}).r*10+(x.f.sh?(x.f.sh===2?2:1):0); return L.sort((a,b)=>rk(b)-rk(a)||salePrice(b.f)-salePrice(a.f)); } return L.reverse(); }
 const coolSortBar=()=>S.cooler.length<2?'':`<div class="cool-sort" role="group" aria-label="Sort the cooler"><span class="meta">Sort</span>${COOL_SORTS.map(([k,n])=>`<button type="button" class="chip${coolSort===k?' on':''}" data-act="coolsort" data-k="${k}" aria-pressed="${coolSort===k}">${n}</button>`).join('')}</div>`;
 { const _ea=extraAct7; extraAct7=function(b){ if(b.dataset.act==='coolsort'){ if(COOL_SORTS.some(s=>s[0]===b.dataset.k)) coolSort=b.dataset.k; return 'render'; } return _ea(b); }; }
-document.head.insertAdjacentHTML('beforeend','<style>.cool-sort{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:10px 0 2px}.cool-sort .chip{height:32px;padding:0 12px;border-radius:10px;border:1px solid var(--line);background:var(--glass,#16243a);color:#cfe0ee;font:700 12.5px var(--display,system-ui);cursor:pointer}.cool-sort .chip.on{background:linear-gradient(180deg,#ffe08a,#f3b94e);color:#2a1c05;border-color:#ffe6a3}</style>');function renderCooler(P){
+document.head.insertAdjacentHTML('beforeend','<style>.cool-empty{display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center;padding:22px 16px}.cool-empty .bwx-art{font-size:34px;line-height:1.1}.cool-empty .meta{max-width:420px}.cool-sort{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:10px 0 2px}.cool-sort .chip{height:32px;padding:0 12px;border-radius:10px;border:1px solid var(--line);background:var(--glass,#16243a);color:#cfe0ee;font:700 12.5px var(--display,system-ui);cursor:pointer}.cool-sort .chip.on{background:linear-gradient(180deg,#ffe08a,#f3b94e);color:#2a1c05;border-color:#ffe6a3}</style>');function renderCooler(P){
   const total=S.cooler.filter(f=>!sellKeep(f)).reduce((a,f)=>a+salePrice(f),0); const tankFree = S.tank.length < aqCap(); const dm=demandSp();
   P.innerHTML=`<div class="row spread"><div><h2>Cooler</h2><p class="sub">${S.cooler.length} of ${gv('cooler')} slots. Your bonuses add +${Math.round((sellMult()-1)*100)}% to every sale. Fish in the aquarium earn coins and give stacking boosts.</p></div>
   <button class="btn" data-act="sellall" ${total?'':'disabled'}>Sell ${sellFilterOn()?"matching":"all"}${S.cooler.some(sellKeep)?" (keeping "+S.cooler.filter(sellKeep).length+")":""} for <span class="coin">${fmt(total)}</span></button></div>
@@ -21528,11 +21571,11 @@ document.head.insertAdjacentHTML('beforeend','<style>.cool-sort{display:flex;fle
   (S.cooler.length ? coolSortBar()+'<div class="list">'+coolOrder().map(({f,i})=>{ const sp=SPI[f.id]; return `<div class="fishrow"><canvas width="128" height="64" data-fish="${f.id}" data-sh="${f.sh||0}" data-pv="${f.pv||''}"></canvas>
    <div class="nm"><span style="color:${RAR[sp.r].c}">${sp.name}</span><small>${RAR[sp.r].k} · ${kgStr(f.kg)}${tags(f)} · <span class="aq">Aquarium: ${aqTxt(f)}</span></small></div>
    <div class="val coin" ${dm.id===f.id?'style="color:var(--gold)" title="Fishmonger pays double"':''}>${fmt(salePrice(f))}${dm.id===f.id?' ×2':''}</div><div class="acts"><button class="btn alt sm" data-act="totank" data-i="${i}" ${tankFree?'':'disabled'} title="${tankFree?'Earns '+fmt(fishRate(f)*60)+' coins per hour':'Aquarium is full'}">To aquarium</button><button class="btn alt sm" data-act="sell" data-i="${i}">Sell</button>${nibScrapBtn(f,i)}</div></div>`; }).join('')+'</div>'
-   : '<div class="empty">Nothing in the cooler yet. Cast a line and land your first fish.</div>');
+   : '<div class="empty cool-empty"><div class="bwx-art" aria-hidden="true">🧊 🐟</div><b>Your cooler is empty</b><div class="meta">Fish you catch wait here. Sell them, scrap them for Nibbles or put them in the aquarium.</div><button class="btn" data-mo="close">Go fishing</button></div>'); /* batch 2: the empty page was mostly blank space */
   paintFish(P);
 }
 function renderAquarium(P){ accrue(); const rate=tankRate(); let AQS=null; const next=TANK_COST[S.tankSlots];
-  const sums={}; for(const f of S.tank) for(const e of aqBuffsOf(f)) sums[e.k]=(sums[e.k]||0)+e.v;
+  const sums={}; for(const f of S.tank) for(const e of aqNet(f)) sums[e.k]=(sums[e.k]||0)+e.v;
   const chips=Object.entries(sums).map(([k,v])=>`<span class="badge k">${fmtB(k,Math.min(v,BONUS_CAP[k]||9))}</span>`).join('');
   P.innerHTML=`<div class="row spread"><div><h2>Aquarium</h2><p class="sub">Visitors pay to see your fish, even while you’re away (up to 8 hours). Every fish gives a boost while on display, and boosts stack. Each fish rolls its own boost when caught: usually one that fits its rarity, now and then a much better (or weaker) one. Heavier fish give more, shiny fish double, and the strangest catches give the most.</p></div>
   <div class="bank"><div><div class="sub">Earning</div><b class="coin" title="${fmt(rate*60)} coins an hour">${fmtShort(rate*60)}</b><span class="sub"> / hour</span></div><div><div class="sub">Ready to collect</div><b class="coin" id="tankbank" title="${fmt(S.tankBank)} coins">${fmtShort(S.tankBank)}</b></div>
