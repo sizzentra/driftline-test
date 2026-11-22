@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="DL Test Android">
 <script>
-window.DL_BUILD='android'; window.DL_PREVIEW=true; if(/[?&]sweep\b/.test(location.search)){ window.__bootErr=[]; addEventListener("error",function(e){ __bootErr.push(String(e.message||e)+(e.lineno?" (line "+e.lineno+")":"")); }); addEventListener("unhandledrejection",function(e){ __bootErr.push("promise: "+String(e.reason&&e.reason.message||e.reason)); }); window.requestAnimationFrame=function(f){ return setTimeout(function(){ f(performance.now()); },16); }; window.cancelAnimationFrame=function(i){ clearTimeout(i); }; } window.DL_VERSION='2026.11.22-0540';
+window.DL_BUILD='android'; window.DL_PREVIEW=true; if(/[?&]sweep\b/.test(location.search)){ window.__bootErr=[]; addEventListener("error",function(e){ __bootErr.push(String(e.message||e)+(e.lineno?" (line "+e.lineno+")":"")); }); addEventListener("unhandledrejection",function(e){ __bootErr.push("promise: "+String(e.reason&&e.reason.message||e.reason)); }); window.requestAnimationFrame=function(f){ return setTimeout(function(){ f(performance.now()); },16); }; window.cancelAnimationFrame=function(i){ clearTimeout(i); }; } window.DL_VERSION='2026.11.22-1436';
 window.addEventListener('beforeinstallprompt',function(e){ e.preventDefault(); window.__dlInstallPrompt=e; });
 </script>
 </head>
@@ -2095,7 +2095,7 @@ const fishPull = s => s.str*4/3;
 const anglerStr = () => gv('line')/tensionMult()*(1+.02*boonR('strength')); /* C30: + the Strong Arms boon */
 const strTxt = v => Math.round(wNum(v))+' '+wUnit();
 function strStand(sps){ const ps=sps.map(fishPull), lo=Math.min(...ps), hi=Math.max(...ps), a=anglerStr(); return {lo, hi, a, beat:ps.filter(p=>p<=a).length, n:ps.length, pos:clamp((a-lo)/Math.max(1,hi-lo),0,1)}; }
-function strStandHTML(sps){ const s=strStand(sps); return `<div class="meta strst" title="Angler strength comes from your Line (Tackle) and skills that lower tension. Fish stronger than you put up a fight: let them run, reel when they rest.">Fish ${strTxt(s.lo)}–${strTxt(s.hi)} <span class="strbar" aria-hidden="true"><i style="left:${(s.pos*100).toFixed(0)}%"></i></span> you ${strTxt(s.a)} · stronger than ${s.beat} of ${s.n}</div>`; }
+function strStandHTML(sps){ const s=strStand(sps); return `<div class="meta strst" title="Angler strength comes from your Line (Tackle) and skills that lower tension. Fish stronger than you put up a fight: let them run, reel when they rest.">Fish ${Math.round(wNum(s.lo))}–${strTxt(s.hi)} <span class="strbar" aria-hidden="true"><i style="left:${(s.pos*100).toFixed(0)}%"></i></span> your line holds ${strTxt(s.a)}, enough for ${s.beat>=s.n?"all "+s.n:s.beat+" of "+s.n}</div>`; }
 document.head.insertAdjacentHTML('beforeend','<style>.strst{white-space:normal;overflow-wrap:anywhere}.strst .strbar{white-space:nowrap}.strbar{display:inline-block;position:relative;width:56px;height:6px;border-radius:3px;margin:0 4px;vertical-align:middle;background:linear-gradient(90deg,#5ad8b0,#ffd36a,#ff7a5a)}.strbar i{position:absolute;top:-3px;width:4px;height:12px;margin-left:-2px;background:#fff;border-radius:2px;box-shadow:0 0 3px #000c}</style>');
 // Legendary and mythic fish have a signature surge: halfway in (and again near the end for mythics) they make one long,
 // heavy run with a burst of spray, then go still for a moment, then leap. Watching the fish beats it; holding loses it.
@@ -16263,7 +16263,7 @@ HOMEF.pond = { name:'Willow Pond dock', hname:'dock',
 };
 /* ---------- the Home page for a format home: a close-up of the home and its 6 features (styles, then the home's one colour list) ---------- */
 function renderHomeF(P){ const sp=hfSpec(S.loc), L=LOCS[locIdx(S.loc)];
-  const sw=(e,c,i,on)=>`<button type="button" class="chipb hf-col" data-act="hfcol" data-k="${e.id}" data-v="${i}" aria-pressed="${on}" title="${esc(c[0])}"><span class="hm-sw${e.id==='light'?' hm-glow':''}" style="background:${e.id==='light'?'radial-gradient(circle,'+c[1]+' 0%,'+c[1]+'59 55%,transparent 75%)':c[1]}"></span>${esc(c[0])}</button>`;
+  const sw=(e,c,i,on)=>`<button type="button" class="chipb hf-col" data-act="hfcol" data-k="${e.id}" data-v="${i}" aria-pressed="${on}" title="${esc(c[0])}"><span class="hm-sw" style="background:${c[1]}"></span>${esc(c[0])}</button>`;
   P.innerHTML=`<i class="hf-mark" hidden></i>
    <div class="tile" style="margin-top:10px;padding:0;overflow:hidden"><canvas id="homecv" width="900" height="360" style="width:100%;height:auto;cursor:default"></canvas></div>`+
    sp.els.map(e=>{ const [s,c]=hfChoice(S.loc,e.id);
@@ -16905,7 +16905,9 @@ function traitProbe(sp){ if(TRAIT_PROBE[sp.id]!==undefined) return TRAIT_PROBE[s
     let bot=null, top=null; for(let py=S-1;py>=0;py--) if(on(bx,py)){ bot=(py-S/2)/M; break; } for(let py=0;py<S;py++) if(on(bx,py)){ top=(py-S/2)/M; break; }
     /* the eye: where the pupil sits next to eye-white, from the normal drawing */ let eye=null; try{ x.clearRect(0,0,S,S); drawCreature3(x,sp,S/2,S/2,M,{t:0,still:1}); const e=x.getImageData(0,0,S,S).data, dark=(px,py)=>{ const i=(py*S+px)*4; return e[i]<45&&e[i+1]<45&&e[i+2]<50&&e[i+3]>200; }, white=(px,py)=>{ const i=(py*S+px)*4; return Math.abs(e[i]-244)<14&&Math.abs(e[i+1]-240)<14&&Math.abs(e[i+2]-230)<16&&e[i+3]>200; };
       let sx=0, sy=0, n=0; for(let py=2;py<S-2;py++) for(let px=S/2;px<S-2;px++){ if(!white(px,py)) continue; let ok=false; for(let dy=-4;dy<=4&&!ok;dy++) for(let dx=-4;dx<=4;dx++) if(dark(px+dx,py+dy)){ ok=true; break; } if(ok){ sx+=px; sy+=py; n++; } } if(n>=4) eye={x:(sx/n-S/2)/M, y:(sy/n-S/2)/M, r:Math.sqrt(n/Math.PI)/M}; }catch(e){}
-    TRAIT_PROBE[sp.id]={nose,bot,top,head,eye}; }catch(e){} return TRAIT_PROBE[sp.id]; }const TRAIT_MASKS={}, TRAIT_OFF=document.createElement('canvas'); let TRAIT_MASKN=0;
+    const prof=[]; for(let f=-.5;f<=.56;f+=.02){ const px=Math.round(S/2+M*f); for(let py=0;py<S;py++) if(on(px,py)){ prof.push([f,(py-S/2)/M]); break; } } /* the top outline along the body: things that sit on the back rest on it (2026-11-22) */
+    TRAIT_PROBE[sp.id]={nose,bot,top,head,eye,prof}; }catch(e){} return TRAIT_PROBE[sp.id]; }
+function traitTopAt(pr,f){ const p=pr&&pr.prof; if(!p||!p.length) return null; let best=p[0]; for(const q of p) if(Math.abs(q[0]-f)<Math.abs(best[0]-f)) best=q; return Math.abs(best[0]-f)<.05?best[1]:null; }const TRAIT_MASKS={}, TRAIT_OFF=document.createElement('canvas'); let TRAIT_MASKN=0;
 function traitMask(sp,L){ const Lb=Math.max(12,Math.round(L/8)*8), key=sp.id+'|'+Lb; let m=TRAIT_MASKS[key]; const S=Math.ceil(L*1.9);
   if(!m){ if(++TRAIT_MASKN>400){ for(const k in TRAIT_MASKS) delete TRAIT_MASKS[k]; TRAIT_MASKN=1; } const Sb=Math.ceil(Lb*1.9); m=document.createElement('canvas'); m.width=m.height=Sb; drawCreature3(m.getContext('2d'),sp,Sb/2,Sb/2,Lb,{sil:'#000000',t:0,still:1}); TRAIT_MASKS[key]=m; }
   return {m,S}; }
@@ -16954,7 +16956,10 @@ function drawTraits(c0,sp,L,col,belly,t){ const T=fishTraits(sp); if(!T) return;
         c.moveTo(x0,y); c.lineTo(xb,y); c.lineTo(xb+L*.04,y+dy); c.lineTo(x1,y+dy); pads.push([x1,y+dy]); }
       c.stroke(); F('#3af0ff'); for(const [px,py] of pads) E(px,py,1.1*k,1.1*k); break; }    case 'antenna': S('#c8c8d0',1); c.beginPath(); c.moveTo(hx,top+2*k); c.lineTo(hx-3*k,top-10*k); c.stroke(); F(Math.sin(t*4)>0?'#ff3ab8':'#ff9ad8'); E(hx-3*k,top-10*k,1.8*k,1.8*k); break;
     case 'led': v3glow(c,L*.33,-hh*.28,L*.06,'rgba(255,58,184,.9)',.6); break;
-    case 'laurel': { const thin=pr0&&pr0.top!=null&&pr0.bot!=null&&pr0.bot-pr0.top<.2, hx=thin?L*(pr0.head-.12):L*(pr0&&pr0.head!=null?pr0.head:.3); /* on a thin body the crown sits behind the eye, not on it */ F('#5a9a3a'); for(let i=0;i<6;i++) E(hx-6*k+i*2.4*k,top+(i%2?0:-1.4)*k,2.2*k,1.1*k,(i%2?.6:-.6)); F('#e8c040'); E(hx+8*k,top+1*k,1.2*k,1.2*k); break; }
+    case 'laurel': { /* a laurel crown resting ON the back behind the eye (director, 2026-11-22: it lay across the eye and body on many Olympus
+         fish, and its yellow berry read as a second eye): each leaf sits on the fish's real top outline there, pointing up and back */
+      const ex=pr0&&pr0.eye?pr0.eye.x-pr0.eye.r-.05:(pr0&&pr0.head!=null?pr0.head:.3)-.08;
+      for(let i=0;i<6;i++){ const f=ex-i*.035, ty=traitTopAt(pr0,f), y=(ty!=null?ty*L:top)-1.3*k; F(i%2?'#4f8f34':'#68a844'); E(f*L,y,2.4*k,1.05*k,-.75); } break; }
     case 'gilded': S('rgba(255,211,106,.85)',1.4); c.beginPath(); c.moveTo(-L*.3,-hh*.2); c.quadraticCurveTo(0,-hh*1.1,L*.3,-hh*.6); c.stroke(); break;
     case 'bolt': F('#ffe84a'); P([-L*.05,-hh*.6,L*.05,-hh*.6,0,-hh*.1,L*.07,-hh*.1,-L*.06,hh*.6,-L*.01,0,-L*.08,0]); break;
     case 'tridentcrown': F('#e8c040'); for(const dx of [-4,0,4]) P([hx+dx*k-1.2*k,top+1*k,hx+dx*k,top-(dx?6:9)*k,hx+dx*k+1.2*k,top+1*k]); c.fillRect(hx-6*k,top,12*k,1.6*k); break;
@@ -18893,7 +18898,7 @@ html body.phone-app #menuov #panel.dk08 .dk08-view > canvas,html body.phone-land
 html body.phone-app #menuov #panel.dk08 .aq07-stage,html body.phone-land #menuov #panel.dk08 .aq07-stage{position:relative}
 html body.phone-app #menuov:has(#panel.dk08) .mo-tools > .mo-coin,html body.phone-land #menuov:has(#panel.dk08) .mo-tools > .mo-coin{display:none} html body.phone-app #menuov:has(#panel.dk08) [data-mo="settings"],html body.phone-land #menuov:has(#panel.dk08) [data-mo="settings"]{visibility:hidden;width:0!important;min-width:0!important;padding:0!important;margin:0!important;border:0!important;overflow:hidden}
 html body.phone-land #menuov:has(#panel.dk08) .mo-in > .mo-body{grid-area:1 / 1 / 3 / 3} /* the Home page fills the top strip too (director, 2026-11-22: the hidden coins and settings left a blank band); Back stays in the rail column */
-html body.phone-app #menuov #panel.dk08 .chips.mb-swrow:not([style*="display: none"]),html body.phone-land #menuov #panel.dk08 .chips.mb-swrow:not([style*="display: none"]){display:grid!important;grid-template-columns:repeat(8,minmax(0,32px));gap:10px!important;justify-content:start} html body.phone-app #menuov #panel.dk08 .chips.mb-swrow > *,html body.phone-land #menuov #panel.dk08 .chips.mb-swrow > *{width:100%!important;min-width:0!important;height:auto!important;aspect-ratio:1} /* 16 colors = 2 rows of 8 round buttons at their own size (director, 2026-11-22: the stretched ovals are gone) */
+html body.phone-app #menuov #panel.dk08 .chips.mb-swrow:not([style*="display: none"]),html body.phone-land #menuov #panel.dk08 .chips.mb-swrow:not([style*="display: none"]){display:grid!important;grid-template-columns:repeat(8,max-content);gap:8px!important;justify-content:start;container-type:inline-size} html body.phone-app #menuov #panel.dk08 .chips.mb-swrow > .mb-swatch,html body.phone-land #menuov #panel.dk08 .chips.mb-swrow > .mb-swatch{--sw:32px;width:var(--sw)!important;min-width:0!important;height:var(--sw)!important;min-height:var(--sw)!important;max-height:var(--sw)!important;padding:3px!important;box-sizing:border-box!important;flex:none!important} @supports (width:1cqw){ html body.phone-app #menuov #panel.dk08 .chips.mb-swrow > .mb-swatch,html body.phone-land #menuov #panel.dk08 .chips.mb-swrow > .mb-swatch{--sw:min(32px,calc((100cqw - 56px) / 8))} } @media (max-width:760px){ html body.phone-app #menuov #panel.dk08 .chips.mb-swrow:not([style*="display: none"]),html body.phone-land #menuov #panel.dk08 .chips.mb-swrow:not([style*="display: none"]){gap:4px!important} @supports (width:1cqw){ html body.phone-app #menuov #panel.dk08 .chips.mb-swrow > .mb-swatch,html body.phone-land #menuov #panel.dk08 .chips.mb-swrow > .mb-swatch{--sw:min(32px,calc((100cqw - 28px) / 8))} } } /* small phones (iPhone SE): a tighter gap keeps the circles about 25 px, big enough to tap */ /* 16 colors = 2 rows of 8 real circles like the old canopy colors (director, 2026-11-22): width and height come from one number, so Safari can never stretch them into ovals; they shrink together only when the row is narrower than 8 full circles */
 html body.phone-app #menuov #panel.dk08 .mb-swatch > .hm-sw,html body.phone-land #menuov #panel.dk08 .mb-swatch > .hm-sw{box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.4)} /* a faint light ring: the darkest colors stay visible on the dark page (accessibility review, 2026-11-22) */
 html body.phone-app #menuov #panel.dk08 .dk08-where,html body.phone-land #menuov #panel.dk08 .dk08-where{position:absolute;left:8px;top:8px;z-index:2;max-width:calc(100% - 16px);padding:3px 10px;border-radius:999px;background:#050e14b8;color:#eaf3fa;font:800 11px var(--display);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;pointer-events:none}
 html body.phone-app #menuov #panel.dk08 .dk08-where span,html body.phone-land #menuov #panel.dk08 .dk08-where span{color:#9fb2c8;font-weight:700}
@@ -18944,7 +18949,7 @@ function DK_SCENE_OK(now){ if(S.tab!=='home'||!MOB()) return false; const c=$('h
         const sps=spAt(L.id), got=caughtAt(L.id), here=S.loc===L.id, open=S.unlocked.includes(L.id);
         card.title=(blurb?blurb.textContent.trim():''); card.classList.add('wt8');
         const info=document.createElement('div'); info.className='wt8-info';
-        info.innerHTML=`<div class="wt8-top"><h4>${esc(L.name)}</h4></div><div class="meta wt8-sub">Depth ${esc(depthStr(L.depth))}</div>${strStandHTML(sps)}<div class="wt8-sp"><span class="wt8-bar"><i style="width:${(got/sps.length*100).toFixed(1)}%"></i></span><span class="meta" title="Species found here">${got}/${sps.length} fish</span></div>`;
+        info.innerHTML=`<div class="wt8-top"><h4>${esc(L.name)}</h4></div><div class="meta wt8-sub">Depth ${esc(depthStr(L.depth))}</div>${strStandHTML(sps)}<div class="wt8-sp"><span class="wt8-bar"><i style="width:${(got/sps.length*100).toFixed(1)}%"></i></span><span class="meta" title="Species found here">${got} of ${sps.length} caught</span></div>`;
         if(req&&!open){ req.classList.add('wt8-req'); info.appendChild(req); }
         if(here) info.insertAdjacentHTML('beforeend','<span class="wt8-here">You are here</span>');
         if(btn&&!here){ btn.classList.add('wt8-btn'); if(open&&btn.disabled) btn.title='Reel in your line first'; info.appendChild(btn); }
@@ -20348,6 +20353,10 @@ PATCHES.unshift({v:'0.4.9', name:'Work in progress', items:phoneNotes([
 // text changes. Released notes live in notes_release.js.
 const TEST_NOTES={v:'test', label:'Test build · '+(window.DL_BUILD==='ios'?'iPhone':'Android'), name:'0.4.9 test build (newest first)', items:[
   '## New in this build',
+  'Mount Olympus fish: the laurel sits on top of the head, behind the eye, instead of lying across the eye and back (the yellow dot that looked like a second eye is gone).',
+  'Map: clearer wording. The top line says how to open the next water (or that all are open), each card says how strong your line is and how many of its fish that covers, and the count reads “2 of 52 caught”.',
+  'Your home: the 16 colors are real circles like the old canopy colors, 2 rows of 8, and look the same for every feature (the lantern colors no longer glow).',
+  '## Test build 0540',
   'Fish: real fish families look like themselves: catfish get their whiskers and flat heads, the tiger shovelnose is a striped catfish, arowana and arapaima are long and scaled, piranhas have teeth, cichlids, oscars, discus, tetras, plecos, loaches, snakeheads, gobies, lungfish and bichirs have their real shapes and markings.',
   'Long fish are slim: arowanas, loaches, plecos, bichirs and snakeheads, and the Nile electric catfish is a catfish (it was drawn like a sunfish).',
   'The black ghost knifefish and the black phantom tetra are dark fish now, not see-through.',
@@ -20688,7 +20697,7 @@ ui(){ QA.sys='UI';
         if(!(EAT_STRIP[5]===1&&EAT_STRIP.every((v,i)=>!i||v>EAT_STRIP[i-1]))) e.push('distance does not rise with rarity to all of it for mythics'); }
     } finally{ save=sv; toast=ts; G.st='idle'; G.fish=null; G.eat=null; } return e.length?{ok:false,detail:e.join(' | ')}:{ok:true,detail:'ok'}; });
   T('Angler strength: one number in the units of fish strength; "heavy" means stronger than you; every water shows where you stand',()=>{ const e=[]; const a=anglerStr(); if(!(a>0)) e.push('no Angler strength'); const L=LOCS[0], sps=SP.filter(s=>s.loc===L.id), st=strStand(sps); if(st.beat<0||st.beat>st.n) e.push('bad standing');
-    openMenu('map'); const P=$('panel'); const cards=P.querySelectorAll('.strst'); if(!cards.length) e.push('no strength line on the Waters cards'); else if(!/you /.test(cards[0].textContent)) e.push('Waters line does not show your strength'); closeMenu();
+    openMenu('map'); const P=$('panel'); const cards=P.querySelectorAll('.strst'); if(!cards.length) e.push('no strength line on the Waters cards'); else if(!/your line holds /.test(cards[0].textContent)) e.push('Waters line does not show your strength'); closeMenu();
     const ss=statSec; statSec='overview'; openMenu('stats'); if(!/Angler strength/.test($('panel').textContent)) e.push('not in Stats › Overview'); statSec='gear'; renderPanel(); if(!/Angler strength/.test($('panel').textContent)) e.push('not in Stats › Gear'); statSec=ss; closeMenu();
     const ls=GEAR.line.lv, maxPull=Math.max(...SP.map(fishPull)); if(ls[7]>=maxPull) e.push('line level 7 already beats every fish ('+ls[7]+' vs '+Math.round(maxPull)+')'); if(ls[ls.length-1]<maxPull) e.push('the best line never beats the strongest fish');
     return e.length?{ok:false,detail:e.join(' | ')}:{ok:true,detail:'you '+Math.round(a)+', first water '+st.beat+'/'+st.n}; });
@@ -21602,14 +21611,14 @@ function renderJournal(P){
   paintFish(P); P.querySelectorAll('canvas[data-junk]').forEach(c=>{ const cx=c.getContext('2d'); cx.clearRect(0,0,c.width,c.height); if(c.dataset.known==='1') drawJunk(cx,c.width,c.height,c.dataset.junk,null); else mysteryThumb(cx,c.width,c.height,c.dataset.junk); });
 }
 function renderMap(P){
-  P.innerHTML=`<h2>Waters</h2><p class="sub">Unlock new waters with coins once you have caught ${unlockNeed()} fish in the one before this voyage (10 more every voyage, up to 50). Each has ${spAt('pond').length} fish of its own, its own junk and treasure, and is tougher than the last.</p><div class="grid">`+
+  P.innerHTML=`<h2>Waters</h2><p class="sub">${LOCS.every(L=>S.unlocked.includes(L.id))?`All ${LOCS.length} waters are open. Every one has ${spAt("pond").length} fish of its own, its own junk and treasure.`:`Open a new water with coins after catching ${unlockNeed()} fish at the water before it. Each voyage adds 10 more, up to 50. Every water has ${spAt("pond").length} fish of its own, its own junk and treasure, and is a little tougher than the last.`}</p><div class="grid">`+
   LOCS.map((L,i)=>{ const open=S.unlocked.includes(L.id), here=S.loc===L.id; const prev=i?LOCS[i-1]:null; const met=unlockMet(i); const sps=spAt(L.id);
     const btn = here ? '<button class="btn alt" disabled>Fishing here</button>' : open ? `<button class="btn" data-act="goto" data-k="${L.id}" ${G.st==='idle'?'':'disabled'}>Travel here</button>`
       : L.eg&&!egCharted(L) ? `<button class="btn" disabled>Complete voyage ${L.eg} to unlock</button>` /* Cam's list #12 */
       : `<button class="btn" data-act="unlock" data-k="${L.id}" ${met&&S.money>=locCost(L)&&locPrevOk(i)?'':'disabled'}>Unlock · <span class="coin">${fmt(locCost(L))}</span></button>`;
     const egHead=L.eg&&!(prev&&prev.eg)?`<div class="eg-head"><h3>End-game waters</h3><span class="meta">These open after later voyages (see Set sail again). Their fish are much tougher and worth much more.</span></div>`:"";
     return egHead+`<div class="tile loc ${here?"here":""}"><div class="sw2" style="background:linear-gradient(${L.sky[0]},${L.sky[1]} 48%,${L.water[0]} 52%,${L.water[1]})"></div>
-    <h4>${L.name}</h4><div class="meta">${L.blurb}</div><div class="meta">Depth ${depthStr(L.depth)} · ${caughtAt(L.id)}/${sps.length} species</div>${strStandHTML(sps)}
+    <h4>${L.name}</h4><div class="meta">${L.blurb}</div><div class="meta">Depth ${depthStr(L.depth)} · ${caughtAt(L.id)} of ${sps.length} caught</div>${strStandHTML(sps)}
     ${!open&&prev?`<div class="meta" style="color:${met?'var(--kelp)':'var(--muted)'}">${met?'✓':'·'} ${unlockLine(i)}</div>`:''}${btn}</div>`; }).join('')+'</div>'; /* Set sail again and Pearl relics live on the Prestige page (cw_pages08.js) */
 }
 const canRetire = () => S.unlocked.includes('trench') && pearlsFor() > 0 && G.st==='idle';
