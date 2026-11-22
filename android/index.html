@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="DL Test Android">
 <script>
-window.DL_BUILD='android'; window.DL_PREVIEW=true; if(/[?&]sweep\b/.test(location.search)){ window.__bootErr=[]; addEventListener("error",function(e){ __bootErr.push(String(e.message||e)+(e.lineno?" (line "+e.lineno+")":"")); }); addEventListener("unhandledrejection",function(e){ __bootErr.push("promise: "+String(e.reason&&e.reason.message||e.reason)); }); window.requestAnimationFrame=function(f){ return setTimeout(function(){ f(performance.now()); },16); }; window.cancelAnimationFrame=function(i){ clearTimeout(i); }; } window.DL_VERSION='2026.11.22-0305';
+window.DL_BUILD='android'; window.DL_PREVIEW=true; if(/[?&]sweep\b/.test(location.search)){ window.__bootErr=[]; addEventListener("error",function(e){ __bootErr.push(String(e.message||e)+(e.lineno?" (line "+e.lineno+")":"")); }); addEventListener("unhandledrejection",function(e){ __bootErr.push("promise: "+String(e.reason&&e.reason.message||e.reason)); }); window.requestAnimationFrame=function(f){ return setTimeout(function(){ f(performance.now()); },16); }; window.cancelAnimationFrame=function(i){ clearTimeout(i); }; } window.DL_VERSION='2026.11.22-0351';
 window.addEventListener('beforeinstallprompt',function(e){ e.preventDefault(); window.__dlInstallPrompt=e; });
 </script>
 </head>
@@ -1658,7 +1658,7 @@ function migrate(o){ const d=fresh(); if(!isObj(o)) return d; o=saveClean(o,d);
 try { const raw = localStorage.getItem(LS_KEY); if (raw) { try { S = migrate(JSON.parse(raw)); } catch(e) { try{ localStorage.setItem(LS_KEY+'-unreadable', raw); window.__dlUnreadable=true; }catch(e2){} } } } catch(e) {} // 0.4: a save that cannot be read is kept aside, never overwritten
 
 let cloudDoc = null, saveTimer = null, saving = false, pendingSave = false;
-function save(){ S.savedAt = Date.now(); try{ localStorage.setItem(LS_KEY, JSON.stringify(S)); }catch(e){}
+function save(){ S.savedAt = Date.now(); try{ localStorage.setItem(LS_KEY, JSON.stringify(S)); }catch(e){} try{ autoBackup(); }catch(e){} /* at most every 5 minutes (d3_update.js) */
   if (cloudDoc){ clearTimeout(saveTimer); saveTimer = setTimeout(pushCloud, 2500); } }
 async function pushCloud(){ if(!cloudDoc) return; if(saving){ pendingSave=true; return; } saving=true;
   try{ await cloudDoc.set({state: JSON.parse(JSON.stringify(S))}); }catch(e){ if(e && (e.code==='invalid_argument'||e.code==='revoked'||e.code==='not_granted')) cloudDoc=null; }
@@ -3891,8 +3891,26 @@ function allPatchesHTML(){ return (S.owned.pets.includes("lily")?[LILY_PATCH]:[]
 // ---------- safe reset ----------
 const BACKUP_KEY='driftline-backup';
 function hasBackup(){ try{ return !!localStorage.getItem(BACKUP_KEY); }catch(e){ return false; } }
+/* ---------- automatic backup on this device (batch 3, director 2026-11-21: "a backup copy on the device, refreshed automatically,
+   restorable from Settings if the main save breaks; works offline"): a copy of the save at most every 5 minutes and whenever the app
+   is hidden or closed. If progress suddenly drops (a reset, a broken save, a smaller save loaded in), the old copy is moved to a kept
+   slot first, so a good backup is never overwritten by a worse one. ---------- */
+const AUTO_BK=LS_KEY+'-auto', AUTO_BK_KEEP=LS_KEY+'-auto-kept', AUTO_BK_MS=5*60*1000;
+const bkScore=s=>{ try{ return Object.keys((s&&s.journal)||{}).length+((s&&s.tides)||0)*100+((s&&s.lvl)||0); }catch(e){ return 0; } }; /* the Fish Log, voyages and level only grow in play */
+const bkRead=k=>{ try{ const r=localStorage.getItem(k); return r?JSON.parse(r):null; }catch(e){ return null; } };
+let autoBkAt=0, bkAsk=null;
+function autoBackup(now){ if(window.__dlUnreadable||!S) return; const t=Date.now(); if(!now&&t-autoBkAt<AUTO_BK_MS) return; autoBkAt=t;
+  try{ const old=bkRead(AUTO_BK); if(old&&bkScore(S)<bkScore(old)*.5) localStorage.setItem(AUTO_BK_KEEP, JSON.stringify(old));
+    localStorage.setItem(AUTO_BK, JSON.stringify(Object.assign({},S,{bkAt:t}))); }catch(e){} }
+document.addEventListener('visibilitychange',()=>{ if(document.hidden) autoBackup(true); });
+addEventListener('pagehide',()=>autoBackup(true));
+function agoText(t){ const m=Math.max(0,Math.round((Date.now()-t)/60000)); return m<1?'just now':m<60?m+' min ago':m<1440?Math.round(m/60)+' h ago':Math.round(m/1440)+' days ago'; }
+function autoBackupHTML(){ const a=bkRead(AUTO_BK), k=bkRead(AUTO_BK_KEEP), row=(s,act,label,note)=>s?`<div class="toggle"><div><b>${label}</b><div class="meta">${note} · saved ${agoText(s.bkAt||s.savedAt||Date.now())} · level ${s.lvl||1}, ${Object.keys(s.journal||{}).length} species</div></div><button class="btn alt sm" data-act="${act}">${bkAsk===act?'Tap again to restore':'Restore'}</button></div>`:'';
+  return `<details class="tile" style="margin-top:12px"><summary style="cursor:pointer"><b>Backup on this device</b> <span class="meta">· made automatically</span></summary>
+   <p class="sub">Your progress is copied every few minutes and whenever you leave the game. If your save ever breaks, restore it here. Restoring replaces your current progress.</p>
+   ${row(a,'autobk','Latest backup','Made by itself')}${row(k,'autobkkept','Earlier backup','Kept when your progress dropped')}${a||k?'':'<p class="meta">No backup yet: the first one is made a few minutes after you start playing.</p>'}</details>`; }
 function dangerHTML(){ const bk=hasBackup();
-  return `<details class="tile" style="margin-top:12px;border-color:#ff546855"><summary style="cursor:pointer"><b>Danger zone</b> <span class="meta">· reset progress</span></summary>
+  return autoBackupHTML()+`<details class="tile" style="margin-top:12px;border-color:#ff546855"><summary style="cursor:pointer"><b>Danger zone</b> <span class="meta">· reset progress</span></summary>
    <p class="sub">This erases your coins, fish, pets, rods, everything. A backup is saved first, so you can restore it on this device afterwards.</p>
    <label class="meta" for="resetword">Type <b>DELETE</b> to confirm</label><div class="row" style="margin-top:6px"><input id="resetword" autocomplete="off" style="background:#0a161d;color:var(--ink);border:1px solid var(--line);border-radius:9px;padding:7px;width:140px">
    <button class="btn sm" id="resetbtn" data-act="safereset" style="background:var(--danger)" disabled>Erase everything</button></div>
@@ -3943,6 +3961,9 @@ function extraAct2(b){ const k=b.dataset.k, i=+b.dataset.i;
     case 'safereset': { const w=$('resetword'); if(!w||w.value.trim()!=='DELETE') return 'skip'; try{ localStorage.setItem(BACKUP_KEY, JSON.stringify(S)); }catch(e){}
       S=fresh(); S.seenPatch=GAME_VERSION; S.tab='settings'; S.savedAt=Date.now(); G.st='idle'; fillBounties(); toast('Progress erased. A backup was kept. You can restore it in Settings.'); return 'render'; }
     case 'restorebk': { try{ const raw=localStorage.getItem(BACKUP_KEY); if(!raw) return 'skip'; S=migrate(JSON.parse(raw)); S.savedAt=Date.now(); localStorage.removeItem(BACKUP_KEY); G.st='idle'; toast('Backup restored. Welcome back!'); }catch(e){ toast('That backup couldn’t be read.'); } return 'render'; }
+    case 'autobk': case 'autobkkept': { if(bkAsk!==b.dataset.act){ bkAsk=b.dataset.act; return 'render'; } bkAsk=null; const s=bkRead(b.dataset.act==='autobk'?AUTO_BK:AUTO_BK_KEEP); if(!s) return 'skip';
+      try{ localStorage.setItem(BACKUP_KEY, JSON.stringify(S)); }catch(e){} /* the progress being replaced becomes the backup above, so a restore can be undone */
+      try{ S=migrate(s); delete S.bkAt; S.savedAt=Date.now(); G.st='idle'; window.__dlUnreadable=false; save(); toast('Backup restored. Welcome back!'); }catch(e){ toast('That backup couldn’t be read.'); } return 'render'; }
     case 'duckagain': { const c=bestLoot(); if(S.money<c) return 'skip'; S.money-=c; newDuck(); taskProgress('game',1); return 'render'; }
     case 'duckpick': { if(!duck||duck.pick>=0) return 'skip'; duck.pick=i; const p=duck.prizes[i]; if(p.k==='crate'){ S.tokens.small++; duck.msg='A small Mystery Crate! Quack.'; sfx.shiny(); } else if(p.k==='coins'){ duck.msg='+'+fmt(bwEarn(bestLoot()*p.m*coinMult()))+' coins. Quack quack.'; sfx.coin(); } else { duck.msg='+'+addTickets(p.n)+' tickets. Quack.'; tone(1200,.08,'triangle',.05); } return 'render'; }
     case 'hilostart': { const c=bestLoot()*2; if(S.money<c) return 'skip'; S.money-=c; newHilo(); taskProgress('game',1); return 'render'; }
@@ -13030,7 +13051,7 @@ body.phone-app #panel .dwb{padding:0 10px 9px;gap:6px}
 // the old "hide menus" toggle is gone (fishing is always full screen); its search entry goes too
 for(let i=SEARCH_IDX.length-1;i>=0;i--) if(SEARCH_IDX[i][0]==='Hide menus') SEARCH_IDX.splice(i,1);
 // a save that could not be read was kept aside at load: say so once
-if(window.__dlUnreadable) setTimeout(()=>toast('Your saved game could not be read, so a new one started. The old file was kept on this device.'),1800);
+if(window.__dlUnreadable) setTimeout(()=>toast(localStorage.getItem(AUTO_BK)?'Your saved game could not be read. Restore it from Save, Backup on this device.':'Your saved game could not be read, so a new one started. The old file was kept on this device.'),1800);
 // save codes and the account copy carry the current dock exactly as it is right now
 { const _mc=makeCode; makeCode=function(){ dockStore(); return _mc.apply(this,arguments); }; const _pc=pushCloud; pushCloud=function(){ dockStore(); return _pc.apply(this,arguments); }; }
 // phones held sideways: the top bar's seven chips share the width by what they hold, so the water name always fits
@@ -18788,6 +18809,7 @@ html body.phone-app #menuov #panel.dk08 .aq07-stage,html body.phone-land #menuov
 html body.phone-app #menuov:has(#panel.dk08) .mo-tools > .mo-coin,html body.phone-land #menuov:has(#panel.dk08) .mo-tools > .mo-coin{display:none} html body.phone-app #menuov:has(#panel.dk08) [data-mo="settings"],html body.phone-land #menuov:has(#panel.dk08) [data-mo="settings"]{visibility:hidden;width:0!important;min-width:0!important;padding:0!important;margin:0!important;border:0!important;overflow:hidden}
 html body.phone-land #menuov:has(#panel.dk08) .mo-in > .mo-body{grid-area:1 / 1 / 3 / 3} /* the Home page fills the top strip too (director, 2026-11-22: the hidden coins and settings left a blank band); Back stays in the rail column */
 html body.phone-app #menuov #panel.dk08 .chips.mb-swrow:not([style*="display: none"]),html body.phone-land #menuov #panel.dk08 .chips.mb-swrow:not([style*="display: none"]){display:grid!important;grid-template-columns:repeat(8,minmax(0,32px));gap:10px!important;justify-content:start} html body.phone-app #menuov #panel.dk08 .chips.mb-swrow > *,html body.phone-land #menuov #panel.dk08 .chips.mb-swrow > *{width:100%!important;min-width:0!important;height:auto!important;aspect-ratio:1} /* 16 colors = 2 rows of 8 round buttons at their own size (director, 2026-11-22: the stretched ovals are gone) */
+html body.phone-app #menuov #panel.dk08 .mb-swatch > .hm-sw,html body.phone-land #menuov #panel.dk08 .mb-swatch > .hm-sw{box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.4)} /* a faint light ring: the darkest colors stay visible on the dark page (accessibility review, 2026-11-22) */
 html body.phone-app #menuov #panel.dk08 .dk08-where,html body.phone-land #menuov #panel.dk08 .dk08-where{position:absolute;left:8px;top:8px;z-index:2;max-width:calc(100% - 16px);padding:3px 10px;border-radius:999px;background:#050e14b8;color:#eaf3fa;font:800 11px var(--display);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;pointer-events:none}
 html body.phone-app #menuov #panel.dk08 .dk08-where span,html body.phone-land #menuov #panel.dk08 .dk08-where span{color:#9fb2c8;font-weight:700}
 html body.phone-app #menuov #panel.dk08 .aq07-bar.dk08-ov,html body.phone-land #menuov #panel.dk08 .aq07-bar.dk08-ov{position:absolute!important;right:8px;bottom:8px;left:auto!important;top:auto!important;z-index:2;width:auto!important;min-height:0!important;margin:0!important;padding:0!important;background:none!important;border:0!important;box-shadow:none!important}
@@ -20238,6 +20260,8 @@ PATCHES.unshift({v:'0.4.9', name:'Work in progress', items:phoneNotes([
 // text changes. Released notes live in notes_release.js.
 const TEST_NOTES={v:'test', label:'Test build · '+(window.DL_BUILD==='ios'?'iPhone':'Android'), name:'0.4.9 test build (newest first)', items:[
   '## New in this build',
+  'Your home: color buttons have a faint light ring, so the darkest colors stay visible.',
+  '## Test build 0305',
   'Roofs, umbrellas, sheds and tents now cover you: each one reaches from before your seat to past where you stand, and stands tall enough to clear your hat.',
   'Covers are drawn from the side: the umbrella is a cap on a pole, the lean-to is one roof line.',
   'Posts and supports blend into the water: murky under the surface, fading out a short way down.',
@@ -20486,6 +20510,14 @@ saves(){ QA.sys='Saves';
   T('save code: make -> read gives the same progress',()=>{ return {ok:'async'}; });
   T('a very old minimal save (2.x era: coins, level, a few fish) loads with valid data',()=>{ const old={money:5400, lvl:7, xp:120, journal:{bluegill:{n:3,kg:.4,big:.4}}, gear:{rod:2,reel:1}, cooler:[{id:'bluegill',kg:.3,value:12}], bait:{cricket:4}, loc:'pond', unlocked:['pond'], tab:'shop', v:1};
       const st=migrate(old); restore(JSON.stringify(st)); dockSync(); const p=inv(); if(p.length) return {ok:false,detail:p.join('; ')}; return (S.money===5400&&S.lvl===7&&S.cooler.length===1&&S.bait.cricket===4&&S.journal.bluegill)?true:{ok:false,detail:'values changed: '+[S.money,S.lvl,S.cooler.length,S.bait.cricket].join(',')}; });
+  T('save backup: a copy is made on this device, a drop in progress keeps the better copy, and the backup can be restored',()=>{ const keep=JSON.stringify(S), ka=localStorage.getItem(AUTO_BK), kk=localStorage.getItem(AUTO_BK_KEEP), kb=localStorage.getItem(BACKUP_KEY), e=[];
+    try{ localStorage.removeItem(AUTO_BK); localStorage.removeItem(AUTO_BK_KEEP); S.lvl=Math.max(S.lvl,12); autoBackup(true); const a=bkRead(AUTO_BK); if(!a||a.lvl!==S.lvl) e.push('no backup made');
+      const lv=S.lvl; S=fresh(); autoBackup(true); const k=bkRead(AUTO_BK_KEEP); if(!k||k.lvl!==lv) e.push('a reset overwrote the good backup');
+      autoBackup(false); if(bkRead(AUTO_BK).bkAt!==bkRead(AUTO_BK).bkAt) e.push('timing');
+      const back=migrate(k); if(back.lvl!==lv) e.push('restore lost the level ('+back.lvl+')');
+      if(typeof autoBackupHTML()!=='string'||!/Earlier backup/.test(autoBackupHTML())) e.push('Save page does not offer the kept backup'); }
+    finally{ S=JSON.parse(keep); const put=(k,v)=>{ if(v==null) localStorage.removeItem(k); else localStorage.setItem(k,v); }; put(AUTO_BK,ka); put(AUTO_BK_KEEP,kk); put(BACKUP_KEY,kb); }
+    return e.length?{ok:false,detail:e.join('; ')}:okInv(); });
   T('per-water homes: each water keeps its own home choices through travel and a save round trip, a new water starts with its defaults',()=>{ S.unlocked=uniq(['pond','reef',...S.unlocked]); S.docks={}; S.dockAt=null; S.loc='pond'; dockSync(); S.dock.el={seat:[1,3]};
       dockStore(); const st=migrate(JSON.parse(JSON.stringify(S))); restore(JSON.stringify(st)); S.loc='reef'; dockSync(); if(S.dock.el) return {ok:false,detail:'reef copied '+JSON.stringify(S.dock.el)};
       S.loc='pond'; dockSync(); return JSON.stringify(S.dock.el)===JSON.stringify({seat:[1,3]})?okInv():{ok:false,detail:'pond '+JSON.stringify(S.dock.el)}; });
