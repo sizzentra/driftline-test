@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="DL Test iPhone">
 <script>
-window.DL_BUILD='ios'; window.DL_PREVIEW=true; if(/[?&]sweep\b/.test(location.search)){ window.__bootErr=[]; addEventListener("error",function(e){ __bootErr.push(String(e.message||e)+(e.lineno?" (line "+e.lineno+")":"")); }); addEventListener("unhandledrejection",function(e){ __bootErr.push("promise: "+String(e.reason&&e.reason.message||e.reason)); }); window.requestAnimationFrame=function(f){ return setTimeout(function(){ f(performance.now()); },16); }; window.cancelAnimationFrame=function(i){ clearTimeout(i); }; } window.DL_VERSION='2026.11.21-2301';
+window.DL_BUILD='ios'; window.DL_PREVIEW=true; if(/[?&]sweep\b/.test(location.search)){ window.__bootErr=[]; addEventListener("error",function(e){ __bootErr.push(String(e.message||e)+(e.lineno?" (line "+e.lineno+")":"")); }); addEventListener("unhandledrejection",function(e){ __bootErr.push("promise: "+String(e.reason&&e.reason.message||e.reason)); }); window.requestAnimationFrame=function(f){ return setTimeout(function(){ f(performance.now()); },16); }; window.cancelAnimationFrame=function(i){ clearTimeout(i); }; } window.DL_VERSION='2026.11.21-2325';
 window.addEventListener('beforeinstallprompt',function(e){ e.preventDefault(); window.__dlInstallPrompt=e; });
 </script>
 </head>
@@ -2110,7 +2110,7 @@ function surgeTick(dt,f){ if(G.surge){ G.surge.t+=dt; const s=G.surge;
 // 0.4.9 (director, 2026-11-19: "Oddities don't fight, they get snagged and by continuing to reel you risk breaking the line"):
 // an oddity or hat comes in as dead weight. Now and then it catches on the bottom ("snag") and gains nothing; reeling without
 // a pause builds tension until the line snaps, so short pulls bring it home.
-function snagFight(dt){ const NF=fishNew(), reel=reelSpeed()*(NF?1.6:1) /* Cam: oddities come in faster */, rin=V3ON?reelInput(dt):(G.hold?1:0), rdt=dt*rin, odt=dt*(1-rin); const oddK=NF?1.3-.15*((G.fish&&G.fish.item&&G.fish.item.t)||1):1; /* Cam: rarer, heavier finds snag more often */ if(!G.fightT) G.evT=(NF?rnd(.7,1.4):rnd(2.2,3.6))*oddK; /* new fight: the first snag comes sooner, so holding stays a risk on a shorter reel-in */ G.fightT=(G.fightT||0)+dt; G.run=false;
+function snagFight(dt){ const NF=fishNew(), reel=reelSpeed()*(NF?1.45*(1-.12*((G.fish&&G.fish.item&&G.fish.item.t)||0)):1) /* Cam: oddities come in faster; batch 1 (director): a touch slower than before (1.6x), and rarer finds slower still (treasure 36% slower than junk) */, rin=V3ON?reelInput(dt):(G.hold?1:0), rdt=dt*rin, odt=dt*(1-rin); const oddK=NF?1.3-.15*((G.fish&&G.fish.item&&G.fish.item.t)||1):1; /* Cam: rarer, heavier finds snag more often */ if(!G.fightT) G.evT=(NF?rnd(.7,1.4):rnd(2.2,3.6))*oddK; /* new fight: the first snag comes sooner, so holding stays a risk on a shorter reel-in */ G.fightT=(G.fightT||0)+dt; G.run=false;
   if(G.ev==='snag'){ G.evDur-=dt; if(G.evDur<=0){ G.ev=null; G.evT=rnd(1.6,3.4)*oddK; } } else { G.ev=null; G.evT-=dt; if(G.evT<=0){ G.ev='snag'; G.evDur=rnd(.6,1.2)*(maxed('snagwise')?.5:1); sfx.warn(); } }
   if(rin>0){ if(G.ev!=='snag') G.d -= reel*.6*rdt; G.strain=(G.strain||0)+rdt; G.ten += (G.ev==='snag'?(NF?110:70):(12+4*G.strain)*(NF?1.6:1))*tensionMult()*(1-rodBonus('snag'))*(1-.08*pr('snagwise'))*pathMul('snag')*rdt; /* [14] Snag Guard, [15] Snag Sense */ G.tickT-=rdt; if(G.tickT<=0){ G.tickT=.07; sfx.tick(); } }
   if(rin<1){ G.ten=Math.max(0,G.ten-60*odt); G.strain=Math.max(0,(G.strain||0)-2*odt); }
@@ -2306,9 +2306,28 @@ aqBuffsOf = function(f){ const L=_aqBuffsOf_w(f), sp=SPI[f.id]; if(!sp) return L
 //  - Rare fish chain moves; a tired fish gets one Second wind after 10 s; deep waters (100 m+) have dives with a tension band.
 // Numbers marked "maths" are Claude's model for Cam's targets (landing times per rarity, measured with __ffSim in test mode).
 // =====================================================================
-const FF = { FAR_M:40, SPOOL_M:150, LB:.4536,
+// Cam's fish feel update (2026-11-21, PLAN › "Cam's answers"; it wins over FIGHT_FEEL.md where they differ):
+//  - tension builds slightly while you reel (also between moves) and only falls when you stop: steadily, 35 a second, a third of that
+//    during a move; temper empties in about 3 s when you stop; full temper makes the fish act up to 3 times as often, each move
+//    costing its Fight in proportion (twice as often, half the cost); reeling into a move (not a jump toward you) drains Fight 1.5x
+//  - between moves the fish is either still or swimming toward you (reel 25-50% faster, 0.25-3 s, less often and shorter for rarer fish)
+//  - a tired fish reels in faster by rarity (common 60% ... mythic 10%)
+//  - Second winds: the first is as before; rare and epic fish may get 1 more, legendary and mythic 2 more, each a 50/50 flip after
+//    5 s tired, then 3 s, then every 1 s; a legendary or mythic's third waits twice as long and gives only 25% Fight
+//  - in waters with dives a third of runs are dives; a dive lasts 5-20 s and stops once tension stays in its band for 1.5 s; it pulls
+//    line more slowly but can take far more; a perfect hook holds the fish still for 1.5 s; the spool takes 200 m
+const FF = { FAR_M:40, SPOOL_M:200, LB:.4536,
+  TEN_RISE:[3,4],                   /* tension per second while you reel between moves: base + up to this much more for a strong fish (Feel call) */
+  TEN_DROP:35, TEN_DROP_ACT:35/3,   /* Cam: easing up drops tension 35 a second, a third of that during a move */
+  TEMPER_DROP:1, TEMPER_RATE:3,     /* Cam: temper empties in 3 s; full temper = moves up to 3 times as often (Feel call), each costing 1/3 */
+  ACT_DRAIN:1.5,                    /* Cam: reeling into a move drains Fight 1.5 times as fast */
+  SWIM_P:[.5,.45,.38,.32,.26,.2], SWIM_K:[1.25,1.5], SWIM_T:[.25,3], SWIM_EVERY:[1,2], /* Cam: still or swimming toward you between moves */
+  TIRED_FAST:[.6,.45,.3,.25,.2,.1], /* Cam: a tired fish reels in this much faster, by rarity */
+  SW_EXTRA:[0,0,1,1,2,2], SW_WAITS:[5,3,1], SW_LAST_TO:.25, /* Cam: extra Second winds by rarity, their flip waits, the legendary / mythic third */
+  DIVE_SHARE:1/3, DIVE_T:[5,20], DIVE_HOLD:1.5, DIVE_RATE:.5, DIVE_MK:3, /* Cam: dives = a third of runs, 5-20 s, stopped by 1.5 s in the band, slower but longer */
+  PERFECT_REST:1.5,                 /* Cam: after a perfect hook the fish doesn't fight for 1.5 s */
   RESIST:[.15,.55,.75,.86,.9,.92],   /* maths: how hard a fresh fish of each rank holds against your reel (C U R E L M) */
-  TIRE_T:[15,15,16,19,23,24],       /* seconds of reeling a fish needs to tire with the best gear (Cam: the weakest never under 15 s) */
+  TIRE_T:[12,12,13,15,18,19],       /* seconds of reeling a fish needs to tire with the best gear (Cam 2026-11-21: "speed up fishing" to about half the speed of the old fight with great gear; was 15-24) */
   SHARE:{shake:35,run:45,jump:20},  /* Cam: rough share of each move */
   CHAIN:[1,1,2,3,4,5],              /* Cam: moves in a row, by rank (common and uncommon never chain) */
   DIVE_N:[1,2,3,4,5,6], DIVE_M:[3,5,10,15,20,20], DEEP_M:100, /* Cam: dives per fight and metres if the band is missed; deep = 100 m+ (director) */
@@ -2332,17 +2351,22 @@ function ffInit(){ const f=G.fish;
   G.d0=G.d=Math.max(3, FF.FAR_M*clamp(G.lastCast,0,1)); G.dd=0; G.maxOut=FF.SPOOL_M+rodSpool();
   G.ffA=null; G.ffRest=rnd(.7,1.4); G.chainOn=false; G.chainN=0; G.chainCD=0; G.diveN=0; G.tiredT=0; G.swUsed=false; G.noReelT=0; G.fullT=0; G.jumpAway=false; G.dive=null; G.ffOpen=false;
   /* Cam (section 2): a rare fish hooked close in runs first to gain some ground */
-  if(f&&f.kind==='fish'&&fishRank(f)>=2&&G.d0<25){ G.ffOpen=true; G.ffRest=.35; } }
+  if(f&&f.kind==='fish'&&fishRank(f)>=2&&G.d0<25){ G.ffOpen=true; G.ffRest=.35; }
+  G.swim=null; G.swimT=rnd(FF.SWIM_EVERY[0],FF.SWIM_EVERY[1]); G.swStep=0; G.swNext=0; G.swN=0;
+  if(G.perfect){ G.ffOpen=false; G.ffRest=Math.max(FF.PERFECT_REST,G.ffRest); } /* Cam: a perfect hook holds the fish still for 1.5 s */ }
+// how often the fish acts, from its temper: 1x calm, up to FF.TEMPER_RATE x at full temper (Cam: full temper = rapid moves)
+const ffRate = () => 1+(FF.TEMPER_RATE-1)*clamp((G.temper||0)/3,0,1);
 function ffWeightClass(f){ const lb=(f.kg||0)/FF.LB; return lb<1.5?0:lb<3?1:lb<5?2:3; }
 function ffPick(f,rk,deep){ if(G.ffOpen){ G.ffOpen=false; return 'run'; } const b=f.beh, w={shake:FF.SHARE.shake*(b==='thrash'?2.2:b==='sulk'?1.3:1), run:FF.SHARE.run*(b==='run'?1.8:b==='dart'?1.3:1), jump:FF.SHARE.jump*(b==='jump'?2.2:1)};
-  if(deep && (G.diveN||0)<FF.DIVE_N[rk]) w.dive=(rk>=2?9:3)*(b==='dive'?2.2:1); /* Cam: the rarest move; seen most on rare and above */
-  let x=Math.random()*Object.values(w).reduce((a,c)=>a+c,0); for(const k in w){ x-=w[k]; if(x<=0) return k; } return 'shake'; }
+  let x=Math.random()*Object.values(w).reduce((a,c)=>a+c,0), k='shake'; for(const q in w){ x-=w[q]; if(x<=0){ k=q; break; } }
+  if(k==='run' && deep && (G.diveN||0)<FF.DIVE_N[rk] && Math.random()<FF.DIVE_SHARE*(b==='dive'?1.6:1)) k='dive'; /* Cam: in waters with dives, a third of runs are dives */
+  return k; }
 function ffStart(f,rk,tk,I,lively){ const k=ffPick(f,rk,waterDeep(S.loc)), A={k,t:0};
   if(k==='shake'){ A.dur=rnd(.5,.9); G.ev='shake'; sfx.warn(); }
   else if(k==='run'){ A.dur=clamp(FF.RUN_T[0]+(FF.RUN_T[1]-FF.RUN_T[0])*(.25*lively+.35*(G.temper/3)+.4*tk/5)*rnd(.7,1.15),FF.RUN_T[0],FF.RUN_T[1]); G.run=true; splash(G.bob.x,G.bob.y,6+tk*4); }
   else if(k==='jump'){ A.dur=JUMP_WINDUP+.85; A.away=Math.random()<.5; G.ev='windup'; G.evDur=JUMP_WINDUP; G.jumpAway=A.away; }
-  else { A.dur=3; A.zone=rnd(35,65); A.max=FF.DIVE_M[rk]*(.6+.4*Math.min(1,I)); A.got=0; G.diveN=(G.diveN||0)+1; G.dive=A; G.ev='dive'; G.run=true; splash(G.bob.x,G.bob.y,18); sfx.warn(); setTimeout(()=>sfx.warn(),140); if(V3ON) vib([60,40,60]); }
-  G.sta=Math.max(0,G.sta-({shake:.015,run:.03,jump:.035,dive:.045}[k])*(1-.5*G.temper/3)); /* Cam: moves cost Fight, less with the temper up */
+  else { A.dur=FF.DIVE_T[0]+(FF.DIVE_T[1]-FF.DIVE_T[0])*clamp(.55*tk/5+.25*lively+.2*Math.min(1,I-.6),0,1); A.zone=rnd(35,65); A.max=FF.DIVE_M[rk]*FF.DIVE_MK*(.6+.4*Math.min(1,I)); A.got=0; A.inZT=0; /* Cam: 5 s at least, up to 20 s; far more line in reach */ G.diveN=(G.diveN||0)+1; G.dive=A; G.ev='dive'; G.run=true; splash(G.bob.x,G.bob.y,18); sfx.warn(); setTimeout(()=>sfx.warn(),140); if(V3ON) vib([60,40,60]); }
+  G.sta=Math.max(0,G.sta-({shake:.015,run:.03,jump:.035,dive:.045}[k])/ffRate()); /* Cam: a move costs Fight in proportion to how often the temper makes it come (twice as often, half the cost) */
   G.ffA=A; }
 function ffEnd(f,tk,lively){ G.ffA=null; G.ev=null; G.run=false; G.dive=null;
   const rest=FF.REST_T[0]+(FF.REST_T[1]-FF.REST_T[0])*(1-lively); /* Cam: 1 s for the liveliest fish, 5 s for the laziest */
@@ -2363,10 +2387,14 @@ function fightNew(dt){
   const rin=V3ON?reelInput(dt):(G.hold?1:0); G.fightT=(G.fightT||0)+dt; G.chainCD=Math.max(0,(G.chainCD||0)-dt);
   // temper: up while you reel; down when you stop, fastest on a tired fish (0 within 1 s for the weakest, 3 s for the strongest)
   if(rin>0) G.temper=Math.min(3,G.temper+dt*rin*(.3+.9*(f.aggr||.3))*tempMult());
-  if(rin<1){ const s01=clamp(tk/5*.6+.4*(rel-.3)/2.7,0,1); G.temper=Math.max(0,G.temper-dt*(1-rin)*(G.sta<=0?3/(1+2*s01):1.2*(maxed('softtouch')?2:1))); }
-  // the fish's next move
-  if(!G.ffA){ G.ffRest-=dt; if(G.ffRest<=0){ if(G.sta<=0&&Math.random()>.12) G.ffRest=rnd(2,4); /* Cam: a tired fish rarely moves */ else ffStart(f,rk,tk,I,lively); } }
-  let gainK=1, outV=0, tenRate=0; const A=G.ffA; const runV=(.8+1.0*rel)*(1+.06*tk)*(1+.2*Math.log10(1+kg))*(.5+.5*G.sta)*I*gearK*(1-rodBonus('grip'))*(1-.04*pr('grappler'));
+  if(rin<1) G.temper=Math.max(0,G.temper-dt*(1-rin)*FF.TEMPER_DROP*(maxed('softtouch')?2:1)); /* Cam: full to empty in about 3 s when you stop */
+  // the fish's next move: rests run down faster the higher its temper (Cam: full temper = rapid moves)
+  if(!G.ffA){ G.ffRest-=dt*ffRate(); if(G.ffRest<=0){ if(G.sta<=0&&Math.random()>.12) G.ffRest=rnd(2,4); /* Cam: a tired fish rarely moves */ else { G.swim=null; ffStart(f,rk,tk,I,lively); } } }
+  // between moves: still, or swimming toward you (Cam: unannounced; 0.25-3 s; rarer fish less often and for shorter)
+  if(!G.ffA && G.sta>0){ if(G.swim){ G.swim.t-=dt; if(G.swim.t<=0) G.swim=null; }
+    G.swimT-=dt; if(G.swimT<=0){ G.swimT=rnd(FF.SWIM_EVERY[0],FF.SWIM_EVERY[1]); if(!G.swim && Math.random()<FF.SWIM_P[tk]) G.swim={t:clamp(rnd(FF.SWIM_T[0],FF.SWIM_T[1])*(1-.1*tk),FF.SWIM_T[0],FF.SWIM_T[1]), k:rnd(FF.SWIM_K[0],FF.SWIM_K[1])}; } }
+  else if(G.ffA) G.swim=null;
+  let gainK=G.swim?G.swim.k:1, outV=0, tenRate=0; const A=G.ffA; const runV=(.8+1.0*rel)*(1+.06*tk)*(1+.2*Math.log10(1+kg))*(.5+.5*G.sta)*I*gearK*(1-rodBonus('grip'))*(1-.04*pr('grappler'));
   if(A){ A.t+=dt;
     if(A.k==='shake'){ if(wc>=1) gainK=.45; tenRate=70*wtK*I; }
     else if(A.k==='run'){ gainK=wc===1?.4:wc>=2?0:1; if(wc===3) outV=runV; if(wc>=1) tenRate=(70+20*rel)*wtK*I; G.run=true; }
@@ -2374,22 +2402,29 @@ function fightNew(dt){
       else { if(G.ev!=='jump'){ G.ev='jump'; splash(G.bob.x,G.bob.y,14); sfx.jump(); } G.evDur=Math.max(0,A.dur-A.t);
         if(!A.away) gainK=1.6; /* Cam: a jump toward you is the time to reel */
         else { gainK=wc===1?.4:wc>=2?0:1; if(wc===3) outV=runV*1.2; if(wc>=1) tenRate=140*wtK*I; } } }
-    else if(A.k==='dive'){ gainK=0; const inZ=G.ten>=A.zone-12.5&&G.ten<=A.zone+12.5; A.inZ=inZ; const add=Math.min(A.max-A.got,(4+3*rel)*I*(inZ?.3:1)*dt); A.got+=add; G.d+=add; G.dd+=add; tenRate=48; if(A.got>=A.max-1e-6) A.t=A.dur; }
+    else if(A.k==='dive'){ gainK=0; const inZ=G.ten>=A.zone-12.5&&G.ten<=A.zone+12.5; A.inZ=inZ; const add=Math.min(A.max-A.got,(4+3*rel)*I*FF.DIVE_RATE*(inZ?.3:1)*dt); A.got+=add; G.d+=add; G.dd+=add; tenRate=48;
+      A.inZT=inZ?(A.inZT||0)+dt:0; if(A.inZT>=FF.DIVE_HOLD||A.got>=A.max-1e-6) A.t=A.dur; } /* Cam: holding the band for 1.5 s stops the dive at once */
     if(A.t>=A.dur){ if(A.k==='jump') splash(G.bob.x+(A.away?30:-30),G.bob.y,18); ffEnd(f,tk,lively); } }
   // reeling: a fresh fish holds against you by rank (only fish of 1.5 lb and up); a tired one comes in at full speed
-  if(rin>0){ const res=wc>=1?clamp(FF.RESIST[tk]*Math.pow(Math.max(0,G.sta),.6)*(B.heavy?1.1:1),0,.97):0, gain=Math.min(reel*rin*(1-res)*gainK, FF.FAR_M/(G.sta>0?FF.SHORT_T[tk]:3))*dt; /* Cam: never faster than its rarity's shortest time while it has fight; a tired fish comes in at full speed (about 3 s from the far edge at most) */
+  if(rin>0){ const tired=G.sta<=0, fast=tired?1+FF.TIRED_FAST[tk]:1, res=wc>=1?clamp(FF.RESIST[tk]*Math.pow(Math.max(0,G.sta),.6)*(B.heavy?1.1:1),0,.97):0, gain=Math.min(reel*rin*(1-res)*gainK*fast, FF.FAR_M*fast/(tired?3:FF.SHORT_T[tk]))*dt; /* Cam: a tired fish comes in 10-60% faster by rarity */ /* Cam: never faster than its rarity's shortest time while it has fight; a tired fish comes in at full speed (about 3 s from the far edge at most) */
     if(G.dd>0){ const back=Math.min(G.dd,.75*gain); G.dd-=back; } G.d-=gain; /* Cam: dive distance comes back at a 75% rate */
-    G.sta=Math.max(0,G.sta-rin*dt/(FF.TIRE_T[tk]*clamp(Math.sqrt(over),1,2)*(B.heavy?1.15:1)*(1+.5*(fightVoy()-1)))*(1-.25*G.temper/3)); /* Cam: the temper keeps its Fight from draining */
+    const intoMove=A&&!(A.k==='jump'&&!A.away&&A.t>=JUMP_WINDUP)?FF.ACT_DRAIN:1; /* Cam: reeling into a move (not a jump toward you) drains its Fight 1.5x */
+    G.sta=Math.max(0,G.sta-intoMove*rin*dt/(FF.TIRE_T[tk]*clamp(Math.sqrt(over),1,2)*(B.heavy?1.15:1)*(1+.5*(fightVoy()-1)))*(1-.25*G.temper/3)); /* Cam: the temper keeps its Fight from draining */
     G.tickT-=rin*dt; if(G.tickT<=0){ G.tickT=.07; sfx.tick(); } }
   if(rin<1 && outV>0) G.d+=outV*(1-rin)*dt; /* only a fish over 5 lb takes line, and only while you let it */
   // tension: moves strain the line while you reel into them; between moves it settles; letting go lets it fall (slower for heavy fish)
   const tm=Math.max(.7,tensionMult()), tgK=clamp(Math.pow(over,.25),.85,1.4); /* Cam: tension cuts never make the dive band impossible, and gear eases a move's strain but never removes it */
   if(rin>0){ if(tenRate>0) G.ten+=Math.min(75,tenRate*tm*tgK)*rin*dt; /* never from 0 to a snap in an instant */
-    else if(!(A&&A.k==='jump'&&!A.away&&A.t>=JUMP_WINDUP)){ const tgt=clamp(12+40*Math.min(1,over)*(.3+.7*G.sta)*wtK,8,70)*tensionMult(); G.ten+=(tgt-G.ten)*Math.min(1,2.5*dt*rin); } }
-  if(rin<1) G.ten=Math.max(0,G.ten-(1-rin)*dt*80/(1+.6*Math.log10(1+kg))*(A&&A.k==='jump'&&!A.away?1.5:1));
+    else if(!(A&&A.k==='jump'&&!A.away&&A.t>=JUMP_WINDUP)) G.ten+=(FF.TEN_RISE[0]+FF.TEN_RISE[1]*Math.min(1,over)*(.3+.7*G.sta)*wtK)*tensionMult()*rin*dt; } /* Cam: reeling builds tension slightly, also between moves; it never falls while you reel */
+  if(rin<1) G.ten=Math.max(0,G.ten-(1-rin)*dt*(A&&!(A.k==='jump'&&!A.away)?FF.TEN_DROP_ACT:FF.TEN_DROP)); /* Cam: easing up drops it steadily, 35 a second, a third of that during a move */
   if(A&&A.k==='jump'&&!A.away&&A.t>=JUMP_WINDUP) G.ten=Math.max(0,G.ten-30*dt);
   // a tired fish: "Reel hard!"; left 10 s it gets one Second wind (back to half its Fight)
-  if(G.sta<=0){ G.tiredT=(G.tiredT||0)+dt; if(G.tiredT>=FF.SW_AFTER&&!G.swUsed){ G.swUsed=true; G.sta=FF.SW_TO; G.tiredT=0; G.swT=1.4; sfx.warn(); if(V3ON) vib([30,30,30]); } } else G.tiredT=0;
+  // Second winds (Cam): the first as before (10 s tired, back to half); rare and epic fish may get 1 more, legendary and mythic 2 more,
+  // each a 50/50 flip after 5 s tired, then 3 s, then every 1 s; a legendary or mythic's third waits twice as long and gives 25%
+  if(G.sta<=0){ G.tiredT=(G.tiredT||0)+dt; const n=G.swN||0, sw=to=>{ G.swN=n+1; G.swUsed=true; G.sta=to; G.tiredT=0; G.swStep=0; G.swNext=0; G.swT=1.4; sfx.warn(); if(V3ON) vib([30,30,30]); };
+    if(n===0){ if(G.tiredT>=FF.SW_AFTER) sw(FF.SW_TO); }
+    else if(n<=FF.SW_EXTRA[rk]){ const k2=n===2?2:1; if(!G.swNext) G.swNext=FF.SW_WAITS[0]*k2; if(G.tiredT>=G.swNext){ if(Math.random()<.5) sw(n===2?FF.SW_LAST_TO:FF.SW_TO); else { G.swStep=Math.min(FF.SW_WAITS.length-1,(G.swStep||0)+1); G.swNext=G.tiredT+FF.SW_WAITS[G.swStep]*k2; } } } }
+  else G.tiredT=0;
   if(G.swT) G.swT=Math.max(0,G.swT-dt);
   if(G.ten>75 && rin>0){ G.warnT-=dt; if(G.warnT<=0){ G.warnT=.25; sfx.warn(); if(V3ON) vib(15); } }
   // a predator that swallowed your catch strips line (n_play.js), as before
@@ -2406,7 +2441,7 @@ function fightNew(dt){
 // the fight's one-line instruction, shared by the PC panel (d_draw.js) and the phones' card (mobile/fight08.js)
 function fightMsg(danger,oddDanger){ const NF=fishNew(), odd=G.fish&&G.fish.kind!=='fish';
   if(odd) return G.ev==='snag'?'Snagged!':oddDanger?'Ease off!':'Dead Weight';
-  return G.swT>0?'Second wind!':G.ev==='windup'?'It’s jumping!':G.ev==='jump'?(NF&&!G.jumpAway?'Reel now!':'Let go!'):G.ev==='dive'?'It’s diving!':G.ev==='shake'?'Head shake!':G.run?'It’s running!':NF&&G.sta<=0?'Reel hard!':G.temper>1.7&&G.hold?'Careful!':danger?'Ease off!':G.hold?'Reeling…':'Hold to reel'; }
+  return G.swT>0?'Second wind!':G.ev==='windup'?'It’s jumping!':G.ev==='jump'?(NF&&!G.jumpAway?'Reel now!':'Let go!'):G.ev==='dive'?'It’s diving!':G.ev==='shake'?'Head shake!':G.run?'It’s running!':NF&&G.sta<=0?'Reel hard!':(NF?G.temper>2:G.temper>1.7)&&G.hold?'Careful!':danger?'Ease off!':G.hold?'Reeling…':'Hold to reel'; }
 // the dive's tension band (Cam: 25% wide; light magenta while the line is inside it)
 const fightZone = () => fishNew()&&G.dive&&G.ev==='dive' ? {lo:(G.dive.zone-12.5)/100, hi:(G.dive.zone+12.5)/100, inZ:!!G.dive.inZ} : null;
 // =====================================================================
@@ -2492,11 +2527,11 @@ function drawCreature(c,sp,x,y,L,o={}){ if(V3ON && drawCreature3(c,sp,x,y,L,o)) 
 /* Shadows (o.sil) are one even tone (director, 2026-11-19: "shadows are multitone"): drawn see-through, every overlapping part (fins, tail,
    body) added up darker. A see-through silhouette is now drawn solid into a small picture, then put down once at the wanted strength. */
 { const _dc=drawCreature; let SC=null; drawCreature=function(c,sp,x,y,L,o){ const a=c.globalAlpha; if(!o||!o.sil||!(a<.999)||!(L>0)) return _dc.apply(this,arguments);
-    const m=c.getTransform(); if(m.b||m.c||!(m.a>0)||!(m.d>0)) return _dc.apply(this,arguments);
-    const bw=L*2.4, bh=L*1.8, pw=Math.ceil(bw*m.a), ph=Math.ceil(bh*m.d); if(pw<2||ph<2||pw*ph>4e6) return _dc.apply(this,arguments);
+    const m=c.getTransform(); if(m.b||m.c||!m.a||!m.d) return _dc.apply(this,arguments); /* batch 2 (director): a flipped fish (facing the other way while it takes line) gets the even shadow too */
+    const ax=Math.abs(m.a), ay=Math.abs(m.d), bw=L*2.4, bh=L*1.8, pw=Math.ceil(bw*ax), ph=Math.ceil(bh*ay); if(pw<2||ph<2||pw*ph>4e6) return _dc.apply(this,arguments);
     if(!SC) SC=document.createElement("canvas"); if(SC.width<pw||SC.height<ph){ SC.width=Math.max(SC.width,pw); SC.height=Math.max(SC.height,ph); }
-    const sx=SC.getContext("2d"); sx.setTransform(1,0,0,1,0,0); sx.clearRect(0,0,pw,ph); sx.setTransform(m.a,0,0,m.d,(bw/2-x)*m.a,(bh/2-y)*m.d); sx.globalAlpha=1; _dc.call(this,sx,sp,x,y,L,o);
-    c.save(); c.setTransform(1,0,0,1,0,0); c.globalAlpha=a; c.drawImage(SC,0,0,pw,ph,m.a*(x-bw/2)+m.e,m.d*(y-bh/2)+m.f,pw,ph); c.restore(); }; }
+    const sx=SC.getContext("2d"); sx.setTransform(1,0,0,1,0,0); sx.clearRect(0,0,pw,ph); sx.setTransform(m.a,0,0,m.d,pw/2-m.a*x,ph/2-m.d*y); sx.globalAlpha=1; _dc.call(this,sx,sp,x,y,L,o);
+    c.save(); c.setTransform(1,0,0,1,0,0); c.globalAlpha=a; c.drawImage(SC,0,0,pw,ph,m.a*x+m.e-pw/2,m.d*y+m.f-ph/2,pw,ph); c.restore(); }; }
 function sparkles(c,w,h,n=7){ c.save(); c.fillStyle='#ffe9a8'; for(let i=0;i<n;i++){ const x=w*(.15+((i*37)%70)/100), y=h*(.15+((i*53)%70)/100), s=Math.max(3,w*.02)*(1+(i%3)*.4);
   c.beginPath(); c.moveTo(x,y-s); c.lineTo(x+s*.28,y-s*.28); c.lineTo(x+s,y); c.lineTo(x+s*.28,y+s*.28); c.lineTo(x,y+s); c.lineTo(x-s*.28,y+s*.28); c.lineTo(x-s,y); c.lineTo(x-s*.28,y-s*.28); c.closePath(); c.fill(); } c.restore(); }
 /* C36 (2026-11-20: the Golden Seahorse showed as a thin strip in the Cooler): a creature's real drawn height, measured once from its
@@ -20426,6 +20461,11 @@ PATCHES.unshift({v:'0.4.9', name:'Work in progress', items:phoneNotes([
   'Hairstyles have real volume and shape with a light strand texture, Curly is back to its hand-drawn curls, hair tucks neatly under every hat, every body build has its own silhouette, and the Natural face has smaller noses.',
   'Fish have eyes of their own: colors and shapes that fit each species. The wizard hat’s magic is new. More pet colors in the shop and at the Boardwalk.',
   '## Fishing',
+  'Fights got a new feel: tension builds while you reel and falls only when you ease off, an angry fish moves faster and faster, and a fish may swim toward you for a moment between moves.',
+  'Tired fish come in faster. Rarer fish can catch a second wind more than once, so keep reeling.',
+  'Dives in deep waters last longer and pull out more line, but keeping the tension in the band stops them. The spool holds 200 m.',
+  'A perfect hook holds the fish still for a moment. Rarer oddities take longer to reel in.',
+  'The shadow of a hooked fish is one even shade, whichever way it faces.',
   'Fish fights, rebuilt: a hooked fish rests between moves (head shakes, runs and jumps) and every move matters. Its weight decides what a move can do: small fish can’t take line, big ones can. Rarer fish chain moves together, and a tired fish you leave too long gets one second wind.',
   'Reel in short pulls while a fish runs, shakes or jumps away; reel hard when it jumps toward you or tires. Before a jump its shadow dives and rushes up as a warning. A running fish turns at once.',
   'Deep waters (100 m or more) have dives: keep the ring inside the pink band to cut a dive short.',
@@ -20468,6 +20508,14 @@ PATCHES.unshift({v:'0.4.9', name:'Work in progress', items:phoneNotes([
 // text changes. Released notes live in notes_release.js.
 const TEST_NOTES={v:'test', label:'Test build · '+(window.DL_BUILD==='ios'?'iPhone':'Android'), name:'0.4.9 test build (newest first)', items:[
   '## New in this build',
+  'Cam’s fish feel update: tension builds a little while you reel and only falls when you stop (steadily, slower during a move). Temper empties in about 3 s once you stop; a fish at full temper moves up to 3 times as often (each move costs it less Fight). Reeling into a move drains its Fight faster.',
+  'Between moves a fish sometimes swims toward you for a moment: reel faster then. Tired fish come in faster, most for common fish.',
+  'Second winds: rare and epic fish can get one more, legendary and mythic two more, each a coin flip while the fish is tired, so a fish can no longer just be waited out.',
+  'Dives (deep waters) are a third of runs, last 5-20 s and stop once you keep the tension in the band for 1.5 s; they pull line more slowly but can take far more. The spool holds 200 m.',
+  'A perfect hook holds the fish still for 1.5 s. “Careful!” shows when the fish’s temper is high enough to make it move quickly.',
+  'Fights are a little faster overall (first version, tell us how it feels). Rarer oddities reel in more slowly.',
+  'The hooked fish’s shadow is one even tone when it turns away to take line too (it showed darker fins and tail).',
+  '## Test build 2301',
   'Wardrobe › Tide Pass: the aura previews are bigger and stay bright while locked, so you can see each aura before you reach it.',
   'Empty Cooler: a picture, what the Cooler is for, and a Go fishing button instead of a mostly blank page.',
   'Boardwalk: Mystery crates has a picture like the other games, and Higher or lower keeps its picture after a game.',
@@ -20740,11 +20788,15 @@ ui(){ QA.sys='UI';
     return e.length?{ok:false,detail:e.join(' | ')}:{ok:true,detail:'ok'}; });
   T('fight pass: with the best gear a top mythic takes 30–60 s, never letting go loses almost every legendary and mythic fish (Cam: tension always matters, but no instant snaps), voyages make fish harder up to a cap',()=>{ const e=[], MAX=[9,10,11,6,9,5], last=LOCS[LOCS.length-1].id;
     const m=(l)=>{ const x=l.match(/: (\d+)% in ([\d.]+|-)s/); return x?{p:+x[1],t:x[2]==='-'?null:+x[2]}:{p:0,t:null}; };
-    const a=__fightSim({tides:0, places:[[last,80,MAX,'starrod']], rars:[4,5], players:[['watcher',.18,82],['holder',0,999]], N:16});
+    const a=__fightSim({tides:0, places:[[last,80,MAX,'starrod']], rars:[4,5], players:[['watcher',.18,82],['holder',0,999]], N:24}); /* 24: at 16 the mythic rate swung 69-87% between runs (batch 1) */
     const myth=m(a[2]), mythH=m(a[3]), legH=m(a[1]); if(myth.p<70) e.push('mythic landed only '+myth.p+'%'); if(myth.t==null||myth.t<30||myth.t>60) e.push('mythic took '+myth.t+' s'); if(mythH.p>10||legH.p>20) e.push('holding the reel landed legendary '+legH.p+'% / mythic '+mythH.p+'%');
-    const v5=m(__fightSim({tides:5, places:[[last,80,MAX,'starrod']], rars:[5], players:[['watcher',.18,82]], N:16})[0]); if(v5.t!=null&&myth.t!=null&&v5.t<=myth.t) e.push('5 voyages not harder ('+v5.t+' vs '+myth.t+' s)');
+    /* voyages: both runs get the same random sequence, so only the voyage boost differs (batch 1: the Second-wind flips made two free runs swing past each other) */
+    /* measured directly (landing times only count the fish that were landed, so a harder fish could look faster): one second of steady
+       reeling, no moves, takes less of the fish's Fight after 5 voyages */
+    const drain=(tides)=>{ const kt=S.tides, ri=reelInput, sv=save, ts=toast; save=function(){}; toast=function(){}; S.tides=tides; try{ const sp=SP.find(s=>s.r===5&&!s.meme); G.pend=rollFish(sp,{noHybrid:true,noPrey:true}); G.pend.shiny=0; G.lastCast=1; G.waitT=0; G.biteEnd=0; hookIt(); G.eatAt=null; G.sta=1; G.ten=10; G.temper=0; G.maxOut=1e4; G.d=1e3; reelInput=()=>1; G.hold=true; for(let i=0;i<60;i++){ G.ffRest=99; G.ffA=null; G.swim=null; G.swimT=99; G.ten=10; fight(1/60); } return 1-G.sta; } finally{ S.tides=kt; reelInput=ri; save=sv; toast=ts; G.st='idle'; G.fish=null; } };
+    const d0=drain(0), d5=drain(5); if(!(d5<d0)) e.push('5 voyages not harder (Fight taken per second '+d5.toFixed(4)+' vs '+d0.toFixed(4)+')'); const v5={t:+(d0/d5).toFixed(2)};
     const k=S.tides; S.tides=5; const c5=fightVoy(); S.tides=50; const c50=fightVoy(); S.tides=k; if(c5!==c50) e.push('voyage boost has no cap');
-    return e.length?{ok:false,detail:e.join(' | ')}:{ok:true,detail:'mythic '+myth.t+' s ('+myth.p+'%), 5 voyages '+v5.t+' s'}; });
+    return e.length?{ok:false,detail:e.join(' | ')}:{ok:true,detail:'mythic '+myth.t+' s ('+myth.p+'%), 5 voyages tire it '+v5.t+'x slower'}; });
   T('oddities snag instead of fighting: reeling without a pause snaps the line, short pulls bring it in',()=>{ const e=[], ri=reelInput, sv=save, ts=toast; save=function(){}; toast=function(){}; const run=style=>{ G.pend=Object.assign({kind:'junk',item:pickJunk()},{str:5,th:.15,beh:'calm',aggr:.15,kg:1}); G.lastCast=.8; G.waitT=0; G.biteEnd=0; hookIt(); let t=0; reelInput=()=>style==='always'?1:((t%1.4)<.9&&G.ev!=='snag'&&G.ten<70?1:0); while(t<60&&G.st==='reeling'){ fight(1/60); t+=1/60; } const r=G.st==='landing'; G.st='idle'; G.fish=null; return r; };
     try{ let a=0,p=0; for(let i=0;i<8;i++){ if(run('always')) a++; if(run('pulse')) p++; } if(a>(fishNew()?2:0)) e.push('holding the reel landed '+a+'/8'); /* Cam: oddities come in faster, so holding is a risk rather than a sure snap */ if(p<8) e.push('short pulls landed '+p+'/8'); } finally{ reelInput=ri; save=sv; toast=ts; G.st='idle'; }
     return e.length?{ok:false,detail:e.join(' | ')}:{ok:true,detail:'ok'}; });
@@ -20978,6 +21030,22 @@ ui(){ QA.sys='UI';
       for(const r of [0,2,3]) if(out[r].s.p<.99) e.push('skilled loses rarity '+r); if(!(out[5].s.t>=30&&out[5].s.t<=60)) e.push('maxed mythic '+out[5].s.t.toFixed(1)+' s'); if(!(out[0].s.t>=1.5&&out[0].s.t<=5)) e.push('maxed common '+out[0].s.t.toFixed(1)+' s'); }
     finally{ save=sv; const o=JSON.parse(snap); for(const k of Object.keys(S)) delete S[k]; Object.assign(S,o); G.st='idle'; G.fish=null; }
     return e.length?{ok:false,detail:e.join(' | ')}:{ok:true,detail:Object.keys(out).map(r=>'r'+r+' '+out[r].s.t.toFixed(1)+'s').join(', ')}; });
+  T('Cam’s fish feel update (batch 1): spool 200 m; tension rises while reeling between moves and falls 35/s when you stop (a third during a move); temper empties in about 3 s; full temper = moves 3x as often; a perfect hook holds the fish 1.5 s; extra Second winds by rarity on 50/50 flips; a dive lasts 5-20 s and stops after 1.5 s in its band; a tired fish reels in faster by rarity',()=>{ const e=[], sv=save, ts=toast, rf=reelInput, R=Math.random, keepLoc=S.loc, keepOld=FISH_OLD; save=function(){}; toast=function(){}; FISH_OLD=false;
+    const step=(n,rin)=>{ reelInput=()=>rin; G.hold=rin>0; for(let i=0;i<n&&G.st==='reeling';i++) fight(1/60); };
+    const start=(sp,kg,perfect)=>{ G.pend=rollFish(sp,{noHybrid:true,noPrey:true}); G.pend.shiny=0; if(kg!=null) G.pend.kg=kg; G.lastCast=1; G.waitT=perfect?99:0; G.biteEnd=0; hookIt(); G.perfect=!!perfect; ffInit(); G.eatAt=null; G.ffRest=99; G.ffA=null; G.run=false; G.ev=null; G.sta=1; G.ten=10; G.temper=0; G.d=G.d0; G.dd=0; G.swim=null; G.swimT=99; G.maxOut=1e4; };
+    try{ S.loc='shelf'; const sp=SP.find(s=>s.loc==='pond'&&s.r===0&&!s.meme), rare=SP.find(s=>s.loc==='shelf'&&s.r===2&&!s.meme), leg=SP.find(s=>s.r===4&&!s.meme&&s.loc==='shelf')||SP.find(s=>s.r===4&&!s.meme);
+      start(sp,.3); G.maxOut=0; hookIt(); if(G.maxOut<200) e.push('spool '+G.maxOut);
+      start(rare,3); G.ten=20; step(60,1); if(!(G.ten>20)) e.push('tension did not rise while reeling ('+G.ten.toFixed(1)+')');
+      start(rare,3); G.ten=80; step(60,0); if(Math.abs(G.ten-45)>2) e.push('tension fell to '+G.ten.toFixed(1)+' in 1 s, want 45');
+      start(rare,3); G.ten=80; G.ffA={k:'shake',t:0,dur:99}; G.ev='shake'; step(60,0); if(Math.abs(G.ten-(80-35/3))>2) e.push('tension during a move fell to '+G.ten.toFixed(1)+', want '+(80-35/3).toFixed(1));
+      start(rare,3); G.temper=3; step(60*3.05,0); if(G.temper>.01) e.push('temper '+G.temper.toFixed(2)+' after 3 s'); G.temper=3; if(Math.abs(ffRate()-3)>1e-9) e.push('full temper rate '+ffRate());
+      start(rare,3,true); if(G.ffRest<1.5||G.ffOpen) e.push('perfect hook rest '+G.ffRest);
+      const winds=(s,coin)=>{ start(s,3); Math.random=()=>coin; let n=0; for(let k=0;k<5;k++){ G.sta=0; for(let i=0;i<60*30&&G.st==='reeling';i++){ G.noReelT=0; G.ffRest=99; reelInput=()=>0; G.hold=false; fight(1/60); if(G.swT>1.3){ n++; break; } } G.swT=0; } Math.random=R; return n; };
+      if(winds(sp,.1)!==1) e.push('common Second winds '+winds(sp,.1)); if(winds(rare,.1)!==2) e.push('rare Second winds '+winds(rare,.1)+', want 2'); if(winds(leg,.1)!==3) e.push('legendary Second winds '+winds(leg,.1)+', want 3'); if(winds(rare,.99)!==1) e.push('a failed flip still gave a Second wind');
+      { start(leg,20); G.ffA=Object.assign({k:'dive',t:0,zone:50,max:999,got:0,inZT:0,dur:12}); G.dive=G.ffA; G.ev='dive'; G.run=true; let t=0; while(G.ffA&&t<5){ G.ten=50; reelInput=()=>0; G.hold=false; G.ffRest=99; fight(1/60); t+=1/60; } if(!(t>=1.45&&t<=1.6)) e.push('dive held in its band ended after '+t.toFixed(2)+' s, want 1.5'); }
+      { for(const rk of [0,5]){ const s=SP.find(q=>q.r===rk&&!q.meme); start(s,.3); G.sta=1; const d0=G.d; step(30,1); const fresh=d0-G.d; start(s,.3); G.sta=0; const d1=G.d; step(30,1); const tired=d1-G.d; if(!(tired>fresh)) e.push('rank '+rk+': a tired fish came in no faster ('+tired.toFixed(2)+' vs '+fresh.toFixed(2)+')'); } }
+    } finally { save=sv; toast=ts; reelInput=rf; Math.random=R; S.loc=keepLoc; FISH_OLD=keepOld; G.st='idle'; G.fish=null; G.ffA=null; G.perfect=false; }
+    return e.length?{ok:false,detail:e.join(' | ')}:{ok:true,detail:'tension, temper, rate, perfect hook, Second winds, dives and tired reel-in as Cam set them'}; });
   T('Cam’s fight feel: 40 m to the far edge, spool-out at 150 m; weight rules (under 1.5 lb nothing, 1.5-3 lb slows, 3-5 lb stops, over 5 lb takes line); 10 s without reeling escapes; a snap needs half a second at full tension; one Second wind after 10 s tired; dives only in waters 100 m+ with their limits; commons never chain; hook tries 1 to 4; a missed hotspot bite takes the bait and the streak; maxed landing times by rarity',()=>{ const e=[], sv=save, ts=toast, rf=reelInput, R=Math.random, keepLoc=S.loc, keepPerks=S.perks, keepGear=Object.assign({},S.gear), keepOld=FISH_OLD; save=function(){}; toast=function(){}; FISH_OLD=false;
     const step=(n,rin)=>{ reelInput=()=>rin; G.hold=rin>0; for(let i=0;i<n&&G.st==='reeling';i++) fight(1/60); };
     const start=(sp,kg,cast)=>{ G.pend=rollFish(sp,{noHybrid:true,noPrey:true}); G.pend.shiny=0; if(kg!=null) G.pend.kg=kg; G.lastCast=cast==null?1:cast; G.waitT=0; G.biteEnd=0; hookIt(); G.eatAt=null; G.ffRest=99; G.ffA=null; G.run=false; G.ev=null; G.sta=1; G.ten=10; G.temper=0; G.d=G.d0; G.dd=0; };
