@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="DL Test Android">
 <script>
-window.DL_BUILD='android'; window.DL_PREVIEW=true; if(/[?&]sweep\b/.test(location.search)){ window.__bootErr=[]; addEventListener("error",function(e){ __bootErr.push(String(e.message||e)+(e.lineno?" (line "+e.lineno+")":"")); }); addEventListener("unhandledrejection",function(e){ __bootErr.push("promise: "+String(e.reason&&e.reason.message||e.reason)); }); window.requestAnimationFrame=function(f){ return setTimeout(function(){ f(performance.now()); },16); }; window.cancelAnimationFrame=function(i){ clearTimeout(i); }; } window.DL_VERSION='2026.11.22-0407';
+window.DL_BUILD='android'; window.DL_PREVIEW=true; if(/[?&]sweep\b/.test(location.search)){ window.__bootErr=[]; addEventListener("error",function(e){ __bootErr.push(String(e.message||e)+(e.lineno?" (line "+e.lineno+")":"")); }); addEventListener("unhandledrejection",function(e){ __bootErr.push("promise: "+String(e.reason&&e.reason.message||e.reason)); }); window.requestAnimationFrame=function(f){ return setTimeout(function(){ f(performance.now()); },16); }; window.cancelAnimationFrame=function(i){ clearTimeout(i); }; } window.DL_VERSION='2026.11.22-0501';
 window.addEventListener('beforeinstallprompt',function(e){ e.preventDefault(); window.__dlInstallPrompt=e; });
 </script>
 </head>
@@ -3121,6 +3121,7 @@ function renderSettings(P){ const s=S.settings; const sl=(k,label)=>`<div class=
   const styles=V3ON?MUS_NAMES:[['auto','Follow the time of day'],['lofi','Cozy lo-fi'],['acoustic','Harbour acoustic'],['night','Dreamy night']];
   P.innerHTML=`<h2>Settings</h2><p class="sub">Everything here is saved on this device.</p>
   <div class="tile" style="margin-top:10px;flex-direction:row;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap"><div><b>📲 Move progress</b><div class="meta">Send your progress between phone and PC with a 6-digit code, or use save codes.</div></div><button class="btn sm" data-tabgo="save">Open</button></div>
+  ${(window.DL_PLAT&&DL_PLAT.app)||window.DL_DESKTOP?'':'<div class="tile" style="margin-top:10px;flex-direction:row;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap"><div><b>📱 Install Driftline</b><div class="meta">Its own icon, full screen and offline fishing. It updates itself.</div></div><button class="btn sm" data-act="installhelp">Show me how</button></div>'}
   <div class="tile" style="margin-top:10px"><b>🎁 Gift code</b><div class="meta">Got a gift code from a friend? Type it here.</div><div class="row" style="gap:8px;margin-top:8px;flex-wrap:nowrap"><input id="giftin" maxlength="24" placeholder="Gift code" autocapitalize="characters" style="flex:1;min-width:0;background:#0a161d;color:var(--ink);border:1px solid var(--line);border-radius:9px;padding:8px;text-transform:uppercase"><button class="btn sm" data-act="redeem">Redeem</button></div></div>
   <div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(300px,1fr))">
    <div class="tile"><h4>Sound</h4>${sl('master','Master volume')}${sl('music','Music')}${sl('sfx','Sound effects')}${sl('amb','Nature sounds')}
@@ -5150,12 +5151,14 @@ function v3range(c,o){
   const K=Math.max(3,Math.round(6/step)), cols=raw.map((h,i)=>{ let s=0,wsum=0; for(let j=-K;j<=K;j++){ const v=raw[Math.min(raw.length-1,Math.max(0,i+j))], w=1-Math.abs(j)/(K+1); s+=v*w; wsum+=w; } return o.base-s/wsum; }); /* a wide soft smoothing: natural, rounded ridges */
   const path=()=>{ c.beginPath(); c.moveTo(0,o.base); for(let i=0;i<cols.length;i++) c.lineTo(i*step,cols[i]); c.lineTo(W,o.base); c.closePath(); };
   const sk=Math.max(4,Math.round(8/step)), sl=i=>{ const a=cols[Math.max(0,i-sk)], b=cols[Math.min(cols.length-1,i+sk)]; return (b-a)/(2*sk*step); };
-  c.save(); path(); c.clip();
-  for(let i=0;i<cols.length;i++){ const lit=clamp(.5+sl(i)*1.9,0,1);
-    const top=Math.min(cols[i],cols[i+1]??cols[i])-1; c.fillStyle=mix(o.shadow,o.light,lit); c.fillRect(i*step,top,step+.6,o.base-top+1); }
-  if(o.snow){ for(let i=0;i<cols.length;i++){ if(cols[i]>=o.snowLine) continue; const above=o.snowLine-cols[i];
-      const depth=above*(.5+.45*m(i*step*.012))+above*.35*Math.max(0,m(i*step*.033+3)-.45);
-      const lit=clamp(.5+sl(i)*1.9,0,1); const top=Math.min(cols[i],cols[i+1]??cols[i])-1; c.fillStyle=mix(mix(o.snow,'#8088bc',.4),o.snow,lit); c.fillRect(i*step,top,step+.6,depth+cols[i]-top); } }
+  // 8b: the slope shading is one left-to-right gradient over the whole range (a stop every ~3 px), not ~1,300 clipped column fills:
+  // the same shading, but the graphics card paints one shape instead of spending ~170 ms of a light change on the columns
+  const nc=cols.length, gs=Math.max(1,Math.round(3/step)), shade=(a,b)=>{ const lg=c.createLinearGradient(0,0,(nc-1)*step,0); for(let i=0;i<nc;i+=gs) lg.addColorStop(i/(nc-1),mix(a,b,clamp(.5+sl(i)*1.9,0,1))); return lg; };
+  c.save(); path(); c.fillStyle=shade(o.shadow,o.light); c.fill(); c.clip();
+  if(o.snow){ const dep=cols.map((y,i)=>{ if(y>=o.snowLine) return -1; const above=o.snowLine-y; return above*(.5+.45*m(i*step*.012))+above*.35*Math.max(0,m(i*step*.033+3)-.45); });
+    c.beginPath(); for(let a=0;a<nc;a++){ if(dep[a]<0) continue; let b=a; while(b+1<nc&&dep[b+1]>=0) b++; /* one run of snow: along the crest, back along its lower edge */
+      c.moveTo(a*step,cols[a]-1); for(let i=a;i<=b;i++) c.lineTo(i*step+step,cols[i]-1); for(let i=b;i>=a;i--) c.lineTo(i*step+step,cols[i]+dep[i]); c.lineTo(a*step,cols[a]+dep[a]); c.closePath(); a=b; }
+    c.fillStyle=shade(mix(o.snow,'#8088bc',.4),o.snow); c.fill(); }
   const hg=c.createLinearGradient(0,o.base-o.amp,0,o.base); hg.addColorStop(0,v3rgba(o.haze,0)); hg.addColorStop(.55,v3rgba(o.haze,o.hazeA*.35)); hg.addColorStop(1,v3rgba(o.haze,o.hazeA)); c.fillStyle=hg; c.fillRect(0,o.base-o.amp,W,o.amp+1);
   c.restore();
 }
@@ -5168,20 +5171,42 @@ let V3CACHE=null, V3PREV=null;
 // smoothly; light changes are redrawn between frames, so the extra steps never make a frame late. Phones keep the original steps.
 function v3steps(){ return document.body.classList.contains('pch-on')?[24,16,12]:[14,9,6]; }
 function v3fade(){ return document.body.classList.contains('pch-on')?1.8:3.4; } // seconds a new light level takes to fade in
+// 8b (director, 2026-11-21, option 20 of the light-change choices; the director's PC showed single frames of 291-329 ms at dawn and dusk):
+// a new light level is painted ahead in slices. The land drawing is recorded (every canvas call, in order) and then replayed a few
+// milliseconds per frame onto a spare picture; only when it is complete does it fade in. Same painting, same look, no long frame.
+function v3rec(x){ const ops=[], stack=[]; let sh={};
+  const ctx=new Proxy(x,{ get(t,k){ if(k==='canvas') return t.canvas; if(k in sh) return sh[k]; const v=t[k]; if(typeof v!=='function') return v;
+      if(k==='save') return ()=>{ stack.push(Object.assign({},sh)); ops.push(['save',[]]); };
+      if(k==='restore') return ()=>{ sh=stack.pop()||{}; ops.push(['restore',[]]); };
+      if(/^create/.test(k)) return v.bind(t); /* gradients and patterns are made now and used at replay */
+      if(k==='measureText') return s=>{ const f=t.font; if(sh.font) t.font=sh.font; const m=t.measureText(s); t.font=f; return m; };
+      return (...a)=>{ ops.push([k,a.map(z=>Array.isArray(z)?z.slice():z)]); }; },
+    set(t,k,v){ sh[k]=v; ops.push([0,k,v]); return true; } });
+  return {ctx,ops}; }
+const V3FLUSH=document.createElement('canvas'); V3FLUSH.width=V3FLUSH.height=1;
+/* a slice is at most ~1,200 canvas calls and is handed to the graphics card at once (drawn into a 1-pixel canvas): the card paints a
+   picture only when it is first used, so without this the whole picture landed on one frame however finely the calls were spread */
+function v3play(J,ms){ const x=J.x, o=J.ops, t0=performance.now(), end=Math.min(o.length,J.i+1200); while(J.i<end){ for(let n=0;n<32&&J.i<end;n++){ const p=o[J.i++]; if(typeof p==='function') p(); else if(p[0]===0) x[p[1]]=p[2]; else x[p[0]].apply(x,p[1]); } if(performance.now()-t0>ms) break; }
+  V3FLUSH.getContext('2d').drawImage(x.canvas,0,0,1,1); return J.i>=o.length; }
+function v3prep(c){ const DL=(typeof gfxHigh==="function"&&gfxHigh())?DPR:Math.min(DPR,2), cw=Math.round(W*DL), ch=Math.round(H*DL); if(c.width!==cw||c.height!==ch){ c.width=cw; c.height=ch; }
+  const x=c.getContext('2d'); x.setTransform(DL,0,0,DL,0,0); x.clearRect(0,0,W,H); return x; } /* still scenery at most 2x: sharp on every phone, far less to repaint */
 function v3land(L,P,hz){
-  const key=L.id+'|'+W+'|'+H+'|'+DPR+'|'+P.key;
-  if(V3CACHE && V3CACHE.key===key) return V3CACHE;
+  const key=L.id+'|'+W+'|'+H+'|'+DPR+'|'+P.key, base=L.id+'|'+W+'|'+H+'|'+DPR;
+  if(V3CACHE && V3CACHE.key===key){ v3land.job=null; return V3CACHE; } /* back to the light on screen: a half-painted next picture is dropped */
   // only the light changed (same place and size): keep the old picture to fade from; otherwise start clean
-  const same=V3CACHE && V3CACHE.base===L.id+'|'+W+'|'+H+'|'+DPR;
-  // a light change is redrawn between frames, not inside one (the new light fades in over 3.4 s anyway), so it never makes a
-  // frame late on fast monitors; a new water or a new size is still drawn at once
-  if(same&&!v3land.now){ if(!v3land.q){ v3land.q=setTimeout(()=>{ v3land.q=0; v3land.now=true; try{ v3land(L,P,hz); }catch(e){} v3land.now=false; },0); } return V3CACHE; }
-  const spare=V3PREV&&V3PREV.c, old=V3CACHE;
-  const c=(same?spare:(old&&old.c))||document.createElement('canvas'), DL=(typeof gfxHigh==="function"&&gfxHigh())?DPR:Math.min(DPR,2), cw=Math.round(W*DL), ch=Math.round(H*DL); if(c.width!==cw||c.height!==ch){ c.width=cw; c.height=ch; }
-  const x=c.getContext('2d'); x.setTransform(DL,0,0,DL,0,0); x.clearRect(0,0,W,H); /* still scenery at most 2x: sharp on every phone, far less to repaint */
-  V3SCENES[L.id].land(x,P,hz,c);
+  const same=V3CACHE && V3CACHE.base===base;
+  // a light change is painted ahead in slices (above) while the current picture stays; a new water or a new size is drawn at once
+  if(same&&!v3land.now){ const J=v3land.job;
+    if(J&&J.base===base){ if(v3play(J,4)){ v3land.job=null; V3PREV={c:V3CACHE.c,t0:performance.now()}; V3CACHE={key:J.key,base,c:J.c}; } return V3CACHE; }
+    if(V3PREV&&V3PREV.t0>0) return V3CACHE; /* the last light level is still fading in: its picture is not free yet */
+    const c=(V3PREV&&V3PREV.c)||document.createElement('canvas'), x=v3prep(c), R=v3rec(x); V3SCENES[L.id].land(R.ctx,P,hz,c);
+    v3land.job={key,base,c,x,ops:R.ops,i:0}; return V3CACHE; }
+  v3land.job=null;
+  const old=V3CACHE, c=(same?V3PREV&&V3PREV.c:(old&&old.c))||document.createElement('canvas'), x=v3prep(c);
+  // v3land.rec (PC's look-ahead picture): record now, replay in slices by the caller (C.ops)
+  const R=v3land.rec?v3rec(x):null; V3SCENES[L.id].land(R?R.ctx:x,P,hz,c);
   V3PREV=same?{c:old.c,t0:performance.now()}:null;
-  V3CACHE={key,base:L.id+'|'+W+'|'+H+'|'+DPR,c}; return V3CACHE;
+  V3CACHE={key,base,c}; if(R){ V3CACHE.x=x; V3CACHE.ops=R.ops; V3CACHE.i=0; } return V3CACHE;
 }
 // the cached scenery, with the previous light level fading out on top while a new one comes in
 function v3landDraw(L,P,hz){ const C=v3land(L,P,hz); g.drawImage(C.c,0,0,W,H);
@@ -5393,7 +5418,7 @@ if(/[?&]test\b/.test(location.search)){
   window.__crop=(x,y,w,h,s=2)=>{ document.getElementById('dbg')?.remove(); const d=cv.width/cv.getBoundingClientRect().width, o=document.createElement('canvas'); o.width=w*s; o.height=h*s; o.getContext('2d').drawImage(cv,x*d,y*d,w*d,h*d,0,0,w*s,h*s); const im=document.createElement('img'); im.src=o.toDataURL(); im.id='dbg'; im.style.cssText='position:fixed;left:0;top:0;z-index:99999;background:#000;width:'+(w*s)+'px'; document.body.appendChild(im); return [o.width,o.height]; };
   window.__go=id=>{ S.loc=id; if(!S.unlocked.includes(id)) S.unlocked.push(id); };
   window.__v3st=()=>({cache:V3CACHE&&V3CACHE.key, prev:V3PREV&&V3PREV.t0});
-  window.__landCost=(n=5)=>{ let mx=0; for(let i=0;i<n;i++){ if(V3CACHE) V3CACHE.key=""; v3palette.k=null; const t0=performance.now(); draw(performance.now()); mx=Math.max(mx,performance.now()-t0); } return +mx.toFixed(2); };
+  window.__landCost=(n=5)=>{ let mx=0; for(let i=0;i<n;i++){ if(V3CACHE) V3CACHE.key=""; v3palette.k=null; v3land.now=true; const t0=performance.now(); try{ draw(performance.now()); } finally{ v3land.now=false; } mx=Math.max(mx,performance.now()-t0); } return +mx.toFixed(2); };
   window.__drawCost=(n=30)=>{ const t0=performance.now(); for(let i=0;i<n;i++) draw(performance.now()); return +((performance.now()-t0)/n).toFixed(2); };
   window.__setWeather=k=>{ for(let i=0;i<3000;i++){ window.__off+=137000; if(weather().k===k) return k; } return 'none'; };
   window.__post=(name,url)=>fetch('/shot/'+name,{method:'POST',body:url});
@@ -6313,8 +6338,12 @@ function v3willowDraw(c,P,t,hz,part){ /* part: undefined = the whole tree; 0, 1,
 //   fore  : foreground along the bottom edge, which the float never reaches (waterY is above ~0.84H there)
 // =====================================================================
 const M33={};
-// wrap one scene hook: the original first, then ours
-function m33wrap(id,hook,fn){ const S0=V3SCENES[id]; if(!S0) return; const old=S0[hook]; S0[hook]=function(){ if(old) old.apply(this,arguments); if(!(W>8&&H>8)||window.__noExtras) return; /* never draw extras on a zero-size canvas (some loops step by a fraction of W) */ try{ fn.apply(this,arguments); }catch(e){ if(!M33.err){ M33.err=1; console.error(e); } } }; }
+// one owner per water and hook (Clean Scenes 5, batch 7): the original hook first, then every extra in the order the files added it.
+// It replaced 96 nested wrappers (one per extra and water); same order, same size guard, same error report, one call per hook. Proven 2026-11-22: every water drawn at a frozen time is pixel-identical to the nested version rebuilt from list.base (kept for that proof).
+function m33wrap(id,hook,fn){ const S0=V3SCENES[id]; if(!S0) return; const X=S0.__x||(S0.__x={}); if(!X[hook]){ const list=X[hook]=[], old=list.base=S0[hook];
+    S0[hook]=function(){ if(old) old.apply(this,arguments); if(!(W>8&&H>8)||window.__noExtras) return; /* never draw extras on a zero-size canvas (some loops step by a fraction of W) */
+      for(const f of list){ try{ f.apply(this,arguments); }catch(e){ if(!M33.err){ M33.err=1; console.error(e); } } } }; }
+  X[hook].push(fn); }
 // a soft mirror of whatever pathFn draws, just under the horizon
 function m33reflect(x,hz,depth,alpha,col,pathFn){ x.save(); x.beginPath(); x.rect(0,hz,W,depth); x.clip(); x.translate(0,hz*2); x.scale(1,-1); x.globalAlpha=alpha; x.fillStyle=col; pathFn(); x.fill(); x.restore(); }
 const m33dot=(c,x,y,r,col)=>{ c.fillStyle=col; c.beginPath(); c.arc(x,y,r,0,7); c.fill(); };
@@ -7230,11 +7259,11 @@ function finGrain(){ if(FIN036.grain) return FIN036.grain; const n=160, c=docume
   x.putImageData(im,0,0); return FIN036.grain=c; }
 const _v3land_036=v3land;
 v3land=function(L,P,hz){ const before=V3CACHE&&V3CACHE.key, C=_v3land_036(L,P,hz);
-  if(C.key!==before && !C.fin){ C.fin=1; try{ const x=C.c.getContext('2d'); x.save(); x.setTransform(1,0,0,1,0,0); x.globalCompositeOperation='source-atop';
+  if(C.key!==before && !C.fin){ C.fin=1; const fin=()=>{ try{ const x=C.c.getContext('2d'); x.save(); x.setTransform(1,0,0,1,0,0); x.globalCompositeOperation='source-atop';
     const k=Math.max(1,Math.round(C.c.width/1400)); const hzq=Math.round(hz*C.c.height/H)+2; x.globalAlpha=.42; x.fillStyle=x.createPattern(finGrain(),'repeat'); if(k>1&&x.fillStyle.setTransform) x.fillStyle.setTransform(new DOMMatrix().scale(k,k)); x.fillRect(0,0,C.c.width,hzq);
     // light falls from above: the tops of things lighter, the ground near the camera darker
     x.globalAlpha=1; const hzp=hz*C.c.height/H, lg=x.createLinearGradient(0,0,0,C.c.height); lg.addColorStop(0,'rgba(255,248,235,.06)'); lg.addColorStop(Math.min(.98,hzp/C.c.height),'rgba(255,248,235,0)'); lg.addColorStop(1,'rgba(0,4,12,.16)'); x.fillStyle=lg; x.fillRect(0,0,C.c.width,C.c.height);
-    x.restore(); }catch(e){} }
+    x.restore(); }catch(e){} }; if(C.ops) C.ops.push(fin); else fin(); } /* a picture painted in slices (8b) gets its finish as the last slice */
   return C; };
 function finVignette(){ const key=W+'x'+H; if(FIN036.vig&&FIN036.vig.key===key) return FIN036.vig.c;
   const c=document.createElement('canvas'), q=Math.min(1,600/Math.max(W,H)); c.width=Math.max(8,Math.round(W*q)); c.height=Math.max(8,Math.round(H*q)); const x=c.getContext('2d'), w=c.width, h=c.height, R=Math.hypot(w,h)/2;
@@ -8506,10 +8535,31 @@ function fishDesign(sp){
   if(has('grouper','roughy','redfish','oilfish','escolar','blackcod','slickhead')){ d.plan=d.plan==='fusi'?'grouper':d.plan; d.eye=has('roughy','redfish','slickhead')?'big':d.eye; }
   if(has('jelly')) d.plan='jelly'; if(has('squid','octopus','kraken','dreamer','endless','telescope','dumbo','mimic')) d.plan=has('octopus','dumbo','mimic','telescope')?'octopus':'squid';
   if(has('crab','lobster','isopod','krill','shrimp','mantis')) d.plan=has('lobster')?'lobster':has('isopod')?'isopod':has('krill')?'krill':has('mantis')?'shrimp':'crab';
+  // batch 4 (director, 2026-11-21: "fish that are based off of real fish should still look like them: arowana don't, most catfish don't,
+  // tiger shovelnose doesn't look anything like its description"): the real families of the newer waters, from the parts above
+  if(has('catfish','bullhead','corydoras','namazu')){ d.barbel='cat'; if(!has('corydoras','upside')) d.h=Math.min(d.h,.34); d.adipose=1; d.tail=has('corydoras')?'fork':'round'; }
+  if(has('shovelnose')&&!has('sturgeon')){ d.plan='long'; d.barbel='cat'; d.pat='tiger'; d.tail='fork';  d.h=Math.min(d.h,.22); } /* the tiger shovelnose is a catfish, not the sturgeon */
+  if(has('arowana')){ d.plan='long'; d.h=Math.min(d.h,.27); d.pat='scales'; d.barbel='short'; d.tail='round'; }
+  if(has('arapaima')){ d.plan='long'; d.h=Math.min(d.h,.26); d.pat='scales'; d.tail='round'; }
+  if(has('knifefish')){ d.plan='eel'; d.ribbon=1; }
+  if(has('electric eel')) d.plan='eel';
+  if(has('piranha')){ d.plan='deep'; d.teeth=1; d.tail='fork'; }
+  if(has('pacu')){ d.plan='deep'; d.tail='fork'; }
+  if(has('cichlid','oscar','tilapia')){ d.plan='deep'; d.dorsal='spiny'; d.tail='round'; if(has('oscar')) d.pat='eyespot'; }
+  if(has('discus')){ d.plan='disc'; if(d.pat==='none') d.pat='vbars'; }
+  if(has('peacock bass')){ d.plan='fusi'; d.dorsal='spiny'; d.pat='eyespot'; d.mouth='big'; }
+  if(has('tetra')){ d.plan='fusi'; d.adipose=1; d.tail='fork'; if(has('neon','cardinal')) d.pat='neon'; }
+  if(has('lungfish')){ d.plan='eel'; if(d.pat==='none') d.pat='spots'; }
+  if(has('bichir')){ d.plan='long'; d.h=Math.min(d.h,.2); d.dorsal='spines3'; d.tail='round'; if(d.pat==='none') d.pat='blotch'; }
+  if(has('pleco')){ d.plan='long'; d.h=Math.min(d.h,.3); d.sucker=1; d.dorsal='sail'; if(d.pat==='none') d.pat='dots'; }
+  if(has('loach')){ d.plan='long'; d.h=Math.min(d.h,.22); d.barbel=d.barbel||'short'; d.tail='round'; if(d.pat==='none') d.pat='marble'; }
+  if(has('snakehead')){ d.plan='long'; d.h=Math.min(d.h,.24); d.dorsal='long'; d.mouth='big'; d.tail='round'; if(d.pat==='none') d.pat='blotch'; }
+  if(has('goby')) d.plan='blenny';
+  if(has('catfish','bullhead','corydoras','namazu','shovelnose','arowana','arapaima','knifefish','electric eel','piranha','pacu','cichlid','oscar','tilapia','discus','peacock bass','tetra','lungfish','bichir','pleco','loach','snakehead','goby')) d.fam=1; /* a real family: the new waters' random body (cq_traits) leaves it alone */
   // element touches from the area
   if(sp.loc==='ember'&&!has('jelly')) d.ember=1; if(sp.loc==='starfall') d.cosmic=1; if(sp.loc==='frost') d.frost=1; if(sp.loc==='trench'||sp.loc==='deep') d.deepsea=1;
   if(has('glow','lantern','light','firefly','aurora','neon','twinkle','star','comet','pulsar','galaxy','nebula')) d.glow=1;
-  if(has('ghost','phantom','wraith','spirit','glass','crystal','clear')) d.ghost=1;
+  if(has('ghost','phantom','wraith','spirit','glass','crystal','clear')&&!has('ghost knifefish','phantom tetra')) d.ghost=1; /* real fish with ghost or phantom in their name (black ghost knifefish, black phantom tetra) are dark, not see-through */
   // patterns from the old pattern flag
   if(d.pat==='none'||d.pat==='scales'){ if(sp.pat===1) d.pat=has('tiger')?'tiger':pick(['vbars','vbars','hstripe']); else if(sp.pat===2) d.pat=pick(['spots','dots','spots','marble']); }
   // a little individual variety
@@ -16919,7 +16969,7 @@ const i_fishDark = col => mix(col,'#1a1a1a',.7);
 // more body variety in the new waters: a fish that would get the plain default body gets a plan, tail and fin of its own (from its id)
 { const NEWW=new Set(WATERS_NEW.map(w=>w.id)), EGP=['fusi','deep','long','disc','grouper','tuna','mahi','ball','box','koi','goldfish','sculpin','mola','hatchet','tadpole','bill','carp','guppy'],
     NP=['fusi','deep','long','disc','grouper','tuna','koi','carp','sculpin','blenny','guppy','bill'], TAILS=['fork','round','lunate','fan','fork'], DORS=['round','long','sail','spiny','trail','trigger','round'];
-  for(const sp of SP){ if(!NEWW.has(sp.loc)||sp.shape!=='f') continue; const d=fishDesign(sp); if(d.plan!=='fusi') continue; let h=0; for(let i=0;i<sp.id.length;i++) h=(h*33+sp.id.charCodeAt(i))>>>0;
+  for(const sp of SP){ if(!NEWW.has(sp.loc)||sp.shape!=='f') continue; const d=fishDesign(sp); if(d.plan!=='fusi'||d.fam) continue; let h=0; for(let i=0;i<sp.id.length;i++) h=(h*33+sp.id.charCodeAt(i))>>>0;
     const L2=sp.eg?EGP:NP; d.plan=L2[h%L2.length]; d.tail=TAILS[(h>>>4)%TAILS.length]; d.dorsal=DORS[(h>>>8)%DORS.length]; if(d.plan==='mola'||d.plan==='ball'||d.plan==='box') d.h=Math.max(d.h,.5); } }
 // =====================================================================
 // 0.4.9 [2] Oddities to 300 (director, 2026-11-19: "Increase the amount of oddities to 300. Go hard. Do memes ... household objects,
@@ -17754,6 +17804,41 @@ if(/[?&]test\b/.test(location.search)) window.__menuMap=async()=>{ const w=ms=>n
   for(const t of pages){ out.labels[t]=label(t); try{ openMenu(t); }catch(e){ continue; } await w(220); const P=$('panel'); if(!P||S.tab!==t) continue;
     out.tabs[t]=[...P.querySelectorAll('.sect-nav > button')].map(b=>clean(b.dataset.sect||b.textContent)).filter(Boolean); }
   try{ closeMenu(); }catch(e){} return out; };
+// =====================================================================
+// Install welcome (batch 6; director 2026-11-21, option B of three: "players can't find how to install"; decided: shown once per
+// device, Install stays one tap away in Settings; goal: everyone plays the installed version, not the browser). Shared by every platform.
+// The first time the game opens in a browser (not installed), a card offers that device's own way to install, or playing in the browser.
+// Never in the installed app, the Windows app, or test pages (?test, ?sweep), where it would sit over the checks.
+// The Windows download is not offered here until the director has tested it (CLAUDE.md: never publish the Windows exes untested).
+// =====================================================================
+const INSTALL_SEEN='dl-install-welcome';
+function installSteps(){ const p=window.DL_PLAT||{}, ip=window.__dlInstallPrompt;
+  if(p.ios) return {html:'In <b>Safari</b>, tap <b>Share</b>, then <b>Add to Home Screen</b>. Then open Driftline from your home screen.', act:null};
+  if(ip) return {html:'Install it in one '+(PLAT.touch()?'tap':'click')+'.', act:'Install Driftline'};
+  if(p.android) return {html:'Open the browser menu <b>⋮</b> and tap <b>Install app</b> (or <b>Add to Home screen</b>).', act:null};
+  return {html:'In <b>Chrome</b> or <b>Edge</b>, click the install icon at the right of the address bar, or open the menu and choose <b>Install Driftline</b>.', act:null}; }
+function installWelcome(force){ const p=window.DL_PLAT||{}, mm=q=>!!(window.matchMedia&&matchMedia(q).matches); if(p.app||window.DL_DESKTOP||mm('(display-mode: fullscreen)')||mm('(display-mode: minimal-ui)')||document.getElementById('dl-install')) return; /* the installed Android app runs in fullscreen display mode */
+  if(!force){ if(/[?&](test|sweep)\b/.test(location.search)) return; try{ if(localStorage.getItem(INSTALL_SEEN)) return; }catch(e){ return; } }
+  const st=installSteps(), el=document.createElement('div'); el.id='dl-install'; el.setAttribute('role','dialog'); el.setAttribute('aria-modal','true'); el.setAttribute('aria-labelledby','dl-install-h');
+  el.innerHTML=`<div class="dli-card"><h3 id="dl-install-h">Play Driftline like an app</h3><p>Install it once: it gets its own icon, plays full screen and works offline. It updates itself.</p><p class="dli-steps">${st.html}</p><div class="dli-row">${st.act?`<button type="button" class="dli-go" data-dli="install">${st.act}</button>`:`<button type="button" class="dli-go" data-dli="ok">Got it</button>`}<button type="button" class="dli-alt" data-dli="skip">Play in the browser</button></div><p class="dli-note">You can find this again in Settings.</p></div>`;
+  const close=()=>{ try{ localStorage.setItem(INSTALL_SEEN,'1'); }catch(e){} el.remove(); };
+  el.addEventListener('click',e=>{ const b=e.target.closest('[data-dli]'); if(!b) return; if(b.dataset.dli==='install'){ const ip=window.__dlInstallPrompt; if(ip){ ip.prompt(); ip.userChoice.finally(()=>{ window.__dlInstallPrompt=null; }); } } close(); });
+  document.body.appendChild(el); const go=el.querySelector('.dli-go'); if(go) go.focus(); }
+function installWhenIdle(){ const ev=document.getElementById('evcard'); if((typeof G!=='undefined'&&G.st!=='idle')||(ev&&ev.offsetWidth)){ setTimeout(installWhenIdle,3000); return; } try{ installWelcome(false); }catch(e){} } /* never over another card (patch notes, the first-day tips) or mid-cast */
+setTimeout(installWhenIdle,2500); /* after loading (the browser's install offer usually arrives first) */
+document.addEventListener('click',e=>{ const b=e.target.closest&&e.target.closest('[data-act="installhelp"]'); if(b) installWelcome(true); }); /* Settings › Install Driftline */
+document.head.insertAdjacentHTML('beforeend',`<style>
+#dl-install{position:fixed;inset:0;z-index:9000;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(5,10,16,.72)}
+#dl-install .dli-card{box-sizing:border-box;width:100%;max-width:440px;max-height:calc(100% - 8px);overflow:auto;background:#0e1a2c;border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:18px 20px;color:#e6efe8;font-family:var(--body,system-ui)}
+#dl-install h3{margin:0 0 8px;font:800 20px var(--display,system-ui);color:#e6efe8}
+#dl-install p{margin:0 0 10px;color:#9fb2c8;font-size:14px;line-height:1.45}
+#dl-install .dli-steps{color:#e6efe8;background:#0a1424;border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:10px 12px}
+#dl-install .dli-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:4px}
+#dl-install .dli-go{font:800 15px var(--display,system-ui);min-height:42px;padding:0 20px;border:0;border-radius:10px;color:#fff;background:linear-gradient(180deg,#1f8a86,#14666a);cursor:pointer}
+#dl-install .dli-alt{font:800 15px var(--display,system-ui);min-height:42px;padding:0 18px;border:1px solid rgba(255,255,255,.12);border-radius:10px;color:#e6efe8;background:#0a1424;cursor:pointer}
+#dl-install button:focus-visible{outline:3px solid #7fe3c4;outline-offset:2px}
+#dl-install .dli-note{font-size:12.5px;margin:10px 0 0}
+</style>`);
 // =====================================================================
 // 0.4.9 start-up pass: the save is read in c_logic.js before later files add their own save rules (wrappers around migrate), so those
 // rules never ran on the save loaded at start-up, and the defaults from fresh() (pearlMig:1, boonMig, passMig) hid that the old save
@@ -20263,6 +20348,14 @@ PATCHES.unshift({v:'0.4.9', name:'Work in progress', items:phoneNotes([
 // text changes. Released notes live in notes_release.js.
 const TEST_NOTES={v:'test', label:'Test build · '+(window.DL_BUILD==='ios'?'iPhone':'Android'), name:'0.4.9 test build (newest first)', items:[
   '## New in this build',
+  'Fish: real fish families look like themselves: catfish get their whiskers and flat heads, the tiger shovelnose is a striped catfish, arowana and arapaima are long and scaled, piranhas have teeth, cichlids, oscars, discus, tetras, plecos, loaches, snakeheads, gobies, lungfish and bichirs have their real shapes and markings.',
+  'Long fish are slim: arowanas, loaches, plecos, bichirs and snakeheads, and the Nile electric catfish is a catfish (it was drawn like a sunfish).',
+  'The black ghost knifefish and the black phantom tetra are dark fish now, not see-through.',
+  'Opening the game in a browser shows a welcome once with how to install it on this device; Settings › Install Driftline brings it back.',
+  'The install welcome waits until other cards (like these notes) are closed.',
+  'Dawn, dusk and weather changes: the scenery’s new light is painted a little at a time, and the mountains are much cheaper to paint, so the short freezes when the light changes should be gone. Tell us if you still see one.',
+  'Behind the scenes: each water’s extra scenery (boats, birds, lights, waves) now has one owner instead of layers stacked on layers. Nothing should look different; tell us if anything does.',
+  '## Test build 0407',
   'Save › Backup on this device: your progress is copied every few minutes and whenever you leave the game; Restore brings it back (tap twice). If your progress suddenly drops, the better copy is kept as an earlier backup.',
   'Behind the scenes: tidier code for the Map, Skills, Pets, Trophy Room and Events pages. Nothing should look different; tell us if anything does.',
   '## Test build 0351',
