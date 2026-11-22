@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="DL Test iPhone">
 <script>
-window.DL_BUILD='ios'; window.DL_PREVIEW=true; if(/[?&]sweep\b/.test(location.search)){ window.__bootErr=[]; addEventListener("error",function(e){ __bootErr.push(String(e.message||e)+(e.lineno?" (line "+e.lineno+")":"")); }); addEventListener("unhandledrejection",function(e){ __bootErr.push("promise: "+String(e.reason&&e.reason.message||e.reason)); }); window.requestAnimationFrame=function(f){ return setTimeout(function(){ f(performance.now()); },16); }; window.cancelAnimationFrame=function(i){ clearTimeout(i); }; } window.DL_VERSION='2026.11.21-2338';
+window.DL_BUILD='ios'; window.DL_PREVIEW=true; if(/[?&]sweep\b/.test(location.search)){ window.__bootErr=[]; addEventListener("error",function(e){ __bootErr.push(String(e.message||e)+(e.lineno?" (line "+e.lineno+")":"")); }); addEventListener("unhandledrejection",function(e){ __bootErr.push("promise: "+String(e.reason&&e.reason.message||e.reason)); }); window.requestAnimationFrame=function(f){ return setTimeout(function(){ f(performance.now()); },16); }; window.cancelAnimationFrame=function(i){ clearTimeout(i); }; } window.DL_VERSION='2026.11.22-0145';
 window.addEventListener('beforeinstallprompt',function(e){ e.preventDefault(); window.__dlInstallPrompt=e; });
 </script>
 </head>
@@ -1651,8 +1651,8 @@ function migrate(o){ const d=fresh(); if(!isObj(o)) return d; o=saveClean(o,d);
   m.petLook=Object.assign({},o.petLook||{}); m.bond=Object.assign({},o.bond||{}); m.petTints=uniq(['none',...(o.petTints||[])]); m.petAccs=uniq(['none','bandana',...(o.petAccs||[])]);
   const rd=Object.assign(fresh().rods,o.rods||{}); rd.owned=uniq(['bamboo',...(rd.owned||[])]); if(!rd.owned.includes(rd.eq)) rd.eq='bamboo'; rd.lvl=Object.assign({},rd.lvl||{}); rd.att=Object.assign({},rd.att||{}); m.rods=rd;
   m.atts=Object.assign({},o.atts||{}); m.login=Object.assign(fresh().login,o.login||{}); m.scales=+o.scales||0;
-  m.specs=Object.assign({},o.specs||{}); m.relics=uniq(o.relics||[]); if(!m.pet2||!PETI[m.pet2]||!m.owned.pets.includes(m.pet2)||m.pet2===m.pet) m.pet2=null;
-  const dk=Object.assign(fresh().dock,o.dock||{}); dk.owned=uniq(['oak',...(dk.owned||[])]); dk.decor=(dk.decor||[]).filter(x=>dk.owned.includes(x)); if(!dk.owned.includes(dk.wood)) dk.wood='oak'; m.dock=dk;
+  m.specs=Object.assign({},o.specs||{}); for(const k in m.specs) if(m.specs[k]==='homebody') m.specs[k]='petnap'; /* batch 5: Homebody became Pet Nap with the decorations */ m.relics=uniq(o.relics||[]); if(!m.pet2||!PETI[m.pet2]||!m.owned.pets.includes(m.pet2)||m.pet2===m.pet) m.pet2=null;
+  const dk=Object.assign(fresh().dock,o.dock||{}); dk.owned=uniq(['oak',...(dk.owned||[])]); dk.decor=[]; /* batch 5: home decorations are gone (no refunds: director 2026-11-21) */ if(!dk.owned.includes(dk.wood)) dk.wood='oak'; m.dock=dk;
   m.pass=Object.assign(fresh().pass,o.pass||{}); m.medals=Object.assign(fresh().medals,o.medals||{}); if(m.derby && !(m.derby.until>Date.now()-3600000)) m.derby=null;
   if((o.pearlV||1)<2){ m.pearls=Math.ceil((+o.pearls||0)*.4); m.pearlV=2; }
   m.bounties=(m.bounties||[]).filter(b=>SPI[b.sp]||['trophy','style','shiny'].includes(b.type)); if(m.tankSlots>TANK_COST.length) m.tankSlots=TANK_COST.length; m.v=3; return m; }
@@ -1711,9 +1711,9 @@ function petSum(k){ const p=PETI[S.pet], q=S.pet2&&PETI[S.pet2]; return (p && p.
 const compShare = () => .5+.02*bondLevel(S.pet2);
 function bonus(k){ const v=buffSum(k)+aqSum(k)+petSum(k)+rodBonus(k); return BONUS_CAP[k] ? Math.min(BONUS_CAP[k],v) : v; }
 /* the sale price before bonuses: one formula, also used by Market Rush (a copy of it missed the Merchant Path, so Rush gave 27.5% instead of 30%: Cam's Pixel, 2026-11-20) */
-const sellBase = () => 1 + .03*(S.lvl-1) + .04*pr('haggler') + cozyBonus()*.005 + .01*anglerRank() + (spec('merchant')?.12:0);
+const sellBase = () => 1 + .03*(S.lvl-1) + .04*pr('haggler') + .01*anglerRank() + (spec('merchant')?.12:0);
 const sellMult = () => (sellBase() + bonus('sell')) * coinMult();
-const xpMult = () => (1 + bonus('xp') + cozyBonus()*.01) * (coinMult() + .01*(pshopLv('xp')-pshopLv('gold')));
+const xpMult = () => (1 + bonus('xp')) * (coinMult() + .01*(pshopLv('xp')-pshopLv('gold')));
 function earn(n){ n=Math.floor(n); S.money+=n; S.stats.earned+=n; S.stats.runEarned+=n; return n; }
 const pearlsFor = () => { const n=Math.floor(Math.pow(S.stats.runEarned/PEARL_DIV,1/PEARL_EXP)*voyagePearlMult()*pathMul('pearl')); return n>0 ? n+(relic("pearlseeker")?1:0) : 0; }; /* 0.3.6: experienced sailors find more pearls */
 const salePrice = f => Math.round(f.value*sellMult()*(demandSp().id===f.id?(maxed('haggler')?3:2):1));
@@ -1833,7 +1833,7 @@ function beginWait(){ G.st='waiting'; G.waitT=0; G.missN=0; const b=BAIT[S.baitS
   G.biteAt = rnd(1.4,4.6)/speed; S.castN=(S.castN||0)+1; if(maxed('patience') && S.castN%10===0) G.biteAt=.35; G.nib=[]; const n=Math.floor(Math.random()*3); for(let i=0;i<n;i++) G.nib.push(rnd(.5,Math.max(.6,G.biteAt-.4))); G.nibOn=0;
   splash(G.bob.x,G.bob.y,10); sfx.splash(); if(G.inHot){ splash(G.bob.x,G.bob.y,14); sfx.hot(); toast('Right in the hotspot! Rare fish are gathering.'); } }
 // shared by fishing and the Stats tab, so the sheet always shows the real numbers
-function biteSpeed(hot){ const b=BAIT[S.baitSel], wx=weather(); return b.speed*(1+.01*(S.lvl-1))*(1+.05*pr('patience'))*(wx.bite||1)*(1+bonus('bite'))*(hot?1.3:1)*(spec('speedy')?1.2:1)*(1+cozyBonus()*.005)*((wx.k!=='Clear'||maxed('weatherwise'))?1+.04*pr('weatherwise'):1); }
+function biteSpeed(hot){ const b=BAIT[S.baitSel], wx=weather(); return b.speed*(1+.01*(S.lvl-1))*(1+.05*pr('patience'))*(wx.bite||1)*(1+bonus('bite'))*(hot?1.3:1)*(spec('speedy')?1.2:1)*((wx.k!=='Clear'||maxed('weatherwise'))?1+.04*pr('weatherwise'):1); }
 function rareScore(dm,far,hot,p){ const b=BAIT[S.baitSel], wx=weather(); p=p==null?phase():p;
   let rare = dm.rare + PEARL_RARE*(S.pearlOld||0) + b.rare + (ROD_RARE[S.gear.rod]||0) + (far ? .2+.03*pr('caster') : 0) + .06*pr('lucky') + (wx.rare||0) + bonus('rare')*2 + (isNight(p)?.1*pr('nightowl'):0) + (hot?1:0);
   if(S.baitSel==='glow' && isNight(p)) rare*=1.5; if(b.loc===S.loc) rare*=(b.locMul||2); if(b.sea && SEA.includes(S.loc)) rare*=1.5; if(b.night && isNight(p)) rare*=b.night; rare*=(spec('patient')?1.2:1)*specLocRare(S.loc); return rare; }
@@ -2019,7 +2019,6 @@ const FEATS = [
   {id:'derby10',name:'Derby champion',        d:'Win 10 gold medals',        p:()=>[S.medals.gold,10], coins:300000, pt:2},
   {id:'pass25',name:'Riding the tide',        d:'Reach Tide Pass level 25',  p:()=>[S.pass.lvl,25], coins:100000, pt:2},
   {id:'pass50',name:'Master of tides',        d:'Reach Tide Pass level 50',  p:()=>[S.pass.lvl,50], coins:1000000, pt:3},
-  {id:'cozy15',name:'Home sweet home',        d:'Reach 15 cozy on your dock', p:()=>[cozy(),15], coins:30000, pt:1},
   {id:'tide1', name:'Second voyage',          d:'Set sail again once',       p:()=>[S.tides,1],           coins:0, pt:2},
   {id:'tide3', name:'Old sea dog',            d:'Set sail again 3 times',    p:()=>[S.tides,3],           coins:0, pt:3},
 ];
@@ -4409,17 +4408,17 @@ function drawDockItem(c,id,x,y,s,t,night,back){ c.save(); c.translate(x,y); c.sc
 const PASS_MAX = 100; /* 0.4.9: five chapters of 20 (cj_tidepass.js) */
 const passNeed = L => Math.round(180 + L*45 + L*L*.8);
 const PASS_XP = [8,14,30,60,150,400];
-const PASS_SPECIAL = {3:['dock','tideflag','Tide Flag','Dock decoration: a flag that ripples in the wind.'], 5:['shoe','tidetreads','Tide Treads','Shoes: sea-glass boots with a rolling wave stripe.'],
+const PASS_SPECIAL = {3:['aq','lantern','Sea Lantern','Aquarium decoration: a lantern that glows on the sand.'], 5:['shoe','tidetreads','Tide Treads','Shoes: sea-glass boots with a rolling wave stripe.'],
   8:['tint','tidal','Tidal pet color','Pet color: recolors any pet in deep sea blues.'], 10:['neck','tidescarf','Tide Scarf','Neckwear: a long scarf of sea foam that drifts behind you.'],
   12:['hat','tidecap','Tide Cap','Hat: a captain’s cap with the Tide crest.'], 15:['bait','mythbait','6 Myth Bait','Bait: legendary fish are far more likely to bite.'],
-  18:['dock','shipwheel','Ship’s Wheel','Dock decoration: an old helm that turns in the breeze.'], 20:['back','tidecape','Tide Cape','On your back: a cape of rolling water that shimmers as it moves.'],
-  25:['wood','pearl','Pearl dock wood','Dock wood: pale, pearly planks for any of your docks.'], 30:['out','tidecoat','Tide Coat','Outfit: a long coat with a glowing wave hem.'],
-  35:['back','shellpack','Seashell Pack','On your back: a backpack made from a giant scallop shell.'], 40:['dock','minilight','Tiny Lighthouse','Dock decoration: its beam sweeps the water at night.'],
+  18:['aq','anchor','Old Anchor','Aquarium decoration: a rusty anchor half sunk in the sand.'], 20:['back','tidecape','Tide Cape','On your back: a cape of rolling water that shimmers as it moves.'],
+  25:['aq','chest','Treasure Chest','Aquarium decoration: a chest that lets out bubbles.'], 30:['out','tidecoat','Tide Coat','Outfit: a long coat with a glowing wave hem.'],
+  35:['back','shellpack','Seashell Pack','On your back: a backpack made from a giant scallop shell.'], 40:['aq','diver','Little Diver','Aquarium decoration: a tiny diver who waves at your fish.'],
   45:['crate2','legend','2 Legendary Crates','Two Legendary Mystery Crates, the best crates there are.'], 50:['back','tidewings','Tide Wings','On your back: wings of living water. The rarest thing in the Pass.']};
 function passReward(L){ const sp=PASS_SPECIAL[L]; return sp?sp[2]:passPlain(L).name; }
 function addPassXP(n){ S.pass.xp+=Math.round(n*(1+.06*pr('tidewalker'))*(relic('tidecaller')?1.3:1)); let ups=0; while(S.pass.xp>=passNeed(S.pass.lvl+1)){ S.pass.xp-=passNeed(S.pass.lvl+1); S.pass.lvl++; ups++; } if(ups){ setTimeout(()=>toast('Tide Pass level '+S.pass.lvl+'! Rewards are waiting in the Pass tab.'),1300); } }
 function passArt(x,w,h,L){ const sp=PASS_SPECIAL[L]; x.clearRect(0,0,w,h); const cx=w/2, s=w/120;
-  if(sp){ const [k,id]=sp; if(k==='dock') dockThumb(x,id,w,h); else if(k==='hat') hatPreview(x,w,h,id,S.look.hatCol); else if(k==='out') drawAngler(x,cx,h*.96,h/80,Object.assign({},S.look,{outfit:id,hat:'none'}),{});
+  if(sp){ const [k,id]=sp; if(k==='aq') drawDecor(x,id,w/2,h*.92,w/160,0); else if(k==='dock') dockThumb(x,id,w,h); else if(k==='hat') hatPreview(x,w,h,id,S.look.hatCol); else if(k==='out') drawAngler(x,cx,h*.96,h/80,Object.assign({},S.look,{outfit:id,hat:'none'}),{});
     else if(k==='tint') drawPetStyled(x,S.pet,cx,h*.86,2.8*s,0,0,Object.assign({},petLook(),{tint:id})); else if(k==='wood'){ x.fillStyle='#f0e8f4'; x.fillRect(w*.08,h*.5,w*.84,h*.13); x.fillStyle='#c8b8d0'; for(let i=0;i<5;i++) x.fillRect(w*(.12+i*.17),h*.5,2*s,h*.13); }
     else if(k==='shoe'||k==='neck'||k==='back') wearPreview(x,k,id,w,h); else if(k==='bait') drawJunk(x,w,h,'goldlure'); else drawJunk(x,w,h,'chest'); return; }
   const p=L>PASS_MAX?{k:'coins'}:passPlain(L); if(p.k==='big'||p.k==='small') drawJunk(x,w,h,'chest'); else if(p.k==='coins'||p.k==='bonus') drawJunk(x,w,h,'coin');
@@ -4678,7 +4677,6 @@ FEATS.push(
   {id:'claw10', name:'Claw master', d:'Win 10 claw machine prizes', p:()=>[S.gstats.claw||0,10], coins:20000, pt:1},
   {id:'atts10', name:'Fully kitted', d:'Own 10 different attachments', p:()=>[Object.keys(S.atts).length,10], coins:150000, pt:2},
   {id:'decor15', name:'Aquarium architect', d:'Own 15 aquarium decorations', p:()=>[S.aq.owned.filter(x=>DECORI[x]).length,15], coins:150000, pt:2},
-  {id:'dock8', name:'Full dock', d:'Place 8 decorations on your dock', p:()=>[S.dock.decor.length,8], coins:60000, pt:1},
   {id:'paths5', name:'Every road taken', d:'Choose all five Paths', p:()=>[Object.keys(S.specs).length,5], coins:500000, pt:3});
 
 // ---------- claw machine ----------
@@ -9686,6 +9684,79 @@ const V3MUS = {
 // settings list and the per-area pick replace the old three-way choice in the preview
 if(typeof V3ON!=='undefined'&&V3ON){ /* curStyle and the settings list read these when the preview is on */ }
 
+// ---- batch 5 (director, 2026-11-22: a music rework for every water): every water has its own theme, made from its "Music and
+// ambience" line in docs/MAP_THEMES.md with the same live instruments; each plays calmer at night (fewer notes, softer).
+const MAJ=[0,2,4,5,7,9,11], DOR=[0,2,3,5,7,9,10], HIJAZ=[0,1,4,5,7,8,10];
+const mNight = () => tod()==='Night';
+Object.assign(STYLES,{
+  cabin:  {bpm:72, swing:.06, key:67, progs:[[[55,[0,4,7,11]],[52,[0,3,7,10]],[48,[0,4,7,9]],[50,[0,4,7]]],[[48,[0,4,7,11]],[55,[0,4,7]],[52,[0,3,7]],[50,[0,5,7]]]], mel:0},
+  mill:   {bpm:96, swing:.1, key:62, progs:[[[50,[0,4,7]],[55,[0,4,7]],[57,[0,4,7]],[50,[0,4,7]]],[[50,[0,4,7]],[48,[0,4,7]],[55,[0,4,7]],[57,[0,4,7,10]]]], mel:0},
+  hanami: {bpm:64, swing:0, key:69, progs:[[[45,[0,3,7]],[41,[0,4,7]],[43,[0,5,7]],[45,[0,3,7]]]], mel:0},
+  glacier:{bpm:84, swing:.05, key:64, progs:[[[52,[0,4,7]],[59,[0,4,7]],[49,[0,3,7]],[57,[0,4,7]]],[[57,[0,4,7]],[52,[0,4,7]],[59,[0,4,7]],[52,[0,4,7,9]]]], mel:0},
+  flats:  {bpm:100, swing:.12, key:65, progs:[[[53,[0,4,7]],[58,[0,4,7]],[48,[0,4,7,10]],[53,[0,4,7]]]], mel:0},
+  canopy: {bpm:92, swing:.08, key:62, progs:[[[50,[0,3,7]],[48,[0,4,7]],[46,[0,4,7]],[48,[0,4,7]]]], mel:0},
+  fair:   {bpm:112, swing:.14, key:67, progs:[[[55,[0,4,7]],[48,[0,4,7]],[50,[0,4,7]],[55,[0,4,7]]],[[55,[0,4,7]],[52,[0,3,7]],[50,[0,4,7,10]],[55,[0,4,7]]]], mel:0},
+  dinner: {bpm:108, swing:.18, key:65, progs:[[[53,[0,4,7,11]],[50,[0,3,7,10]],[55,[0,3,7,10]],[48,[0,4,7,10]]]], mel:0},
+  lounge: {bpm:96, swing:.14, key:62, progs:[[[50,[0,3,7,10]],[55,[0,4,7,10]],[48,[0,4,7,11]],[45,[0,3,7,10]]]], mel:0},
+  nile:   {bpm:84, swing:.06, key:62, progs:[[[50,[0,4,7]],[51,[0,4,7]],[50,[0,4,7]],[48,[0,3,7]]]], mel:0},
+  neon:   {bpm:104, swing:0, key:57, progs:[[[45,[0,3,7]],[41,[0,4,7]],[48,[0,4,7]],[43,[0,4,7]]]], mel:0},
+  thunder:{bpm:76, swing:0, key:62, progs:[[[50,[0,4,7]],[46,[0,4,7]],[48,[0,4,7]],[45,[0,4,7]]],[[43,[0,3,7]],[46,[0,4,7]],[48,[0,4,7]],[50,[0,4,7]]]], mel:0}
+});
+const m3Vib=(o,f,t,d,rate)=>{ const v=AC.createOscillator(), vg=AC.createGain(); v.frequency.value=rate||5.5; vg.gain.value=f*.008; v.connect(vg); vg.connect(o.frequency); v.start(t); v.stop(t+d); };
+Object.assign(V3MUS,{
+  cabin(t,s,root,ivs,L,n,bar){ /* Willow Pond: fingerpicked guitar, felt-piano chords, a glockenspiel now and then */
+    const nt=mNight(), pat=[0,2,1,3,2,1,3,2]; if(!nt||s%2===0) i3Pluck(mtof(root+12+ivs[pat[s]%ivs.length]),t,nt?.016:.024,.9,[n.dry,n.wet],2400);
+    if(s===0) ivs.slice(0,3).forEach(iv=>mv('triangle',mtof(root+iv),t,L*7,.012,.3,[n.dry,n.wet])); if(s===0||s===4) mv('sine',mtof(root-12+(s===4?7:0)),t,L*3,.07,.02,[n.dry]);
+    if(!nt&&s===6&&Math.random()<.35) i3Bell(mtof(STYLES.cabin.key+12+m3Wander(PENT,3,9)),t,.02,1.4,[n.dry,n.wet,n.dls]); },
+  mill(t,s,root,ivs,L,n,bar){ /* Stonebrook River: a folk fiddle over a walking guitar and bass */
+    const nt=mNight(); if(s%2===0) mv('sine',mtof(root-12+[0,7,4,7][s/2]),t,L*1.6,.08,.01,[n.dry]); if(s===1||s===5) ivs.slice(0,3).forEach((iv,k)=>i3Pluck(mtof(root+12+iv),t+k*.012,.016,.4,[n.dry],2800));
+    if(s%2===0&&Math.random()<(nt?.2:.5)){ const m=STYLES.mill.key+12+m3Wander(MAJ,3,12); i3Saw(mtof(m),t,L*(Math.random()<.4?2.6:1.4),.011,.03,2200,[n.dry,n.wet,n.dls],4,5.5); } },
+  hanami(t,s,root,ivs,L,n,bar){ /* Cherry Blossom Lake: koto plucks in a Japanese scale, a breathy flute, a temple bell */
+    const nt=mNight(); if(Math.random()<(nt?.3:.6)) i3Pluck(mtof(STYLES.hanami.key+m3Wander(YO,2,10)),t,.03,1.4,[n.dry,n.wet,n.dls],3800);
+    if(s===0) mv('triangle',mtof(root-12),t,L*8,.05,.6,[n.dry,n.wet]);
+    if(s%4===0&&Math.random()<(nt?.15:.35)){ const m=STYLES.hanami.key+12+m3Wander(YO,3,9), d=L*3; mv('sine',mtof(m),t,d,.025,.12,[n.dry,n.wet,n.dls]); nz(t,d*.5,.005,'bandpass',mtof(m)*2,n.wet); }
+    if(S.settings.ambient&&s===0&&bar%4===0&&Math.random()<.4) i3Bell(196,t,.03,3.5,[BUS.amb]); },
+  glacier(t,s,root,ivs,L,n,bar){ /* Canadian Rockies: open guitar strums, banjo rolls, a wide string pad */
+    const nt=mNight(); if(s===0||s===4) ivs.slice(0,3).concat([12]).forEach((iv,k)=>i3Pluck(mtof(root+iv+12),t+k*.02,.02,.9,[n.dry,n.wet],2600));
+    if(s===0) ivs.slice(0,3).forEach(iv=>i3Saw(mtof(root+iv),t,L*8.4,.006,L*2.6,800,[n.wet],10)); if(s===0||s===4) mv('sine',mtof(root-12),t,L*3,.08,.02,[n.dry]);
+    if(!nt&&Math.random()<.45) i3Pluck(mtof(root+24+ivs[(s*2+bar)%ivs.length]),t,.012,.35,[n.dry,n.dls],5200); },
+  flats(t,s,root,ivs,L,n,bar){ /* Florida Keys: easy off-beat guitar, a steel drum tune, a shaker, a lazy bass */
+    const nt=mNight(); if(s===2||s===6) ivs.slice(0,3).forEach(iv=>i3Pluck(mtof(root+12+iv),t,.018,.3,[n.dry,n.wet],3000)); if(s===0||s===5) mv('sine',mtof(root-12+(s===5?7:0)),t,L*1.6,.09,.01,[n.dry]);
+    nz(t,.03,s%2?.006:.01,'highpass',6800,n.dry); if(s%2===0&&Math.random()<(nt?.15:.45)) i3Steel(mtof(STYLES.flats.key+12+m3Wander(PENT,2,9)),t,.035,[n.dry,n.wet]); },
+  canopy(t,s,root,ivs,L,n,bar){ /* Amazon: hand drums and shakers, a marimba, a wooden flute */
+    const nt=mNight(); if(s===0||s===3||s===6) i3Drum(s===0?150:200,s===0?90:120,t,nt?.06:.1,.25,n.dry); nz(t,.03,s%2?.008:.012,'bandpass',5000,n.dry);
+    if(s%2===0&&Math.random()<(nt?.25:.55)) i3Pluck(mtof(STYLES.canopy.key+m3Wander(PENT_MIN,3,10)),t,.03,.5,[n.dry,n.wet],1800);
+    if(s===0&&Math.random()<(nt?.2:.4)){ const m=STYLES.canopy.key+12+m3Wander(PENT_MIN,3,9), d=L*3.2; mv('sine',mtof(m),t,d,.022,.1,[n.dry,n.wet,n.dls]); nz(t,d*.5,.005,'bandpass',mtof(m)*2,n.wet); }
+    if(s===0) mv('sine',mtof(root-12),t,L*8,.06,.4,[n.dry]); },
+  fair(t,s,root,ivs,L,n,bar){ /* Animal Farm: banjo picking, an oom-pah bass, a harmonica wail */
+    const nt=mNight(); if(s%2===0) mv('sine',mtof(root-12+(s%4?7:0)),t,L*.9,.09,.01,[n.dry]); if(!nt||s%2) i3Pluck(mtof(root+12+ivs[(s*2)%ivs.length]+(s%3?12:0)),t,.014,.25,[n.dry],5200);
+    if(s%4===0&&Math.random()<(nt?.2:.45)){ const m=STYLES.fair.key+m3Wander(MAJ,3,11), f=mtof(m); m3Vib(mv('square',f,t,L*2.2,.008,.04,[n.dry,n.wet,n.dls]),f,t,L*2.4,6); } },
+  dinner(t,s,root,ivs,L,n,bar){ /* The Buffet: brushed drums, a walking upright bass, a vibraphone */
+    const nt=mNight(); if(s%2===0) mv('sine',mtof(root-12+[0,4,7,9][s/2]),t,L*1.8,.08,.01,[n.dry]); nz(t,L*.9,s===2||s===6?.012:.005,'bandpass',2500,n.dry);
+    if(s===0||s===3) ivs.forEach(iv=>mv('sine',mtof(root+12+iv),t,L*2.4,.007,.01,[n.dry,n.wet]));
+    if(s%2===0&&Math.random()<(nt?.2:.45)){ const f=mtof(STYLES.dinner.key+12+m3Wander(MAJ,3,12)); m3Vib(mv('sine',f,t,1.2,.03,.004,[n.dry,n.wet,n.dls]),f,t,1.2,5); } },
+  lounge(t,s,root,ivs,L,n,bar){ /* Corporate Pond: electric piano, a soft sax, a gentle bossa beat (played very straight-faced) */
+    const nt=mNight(); if(s===0||s===3||s===6) ivs.forEach(iv=>{ mv('sine',mtof(root+12+iv),t,L*2.2,.008,.01,[n.dry,n.wet]); mv('sine',mtof(root+24+iv),t,L*.6,.002,.003,[n.wet]); });
+    if(s===0||s===3||s===5) mv('sine',mtof(root-12+(s===5?7:0)),t,L*1.4,.07,.01,[n.dry]); if(s===2||s===6) nz(t,.05,.008,'highpass',4000,n.dry);
+    if(s%4===0&&Math.random()<(nt?.2:.5)) i3Saw(mtof(STYLES.lounge.key+m3Wander(DOR,4,11)),t,L*(Math.random()<.5?3:1.8),.009,L*.3,1300,[n.dry,n.wet,n.dls],3,5); },
+  nile(t,s,root,ivs,L,n,bar){ /* The Nile: oud plucks in a Middle Eastern scale, a ney-like flute, a frame drum */
+    const nt=mNight(); if(s===0) i3Drum(90,50,t,.14,.5,n.dry); if(s===3||s===5) nz(t,.06,.012,'bandpass',900,n.dry); if(s===6) i3Drum(110,70,t,.07,.3,n.dry);
+    if(Math.random()<(nt?.3:.6)) i3Pluck(mtof(STYLES.nile.key+m3Wander(HIJAZ,3,11)),t,.028,.6,[n.dry,n.wet,n.dls],2000);
+    if(s===0&&bar%2===0&&Math.random()<(nt?.25:.5)){ const m=STYLES.nile.key+12+m3Wander(HIJAZ,4,10), d=L*4; mv('sine',mtof(m),t,d,.02,.15,[n.dry,n.wet,n.dls]); nz(t,d*.6,.006,'bandpass',mtof(m)*2,n.wet); }
+    if(s===0) mv('triangle',mtof(root-12),t,L*8,.03,.5,[n.dry,n.wet]); },
+  neon(t,s,root,ivs,L,n,bar){ /* Circuit Lake: synthwave, warm pads, a drum machine, a bright arpeggio */
+    const nt=mNight(); if(s===0||s===4) i3Drum(60,40,t,.18,.3,n.dry); if(s===2||s===6) nz(t,.12,.03,'bandpass',1800,n.dry); if(!nt||s%2===0) nz(t,.02,.006,'highpass',8000,n.dry);
+    if(s===0) ivs.forEach(iv=>i3Saw(mtof(root+12+iv),t,L*8.4,.006,L*1.2,1400,[n.dry,n.wet],12));
+    mv('square',mtof(root+24+ivs[s%ivs.length]+(s>=4?12:0)),t,L*.7,nt?.004:.007,.003,[n.dry,n.dls]); if(s%2===0) mv('sawtooth',mtof(root-12),t,L*.8,.02,.01,[n.dry]); },
+  thunder(t,s,root,ivs,L,n,bar){ /* Mount Olympus: harp arpeggios, a brass fanfare on the big beats, a choir, distant timpani */
+    const nt=mNight(); i3Pluck(mtof(root+12+ivs[s%ivs.length]+(s>=4?12:0)),t,nt?.014:.022,1.1,[n.dry,n.wet],3600);
+    if(s===0&&bar%2===0) ivs.slice(0,3).forEach(iv=>i3Choir(mtof(root+12+iv),t,L*16,.012,[n.dry,n.wet]));
+    if(!nt&&s===0&&bar%4===0) ivs.slice(0,3).forEach(iv=>i3Saw(mtof(root+iv+12),t,L*2,.012,.04,2600,[n.dry,n.wet],5));
+    if(s===0){ i3Drum(70,46,t,.1,.8,n.dry); mv('sine',mtof(root-12),t,L*8,.07,.5,[n.dry]); } }
+});
+Object.assign(MUS_AREA,{pond:'cabin', river:'mill'});
+MUS_NAMES.splice(MUS_NAMES.findIndex(x=>x[0]==='lofi'),0,['cabin','Cabin morning'],['mill','Mill stream'],['hanami','Hanami'],['glacier','Glacier light'],['flats','Flats breeze'],['canopy','Canopy'],['fair','County fair'],['dinner','Dinner jazz'],['lounge','Elevator lounge'],['nile','River of gold'],['neon','Neon nights'],['thunder','Halls of thunder']);
+
 // =====================================================================
 // 0.3 Boardwalk: meme outfits, and a Counter Specials shelf that restocks every 3 hours with
 // Boardwalk-only wear (shoes, neckwear, back pieces, outfits) for tickets.
@@ -10803,7 +10874,7 @@ function setRest(on){ if(on){ if(G.st!=='idle'){ toast('Finish what you are doin
     S.settings.rest=true; G.st='rest'; restCast(); toast('You sit down and let the line drift. Fish bite slowly while you rest.'); }
   else { S.settings.rest=false; if(G.st==='rest'){ G.st='idle'; } toast('Back on your feet.'); }
   restBtn(); save(); }
-function restTick(dt){ if(!S.settings.rest){ G.st='idle'; return; } RST.t+=dt;
+function restTick(dt){ if(!S.settings.rest){ G.st='idle'; return; } RST.t+=dt; petNap(dt);
   if(RST.phase==='wait'){ G.bob.x=castX(.55); G.bob.y=waterY(G.bob.x); if(RST.t>=RST.at){ RST.phase='bite'; RST.k=0; splash(G.bob.x,G.bob.y,10); sfx.bite(); } }
   else if(RST.phase==='bite'){ RST.k+=dt; if(RST.k>1.2){ RST.phase='reel'; RST.k=0; } }
   else if(RST.phase==='reel'){ RST.k+=dt/11; const x0=castX(.55), x1=W*.24; G.bob.x=x0+(x1-x0)*RST.k+Math.sin(RST.t*3)*2; G.bob.y=waterY(G.bob.x); if(Math.random()<dt*1.5) splash(G.bob.x,G.bob.y,5);
@@ -10818,7 +10889,7 @@ function restLand(){ const f=chooseCatch(); splash(G.bob.x,G.bob.y,18); sfx.pull
   if(S.cooler.length>=gv('cooler')){ toast('Your cooler is full, so you stand up again.'); setRest(false); return; }
   restCast(); }
 // where and how the angler sits: in the chair if it is on the dock, else on the dock edge
-function restPose(dockY,pb,sc){ const items=dockView(); if(items.includes('chair')){ const PW=W*.19, ax0=W*.12, X0=W*.008, X1=PW-W*.012, P=dockPositions(items,(ax0-40*sc-X0)/(X1-X0),(ax0+12*sc-X0)/(X1-X0));
+function restPose(dockY,pb,sc){ if(HOMEF[S.loc]&&HOMEF[S.loc].seatH){ const ss=hfStyle(S.loc,"seat"); return {ax:HF.seatX()+3*sc, ay:dockY+pb, sit:{seat:HOMEF[S.loc].seatH[ss],hang:false}, hx:10, hy:-26}; } /* format homes: resting sits the angler in the home's seat (batch 5) */ const items=dockView(); if(items.includes('chair')){ const PW=W*.19, ax0=W*.12, X0=W*.008, X1=PW-W*.012, P=dockPositions(items,(ax0-40*sc-X0)/(X1-X0),(ax0+12*sc-X0)/(X1-X0));
     return {ax:X0+P.chair*(X1-X0)+3*sc, ay:dockY+pb, sit:{seat:17,hang:false}, hx:10, hy:-26}; }
   return {ax:W*.19-14*sc, ay:dockY+pb, sit:{seat:.5,hang:true}, hx:10, hy:-12}; }
 // the toggle on the water
@@ -10845,6 +10916,10 @@ if(/[?&]test\b/.test(location.search)) window.__fightSim=(opts)=>{ const B=__bal
    out.push(loc+' '+['C','U','R','E','L','M'][r]+' '+name+': '+Math.round(caught/N*100)+'% in '+(caught?(ts/caught).toFixed(1):'-')+'s peak '+Math.round(peak/N)); }
  }catch(e){ out.push(String(e.stack).slice(0,300)); } finally { window.save=os; const o=JSON.parse(snap); for(const k of Object.keys(S)) delete S[k]; Object.assign(S,o); for(const k in gsnap) G[k]=gsnap[k]; G.st='idle'; G.fish=null; }
  return out; };
+/* Pet Nap (Rest path, batch 5, replaces Homebody with the decorations): while you rest, each pet with you gains a bond point every
+   minute (the favourite two), up to 20 a day from napping. First version; the amount is tuned in the balance batch. */
+function petNap(dt){ if(!pathChosen().includes('petnap')) return; RST.nap=(RST.nap||0)+dt; if(RST.nap<60) return; RST.nap=0; const today=dayKey();
+  for(const id of [S.pet,S.pet2]){ if(!id||!PETI[id]) continue; const b=S.bond[id]||(S.bond[id]={xp:0,day:today,today:0}); if(b.napDay!==today){ b.napDay=today; b.nap=0; } if(b.nap>=20) continue; b.nap++; b.xp+=id===S.pet?2:1; } }
 
 // =====================================================================
 // 0.3 less scrolling: long menus get sections you switch between (the same segmented bar as the
@@ -10940,7 +11015,7 @@ function passWearPool(){ return [...HATS.filter(x=>x.src==='shop'&&!S.owned.hats
   ...SHOES.filter(x=>x[3]==='shop'&&!S.owned.shoes.includes(x[0])).map(x=>({kind:'shoe',id:x[0],name:x[1],cat:'Shoes'})),
   ...NECKS.filter(x=>x[3]==='shop'&&!S.owned.necks.includes(x[0])).map(x=>({kind:'neck',id:x[0],name:x[1],cat:'Neckwear'})),
   ...BACKS.filter(x=>x[3]==='shop'&&!S.owned.backs.includes(x[0])).map(x=>({kind:'back',id:x[0],name:x[1],cat:'Worn on your back'}))].sort((a,b)=>(a.kind+a.id).localeCompare(b.kind+b.id)); }
-function passDecorPool(){ return [...DOCK_DECOR.filter(d=>d.src==='shop'&&!S.dock.owned.includes(d.id)).map(d=>({kind:'dock',id:d.id,name:d.name,cat:'Home decoration'})),
+function passDecorPool(){ return [ /* batch 5: aquarium decorations only (home decorations are gone) */
   ...DECOR.filter(d=>d.price&&!(d.src&&d.src!=='shop')&&!S.aq.owned.includes(d.id)).map(d=>({kind:'aq',id:d.id,name:d.name,cat:'Aquarium decoration'}))].sort((a,b)=>(a.kind+a.id).localeCompare(b.kind+b.id)); }
 // upcoming levels pick in order and never promise the same item twice (so no repeats, back to back or otherwise)
 // when you already own everything a clothing or decoration level could give, it falls back to Scales or tickets
@@ -10957,7 +11032,7 @@ function passPlain(L){ if(S.pass.got&&S.pass.got[L]&&L<=S.pass.claimed) return {
   if(slot===1) return {k:'big', name:'Big Mystery Crate', d:'Clothes, Boardwalk-only wear, decor and the rarer pets.'};
   return {k:'bundle', name:'25 Scales + 150 tickets', d:'Scales level up rods; tickets buy Boardwalk prizes.'}; };
 const grantPass_ = function(L){ const sp=PASS_SPECIAL[L]; if(L%10===0 && maxed('tidewalker')) S.tokens.big++;
-  if(sp){ const [k,id]=sp; if(k==='dock'&&!S.dock.owned.includes(id)) S.dock.owned.push(id); if(k==='tint'&&!S.petTints.includes(id)) S.petTints.push(id); if(k==='hat'&&!S.owned.hats.includes(id)) S.owned.hats.push(id);
+  if(sp){ const [k,id]=sp; if(k==='aq'&&!S.aq.owned.includes(id)) S.aq.owned.push(id); if(k==='dock'&&!S.dock.owned.includes(id)) S.dock.owned.push(id); if(k==='tint'&&!S.petTints.includes(id)) S.petTints.push(id); if(k==='hat'&&!S.owned.hats.includes(id)) S.owned.hats.push(id);
     if(k==='wood'&&!S.dock.owned.includes(id)) S.dock.owned.push(id); if(k==='out'&&!S.owned.outfits.includes(id)) S.owned.outfits.push(id); if(k==='crate2') S.tokens.legend+=2; if(k==='bait') S.bait[id]=(S.bait[id]||0)+6;
     if(k==='shoe'&&!S.owned.shoes.includes(id)) S.owned.shoes.push(id); if(k==='neck'&&!S.owned.necks.includes(id)) S.owned.necks.push(id); if(k==='back'&&!S.owned.backs.includes(id)) S.owned.backs.push(id); return sp[2]; }
   const p=passPlain(L);
@@ -11413,7 +11488,7 @@ function statsHTML(){ const wx=weather(), b=BAIT[S.baitSel]||BAIT.worm, dm={rare
       ${statRow('Epic or better',fmtOdds(epNow),'per fish here, '+fmtOdds(epBase)+' with no bonuses')}${statRow('Legendary or better',fmtOdds(legNow),'per fish here, '+fmtOdds(legW)+' with no bonuses')}${statRow('Shiny chance',(sh*100).toFixed(2)+'%')}${statRow('Hybrid chance',(hybridChance()*100).toFixed(2)+'%')}${statRow('Junk chance',(junkChance()*100).toFixed(1)+'%')}${statRow('Far casts count from',Math.round(farAt()*100)+'% power')}</div>
     <div class="tile"><h4>Fighting</h4>${statRow('Reel speed',reelSpeed().toFixed(2)+' m/s')}${statRow('Angler strength',strTxt(anglerStr()),'Your Line, plus skills that lower tension. Fish stronger than this are heavy for you.')}${statRow('Line strength',Math.round(wNum(gv('line')))+' '+wUnit())}${statRow('Line tension',mulS(tensionMult()),'Lower is better')}${statRow('Temper build-up',mulS(tempMult()),'Lower is better')}${statRow('Max line out',Math.round(gv('rod')*rodCast()+28+rodSpool())+' m')}</div>
     <div class="tile"><h4>Coins & XP</h4>${statRow('Sale price',mulS(sm),'Level, Haggler, rank, boosts, pearls')}${statRow('XP',mulS(xm))}${statRow('Wisdom Pearls',mulS(cm),S.pearls+' pearl'+(S.pearls===1?'':'s'))}${statRow('Titled shinies','+'+Math.round(titleLegacy()*100)+'% coins',Object.keys(S.titled||{}).length+' species and titles caught, up to +'+Math.round(TITLE_COIN_CAP*100)+'%')}${statRow('Streak bonus cap','+'+Math.round(streakCap()*100)+'% XP')}
-      ${statRow('Aquarium',fmt(Math.round(tankRate()*60))+' / hour',S.tank.length+' fish · up to '+Math.round(offlineCap()/60)+' h away')}${statRow('Cozy level',cozy()+' ♥','+'+cozyBonus()+'% XP, +'+(cozyBonus()*.5)+'% bite speed and sale price')}</div>
+      ${statRow('Aquarium',fmt(Math.round(tankRate()*60))+' / hour',S.tank.length+' fish · up to '+Math.round(offlineCap()/60)+' h away')}</div>
     <div class="tile"><h4>Right now</h4>${statRow('Water',esc(curLoc().name))}${statRow('Weather',esc(wxName(wx.k)),esc(wx.note||''))}${statRow('Time of day',isNight()?'Night':'Day')}${statRow('Active boosts',S.buffs.filter(x=>x.until>Date.now()).length||'None')}${statRow('Skill points',ptsFree()+' free · '+ptsSpent()+' spent')}</div>
   </div>`; }
 function renderStats(P){ P.innerHTML=`<h2>Stats</h2><p class="sub">Everything that shapes your fishing, worked out exactly like the game does.</p>
@@ -14527,7 +14602,7 @@ document.head.insertAdjacentHTML('beforeend',`<style>@media (max-width:560px){
 // two rows: a long name wraps inside its button, never cut), the result line lines up with them, and an empty cooler shows the card's idle picture.
 document.head.insertAdjacentHTML('beforeend',`<style>
 html body.phone-land #menuov #panel .bwx-gl,html body.phone-app #menuov #panel .bwx-gl{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
-html body.phone-land #menuov #panel .bwx-gl .btn,html body.phone-app #menuov #panel .bwx-gl .btn{min-width:0;display:flex;align-items:center;justify-content:center;gap:4px}
+html body.phone-land #menuov #panel .bwx-gl .btn,html body.phone-app #menuov #panel .bwx-gl .btn{min-width:0;display:flex;align-items:center;justify-content:center;gap:4px;height:auto!important;min-height:34px;padding-top:4px!important;padding-bottom:4px!important} /* a long name wraps: the button grows with it (extreme save: two lines spilled over the button below) */
 html body.phone-land #menuov #panel .bwx-gl .gn,html body.phone-app #menuov #panel .bwx-gl .gn{min-width:0;white-space:normal;line-height:1.15;text-align:left;overflow-wrap:anywhere} /* names wrap, never cut (TEXT_STANDARD) */
 html body.phone-land #menuov #panel .bwx-gl .coin,html body.phone-app #menuov #panel .bwx-gl .coin{flex:0 0 auto}
 html body.phone-land #menuov #panel .bwx-res:has(+ .bwx-gl),html body.phone-app #menuov #panel .bwx-res:has(+ .bwx-gl){text-align:left}
@@ -14768,7 +14843,7 @@ document.head.insertAdjacentHTML('beforeend',`<style>#fpsbox{position:absolute;r
     ['Legends & myths',['leg','leg5','leg12','legall','myth1','myth3','mythall']],
     ['Pets',['pet50','bond10','pets3','petsall']],
     ['Waters',[]],
-    ['Aquarium & home',['tank6','tank12','decor5','decor15','cozy15','dock8']],
+    ['Aquarium & home',['tank6','tank12','decor5','decor15']],
     ['Style',['hats5','hats15','hatsall','style5']],
     ['Gear',['rods4','rods8','rod10','atts10','buff4']],
     ['Boardwalk & events',['derby1','derby10','gold3','claw10','crates10']],
@@ -15669,7 +15744,7 @@ SPEC_TIERS.push(
  {lvl:16, name:'Rest', opts:[
    ['snoozer','Snoozer','Bites come 40% faster while you rest.',''],
    ['dreamer','Lucid Dreamer','+30% rare bonus while you rest.',''],
-   ['homebody','Homebody','Cozy counts 50% more, and its cap rises from 40 to 60.','']]},
+   ['petnap','Pet Nap','While you rest, your pets nap beside you and grow closer: their bond rises by itself.','']]},
  {lvl:19, name:'Weather', opts:[
    ['stormchaser','Storm Chaser','In Storms and Blood Moons fish fight no harder than usual, and the rare bonus is 50% stronger.',''],
    ['rainmaker','Rainmaker','Rain and the Spawning Run speed up bites 50% more.',''],
@@ -15709,7 +15784,7 @@ SPEC_TIERS.push(
 const PATH_ORDER = SPEC_TIERS.map((T,i)=>i).sort((a,b)=>SPEC_TIERS[a].lvl-SPEC_TIERS[b].lvl);
 // what each new path does, as multipliers (mul: 1.5 = +50%) or additions to a bonus key (add); 'when' limits it
 const PATH_FX = {
-  snoozer:{mul:{restbite:.6}}, dreamer:{add:{rare:.3}, when:()=>G.st==='rest'}, homebody:{mul:{cozy:1.5, cozycap:1.5}},
+  snoozer:{mul:{restbite:.6}}, dreamer:{add:{rare:.3}, when:()=>G.st==='rest'}, petnap:{},
   stormchaser:{}, rainmaker:{}, skywatcher:{},
   thrifty:{save:.25}, gourmand:{mul:{fav:1.4}}, chummer:{add:{bite:.15}, when:()=>S.baitSel!=='worm'},
   ticketmaster:{mul:{tix:1.3}}, highroller:{mul:{bwcoin:2}}, regular:{mul:{spin:1.4}},
@@ -16697,7 +16772,7 @@ const WA_MORE={
         g.fillStyle='rgba(255,255,255,.95)'; g.beginPath(); g.moveTo(-s*.2,-s*.6); g.quadraticCurveTo(-s*1.6,-s*(2.6+f*1.4),-s*3,-s*(2+f*2)); g.quadraticCurveTo(-s*1.4,-s*(1+f*.6),s*.8,-s*.6); g.fill(); g.strokeStyle='#e8d090'; g.lineWidth=1; g.beginPath(); g.moveTo(-s*2.4,0); g.quadraticCurveTo(-s*3.2,s*.2,-s*3.6,s*1); g.stroke(); g.restore(); v3glow(g,px,py,H*.04,'rgba(255,230,160,.9)',.25); } } } }
 };
 // music, depth motes and search words for the new waters
-try{ Object.assign(MUS_AREA,{blossom:'musicbox', rockies:'strings', keys:'island', amazon:'taiko', farm:'shanty', buffet:'island', corporate:'strings', nile:'cello', circuit:'abyss', olympus:'celestial'}); }catch(e){}
+try{ Object.assign(MUS_AREA,{blossom:'hanami', rockies:'glacier', keys:'flats', amazon:'canopy', farm:'fair', buffet:'dinner', corporate:'lounge', nile:'nile', circuit:'neon', olympus:'thunder'}); }catch(e){} /* batch 5: every water its own theme (j_music.js) */
 try{ Object.assign(DEPTH_MOTE,{blossom:'255,230,240', rockies:'255,255,255', keys:'255,255,240', amazon:'220,240,200', farm:'255,250,230', buffet:'255,240,200', corporate:'220,230,255', nile:'255,240,210', circuit:'120,240,255', olympus:'255,240,200'}); }catch(e){}
 try{ const s=SEARCH_IDX.find(e=>e[0]==='Waters'); if(s) s[3]+=' cherry blossom japan rockies canada keys florida amazon farm buffet corporate nile egypt circuit cyber olympus'; }catch(e){}
 // end-game waters: open them for anyone with enough voyages (start-up, any load, and after setting sail)
@@ -16792,8 +16867,9 @@ Object.assign(V3PLAT,{
 });
 // =====================================================================
 // The home format (docs/HOME_STANDARD.md, decided with the director 2026-11-21). Pilot: Willow Pond.
-// Every format home has the same footprint, standing surface, shore at the left edge, light spot and pet spots; the player changes
-// 5 elements (the light fixture always, plus 4 that fit the home), each with 3 styles and curated colors, all free.
+// Every format home has the same footprint, standing surface, light spot, seat spot and pet spots; the player changes 6 features
+// (the light and the seat always, plus 4 that fit the home), each with 3 styles, all coloured from ONE list of 16+ colours per home
+// (director, 2026-11-21: so parts can match), all free. Every home's design: docs/HOME_DESIGNS.md.
 // Performance: the still home is painted once into a stored picture and pasted every frame; it is repainted only when a choice,
 // the screen size or the light of the day (in small steps) changes. Drawn live each frame: the light's glow, its pool and its
 // reflection, the ripples at the supports, and the bob of floating homes (the stored picture pasted a little higher or lower).
@@ -16802,29 +16878,37 @@ Object.assign(V3PLAT,{
 // =====================================================================
 const HOMEF={};
 /* the format, in the scene's own units (W, H): the same for every format home */
-const HF = { pw:()=>W*.19, x0:()=>-4 /* the deck starts at the left edge (no bank: director, 2026-11-21) */, dockY:()=>H*.6, wl:dockY=>dockY+H*.075, top:dockY=>dockY-H*.25, lightX:()=>W*.19-W*.012 };
+const HF = { pw:()=>W*.19, x0:()=>-4 /* the deck starts at the left edge (no bank: director, 2026-11-21) */, dockY:()=>H*.6, wl:dockY=>dockY+H*.075, top:dockY=>dockY-H*.25, lightX:()=>W*.19-W*.012,
+  seatX:()=>W*.064 /* the seat: behind the angler (who stands at W*.12), under the canopy; resting sits the angler in it */, sc:()=>clamp(H/420,.7,1.25) /* the angler's scale */ };
 const hfSpec = id => HOMEF[id]||null;
 function hfChoice(id,el){ const sp=hfSpec(id), e=sp&&sp.els.find(x=>x.id===el); if(!e) return [0,0]; const c=S.dock&&S.dock.el&&S.dock.el[el];
-  return [Array.isArray(c)&&c[0]>=0&&c[0]<e.styles.length?c[0]|0:(e.def?e.def[0]:0), Array.isArray(c)&&c[1]>=0&&c[1]<e.colors.length?c[1]|0:(e.def?e.def[1]:0)]; }
-function hfColor(id,el){ const sp=hfSpec(id), e=sp.els.find(x=>x.id===el); return e.colors[hfChoice(id,el)[1]][1]; }
+  return [Array.isArray(c)&&c[0]>=0&&c[0]<e.styles.length?c[0]|0:(e.def?e.def[0]:0), Array.isArray(c)&&c[1]>=0&&c[1]<sp.colors.length?c[1]|0:(e.def?e.def[1]:0)]; }
+function hfColor(id,el){ const sp=hfSpec(id); return sp.colors[hfChoice(id,el)[1]][1]; }
+/* the light's glow colour: the chosen colour, lifted toward white so even a deep shade still reads as light */
+function hfGlow(id){ const sp=hfSpec(id), e=sp&&sp.els.find(x=>x.light||x.id==='light'); const v=hex2rgb(mix(hfColor(id,e?e.id:'light'),'#ffffff',.3)); return v.join(','); } /* the feature that carries the home's light (batch 5: not always called "light") */
 function hfStyle(id,el){ return hfChoice(id,el)[0]; }
 /* the saved choices of one home: only valid numbers survive (dockCopy) */
-function hfClean(o){ const r={}; if(o&&typeof o==='object'&&!Array.isArray(o)) for(const k in o){ const v=o[k]; if(Array.isArray(v)&&v.length===2&&v.every(n=>Number.isInteger(n)&&n>=0&&n<12)) r[k]=[v[0],v[1]]; } return r; }
+function hfClean(o){ const r={}; if(o&&typeof o==='object'&&!Array.isArray(o)) for(const k in o){ const v=o[k]; if(Array.isArray(v)&&v.length===2&&v.every(n=>Number.isInteger(n)&&n>=0&&n<32)) r[k]=[v[0],v[1]]; } return r; }
 
 /* ---------- the stored picture ---------- */
 const HF_CACHE={}; let HF_LAST=null; /* HF_LAST: where the scene last drew the angler, rod and pets on a format home (for the close-up) */
 /* d: pixels per scene unit (the scene's own, or the close-up's); slot: a separate stored picture for the close-up */
 function hfPaintCache(L,P,night,dockY,dIn,slot){ const sp=hfSpec(L.id), d=dIn||Math.max(1,(typeof cv!=='undefined'&&cv&&W>0)?cv.width/W:1), id=L.id+(slot||'');
-  const x0=-4, y0=HF.top(dockY), x1=HF.pw()*1.14, y1=Math.min(H,HF.wl(dockY)+H*.24), key=[L.id,W,H,d,Math.round(night*24),P.rim,...sp.els.map(e=>hfChoice(L.id,e.id).join('.'))].join('|');
+  const x0=-4, y0=HF.top(dockY), x1=HF.pw()*1.14, y1=H /* down to the bottom of the screen: the supports fade into the water all the way (director) */, key=[L.id,W,H,d,Math.round(night*24),P.rim,...sp.els.map(e=>hfChoice(L.id,e.id).join('.'))].join('|');
   let c=HF_CACHE[id]; if(c&&c.key===key) return c;
   if(!c){ c={cv:document.createElement('canvas')}; HF_CACHE[id]=c; } c.key=key; c.x=x0; c.y=y0; c.w=x1-x0; c.h=y1-y0;
   c.cv.width=Math.max(1,Math.ceil(c.w*d)); c.cv.height=Math.max(1,Math.ceil(c.h*d)); const x=c.cv.getContext('2d'); x.setTransform(d,0,0,d,-x0*d,-y0*d); x.clearRect(x0,y0,c.w,c.h);
   const N=col=>mix(col,'#0a1020',night*.55), ctx={x,P,night,dockY,N,id:L.id,pw:HF.pw(),wl:HF.wl(dockY),posts:[]};
   sp.paint(ctx); c.posts=ctx.posts; c.lights=ctx.lights||[]; return c; }
-/* the ripple rings, drawn BEFORE the home so each support hides the middle of its ring (they read as going around it) */
-function hfRings(x,c,t,night,dockY){ for(const p of c.posts){ const k=1+.18*Math.sin(t*1.7+p.x*.07); x.strokeStyle='rgba(255,255,255,'+(.28-night*.12)+')'; x.lineWidth=1; x.beginPath(); x.ellipse(p.x,HF.wl(dockY),(p.w*.62+H*.006)*k,Math.max(1.2,H*.004),0,0,7); /* sized to its support, never touching the next ring */ x.stroke(); } }
+/* the water flowing past each support (director, 2026-11-21: subtle, like water going by, not rings that grow and shrink): a faint
+   contact line where the support meets the water, and two short ripples drifting away downstream and fading. Drawn BEFORE the home,
+   so the support covers the start of each line. */
+function hfRings(x,c,t,night,dockY){ const wl=HF.wl(dockY), a0=.26-night*.1; x.lineWidth=1;
+  for(const p of c.posts){ x.strokeStyle='rgba(255,255,255,'+a0+')'; x.beginPath(); x.moveTo(p.x-p.w*.62,wl); x.lineTo(p.x+p.w*.62,wl); x.stroke();
+    for(let k=0;k<2;k++){ const u=((t*.32+k*.5+p.x*.0137)%1+1)%1, dx=p.w*.55+u*H*.045, len=H*(.012+.01*u), y=wl+H*(.002+.003*u);
+      x.strokeStyle='rgba(255,255,255,'+(a0*(1-u)*.9)+')'; x.beginPath(); x.moveTo(p.x+dx,y); x.quadraticCurveTo(p.x+dx+len*.5,y+H*.0015,p.x+dx+len,y); x.stroke(); } } }
 /* the light: glow and hot centre on any canvas; on the scene also its pool on the deck and its reflection; a firefly jar has its fireflies */
-function hfLights(x,L,c,t,night,dockY,b,P,scene){ const lit=clamp(night*1.2+P.d*.9,0,1), rgb=hfColor(L.id,'light');
+function hfLights(x,L,c,t,night,dockY,b,P,scene){ const lit=clamp(night*1.2+P.d*.9,0,1), rgb=hfGlow(L.id);
   for(const l of c.lights){ const fl=.93+.07*Math.sin(t*7.1+l.x)*Math.sin(t*3.3+l.y);
     if(lit>.05){ v3glow(x,l.x,l.y+b,H*(l.r||.2),'rgba('+rgb+',.85)',lit*(l.a||.6)*fl); if(scene&&!l.small){ v3lightPool(l.x-W*.01,dockY-1+b,W*.075,rgb,.28*lit); v3lanternReflect(l.x,HF.wl(dockY),lit,t,rgb); } }
     if(l.jar){ for(let i=0;i<3;i++){ const a=t*(1.1+i*.37)+i*2.1; x.fillStyle='rgba('+rgb+','+(.35+.55*lit)*(.6+.4*Math.sin(t*5+i))+')'; x.beginPath(); x.arc(l.x+Math.cos(a)*H*.004,l.y+b+Math.sin(a*1.3)*H*.006,Math.max(.8,H*.0016),0,7); x.fill(); } }
@@ -16852,104 +16936,690 @@ function hfPost(o,px,w,col,kind,top){ const {x,N,P,wl}=o, wc=P.wMid||'#3a6a7a'; 
   else { x.fillStyle=c; x.fillRect(px-w/2,top,w,wl-top);
     if(kind==='round'){ const gr=x.createLinearGradient(px-w/2,0,px+w/2,0); gr.addColorStop(0,v3rgba('#ffffff',.18*(1-o.night*.6))); gr.addColorStop(.45,v3rgba('#000000',0)); gr.addColorStop(1,v3rgba('#000000',.35)); x.fillStyle=gr; x.fillRect(px-w/2,top,w,wl-top); }
     else { x.fillStyle=mix(c,'#000000',.3); x.fillRect(px+w*.15,top,w*.35,wl-top); } }
-  const gr=x.createLinearGradient(0,wl,0,wl+H*.22); gr.addColorStop(0,v3rgba(mix(c,wc,.45),.9)); gr.addColorStop(.55,v3rgba(mix(c,wc,.8),.45)); gr.addColorStop(1,v3rgba(wc,0)); x.fillStyle=gr; x.fillRect(px-w/2,wl,w,H*.22);
+  /* under the water line: the support runs on down to the bottom of the screen, taking on the water's colour and fading out gradually
+     (director, 2026-11-21: they stopped as hard blocks above the bottom) */
+  const gr=x.createLinearGradient(0,wl,0,H); gr.addColorStop(0,v3rgba(mix(c,wc,.4),.92)); gr.addColorStop(.3,v3rgba(mix(c,wc,.68),.6)); gr.addColorStop(.7,v3rgba(mix(c,wc,.88),.22)); gr.addColorStop(1,v3rgba(wc,0)); x.fillStyle=gr; x.fillRect(px-w/2,wl,w,H-wl);
   o.posts.push({x:px,w}); }
 
-/* ---------- Willow Pond: a lakeside dock (pilot) ---------- */
-/* an element whose first style is "nothing" (none:true) offers 3 real styles besides it (director, 2026-11-21: "nothing" is no choice) */
+/* ---------- Willow Pond: the starter dock (pilot; docs/HOME_DESIGNS.md › 1) ---------- */
+/* a feature whose first style is "nothing" (none:true) offers 3 real styles besides it (director, 2026-11-21: "nothing" is no choice) */
 HOMEF.pond = { name:'Willow Pond dock', hname:'dock',
+  /* one colour list for every feature (docs/MAP_THEMES.md › Willow Pond › Home colours) */
+  colors:[['Honey pine','#b98a5a'],['Weathered pine','#8a6a4a'],['Dark stain','#5a4030'],['Driftwood','#9a9488'],['Moss','#5f8a6c'],['Pine green','#2c4a3e'],['Sage','#9ab08a'],['Willow','#7fae5c'],
+          ['Lake teal','#3f827b'],['Sky blue','#86bcd9'],['Canvas','#f3e4ca'],['Warm white','#f4efe6'],['Barn red','#a8483a'],['Lantern gold','#e8b04a'],['Dusk rose','#c97a8a'],['Lilac','#8a7aa8']],
   els:[
-    {id:'light', label:'Lantern', styles:['Lamp post','Hurricane lantern','Firefly jar'], def:[0,0], colors:[['Warm gold','255,196,90'],['Candle','255,224,160'],['Rose','255,140,175'],['Sea glass','130,255,205'],['Moon blue','150,195,255'],['Lilac','195,150,255']]},
-    {id:'deck', label:'Deck', styles:['Planks','Wide boards','Weathered boards'], def:[0,0], colors:[['Oak','#9a6a44'],['Birch','#c8a878'],['Walnut','#5e3e28'],['Driftwood','#8a8478'],['Painted white','#e6e2da'],['Sage','#8aa08a']]},
-    {id:'posts', label:'Posts', styles:['Round posts','Square posts','Stone piers'], def:[0,0], colors:[['Dark oak','#4a3222'],['Weathered','#6e6658'],['Mossy','#4e5e3a'],['Painted white','#dedad2'],['River stone','#7a7a74'],['Charcoal','#2e2e32']]},
-    {id:'rail', label:'Rail', none:true, styles:['No rail','Rope rail','Wooden rail','Iron rail'], def:[0,0], colors:[['Natural','#9a7a54'],['White','#ece8e0'],['Sage','#8aa08a'],['Barn red','#a8402e'],['Harbour blue','#3a6a9a'],['Charcoal','#34343a']]},
-    {id:'canopy', label:'Canopy', none:true, styles:['Open sky','Patio umbrella','Cloth pergola','Wooden shelter'], def:[0,0], colors:[['Cream','#efe6d0'],['Sage','#9ab89a'],['Rose','#e8a8b0'],['Sky','#9ac0e0'],['Butter','#f0d890'],['Lilac','#c0a8e0']]}
+    {id:'light', label:'Light', styles:['Lamp post','Hurricane lantern','Firefly jar'], def:[0,13]},
+    {id:'deck', label:'Deck', styles:['Pine planks','Weathered boards','Log deck'], def:[0,0]},
+    {id:'posts', label:'Posts', styles:['Square posts','Round piles','Stone piers'], def:[1,2]},
+    {id:'rail', label:'Rail', none:true, styles:['No rail','Rope rail','Slat rail','Log rail'], def:[0,1]},
+    {id:'canopy', label:'Canopy', none:true, styles:['Open sky','Patio umbrella','Lean-to roof','Sailcloth shade'], def:[0,10]},
+    {id:'seat', label:'Seat', styles:['Camp chair','Log bench','Deck chair'], def:[0,12]}
   ],
-  paint(o){ const {x,N,P,dockY,pw,id}=o, th=Math.max(4,H*.012), fh=Math.max(6,H*.018), night=o.night, rimA=.35*(1-night*.6);
-    const deckC=hfColor(id,'deck'), postC=hfColor(id,'posts'), railC=hfColor(id,'rail'), canC=hfColor(id,'canopy'), x0=HF.x0(), at=f=>x0+(pw-x0)*f;
-    /* posts: from the deck's underside, every one fully under the deck */
+  /* where the seat holds the angler, in the angler's own units (restPose sits them at this height) */
+  seatH:[17,12,15],
+  paint(o){ const {x,N,P,dockY,pw,id}=o, th=Math.max(4,H*.012), fh=Math.max(6,H*.018), night=o.night, rimA=.35*(1-night*.6), lit=1-night*.6;
+    const deckC=hfColor(id,'deck'), postC=hfColor(id,'posts'), railC=hfColor(id,'rail'), canC=hfColor(id,'canopy'), seatC=hfColor(id,'seat'), x0=HF.x0(), at=f=>x0+(pw-x0)*f, sc=HF.sc();
+    /* supports: from the deck's underside down into the water, every one fully under the deck */
     { const ps=hfStyle(id,'posts'), w=ps===2?Math.max(8,W*.018):Math.max(5,W*.011), xs=[.08,.3,.53,.76,.97].map(f=>Math.min(pw-w/2-1,at(f))), under=dockY+fh;
-      if(ps===1){ x.strokeStyle=N(mix(postC,'#000000',.2)); x.lineWidth=Math.max(2,W*.004); for(let i=0;i<xs.length-1;i++){ x.beginPath(); x.moveTo(xs[i],under); x.lineTo(xs[i+1],o.wl-H*.01); x.moveTo(xs[i+1],under); x.lineTo(xs[i],o.wl-H*.01); x.stroke(); } }
-      for(const px of xs) hfPost(o,px,w,postC,['round','square','stone'][ps],under); }
-    /* deck: surface, face, seams, a hint of grain, nails, lit edge */
+      if(ps===0){ x.strokeStyle=N(mix(postC,'#000000',.2)); x.lineWidth=Math.max(2,W*.004); for(let i=0;i<xs.length-1;i++){ x.beginPath(); x.moveTo(xs[i],under); x.lineTo(xs[i+1],o.wl-H*.01); x.moveTo(xs[i+1],under); x.lineTo(xs[i],o.wl-H*.01); x.stroke(); } } /* square posts: cross-braced */
+      for(const px of xs) hfPost(o,px,w,postC,['square','round','stone'][ps],under);
+      if(ps===1){ x.fillStyle=N(mix('#c8a878',postC,.25)); for(const px of xs){ x.fillRect(px-w/2-.5,under+H*.006,w+1,Math.max(2,H*.004)); x.fillRect(px-w/2-.5,under+H*.013,w+1,Math.max(1.5,H*.003)); } } } /* round piles: a band of rope near the top */
+    /* deck: surface, face, seams, a hint of grain, lit edge */
     { const ds=hfStyle(id,'deck'), top=N(mix(deckC,'#ffffff',.08)), face=N(mix(deckC,'#000000',.24));
       x.fillStyle=face; x.fillRect(x0,dockY+th,pw-x0,fh-th); x.fillStyle=top; x.fillRect(x0,dockY,pw-x0,th);
-      { const gr=x.createLinearGradient(0,dockY,0,dockY+th); gr.addColorStop(0,v3rgba('#ffffff',.1*(1-night*.6))); gr.addColorStop(1,v3rgba('#000000',.12)); x.fillStyle=gr; x.fillRect(x0,dockY,pw-x0,th); }
-      const n=ds===1?7:14; x.strokeStyle=N(mix(deckC,'#000000',.32)); x.lineWidth=1;
-      for(let i=1;i<n;i++){ const sx=at(i/n)+(ds===2?((i*37)%7-3):0); x.beginPath(); x.moveTo(sx,dockY+.5); x.lineTo(sx,dockY+th); x.stroke(); }
-      if(ds===2){ for(let i=0;i<n;i++){ x.fillStyle=v3rgba(i%3?'#000000':'#ffffff',.07); x.fillRect(at(i/n),dockY,(pw-x0)/n,th); } x.fillStyle=N(mix(deckC,'#000000',.4)); for(let i=0;i<5;i++){ x.beginPath(); x.ellipse(at(.1+i*.2),dockY+th*.5,1.6,.9,0,0,7); x.fill(); } }
-      if(ds===1){ x.fillStyle=N(mix(deckC,'#ffffff',.18)); x.fillRect(x0,dockY+th,pw-x0,Math.max(2,fh*.25)); }
+      { const gr=x.createLinearGradient(0,dockY,0,dockY+th); gr.addColorStop(0,v3rgba('#ffffff',.1*lit)); gr.addColorStop(1,v3rgba('#000000',.12)); x.fillStyle=gr; x.fillRect(x0,dockY,pw-x0,th); }
+      if(ds===2){ /* log deck: round log ends showing along the front, rings in each */ const r=(fh-th)*.5, n=Math.max(8,Math.round((pw-x0)/(r*2.05)));
+        for(let i=0;i<n;i++){ const cx=at((i+.5)/n), cy=dockY+th+(fh-th)*.5; x.fillStyle=N(mix(deckC,'#ffffff',.12)); x.beginPath(); x.arc(cx,cy,r,0,7); x.fill(); x.strokeStyle=N(mix(deckC,'#000000',.35)); x.lineWidth=1; x.beginPath(); x.arc(cx,cy,r*.55,0,7); x.stroke(); x.beginPath(); x.arc(cx,cy,r,0,7); x.stroke(); } }
+      else { const n=ds===1?11:14; x.strokeStyle=N(mix(deckC,'#000000',.32)); x.lineWidth=1;
+        for(let i=1;i<n;i++){ const sx=at(i/n)+(ds===1?((i*37)%7-3):0); x.beginPath(); x.moveTo(sx,dockY+.5); x.lineTo(sx,dockY+th); x.stroke(); }
+        if(ds===1){ for(let i=0;i<n;i++){ x.fillStyle=v3rgba(i%3?'#000000':'#ffffff',.07); x.fillRect(at(i/n),dockY,(pw-x0)/n,th); } x.fillStyle=N(mix(deckC,'#000000',.4)); for(let i=0;i<5;i++){ x.beginPath(); x.ellipse(at(.1+i*.2),dockY+th*.5,1.6,.9,0,0,7); x.fill(); } }
+        x.fillStyle=N(mix(deckC,'#000000',.45)); for(let i=0;i<9;i++) x.fillRect(at(.05+i*.11),dockY+th+(fh-th)*.5,1.5,1.5); }
       x.strokeStyle=v3rgba('#000000',.08); for(let i=0;i<3;i++){ x.beginPath(); x.moveTo(x0,dockY+th*(.3+i*.22)); x.lineTo(pw,dockY+th*(.3+i*.22)+((i%2)?.6:-.6)); x.stroke(); }
-      x.fillStyle=N(mix(deckC,'#000000',.45)); for(let i=0;i<9;i++) x.fillRect(at(.05+i*.11),dockY+th+(fh-th)*.5,1.5,1.5);
       x.fillStyle=v3rgba(P.rim||'#fff0d0',rimA); x.fillRect(x0,dockY,pw-x0,1.2); }
-    /* canopy, drawn as seen from the side, over the left part so the angler stays in the open */
-    { const cs=hfStyle(id,'canopy'), cc=N(canC), shade=N(mix(canC,'#000000',.22)), wood=N(mix(deckC,'#000000',.35)), a=at(.04), b=at(.44);
-      if(cs===1){ /* patio umbrella: one pole, a shallow dome with panels and a scalloped edge */
-        const ux=at(.27), R=(pw-x0)*.19, ty=dockY-H*.17, ey=ty+H*.03; x.fillStyle=N('#3a3a40'); x.fillRect(ux-1.2,ty,2.4,dockY-ty);
-        x.fillStyle=cc; x.beginPath(); x.moveTo(ux-R,ey); x.quadraticCurveTo(ux-R*.55,ty-H*.006,ux,ty-H*.012); x.quadraticCurveTo(ux+R*.55,ty-H*.006,ux+R,ey); x.closePath(); x.fill();
-        x.fillStyle=shade; for(let i=0;i<6;i++){ const u0=i/6, u1=(i+1)/6; x.beginPath(); x.arc(ux-R+(2*R)*(u0+u1)/2,ey,R/6,0,Math.PI); x.fill(); } /* scalloped edge, the underside in shade */
-        x.strokeStyle=v3rgba('#000000',.18); x.lineWidth=1; for(const f of [-.6,-.2,.2,.6]){ x.beginPath(); x.moveTo(ux,ty-H*.012); x.lineTo(ux+R*f,ey); x.stroke(); }
-        x.fillStyle=v3rgba('#ffffff',.25*(1-night*.6)); x.beginPath(); x.moveTo(ux-R*.85,ey-H*.004); x.quadraticCurveTo(ux-R*.5,ty-H*.002,ux,ty-H*.009); x.lineTo(ux,ty-H*.004); x.quadraticCurveTo(ux-R*.5,ty+H*.004,ux-R*.85,ey-H*.002); x.fill();
-        x.fillStyle=N('#2a2a2e'); x.beginPath(); x.arc(ux,ty-H*.015,2,0,7); x.fill(); }
-      if(cs===2){ /* cloth pergola: two posts and a beam; the cloth lies over the beam and its ends drape down, tied back to the posts */
-        const by=dockY-H*.165, ov=W*.008; x.fillStyle=wood; x.fillRect(a-1.5,by,3,dockY-by); x.fillRect(b-1.5,by,3,dockY-by); x.fillRect(a-ov,by-2,(b-a)+ov*2,3);
-        x.fillStyle=cc; x.fillRect(a-ov,by-H*.012,(b-a)+ov*2,H*.012); /* the cloth on top */
-        for(const [px,dir] of [[a-ov,1],[b+ov,-1]]){ x.fillStyle=cc; x.beginPath(); x.moveTo(px,by-H*.012); x.lineTo(px+dir*W*.022,by-H*.012); x.quadraticCurveTo(px+dir*W*.006,by+H*.05,px+dir*ov,by+H*.09); x.lineTo(px,by+H*.085); x.closePath(); x.fill();
-          x.fillStyle=shade; x.fillRect(px+dir*ov-(dir>0?0:3),by+H*.07,3,H*.008); } /* the tie */
-        x.fillStyle=shade; x.fillRect(a-ov,by-1,(b-a)+ov*2,2); x.fillStyle=v3rgba('#ffffff',.22*(1-night*.6)); x.fillRect(a-ov,by-H*.012,(b-a)+ov*2,1.2); }      if(cs===3){ /* wooden shelter: a small slanted plank roof on two posts, in the deck's wood, with a fabric edge in your color */
-        const y1=dockY-H*.175, y2=dockY-H*.145, t2=H*.014; x.fillStyle=wood; x.fillRect(a-1.5,y1,3,dockY-y1); x.fillRect(b-1.5,y2,3,dockY-y2);
-        x.fillStyle=N(mix(deckC,'#000000',.15)); x.beginPath(); x.moveTo(a-W*.008,y1-t2*.4); x.lineTo(b+W*.008,y2-t2*.4); x.lineTo(b+W*.008,y2+t2*.6); x.lineTo(a-W*.008,y1+t2*.6); x.closePath(); x.fill();
-        x.strokeStyle=N(mix(deckC,'#000000',.4)); x.lineWidth=1; for(let i=1;i<6;i++){ const u=i/6, px=a-W*.008+(b-a+W*.016)*u, py=y1+(y2-y1)*u; x.beginPath(); x.moveTo(px,py-t2*.4); x.lineTo(px,py+t2*.6); x.stroke(); }
-        x.fillStyle=v3rgba(P.rim||'#fff0d0',rimA); x.beginPath(); x.moveTo(a-W*.008,y1-t2*.4); x.lineTo(b+W*.008,y2-t2*.4); x.lineTo(b+W*.008,y2-t2*.4+1.2); x.lineTo(a-W*.008,y1-t2*.4+1.2); x.fill();
-        for(let i=0;i<8;i++){ const u0=i/8, u=(i+.5)/8, px=a-W*.008+(b-a+W*.016)*u, py=y1+(y2-y1)*u+t2*.6; x.fillStyle=i%2?cc:shade; x.beginPath(); x.arc(px,py,(b-a+W*.016)/16,0,Math.PI); x.fill(); } } }
-    /* rail */
+    /* rail along the deck edge */
     { const rs=hfStyle(id,'rail'), rh=H*.045, rc=N(railC);
       if(rs===1){ const xs=[.02,.27,.52,.77,.98]; x.fillStyle=N(mix(railC,'#000000',.3)); for(const f of xs) x.fillRect(at(f)-1.5,dockY-rh,3,rh);
-        x.strokeStyle=rc; x.lineWidth=Math.max(1.6,H*.0035); for(let i=0;i<xs.length-1;i++){ const a=at(xs[i]), b=at(xs[i+1]); x.beginPath(); x.moveTo(a,dockY-rh*.85); x.quadraticCurveTo((a+b)/2,dockY-rh*.45,b,dockY-rh*.85); x.stroke(); }
-        x.strokeStyle=v3rgba('#ffffff',.25*(1-night*.6)); x.lineWidth=1; for(let i=0;i<xs.length-1;i++){ const a=at(xs[i]), b=at(xs[i+1]); x.beginPath(); x.moveTo(a,dockY-rh*.86-1); x.quadraticCurveTo((a+b)/2,dockY-rh*.46-1,b,dockY-rh*.86-1); x.stroke(); } }
+        x.strokeStyle=N(mix('#c8a878',railC,.35)); x.lineWidth=Math.max(1.6,H*.0035); for(let i=0;i<xs.length-1;i++){ const a=at(xs[i]), b=at(xs[i+1]); x.beginPath(); x.moveTo(a,dockY-rh*.85); x.quadraticCurveTo((a+b)/2,dockY-rh*.45,b,dockY-rh*.85); x.stroke(); }
+        x.strokeStyle=v3rgba('#ffffff',.25*lit); x.lineWidth=1; for(let i=0;i<xs.length-1;i++){ const a=at(xs[i]), b=at(xs[i+1]); x.beginPath(); x.moveTo(a,dockY-rh*.86-1); x.quadraticCurveTo((a+b)/2,dockY-rh*.46-1,b,dockY-rh*.86-1); x.stroke(); } }
       if(rs===2){ x.fillStyle=rc; for(let i=0;i<=6;i++) x.fillRect(at(i/6)-2,dockY-rh,4,rh); x.fillRect(x0,dockY-rh,pw-x0,Math.max(3,H*.006)); x.fillRect(x0,dockY-rh*.5,pw-x0,Math.max(2,H*.004));
         x.fillStyle=v3rgba(P.rim||'#fff0d0',rimA); x.fillRect(x0,dockY-rh,pw-x0,1); }
-      if(rs===3){ /* iron rail: thin dark rails, slim balusters and a small curl between each pair */ const ic=N(mix(railC,'#1a1a1e',.55)); x.fillStyle=ic;
-        x.fillRect(x0,dockY-rh,pw-x0,2.2); x.fillRect(x0,dockY-rh*.18,pw-x0,1.6); for(let i=0;i<=12;i++) x.fillRect(at(i/12)-.8,dockY-rh,1.6,rh);
-        x.strokeStyle=ic; x.lineWidth=1.2; for(let i=0;i<12;i++){ const cx2=at((i+.5)/12); x.beginPath(); x.arc(cx2,dockY-rh*.6,Math.max(2,(pw-x0)/60),0,Math.PI*1.6); x.stroke(); }
-        x.fillStyle=v3rgba('#ffffff',.2*(1-night*.6)); x.fillRect(x0,dockY-rh,pw-x0,.8); } }
-    /* the light fixture at the light spot (its glow is drawn live); all three stay at the end of the dock */
-    { const ls=hfStyle(id,'light'), lx=HF.lightX(), iron=N('#2a2a30'); o.lights=[];
-      if(ls===0){ x.fillStyle=iron; x.fillRect(lx-1.5,dockY-H*.1,3,H*.1); x.fillRect(lx-H*.009,dockY-H*.118,H*.018,2.5); x.strokeStyle=iron; x.lineWidth=1.2; x.strokeRect(lx-H*.008,dockY-H*.115,H*.016,H*.02); x.beginPath(); x.moveTo(lx-H*.01,dockY-H*.116); x.lineTo(lx,dockY-H*.128); x.lineTo(lx+H*.01,dockY-H*.116); x.stroke();
-        o.lights.push({x:lx,y:dockY-H*.105}); }
+      if(rs===3){ /* low log rail: one round log on stubby posts */ const ly=dockY-rh*.5, lr=Math.max(2.5,H*.0055); x.fillStyle=N(mix(railC,'#000000',.3)); for(let i=0;i<=4;i++) x.fillRect(at(i/4)-2,ly,4,dockY-ly);
+        x.fillStyle=rc; x.fillRect(x0,ly-lr,pw-x0,lr*2); x.fillStyle=v3rgba('#000000',.22); x.fillRect(x0,ly+lr*.2,pw-x0,lr*.8); x.fillStyle=v3rgba('#ffffff',.22*lit); x.fillRect(x0,ly-lr,pw-x0,1.2);
+        x.fillStyle=N(mix(railC,'#ffffff',.2)); x.beginPath(); x.arc(pw-1,ly,lr,0,7); x.fill(); x.strokeStyle=N(mix(railC,'#000000',.35)); x.lineWidth=1; x.beginPath(); x.arc(pw-1,ly,lr*.5,0,7); x.stroke(); } }
+    /* the seat: on the deck at the seat spot, in front of the rail (resting sits the angler in it) */
+    { const ss=hfStyle(id,'seat'), sx=HF.seatX(), s=sc, sh=HOMEF.pond.seatH[ss]*s, wood=N(mix(seatC,'#000000',.25)), cc=N(seatC), dark=N(mix(seatC,'#000000',.45));
+      if(ss===0){ /* camp chair: X legs, a sling seat and a sling back, armrest tubes */ const w=14*s, by=dockY-sh; x.strokeStyle=N('#3a3a40'); x.lineWidth=Math.max(1.4,1.2*s);
+        x.beginPath(); x.moveTo(sx-w/2,dockY); x.lineTo(sx+w/2,by); x.moveTo(sx+w/2,dockY); x.lineTo(sx-w/2,by); x.moveTo(sx-w/2,by-1); x.lineTo(sx-w*.6,by-15*s); x.moveTo(sx-w/2,by-6*s); x.lineTo(sx+w/2,by-6*s); x.stroke();
+        x.fillStyle=cc; x.beginPath(); x.moveTo(sx-w/2,by); x.quadraticCurveTo(sx,by+3*s,sx+w/2,by); x.lineTo(sx+w/2,by-1.6*s); x.quadraticCurveTo(sx,by+1.2*s,sx-w/2,by-1.6*s); x.fill();
+        x.beginPath(); x.moveTo(sx-w/2,by-1); x.quadraticCurveTo(sx-w*.62,by-8*s,sx-w*.6,by-15*s); x.lineTo(sx-w*.6+2.4*s,by-15*s); x.quadraticCurveTo(sx-w*.5,by-8*s,sx-w/2+2.4*s,by-1); x.fill();
+        x.fillStyle=v3rgba('#ffffff',.18*lit); x.fillRect(sx-w*.6,by-15*s,1.2,13*s); }
+      if(ss===1){ /* log bench: a split log, flat side up, on two stubby log legs */ const w=24*s, by=dockY-sh, t2=3.6*s; x.fillStyle=wood; x.fillRect(sx-w*.38,by,3.4*s,sh); x.fillRect(sx+w*.38-3.4*s,by,3.4*s,sh);
+        x.fillStyle=cc; x.beginPath(); x.moveTo(sx-w/2,by); x.lineTo(sx+w/2,by); x.quadraticCurveTo(sx+w/2,by+t2,sx+w/2-t2,by+t2); x.lineTo(sx-w/2+t2,by+t2); x.quadraticCurveTo(sx-w/2,by+t2,sx-w/2,by); x.fill();
+        x.fillStyle=N(mix(seatC,'#ffffff',.25)); x.beginPath(); x.ellipse(sx+w/2-1,by+t2*.45,1.6*s,t2*.5,0,0,7); x.fill(); x.fillStyle=v3rgba('#ffffff',.2*lit); x.fillRect(sx-w/2,by,w,1); }
+      if(ss===2){ /* wooden deck chair: a slanted slatted back, a flat seat, flat arms */ const w=16*s, by=dockY-sh; x.fillStyle=wood; x.fillRect(sx-w*.45,by,2.4*s,sh); x.fillRect(sx+w*.4,by,2.4*s,sh);
+        x.fillStyle=cc; x.fillRect(sx-w/2,by-1.6*s,w,2.6*s); x.save(); x.translate(sx-w*.45,by-1); x.rotate(-.42); for(let i=0;i<3;i++) x.fillRect(0,-16*s+i*5.6*s,2.6*s,4.6*s); x.fillRect(-.6*s,-16.5*s,3.8*s,17*s*.06+1); x.restore();
+        x.fillStyle=dark; x.fillRect(sx-w*.5,by-7*s,w*.9,1.8*s); x.fillRect(sx+w*.3,by-7*s,1.8*s,7*s);
+        x.fillStyle=v3rgba('#ffffff',.2*lit); x.fillRect(sx-w/2,by-1.6*s,w,1); } }
+    /* canopy: in true side view, drawn after the rail so it stands on the deck (director: it looked attached to the rail) */
+    { const cs=hfStyle(id,'canopy'), cc=N(canC), shade=N(mix(canC,'#000000',.22)), wood=N(mix(deckC,'#000000',.35)), iron=N('#3a3a40');
+      const foot=(px)=>{ x.fillStyle=iron; x.fillRect(px-H*.007,dockY-H*.004,H*.014,H*.004); }; /* a small foot on the boards */
+      if(cs===1){ /* patio umbrella (the director's model): one pole on a foot, a shallow dome with panels, its scalloped rim */
+        const ux=at(.27), R=(pw-x0)*.19, ty=dockY-H*.17, ey=ty+H*.03; x.fillStyle=iron; x.fillRect(ux-1.2,ty,2.4,dockY-ty); foot(ux);
+        x.fillStyle=cc; x.beginPath(); x.moveTo(ux-R,ey); x.quadraticCurveTo(ux-R*.55,ty-H*.006,ux,ty-H*.012); x.quadraticCurveTo(ux+R*.55,ty-H*.006,ux+R,ey); x.closePath(); x.fill();
+        x.fillStyle=shade; for(let i=0;i<6;i++){ const u0=i/6, u1=(i+1)/6; x.beginPath(); x.arc(ux-R+(2*R)*(u0+u1)/2,ey,R/6,0,Math.PI); x.fill(); }
+        x.strokeStyle=v3rgba('#000000',.18); x.lineWidth=1; for(const f of [-.6,-.2,.2,.6]){ x.beginPath(); x.moveTo(ux,ty-H*.012); x.lineTo(ux+R*f,ey); x.stroke(); }
+        x.fillStyle=v3rgba('#ffffff',.25*lit); x.beginPath(); x.moveTo(ux-R*.85,ey-H*.004); x.quadraticCurveTo(ux-R*.5,ty-H*.002,ux,ty-H*.009); x.lineTo(ux,ty-H*.004); x.quadraticCurveTo(ux-R*.5,ty+H*.004,ux-R*.85,ey-H*.002); x.fill();
+        x.fillStyle=N('#2a2a2e'); x.beginPath(); x.arc(ux,ty-H*.015,2,0,7); x.fill(); }
+      if(cs===2){ /* lean-to roof: a tall post at the back, a shorter one in front, a plank roof sloping down between them (side view: one roof line) */
+        const a=at(.03), b=at(.46), y1=dockY-H*.18, y2=dockY-H*.14, t2=H*.012; x.fillStyle=wood; x.fillRect(a-1.6,y1,3.2,dockY-y1); x.fillRect(b-1.6,y2,3.2,dockY-y2);
+        x.fillStyle=cc; x.beginPath(); x.moveTo(a-W*.008,y1-t2*.5); x.lineTo(b+W*.01,y2-t2*.5); x.lineTo(b+W*.01,y2+t2*.5); x.lineTo(a-W*.008,y1+t2*.5); x.closePath(); x.fill();
+        x.fillStyle=shade; x.beginPath(); x.moveTo(a-W*.008,y1+t2*.15); x.lineTo(b+W*.01,y2+t2*.15); x.lineTo(b+W*.01,y2+t2*.5); x.lineTo(a-W*.008,y1+t2*.5); x.closePath(); x.fill();
+        x.strokeStyle=v3rgba('#000000',.2); x.lineWidth=1; for(let i=1;i<7;i++){ const u=i/7, px=a-W*.008+(b-a+W*.018)*u, py=y1+(y2-y1)*u; x.beginPath(); x.moveTo(px,py-t2*.5); x.lineTo(px,py+t2*.5); x.stroke(); }
+        x.fillStyle=v3rgba(P.rim||'#fff0d0',rimA); x.beginPath(); x.moveTo(a-W*.008,y1-t2*.5); x.lineTo(b+W*.01,y2-t2*.5); x.lineTo(b+W*.01,y2-t2*.5+1.2); x.lineTo(a-W*.008,y1-t2*.5+1.2); x.fill(); }
+      if(cs===3){ /* sailcloth shade: a pole at each end, the cloth stretched between them as a thin line with a gentle sag, tied at the tops */
+        const a=at(.03), b=at(.48), py=dockY-H*.17, sag=H*.012, t2=Math.max(2.4,H*.0055); x.fillStyle=wood; x.fillRect(a-1.4,py,2.8,dockY-py); x.fillRect(b-1.4,py+H*.008,2.8,dockY-py-H*.008);
+        x.fillStyle=cc; x.beginPath(); x.moveTo(a,py); x.quadraticCurveTo((a+b)/2,py+sag*2,b,py+H*.008); x.lineTo(b,py+H*.008+t2); x.quadraticCurveTo((a+b)/2,py+sag*2+t2,a,py+t2); x.closePath(); x.fill();
+        x.fillStyle=shade; x.beginPath(); x.moveTo(a,py+t2*.55); x.quadraticCurveTo((a+b)/2,py+sag*2+t2*.55,b,py+H*.008+t2*.55); x.lineTo(b,py+H*.008+t2); x.quadraticCurveTo((a+b)/2,py+sag*2+t2,a,py+t2); x.closePath(); x.fill();
+        x.strokeStyle=N(mix('#c8a878',canC,.3)); x.lineWidth=1; for(const [px,qy] of [[a,py],[b,py+H*.008]]){ x.beginPath(); x.moveTo(px,qy); x.lineTo(px+(px===a?-W*.006:W*.006),qy-H*.012); x.stroke(); }
+        x.fillStyle=v3rgba('#ffffff',.22*lit); x.beginPath(); x.moveTo(a,py); x.quadraticCurveTo((a+b)/2,py+sag*2,b,py+H*.008); x.lineTo(b,py+H*.008+1); x.quadraticCurveTo((a+b)/2,py+sag*2+1,a,py+1); x.fill(); } }
+    /* the light at the light spot (its glow is drawn live); all three stand on the deck at the end of the dock */
+    { const ls=hfStyle(id,'light'), lx=HF.lightX(), iron=N('#2a2a30'), metal=iron; /* the fixture stays iron: the light's colour is its glow */ o.lights=[];
+      if(ls===0){ x.fillStyle=metal; x.fillRect(lx-1.5,dockY-H*.1,3,H*.1); x.fillRect(lx-H*.009,dockY-H*.118,H*.018,2.5); x.strokeStyle=metal; x.lineWidth=1.2; x.strokeRect(lx-H*.008,dockY-H*.115,H*.016,H*.02); x.beginPath(); x.moveTo(lx-H*.01,dockY-H*.116); x.lineTo(lx,dockY-H*.128); x.lineTo(lx+H*.01,dockY-H*.116); x.stroke();
+        x.fillStyle=iron; x.fillRect(lx-H*.006,dockY-H*.004,H*.012,H*.004); o.lights.push({x:lx,y:dockY-H*.105}); }
       if(ls===1){ /* hurricane lantern sitting on the boards: a base, a glass chimney, a cap and a wire handle */ const hx=lx-W*.004, by=dockY, gh=H*.026, gw=H*.016;
-        x.fillStyle=N('#3a3a40'); x.fillRect(hx-gw*.7,by-H*.006,gw*1.4,H*.006); x.fillRect(hx-gw*.55,by-H*.006-gh-H*.006,gw*1.1,H*.006);
-        x.fillStyle=v3rgba('#e8f0f4',.35); x.beginPath(); x.ellipse(hx,by-H*.006-gh/2,gw*.55,gh/2,0,0,7); x.fill(); x.strokeStyle=N('#3a3a40'); x.lineWidth=1; x.stroke();
+        x.fillStyle=metal; x.fillRect(hx-gw*.7,by-H*.006,gw*1.4,H*.006); x.fillRect(hx-gw*.55,by-H*.006-gh-H*.006,gw*1.1,H*.006);
+        x.fillStyle=v3rgba('#e8f0f4',.35); x.beginPath(); x.ellipse(hx,by-H*.006-gh/2,gw*.55,gh/2,0,0,7); x.fill(); x.strokeStyle=metal; x.lineWidth=1; x.stroke();
         x.strokeStyle=v3rgba('#ffffff',.5*(1-night*.5)); x.beginPath(); x.ellipse(hx-gw*.2,by-H*.006-gh/2,gw*.12,gh*.3,0,0,7); x.stroke();
-        x.strokeStyle=N('#3a3a40'); x.lineWidth=1.2; x.beginPath(); x.arc(hx,by-H*.012-gh,gw*.6,Math.PI,0); x.stroke();
+        x.strokeStyle=metal; x.lineWidth=1.2; x.beginPath(); x.arc(hx,by-H*.012-gh,gw*.6,Math.PI,0); x.stroke();
         o.lights.push({x:hx,y:by-H*.006-gh/2,r:.15,a:.55}); }
-      if(ls===2){ /* firefly jar hanging from a short hook on the end post */ const px=lx; x.fillStyle=N(mix(deckC,'#000000',.4)); x.fillRect(px-2,dockY-H*.07,4,H*.07);
+      if(ls===2){ /* firefly jar hanging from a short hook on a post standing on the deck */ const px=lx; x.fillStyle=N(mix(deckC,'#000000',.4)); x.fillRect(px-2,dockY-H*.07,4,H*.07);
         x.strokeStyle=iron; x.lineWidth=1.6; x.beginPath(); x.moveTo(px,dockY-H*.068); x.lineTo(px-H*.012,dockY-H*.068); x.lineTo(px-H*.012,dockY-H*.062); x.stroke();
         const jx=px-H*.012, jy=dockY-H*.046, jw=H*.013, jh=H*.018; x.fillStyle=v3rgba('#dceee8',.3); x.beginPath(); x.ellipse(jx,jy,jw*.5,jh*.5,0,0,7); x.fill(); x.strokeStyle=v3rgba(N('#9ab0a8'),.8); x.lineWidth=1; x.stroke();
-        x.fillStyle=N('#6a5a3a'); x.fillRect(jx-jw*.35,jy-jh*.6,jw*.7,H*.004); x.strokeStyle=N('#6a5a3a'); x.beginPath(); x.moveTo(jx,jy-jh*.6); x.lineTo(jx,dockY-H*.062); x.stroke();
+        x.fillStyle=metal; x.fillRect(jx-jw*.35,jy-jh*.6,jw*.7,H*.004); x.strokeStyle=metal; x.beginPath(); x.moveTo(jx,jy-jh*.6); x.lineTo(jx,dockY-H*.062); x.stroke();
         o.lights.push({x:jx,y:jy,r:.11,a:.5,jar:1}); }
     } }
 };
-/* ---------- the Home page for a format home: a close-up of the home and its 5 elements (styles, then colors) ---------- */
+/* ---------- the Home page for a format home: a close-up of the home and its 6 features (styles, then the home's one colour list) ---------- */
 function renderHomeF(P){ const sp=hfSpec(S.loc), L=LOCS[locIdx(S.loc)];
-  const sw=(e,c,i,on)=>`<button type="button" class="chipb hf-col" data-act="hfcol" data-k="${e.id}" data-v="${i}" aria-pressed="${on}" title="${esc(c[0])}"><span class="hm-sw${e.id==='light'?' hm-glow':''}" style="background:${e.id==='light'?'radial-gradient(circle,rgb('+c[1]+') 0%,rgba('+c[1]+',.35) 55%,transparent 75%)':c[1]}"></span>${esc(c[0])}</button>`;
+  const sw=(e,c,i,on)=>`<button type="button" class="chipb hf-col" data-act="hfcol" data-k="${e.id}" data-v="${i}" aria-pressed="${on}" title="${esc(c[0])}"><span class="hm-sw${e.id==='light'?' hm-glow':''}" style="background:${e.id==='light'?'radial-gradient(circle,'+c[1]+' 0%,'+c[1]+'59 55%,transparent 75%)':c[1]}"></span>${esc(c[0])}</button>`;
   P.innerHTML=`<i class="hf-mark" hidden></i>
    <div class="tile" style="margin-top:10px;padding:0;overflow:hidden"><canvas id="homecv" width="900" height="360" style="width:100%;height:auto;cursor:default"></canvas></div>`+
    sp.els.map(e=>{ const [s,c]=hfChoice(S.loc,e.id);
      return `<h5 data-hel="${e.id}">Style</h5><div class="chips" data-hel="${e.id}">${e.styles.map((n,i)=>`<button type="button" class="chipb" data-act="hfel" data-k="${e.id}" data-v="${i}" aria-pressed="${i===s}">${esc(n)}</button>`).join('')}</div>`+
-       `<h5 data-hel="${e.id}">Color</h5><div class="chips" data-hel="${e.id}">${e.colors.map((col,i)=>sw(e,col,i,i===c)).join('')}</div>`; }).join('');
+       `<h5 data-hel="${e.id}">Color</h5><div class="chips" data-hel="${e.id}">${sp.colors.map((col,i)=>sw(e,col,i,i===c)).join('')}</div>`; }).join('');
   paintHome(); }
-/* the 5 elements become the page's tabs */
+/* the 6 features become the page's tabs */
 function hfSections(P){ const sp=hfSpec(S.loc); if(!sp) return false; sectionize(P,'home',sp.els.map(e=>({name:e.label,nodes:[...P.querySelectorAll(':scope > [data-hel="'+e.id+'"]')]}))); return true; }
 /* the Home view frames the home: its footprint, the free zone above it and the water under it, at the view's own shape */
 function hfFrame(c,top){ const pw=HF.pw(), dy=HF.dockY(), want={x:0,y:HF.top(dy)+H*.02,w:pw*1.08,h:(HF.wl(dy)+H*.05)-(HF.top(dy)+H*.02)}, ar=c.width/c.height;
-  let w=want.w, h=want.h; if(w/h<ar) w=h*ar; else h=w/ar;
-  if(w>want.w/.5){ w=want.w/.5; h=w/ar; } /* a wide view: the home still fills about half of it (the top of the free zone may be cut) */
-  let y=Math.min(want.y+want.h/2,dy-H*.03)-h/2; y=Math.max(top||0,Math.min(H-h,y)); return {sx:0,sy:y,sw:Math.min(W,w),sh:h}; }
+  let w=want.w, h=w/ar; /* the home fills the view's width */
+  if(h>H*.96){ h=H*.96; w=h*ar; } if(h<H*.25){ h=H*.25; w=h*ar; } /* never so flat that the deck or the canopy is cut */ /* the preview shows only the home (director, 2026-11-21): framed on the home's width, never the fishing scene beside it; a wide view crops water below instead */
+  let y=h>=want.h?Math.min(want.y+want.h/2,dy-H*.03)-h/2:dy-H*.205; y=Math.max(top||0,Math.min(H-h,y)); return {sx:0,sy:y,sw:Math.min(W,w),sh:h}; }
 /* a choice: the element's style or color (saved with this water's home) */
 function hfAct(b){ const a=b.dataset.act; if(a!=='hfel'&&a!=='hfcol') return undefined; const sp=hfSpec(S.loc), e=sp&&sp.els.find(x=>x.id===b.dataset.k), v=+b.dataset.v; if(!e) return 'skip';
-  const cur=hfChoice(S.loc,e.id); if(a==='hfel'){ if(!(v>=0&&v<e.styles.length)) return 'skip'; cur[0]=v; } else { if(!(v>=0&&v<e.colors.length)) return 'skip'; cur[1]=v; }
+  const cur=hfChoice(S.loc,e.id); if(a==='hfel'){ if(!(v>=0&&v<e.styles.length)) return 'skip'; cur[0]=v; } else { if(!(v>=0&&v<sp.colors.length)) return 'skip'; cur[1]=v; }
   S.dock.el=hfClean(S.dock.el); S.dock.el[e.id]=cur; try{ sfx.coin(); }catch(er){} save(); return 'render'; }
+// =====================================================================
+// The home kit (batch 5, 2026-11-22): side-view parts every format home is built from (docs/HOME_DESIGNS.md). Each home in
+// cw_homes.js picks its parts and colours; everything here draws into the home's stored picture (cv_homefmt.js), so nothing in
+// this file runs per frame. Side view only: a roof is a roof line, a boat a hull outline, a deck a plank edge with posts.
+// Coordinates are the scene's own units; o is the paint context from hfPaintCache (x, N, P, dockY, pw, wl, posts, night, id).
+// =====================================================================
+const HK = {
+  n:(o,c)=>(typeof c==="string"&&c[0]==="#")?o.N(c):c, /* night tint for hex colours; rgba() strings pass as they are */
+  lit:o=>1-o.night*.6, dk:(c,k)=>mix(c,'#000000',k), lt:(c,k)=>mix(c,'#ffffff',k),
+  at:(o,f)=>HF.x0()+(o.pw-HF.x0())*f, th:()=>Math.max(4,H*.012), fh:()=>Math.max(6,H*.018), s:()=>HF.sc(),
+  rect(o,x,y,w,h,col){ o.x.fillStyle=HK.n(o,col); o.x.fillRect(x,y,w,h); },
+  poly(o,pts,col){ const x=o.x; x.fillStyle=HK.n(o,col); x.beginPath(); x.moveTo(pts[0],pts[1]); for(let i=2;i<pts.length;i+=2) x.lineTo(pts[i],pts[i+1]); x.closePath(); x.fill(); },
+  circ(o,cx,cy,r,col){ o.x.fillStyle=HK.n(o,col); o.x.beginPath(); o.x.arc(cx,cy,Math.max(.5,r),0,7); o.x.fill(); },
+  ell(o,cx,cy,rx,ry,col,rot){ o.x.fillStyle=HK.n(o,col); o.x.beginPath(); o.x.ellipse(cx,cy,Math.max(.5,rx),Math.max(.5,ry),rot||0,0,7); o.x.fill(); },
+  line(o,pts,col,w){ const x=o.x; x.strokeStyle=HK.n(o,col); x.lineWidth=w||1; x.beginPath(); x.moveTo(pts[0],pts[1]); for(let i=2;i<pts.length;i+=2) x.lineTo(pts[i],pts[i+1]); x.stroke(); },
+  curve(o,x0,y0,cx,cy,x1,y1,col,w){ const x=o.x; x.strokeStyle=HK.n(o,col); x.lineWidth=w||1; x.beginPath(); x.moveTo(x0,y0); x.quadraticCurveTo(cx,cy,x1,y1); x.stroke(); },
+  rim(o,x0,y,w,a){ o.x.fillStyle=v3rgba(o.P.rim||'#fff0d0',(a||.35)*HK.lit(o)); o.x.fillRect(x0,y,w,1.2); },
+  hi(o,x0,y,w,h,a){ o.x.fillStyle=v3rgba('#ffffff',(a||.2)*HK.lit(o)); o.x.fillRect(x0,y,w,h||1); },
+  sh(o,x0,y,w,h,a){ o.x.fillStyle=v3rgba('#000000',a||.2); o.x.fillRect(x0,y,w,h); },
+  /* a shaded block: body, lit top edge, darker right side */
+  block(o,x0,y,w,h,col){ HK.rect(o,x0,y,w,h,col); HK.sh(o,x0+w*.68,y,w*.32,h,.18); HK.hi(o,x0,y,w,1.2,.25); },
+
+  /* ---------- the standing surface (deck) ---------- */
+  deck(o,col,kind){ const x0=HF.x0(), w=o.pw-x0, y=o.dockY, th=HK.th(), fh=HK.fh(), top=HK.lt(col,.08), face=HK.dk(col,.24), at=f=>HK.at(o,f);
+    HK.rect(o,x0,y+th,w,fh-th,face); HK.rect(o,x0,y,w,th,top);
+    const seams=(n,c,jit)=>{ for(let i=1;i<n;i++){ const sx=at(i/n)+(jit?((i*37)%7-3):0); HK.line(o,[sx,y+.5,sx,y+th],c); } };
+    switch(kind){
+      case 'planks': seams(14,HK.dk(col,.32)); break;
+      case 'boards': seams(11,HK.dk(col,.32),1); for(let i=0;i<11;i++) o.x.fillStyle=v3rgba(i%3?'#000000':'#ffffff',.06), o.x.fillRect(at(i/11),y,w/11,th); break;
+      case 'logs': { const r=(fh-th)*.5, n=Math.max(8,Math.round(w/(r*2.05))); for(let i=0;i<n;i++){ const cx=at((i+.5)/n), cy=y+th+(fh-th)*.5; HK.circ(o,cx,cy,r,HK.lt(col,.12)); o.x.strokeStyle=HK.n(o,HK.dk(col,.35)); o.x.lineWidth=1; o.x.beginPath(); o.x.arc(cx,cy,r*.55,0,7); o.x.stroke(); } break; }
+      case 'stone': { const n=7; for(let i=0;i<n;i++){ const a=at(i/n), b=at((i+1)/n); HK.rect(o,a+1,y+th,b-a-2,fh-th,i%2?HK.dk(col,.18):HK.dk(col,.28)); HK.line(o,[a,y,a,y+th],HK.dk(col,.4)); } break; }
+      case 'bamboo': { const r=(fh-th)*.42, n=Math.round(w/(r*2.2)); for(let i=0;i<n;i++){ const cx=at((i+.5)/n); HK.circ(o,cx,y+th+(fh-th)*.5,r,HK.lt(col,.1)); HK.circ(o,cx,y+th+(fh-th)*.5,r*.45,HK.dk(col,.3)); } break; }
+      case 'mat': for(let i=0;i<w;i+=3){ HK.line(o,[x0+i,y,x0+i+2,y+th],HK.dk(col,.2)); } break;
+      case 'grate': for(let i=0;i<w;i+=4) HK.rect(o,x0+i,y+th+1,2,fh-th-2,HK.dk(col,.5)); break;
+      case 'tile': seams(18,HK.dk(col,.3)); HK.line(o,[x0,y+th*.5,o.pw,y+th*.5],HK.dk(col,.25)); break;
+      case 'marble': HK.rect(o,x0,y+th+(fh-th)*.35,w,Math.max(1.2,(fh-th)*.15),'#d8a830'); for(let i=0;i<6;i++) HK.curve(o,at(i/6),y+th+1,at(i/6+.05),y+fh*.5,at(i/6+.09),y+fh-1,HK.dk(col,.12)); break;
+      case 'mosaic': for(let i=0;i<24;i++) HK.rect(o,at(i/24),y+th,w/24-.5,fh-th,['#2a4aa8','#d8a830','#c8683a','#f0ecf4'][i%4]); break;
+      case 'carpet': for(let i=0;i<w;i+=6) HK.rect(o,x0+i,y,3,th,HK.dk(col,.08)); HK.rect(o,x0,y+th,w,Math.max(2,fh*.25),'#a8b0b8'); break;
+      case 'concrete': for(let i=0;i<4;i++) HK.line(o,[at(i/4),y,at(i/4),y+fh],HK.dk(col,.2)); break;
+      case 'walnut': seams(9,HK.dk(col,.35)); HK.hi(o,x0,y+1,w,1,.3); break;
+      case 'cloud': for(let i=0;i<10;i++) HK.circ(o,at((i+.5)/10),y+fh*.75,fh*.55,HK.lt(col,.1)); break;
+      case 'crystal': case 'moonstone': case 'glass': { const g=o.x.createLinearGradient(0,y,0,y+fh); g.addColorStop(0,v3rgba(HK.lt(col,.4),.95)); g.addColorStop(1,v3rgba(col,.6)); o.x.fillStyle=g; o.x.fillRect(x0,y,w,fh); if(kind!=='moonstone') for(let i=0;i<8;i++) HK.line(o,[at(i/8),y+fh,at(i/8+.06),y],v3rgba('#ffffff',.25)); if(kind==='glass') for(let i=0;i<5;i++) HK.line(o,[at(i/5+.02),y+fh*.6,at(i/5+.12),y+fh*.6,at(i/5+.12),y+fh*.3],'#3ae8ff',1); break; }
+      case 'chrome': { const g=o.x.createLinearGradient(0,y,0,y+fh); g.addColorStop(0,'#f4f8ff'); g.addColorStop(.5,HK.n(o,col)); g.addColorStop(1,'#3a3e4a'); o.x.fillStyle=g; o.x.fillRect(x0,y,w,fh); break; }
+      case 'carbon': for(let i=0;i<w;i+=4) HK.line(o,[x0+i,y,x0+i+3,y+fh],HK.lt(col,.12)); break;
+      case 'snow': for(let i=0;i<9;i++) HK.circ(o,at((i+.5)/9),y+th*.4,th*1.1,HK.lt(col,.15)); break;
+      case 'fur': for(let i=0;i<w;i+=2.5) HK.line(o,[x0+i,y+fh,x0+i+1,y+fh+H*.006],HK.dk(col,.1)); break;
+      case 'hay': seams(11,HK.dk(col,.3)); for(let i=0;i<14;i++) HK.line(o,[at(i/14+.02),y,at(i/14+.04),y-H*.004],'#e0c060',1); break;
+      case 'platter': case 'plate': { HK.ell(o,(x0+o.pw)/2,y+th,w*.52,fh*.7,kind==='plate'?'#f0f0f4':'#c8ccd8'); if(kind==='plate') HK.line(o,[x0,y+th*.7,o.pw,y+th*.7],'#5a7ad8',1.5); else HK.hi(o,x0,y,w,1.5,.5); break; }
+      case 'cracker': for(let i=0;i<10;i++) HK.circ(o,at((i+.5)/10),y+th+(fh-th)*.5,1.2,HK.dk(col,.35)); break;
+      case 'red': seams(12,HK.dk(col,.35)); HK.hi(o,x0,y,w,1.2,.25); break;
+      default: seams(12,HK.dk(col,.3)); }
+    HK.rim(o,x0,y,w); },
+
+  /* ---------- supports from the deck down into the water ---------- */
+  supports(o,col,kind,n){ const x0=HF.x0(), under=o.dockY+HK.fh(), at=f=>HK.at(o,f), cnt=n||5, w=['stone','boulder','crib','hay','tyres','cabinet','column','cloud','jetty'].includes(kind)?Math.max(8,W*.018):['stilts','pretzel','cane'].includes(kind)?Math.max(3,W*.006):Math.max(5,W*.011);
+    const xs=[]; for(let i=0;i<cnt;i++) xs.push(Math.min(o.pw-w/2-1,at(.08+.89*i/(cnt-1))));
+    const base={square:'square',fence:'square',hex:'square',iron:'round',round:'round',stilts:'round',tarred:'round',palm:'round',bamboo:'round',pretzel:'round',cane:'round',glass:'round',column:'round',wafer:'square',cabinet:'square',crib:'square',hay:'square',tyres:'round',stone:'stone',boulder:'stone',jetty:'stone',mangrove:'round',braced:'round'}[kind]||'round';
+    if(kind==='braced'||kind==='crib'){ for(let i=0;i<xs.length-1;i++){ HK.line(o,[xs[i],under,xs[i+1],o.wl-H*.01],HK.dk(col,.2),Math.max(2,W*.004)); HK.line(o,[xs[i+1],under,xs[i],o.wl-H*.01],HK.dk(col,.2),Math.max(2,W*.004)); } }
+    if(kind==='cloud'){ for(const px of xs){ for(let k=0;k<6;k++) HK.circ(o,px+(k%2?2:-2),under+k*H*.03,w*.7,v3rgba(HK.lt(col,.1),Math.max(.15,1-k*.15))); o.posts.push({x:px,w}); } return; }
+    if(kind==='spires'||kind==='floatstones'||kind==='glowroots'||kind==='rings'||kind==='jets'||kind==='coils'){ HK.under(o,col,kind,xs); return; }
+    for(const px of xs) hfPost(o,px,w,col,base,under);
+    for(const px of xs){ const t=under, b=o.wl;
+      if(kind==='bamboo'||kind==='palm') for(let y=t+H*.012;y<b;y+=H*.018) HK.rect(o,px-w/2,y,w,1.2,HK.dk(col,.35));
+      if(kind==='hex') HK.line(o,[px-w*.15,t,px-w*.15,b],HK.dk(col,.4));
+      if(kind==='column'){ for(let k=-1;k<=1;k++) HK.line(o,[px+k*w*.25,t,px+k*w*.25,b],HK.dk(col,.15)); HK.rect(o,px-w*.7,t,w*1.4,H*.006,HK.lt(col,.1)); }
+      if(kind==='pretzel') for(let y=t;y<b;y+=H*.01) HK.circ(o,px+((y*7)%3-1),y,.7,'#f4f0e6');
+      if(kind==='cane') for(let y=t;y<b;y+=H*.012) HK.rect(o,px-w/2,y,w,H*.005,'#f4f0e6');
+      if(kind==='wafer') for(let y=t;y<b;y+=H*.008) HK.rect(o,px-w/2,y,w,1,HK.dk(col,.25));
+      if(kind==='cabinet') for(let y=t+H*.004;y<b;y+=H*.016){ HK.rect(o,px-w*.4,y,w*.8,H*.012,HK.lt(col,.08)); HK.rect(o,px-w*.12,y+H*.005,w*.24,1.5,'#3a3e4a'); }
+      if(kind==='hay') for(let y=t;y<b;y+=H*.014){ HK.rect(o,px-w/2,y,w,H*.012,'#e0c060'); HK.line(o,[px-w/2,y+H*.004,px+w/2,y+H*.004],'#a8843a'); }
+      if(kind==='tyres') for(let y=t+H*.006;y<b;y+=H*.012) HK.ell(o,px,y,w*.6,H*.006,'#1e1e22');
+      if(kind==='tarred'){ HK.rect(o,px-w*.65,b-H*.012,w*1.3,H*.012,HK.dk(col,.4)); }
+      if(kind==='glass'){ HK.rect(o,px-w/2,t,w,b-t,v3rgba('#9ad0e0',.35)); HK.line(o,[px-w/2,t,px-w/2,b],'#3ae8ff'); }
+      if(kind==='mangrove'){ HK.curve(o,px,t+H*.02,px-W*.01,b-H*.02,px-W*.014,b,col,2); HK.curve(o,px,t+H*.02,px+W*.01,b-H*.02,px+W*.015,b,col,2); }
+      if(kind==='boulder'||kind==='jetty'){ HK.ell(o,px,b-H*.01,w*1.1,H*.022,HK.dk(col,.1)); HK.ell(o,px-w*.3,b-H*.026,w*.7,H*.016,HK.lt(col,.05)); } } },
+  /* supports that don't touch the water: glowing, floating or hovering (Starfall, Circuit Lake) */
+  under(o,col,kind,xs){ const t=o.dockY+HK.fh();
+    for(const px of xs){ const g=o.x.createLinearGradient(0,t,0,o.wl+H*.08);
+      if(kind==='spires'){ g.addColorStop(0,v3rgba(HK.lt(col,.3),.9)); g.addColorStop(1,v3rgba(col,0)); o.x.fillStyle=g; o.x.beginPath(); o.x.moveTo(px-W*.008,t); o.x.lineTo(px+W*.008,t); o.x.lineTo(px,o.wl+H*.08); o.x.fill(); }
+      if(kind==='floatstones'){ HK.ell(o,px,t+H*.03,W*.01,H*.012,HK.dk(col,.2)); HK.ell(o,px+W*.006,t+H*.065,W*.006,H*.008,HK.dk(col,.25)); }
+      if(kind==='glowroots'){ HK.curve(o,px,t,px-W*.01,t+H*.05,px+W*.004,o.wl+H*.05,v3rgba(HK.lt(col,.3),.7),2); }
+      if(kind==='rings'){ for(let k=0;k<3;k++) { o.x.strokeStyle=v3rgba('#3ae8ff',.7-k*.2); o.x.lineWidth=1.5; o.x.beginPath(); o.x.ellipse(px,t+H*.01+k*H*.018,W*.012-k*W*.002,H*.004,0,0,7); o.x.stroke(); } }
+      if(kind==='jets'){ g.addColorStop(0,'rgba(255,74,184,.85)'); g.addColorStop(1,'rgba(255,74,184,0)'); o.x.fillStyle=g; o.x.beginPath(); o.x.moveTo(px-W*.006,t); o.x.lineTo(px+W*.006,t); o.x.lineTo(px+W*.003,o.wl); o.x.lineTo(px-W*.003,o.wl); o.x.fill(); HK.rect(o,px-W*.007,t,W*.014,H*.01,'#3a3e4a'); }
+      if(kind==='coils'){ for(let k=0;k<4;k++) HK.ell(o,px,t+H*.006+k*H*.008,W*.008,H*.004,k%2?'#7aff4a':'#3a3e4a'); } } },
+
+  /* ---------- a hull for homes that float (boats, rafts) ---------- */
+  hull(o,col,kind){ const x0=HF.x0(), x1=o.pw, y=o.dockY, wl=o.wl, at=f=>HK.at(o,f), d=wl+H*.02, bow=x1+W*.02, lit=HK.lit(o);
+    const shape=(bt,sk)=>{ HK.poly(o,[x0,y,bow,y-H*(sk||0),x1-W*.005,d,x0+W*.01,bt||d],col); };
+    switch(kind){
+      case 'skiff': shape(d-H*.01,.004); HK.rect(o,x0,y,bow-x0,H*.005,HK.lt(col,.3)); break;
+      case 'console': case 'sport': shape(d,.012); HK.rect(o,x0,y+H*.012,bow-x0,H*.006,'#1e3a5a'); break;
+      case 'jon': HK.poly(o,[x0,y,x1+W*.01,y,x1,d,x0,d],col); HK.rect(o,x0,y+H*.02,x1-x0,H*.006,HK.dk(col,.2)); break;
+      case 'cruiser': shape(d,.01); for(let i=0;i<4;i++) HK.line(o,[x0,y+H*(.008+i*.01),bow-W*.004*i,y+H*(.008+i*.01)],HK.dk(col,.25)); break;
+      case 'work': case 'steel': case 'rusty': shape(d+H*.01,.008); HK.rect(o,x0,y+H*.008,bow-x0,H*.006,'#1a1c20'); if(kind==='rusty') for(let i=0;i<9;i++) HK.rect(o,at(i/9+.03),y+H*.016,1.5,H*.03,'#8a4a2a'); break;
+      case 'woodsteel': shape(d,.006); HK.rect(o,x0,y,bow-x0,H*.008,'#a8743a'); break;
+      case 'reed': case 'barque': { HK.poly(o,[x0-W*.01,y-H*.03,x0+W*.01,y,x1-W*.01,y,bow+W*.005,y-H*.035,x1,d,x0,d],col); for(let i=0;i<10;i++) HK.line(o,[at(i/10),y+H*.004,at(i/10)+W*.004,d-H*.004],HK.dk(col,.25)); if(kind==='barque') for(const f of [.2,.5,.8]) HK.rect(o,at(f),y,W*.004,d-y,'#d8a830'); break; }
+      case 'felucca': shape(d,.02); for(let i=0;i<3;i++) HK.line(o,[x0,y+H*(.01+i*.012),bow-W*.006,y+H*(.01+i*.012)],HK.dk(col,.3)); break;
+      case 'barrels': { const n=6; for(let i=0;i<n;i++){ const cx=at((i+.5)/n); HK.ell(o,cx,wl,W*.012,H*.03,col); HK.rect(o,cx-W*.012,wl-H*.012,W*.024,1.5,'#5a5a5a'); HK.rect(o,cx-W*.012,wl+H*.01,W*.024,1.5,'#5a5a5a'); } HK.deck(o,'#6a5a48','boards'); return; }
+      case 'planks': HK.rect(o,x0,y,x1-x0,wl-y+H*.006,HK.dk(col,.15)); for(let i=0;i<9;i++) HK.line(o,[at(i/9),y,at(i/9),wl],HK.dk(col,.4)); break;
+      case 'door': HK.rect(o,x0,y,x1-x0,wl-y,col); HK.rect(o,at(.15),y+2,W*.01,wl-y-4,HK.dk(col,.2)); HK.rect(o,at(.6),y+2,W*.01,wl-y-4,HK.dk(col,.2)); HK.circ(o,at(.9),y+(wl-y)*.5,1.6,'#a8884a'); break;
+      default: shape(d,.008); }
+    HK.hi(o,x0,y,bow-x0,1.2,.3); o.posts.push({x:x1,w:W*.02},{x:x0+W*.02,w:W*.02}); /* the water flowing past the hull ends */ },
+
+  /* ---------- roofs and canopies (side view) ---------- */
+  roof(o,col,kind,f0,f1){ const a=HK.at(o,f0==null?.03:f0), b=HK.at(o,f1==null?.47:f1), y=o.dockY, c=col, wood=HK.dk(col,.4), lit=HK.lit(o), post=(px,top)=>HK.rect(o,px-1.5,top,3,y-top,wood);
+    switch(kind){
+      case 'umbrella': case 'beachumbrella': case 'logoumbrella': { const ux=(a+b)/2, R=(b-a)*.48, ty=y-H*.17, ey=ty+H*.03; HK.rect(o,ux-1.2,ty,2.4,y-ty,'#3a3a40'); HK.rect(o,ux-H*.007,y-H*.004,H*.014,H*.004,'#3a3a40');
+        HK.poly(o,[ux-R,ey,ux-R*.55,ty-H*.004,ux,ty-H*.012,ux+R*.55,ty-H*.004,ux+R,ey],c); if(kind==='beachumbrella') for(let i=0;i<3;i++) HK.poly(o,[ux-R+i*R*.66,ey,ux-R*.55+i*R*.5,ty-H*.003,ux-R*.3+i*R*.5,ty-H*.006,ux-R*.66+i*R*.66,ey],'#f4efe6');
+        if(kind==='logoumbrella') HK.circ(o,ux,ty+H*.012,H*.008,'#f4f6f8'); for(let i=0;i<6;i++) HK.circ(o,ux-R+(2*R)*(i+.5)/6,ey,R/6.5,HK.dk(c,.22)); HK.circ(o,ux,ty-H*.015,2,'#2a2a2e'); break; }
+      case 'leanto': case 'shingle': case 'tin': case 'canvas': { const y1=y-H*.18, y2=y-H*.14, t2=H*.012; post(a,y1); post(b,y2); HK.poly(o,[a-W*.008,y1-t2*.5,b+W*.01,y2-t2*.5,b+W*.01,y2+t2*.5,a-W*.008,y1+t2*.5],c);
+        const n=kind==='tin'?14:7; for(let i=1;i<n;i++){ const u=i/n; HK.line(o,[a+(b-a)*u,y1+(y2-y1)*u-t2*.5,a+(b-a)*u,y1+(y2-y1)*u+t2*.5],v3rgba('#000000',.2)); } HK.line(o,[a-W*.008,y1-t2*.5,b+W*.01,y2-t2*.5],v3rgba(o.P.rim||'#fff0d0',.4*lit),1.2); break; }
+      case 'sail': { const py=y-H*.17, t2=Math.max(2.4,H*.0055); post(a,py); post(b,py+H*.008); o.x.fillStyle=HK.n(o,c); o.x.beginPath(); o.x.moveTo(a,py); o.x.quadraticCurveTo((a+b)/2,py+H*.024,b,py+H*.008); o.x.lineTo(b,py+H*.008+t2); o.x.quadraticCurveTo((a+b)/2,py+H*.024+t2,a,py+t2); o.x.fill(); break; }
+      case 'gable': case 'slate': case 'barn': case 'aframe': case 'shack': { const h=kind==='aframe'?H*.2:H*.08, base=y-H*.12, m=(a+b)/2; if(kind!=='aframe'){ post(a+W*.004,base); post(b-W*.004,base); }
+        HK.poly(o,[a-W*.01,kind==='aframe'?y:base,m,base-h,b+W*.01,kind==='aframe'?y:base],c); HK.poly(o,[m,base-h,b+W*.01,kind==='aframe'?y:base,m+(b-m)*.2,kind==='aframe'?y:base],HK.dk(c,.18));
+        if(kind==='slate') for(let i=1;i<5;i++) HK.line(o,[a+(m-a)*i/5,base-h*i/5,b-(b-m)*i/5,base-h*i/5],HK.dk(c,.3)); if(kind==='barn') HK.rect(o,m-W*.006,base-h*.55,W*.012,h*.4,'#f4f0e6'); break; }
+      case 'shackbox': { const top=y-H*.13; HK.block(o,a,top,b-a,y-top,c); HK.poly(o,[a-W*.006,top,b+W*.008,top-H*.03,b+W*.008,top-H*.02,a-W*.006,top+H*.008],HK.dk(c,.35)); HK.rect(o,a+(b-a)*.55,top+H*.04,(b-a)*.2,y-top-H*.04,HK.dk(c,.35)); break; }
+      case 'curved': case 'tiled': { const base=y-H*.13; post(a+W*.006,base); post(b-W*.006,base); o.x.fillStyle=HK.n(o,c); o.x.beginPath(); o.x.moveTo(a-W*.016,base-H*.02); o.x.quadraticCurveTo(a,base-H*.004,(a+b)/2,base-H*.05); o.x.quadraticCurveTo(b,base-H*.004,b+W*.016,base-H*.02); o.x.lineTo(b+W*.01,base); o.x.lineTo(a-W*.01,base); o.x.fill(); for(let i=1;i<8;i++) HK.line(o,[a+(b-a)*i/8,base-H*.012,a+(b-a)*i/8,base],HK.dk(c,.3)); break; }
+      case 'thatch': case 'thatchgate': { const base=y-H*.12, m=(a+b)/2; post(a+W*.006,base); post(b-W*.006,base); o.x.fillStyle=HK.n(o,c); o.x.beginPath(); o.x.moveTo(a-W*.014,base+H*.006); o.x.quadraticCurveTo(m,base-H*.11,b+W*.014,base+H*.006); o.x.fill(); for(let i=0;i<16;i++){ const px=a-W*.014+(b-a+W*.028)*i/16; HK.line(o,[px,base+H*.006,px+1,base+H*.016],HK.dk(c,.25)); } break; }
+      case 'torii': { const top=y-H*.17; HK.rect(o,a+W*.004,top,W*.006,y-top,c); HK.rect(o,b-W*.01,top,W*.006,y-top,c); HK.rect(o,a-W*.004,top+H*.025,b-a+W*.008,H*.008,c); o.x.fillStyle=HK.n(o,HK.dk(c,.2)); o.x.beginPath(); o.x.moveTo(a-W*.014,top-H*.006); o.x.quadraticCurveTo((a+b)/2,top+H*.004,b+W*.014,top-H*.006); o.x.lineTo(b+W*.012,top+H*.004); o.x.quadraticCurveTo((a+b)/2,top+H*.012,a-W*.012,top+H*.004); o.x.fill(); break; }
+      case 'leaf': { const base=y-H*.16; HK.curve(o,a+W*.004,y,a,base,a+W*.01,base-H*.01,'#3a6a2a',2); o.x.fillStyle=HK.n(o,c); o.x.beginPath(); o.x.moveTo(a+W*.008,base-H*.012); o.x.quadraticCurveTo((a+b)*.5,base-H*.06,b+W*.012,base+H*.02); o.x.quadraticCurveTo((a+b)*.5,base-H*.01,a+W*.008,base-H*.012); o.x.fill(); HK.curve(o,a+W*.008,base-H*.012,(a+b)*.5,base-H*.035,b+W*.012,base+H*.02,HK.dk(c,.3),1); break; }
+      case 'fronds': { const base=y-H*.14; post(a,base); post(b,base+H*.02); for(let i=0;i<7;i++){ const px=a+(b-a)*i/6; o.x.fillStyle=HK.n(o,i%2?c:HK.dk(c,.15)); o.x.beginPath(); o.x.moveTo(px-W*.02,base+(px-a)/(b-a)*H*.02); o.x.quadraticCurveTo(px,base-H*.02,px+W*.02,base+H*.012+(px-a)/(b-a)*H*.02); o.x.fill(); } break; }
+      case 'flat': case 'ttop': case 'hardtop': case 'glass': case 'ceiling': case 'overhang': { const top=y-H*.15, tt=H*.008; post(a+W*.006,top); post(b-W*.006,top);
+        HK.rect(o,a-W*.008,top-tt,b-a+W*.016,tt,kind==='glass'?v3rgba(c,.55):c); HK.hi(o,a-W*.008,top-tt,b-a+W*.016,1,.4); if(kind==='ceiling') for(let i=0;i<6;i++) HK.line(o,[a+(b-a)*i/6,top-tt,a+(b-a)*i/6,top],HK.dk(c,.3)); break; }
+      case 'bimini': { const top=y-H*.15; HK.curve(o,a,y,a+W*.004,top+H*.02,a+W*.012,top,'#c0c8cc',1.6); HK.curve(o,b,y,b-W*.004,top+H*.02,b-W*.012,top,'#c0c8cc',1.6); o.x.fillStyle=HK.n(o,c); o.x.beginPath(); o.x.moveTo(a,top+H*.006); o.x.quadraticCurveTo((a+b)/2,top-H*.03,b,top+H*.006); o.x.lineTo(b,top+H*.014); o.x.quadraticCurveTo((a+b)/2,top-H*.02,a,top+H*.014); o.x.fill(); break; }
+      case 'tent': case 'stripedtent': case 'walltent': { const m=(a+b)/2, top=y-H*.15; HK.poly(o,[a-W*.006,y,m,top,b+W*.006,y],c); if(kind==='stripedtent') for(let i=1;i<6;i+=2) HK.poly(o,[a+(m-a)*i/6,y-(y-top)*i/6,a+(m-a)*(i+1)/6,y-(y-top)*(i+1)/6,a+(m-a)*(i+1)/6,y,a+(m-a)*i/6,y],'#f0e8d4'); HK.poly(o,[m,top,b+W*.006,y,m+(b-m)*.25,y],HK.dk(c,.2)); if(kind==='walltent'){ HK.rect(o,m+W*.01,top-H*.04,2.5,H*.05,'#2a2a30'); } break; }
+      case 'cloche': { const m=(a+b)/2, R=(b-a)*.4, top=y-H*.06; o.x.fillStyle=HK.n(o,c); o.x.beginPath(); o.x.ellipse(m,top,R,H*.06,-.25,Math.PI,0); o.x.fill(); HK.circ(o,m-R*.1,top-H*.06,2.5,c); HK.hi(o,m-R*.6,top-H*.03,R*.6,1.5,.5); break; }
+      case 'cone': { const m=(a+b)/2, top=y-H*.17; HK.rect(o,m-1,top,2,y-top,'#f4f0e6'); HK.poly(o,[m-(b-a)*.32,top,m,top+H*.05,m+(b-a)*.32,top],c); HK.ell(o,m,top-H*.006,(b-a)*.3,H*.01,'#f4a0b0'); break; }
+      case 'pediment': { const top=y-H*.14; post(a+W*.008,top); post(b-W*.008,top); HK.rect(o,a,top,b-a,H*.01,c); HK.poly(o,[a-W*.008,top,(a+b)/2,top-H*.045,b+W*.008,top],c); HK.poly(o,[a+W*.01,top-H*.004,(a+b)/2,top-H*.034,b-W*.01,top-H*.004],HK.dk(c,.12)); break; }
+      case 'crescent': case 'neonarch': case 'rainbow': case 'sundisc': case 'ring': case 'bower': { const m=(a+b)/2, R=(b-a)*.5, cy=y;
+        if(kind==='rainbow'){ ['#e84a4a','#f8a050','#f4e07a','#7aff4a','#3a8ae8','#8a3a9a'].forEach((cc,i)=>{ o.x.strokeStyle=HK.n(o,cc); o.x.lineWidth=2; o.x.beginPath(); o.x.arc(m,cy,R-i*2,Math.PI,0); o.x.stroke(); }); break; }
+        if(kind==='ring'){ o.x.strokeStyle=HK.n(o,c); o.x.lineWidth=2.5; o.x.beginPath(); o.x.ellipse(m,cy-H*.12,R,H*.03,-.15,0,7); o.x.stroke(); HK.circ(o,m,cy-H*.12,H*.02,HK.lt(c,.2)); break; }
+        if(kind==='sundisc'){ HK.circ(o,m,cy-H*.13,H*.025,'#f0c84a'); HK.poly(o,[m-H*.025,cy-H*.13,m-R,cy-H*.15,m-R*.8,cy-H*.12],c); HK.poly(o,[m+H*.025,cy-H*.13,m+R,cy-H*.15,m+R*.8,cy-H*.12],c); post(m,cy-H*.105); break; }
+        o.x.strokeStyle=HK.n(o,c); o.x.lineWidth=kind==='neonarch'?3:H*.012; o.x.beginPath(); o.x.arc(m,cy,R,Math.PI,0); o.x.stroke(); if(kind==='neonarch'){ o.x.strokeStyle=v3rgba(c,.3); o.x.lineWidth=8; o.x.stroke(); }
+        if(kind==='bower') for(let i=0;i<9;i++){ const an=Math.PI+Math.PI*i/8; HK.circ(o,m+Math.cos(an)*R,cy+Math.sin(an)*R,H*.008,'#ffb8e0'); } break; }
+      case 'slab': { HK.ell(o,a+W*.004,y-H*.004,W*.006,H*.006,'#3a3436'); HK.ell(o,b-W*.004,y-H*.004,W*.006,H*.006,'#3a3436'); HK.rect(o,a-W*.008,y-H*.13,b-a+W*.016,H*.012,c); post(a+W*.004,y-H*.12); post(b-W*.004,y-H*.12); break; }
+      case 'iron': { const top=y-H*.14; HK.rect(o,a+W*.004,top,2,y-top,'#3a3436'); HK.rect(o,b-W*.004,top,2,y-top,'#3a3436'); HK.poly(o,[a-W*.008,top,(a+b)/2,top-H*.04,b+W*.008,top],c); HK.line(o,[a-W*.008,top,(a+b)/2,top-H*.04,b+W*.008,top],'#3a3436',1.5); break; }
+      case 'holo': { const top=y-H*.15; o.x.fillStyle=v3rgba(c,.35); o.x.beginPath(); o.x.moveTo(a,top); o.x.quadraticCurveTo((a+b)/2,top-H*.03,b,top); o.x.lineTo(b,top+H*.008); o.x.quadraticCurveTo((a+b)/2,top-H*.02,a,top+H*.008); o.x.fill(); for(let i=0;i<5;i++) HK.line(o,[a+(b-a)*i/4,top,a+(b-a)*i/4,y],v3rgba(c,.25)); break; }
+      default: break; } },
+
+  /* ---------- rails and edges ---------- */
+  rail(o,col,kind){ const x0=HF.x0(), y=o.dockY, rh=H*.045, at=f=>HK.at(o,f), w=o.pw-x0, c=col;
+    switch(kind){
+      case 'rope': case 'chain': case 'velvet': case 'licorice': case 'garland': { const xs=[.02,.27,.52,.77,.98]; for(const f of xs) HK.rect(o,at(f)-1.5,y-rh,3,rh,kind==='velvet'?'#d8a830':HK.dk(c,.3));
+        for(let i=0;i<xs.length-1;i++) HK.curve(o,at(xs[i]),y-rh*.85,(at(xs[i])+at(xs[i+1]))/2,y-rh*.45,at(xs[i+1]),y-rh*.85,kind==='garland'?'#6a8a4a':kind==='chain'?'#5a5a5a':c,Math.max(1.6,H*(kind==='garland'?.006:.0035)));
+        if(kind==='garland') for(let i=0;i<16;i++) HK.circ(o,at(.02+.96*i/15),y-rh*(.55+.25*Math.abs(Math.sin(i*1.57))),H*.004,'#8a9a5a'); break; }
+      case 'slat': case 'postrail': case 'oak': case 'weathered': case 'bamboo': case 'lacquer': case 'breadstick': { const n=kind==='bamboo'?8:6; for(let i=0;i<=n;i++) HK.rect(o,at(i/n)-2,y-rh,4,rh,c); HK.rect(o,x0,y-rh,w,Math.max(3,H*.006),c); if(kind!=='lacquer') HK.rect(o,x0,y-rh*.5,w,Math.max(2,H*.004),c); HK.rim(o,x0,y-rh,w); break; }
+      case 'log': { const ly=y-rh*.5, lr=Math.max(2.5,H*.0055); for(let i=0;i<=4;i++) HK.rect(o,at(i/4)-2,ly,4,y-ly,HK.dk(c,.3)); HK.rect(o,x0,ly-lr,w,lr*2,c); HK.sh(o,x0,ly+lr*.2,w,lr*.8,.22); HK.hi(o,x0,ly-lr,w,1.2,.22); break; }
+      case 'picket': for(let i=0;i<=18;i++){ const px=at(i/18); HK.poly(o,[px-1.6,y,px-1.6,y-rh*.8,px,y-rh,px+1.6,y-rh*.8,px+1.6,y],c); } HK.rect(o,x0,y-rh*.55,w,2,c); break;
+      case 'iron': case 'gold': { const ic=kind==='gold'?'#d8a830':HK.dk(c,.5); HK.rect(o,x0,y-rh,w,2.2,ic); for(let i=0;i<=12;i++) HK.rect(o,at(i/12)-.8,y-rh,1.6,rh,ic); if(kind==='gold') for(let i=0;i<=12;i+=3) HK.circ(o,at(i/12),y-rh-2,2,'#f4d060'); break; }
+      case 'glass': HK.rect(o,x0,y-rh,w,rh,v3rgba('#9ad0e0',.3)); HK.rect(o,x0,y-rh,w,2.2,'#a8b0b8'); for(let i=0;i<=6;i++) HK.rect(o,at(i/6)-1,y-rh,2,rh,'#a8b0b8'); break;
+      case 'cubicle': HK.block(o,x0,y-rh*1.1,w,rh*1.1,c); HK.rect(o,x0,y-rh*1.1,w,2,'#a8b0b8'); break;
+      case 'balustrade': HK.rect(o,x0,y-rh,w,H*.006,c); for(let i=0;i<=16;i++){ const px=at(i/16); HK.ell(o,px,y-rh*.5,W*.003,rh*.38,c); } HK.rect(o,x0,y-H*.004,w,H*.004,c); break;
+      case 'icing': o.x.strokeStyle=HK.n(o,c); o.x.lineWidth=2.4; o.x.beginPath(); for(let i=0;i<=40;i++){ const px=at(i/40), py=y-rh*.4-Math.sin(i*1.2)*H*.004; if(!i) o.x.moveTo(px,py); else o.x.lineTo(px,py); } o.x.stroke(); break;
+      case 'neon': case 'holo': case 'cable': HK.rect(o,x0,y-(kind==='neon'?2:rh),w,kind==='neon'?2.4:2,c); if(kind!=='neon') for(let i=0;i<=6;i++) HK.rect(o,at(i/6)-1,y-rh,2,rh,kind==='holo'?v3rgba(c,.5):'#3a3e4a'); o.x.fillStyle=v3rgba(c,.25); o.x.fillRect(x0,y-(kind==='neon'?4:rh+2),w,4); break;
+      case 'lowwall': for(let i=0;i<8;i++) HK.block(o,at(i/8)+.5,y-rh*.55,w/8-1,rh*.55,i%2?c:HK.dk(c,.1)); break;
+      case 'wheel': HK.rect(o,x0,y-rh*.55,w,2.4,c); for(const f of [.02,.98]){ o.x.strokeStyle=HK.n(o,HK.dk(c,.2)); o.x.lineWidth=2; o.x.beginPath(); o.x.arc(at(f),y-rh*.5,rh*.5,0,7); o.x.stroke(); for(let k=0;k<6;k++){ const an=k*Math.PI/3; HK.line(o,[at(f),y-rh*.5,at(f)+Math.cos(an)*rh*.5,y-rh*.5+Math.sin(an)*rh*.5],HK.dk(c,.2)); } } break;
+      default: break; } },
+
+  /* ---------- lights: draw the fixture, return the glow spot (cv_homefmt draws the glow live) ---------- */
+  light(o,kind,px){ const x=px==null?HF.lightX():px, y=o.dockY, iron='#2a2a30', L=(lx,ly,r,a,extra)=>Object.assign({x:lx,y:ly,r:r||.16,a:a||.55},extra||{});
+    const pole=(h,col)=>HK.rect(o,x-1.4,y-h,2.8,h,col||iron), foot=()=>HK.rect(o,x-H*.006,y-H*.004,H*.012,H*.004,iron);
+    const lantern=(lx,ly,gw)=>{ HK.rect(o,lx-gw*.6,ly-gw*1.1,gw*1.2,2,iron); HK.ell(o,lx,ly,gw*.5,gw*.8,v3rgba('#e8f0f4',.35)); HK.rect(o,lx-gw*.6,ly+gw*.8,gw*1.2,2,iron); };
+    switch(kind){
+      case 'post': pole(H*.1); foot(); lantern(x,y-H*.105,H*.012); return L(x,y-H*.105);
+      case 'hook': pole(H*.11); HK.rect(o,x-H*.016,y-H*.11,H*.016,2,iron); lantern(x-H*.014,y-H*.085,H*.011); return L(x-H*.014,y-H*.085);
+      case 'table': HK.rect(o,x-H*.012,y-H*.006,H*.024,H*.006,iron); lantern(x,y-H*.022,H*.012); return L(x,y-H*.022,.14,.5);
+      case 'paperline': { const a=HK.at(o,.05), b=o.pw-W*.01, top=y-H*.14; HK.rect(o,b-1,top,2,y-top,'#5a3a26'); HK.curve(o,a,top+H*.01,(a+b)/2,top+H*.03,b,top,'#3a2a20',1); for(let i=1;i<5;i++){ const u=i/5, lx=a+(b-a)*u, ly=top+H*.01+H*.022*(1-Math.pow(2*u-1,2))-u*H*.01; HK.ell(o,lx,ly+H*.01,H*.007,H*.009,'#f0a848'); } return L((a+b)/2,top+H*.03,.2,.55); }
+      case 'toro': HK.rect(o,x-H*.008,y-H*.008,H*.016,H*.008,'#9a948a'); HK.rect(o,x-2,y-H*.03,4,H*.022,'#9a948a'); HK.rect(o,x-H*.009,y-H*.046,H*.018,H*.016,'#9a948a'); HK.rect(o,x-H*.005,y-H*.043,H*.01,H*.01,'#f0a848'); HK.poly(o,[x-H*.014,y-H*.046,x,y-H*.058,x+H*.014,y-H*.046],'#6a665e'); return L(x,y-H*.038,.13,.5);
+      case 'chochin': pole(H*.12,'#5a3a26'); HK.ell(o,x-H*.012,y-H*.09,H*.011,H*.016,'#d8302a'); HK.rect(o,x-H*.02,y-H*.106,H*.016,2,'#2a2426'); return L(x-H*.012,y-H*.09,.17,.6);
+      case 'cage': pole(H*.1); HK.rect(o,x,y-H*.1,H*.014,2,iron); o.x.strokeStyle=HK.n(o,iron); o.x.lineWidth=1; o.x.strokeRect(x+H*.006,y-H*.096,H*.014,H*.02); return L(x+H*.013,y-H*.086);
+      case 'hanging': pole(H*.11); HK.curve(o,x,y-H*.11,x-H*.012,y-H*.112,x-H*.016,y-H*.1,iron,1.4); HK.ell(o,x-H*.016,y-H*.088,H*.006,H*.01,'#e8d8a0'); return L(x-H*.016,y-H*.088,.13);
+      case 'candle': case 'millcandle': HK.ell(o,x,y-H*.004,H*.014,H*.005,'#9a948a'); HK.rect(o,x-H*.003,y-H*.024,H*.006,H*.02,'#f4ece0'); HK.ell(o,x,y-H*.028,1.4,2.6,'#ffd060'); return L(x,y-H*.028,.11,.5,{small:1});
+      case 'lighthouse': HK.rect(o,x-H*.006,y-H*.07,H*.012,H*.07,'#f4f0e6'); for(let i=0;i<3;i++) HK.rect(o,x-H*.006,y-H*.06+i*H*.02,H*.012,H*.008,'#c8483a'); HK.rect(o,x-H*.008,y-H*.085,H*.016,H*.015,'#e8f0f4'); HK.poly(o,[x-H*.01,y-H*.085,x,y-H*.095,x+H*.01,y-H*.085],'#c8483a'); return L(x,y-H*.078,.16);
+      case 'buoy': pole(H*.11); HK.line(o,[x,y-H*.11,x-H*.014,y-H*.11,x-H*.014,y-H*.08],'#c8a878',1); HK.circ(o,x-H*.014,y-H*.072,H*.008,'#c8483a'); return L(x-H*.014,y-H*.082,.14);
+      case 'stove': { HK.block(o,x-H*.016,y-H*.026,H*.03,H*.026,iron); HK.rect(o,x-H*.008,y-H*.018,H*.012,H*.008,'#f0983a'); HK.rect(o,x+H*.004,y-H*.075,H*.005,H*.05,iron); for(let i=0;i<3;i++) HK.circ(o,x+H*.006+i*H*.004,y-H*.08-i*H*.008,H*.004+i*.6,v3rgba('#c8ccd0',.35-i*.08)); return L(x-H*.002,y-H*.014,.15,.55); }
+      case 'stake': HK.rect(o,x-1,y-H*.05,2,H*.05,'#7a5440'); lantern(x,y-H*.06,H*.011); return L(x,y-H*.06);
+      case 'campfire': case 'firering': case 'firebowl': { if(kind==='firebowl') HK.poly(o,[x-H*.018,y-H*.02,x+H*.018,y-H*.02,x+H*.01,y,x-H*.01,y],'#3a3436'); else for(let i=0;i<5;i++) HK.ell(o,x-H*.016+i*H*.008,y-H*.003,H*.005,H*.004,'#7a7a74');
+        HK.poly(o,[x-H*.01,y-H*.006,x-H*.004,y-H*.03,x,y-H*.018,x+H*.005,y-H*.034,x+H*.01,y-H*.006],'#ff7a2a'); HK.poly(o,[x-H*.005,y-H*.006,x,y-H*.022,x+H*.005,y-H*.006],'#ffd060'); if(kind==='firering'){ HK.rect(o,x-H*.016,y-H*.042,H*.032,1.5,iron); HK.ell(o,x,y-H*.036,H*.008,H*.006,iron); } return L(x,y-H*.016,.2,.65); }
+      case 'tiki': pole(H*.1,'#b8b06a'); for(let y2=y-H*.09;y2<y;y2+=H*.012) HK.rect(o,x-1.4,y2,2.8,1.2,'#7a6a3a'); HK.poly(o,[x-H*.004,y-H*.1,x,y-H*.118,x+H*.004,y-H*.1],'#ff7a2a'); return L(x,y-H*.106,.17,.6);
+      case 'shells': pole(H*.1,'#9a7a52'); HK.line(o,[x,y-H*.1,x-H*.012,y-H*.09],'#c8a878'); for(let i=0;i<4;i++) HK.circ(o,x-H*.012,y-H*.086+i*H*.006,H*.004,'#fbf2e4'); return L(x-H*.012,y-H*.08,.13);
+      case 'floats': { const a=HK.at(o,.5), b=o.pw-W*.006; HK.rect(o,b-1,y-H*.1,2,H*.1,'#9a7a52'); HK.curve(o,a,y-H*.08,(a+b)/2,y-H*.06,b,y-H*.1,'#c8a878',1); for(let i=1;i<4;i++) HK.circ(o,a+(b-a)*i/4,y-H*.075+Math.sin(i)*H*.004,H*.006,'#7ae8e0'); return L((a+b)/2,y-H*.07,.17); }
+      case 'navlight': HK.rect(o,x-1,y-H*.05,2,H*.05,'#c0c8cc'); HK.circ(o,x-H*.004,y-H*.052,H*.004,'#e84a4a'); HK.circ(o,x+H*.004,y-H*.052,H*.004,'#4ad86a'); return L(x,y-H*.052,.12,.5);
+      case 'deck': case 'brass': HK.rect(o,x-H*.004,y-H*.03,H*.008,H*.03,'#c8a04a'); lantern(x,y-H*.04,H*.011); return L(x,y-H*.04);
+      case 'mast': HK.rect(o,x-1.2,y-H*.17,2.4,H*.17,'#c0c8cc'); HK.circ(o,x,y-H*.172,H*.005,'#fff4cc'); return L(x,y-H*.172,.12,.5,{small:1});
+      case 'flood': case 'floodpole': pole(H*.13,'#3a424c'); HK.poly(o,[x-H*.002,y-H*.13,x-H*.02,y-H*.122,x-H*.02,y-H*.108,x-H*.002,y-H*.116],'#3a424c'); HK.rect(o,x-H*.021,y-H*.122,2,H*.014,'#f4eccc'); return L(x-H*.02,y-H*.115,.22,.7);
+      case 'workcage': HK.rect(o,x-H*.008,y-H*.03,H*.016,H*.03,'#3a424c'); o.x.strokeStyle=HK.n(o,'#f0782a'); o.x.lineWidth=1; o.x.strokeRect(x-H*.007,y-H*.028,H*.014,H*.016); return L(x,y-H*.02,.14);
+      case 'gourd': HK.circ(o,x,y-H*.012,H*.011,'#c8a85a'); HK.rect(o,x-1,y-H*.03,2,H*.008,'#7a5a3a'); HK.ell(o,x,y-H*.034,1.4,2.6,'#ffd060'); return L(x,y-H*.024,.13);
+      case 'fireflybasket': HK.ell(o,x,y-H*.016,H*.012,H*.014,'#a8843a'); for(let i=0;i<5;i++) HK.line(o,[x-H*.012,y-H*.03+i*H*.006,x+H*.012,y-H*.03+i*H*.006],'#7a5a2a'); return L(x,y-H*.016,.12,.5,{jar:1});
+      case 'torch': pole(H*.1,'#b8b06a'); HK.poly(o,[x-H*.005,y-H*.1,x,y-H*.12,x+H*.005,y-H*.1],'#ff7a2a'); return L(x,y-H*.108,.17,.6);
+      case 'jelly': case 'jellyjar': HK.ell(o,x,y-H*.016,H*.01,H*.014,v3rgba('#5afff0',.4)); HK.rect(o,x-H*.006,y-H*.032,H*.012,2,'#6a5a48'); return L(x,y-H*.016,.13,.5,{jar:1});
+      case 'wreck': pole(H*.12,'#3a3028'); HK.rect(o,x-H*.02,y-H*.12,H*.02,2,'#3a3028'); HK.ell(o,x-H*.018,y-H*.1,H*.008,H*.011,'#a8884a'); return L(x-H*.018,y-H*.1);
+      case 'chain': pole(H*.12,'#3a3436'); for(let i=0;i<4;i++) HK.ell(o,x-H*.014,y-H*.115+i*H*.007,1.3,2.3,'#5a4a44'); HK.block(o,x-H*.024,y-H*.088,H*.02,H*.024,'#3a3436'); HK.rect(o,x-H*.02,y-H*.082,H*.012,H*.012,'#ff9a5a'); return L(x-H*.014,y-H*.076,.16);
+      case 'lavabowl': HK.poly(o,[x-H*.016,y-H*.016,x+H*.016,y-H*.016,x+H*.01,y,x-H*.01,y],'#4a3a3a'); for(let i=0;i<4;i++) HK.circ(o,x-H*.009+i*H*.006,y-H*.017,H*.004,i%2?'#ff7a2a':'#ffc04a'); return L(x,y-H*.018,.15,.6);
+      case 'steam': pole(H*.08,'#3a3436'); HK.ell(o,x,y-H*.088,H*.009,H*.012,'#ffd8b0'); for(let i=0;i<3;i++) HK.circ(o,x+i*H*.004,y-H*.11-i*H*.01,H*.005,v3rgba('#f0e8e4',.3)); return L(x,y-H*.088);
+      case 'star': pole(H*.1,'#c8c8d8'); HK.ell(o,x-H*.012,y-H*.085,H*.009,H*.012,v3rgba('#e8e0f4',.5)); HK.circ(o,x-H*.012,y-H*.085,H*.004,'#fff8ff'); HK.rect(o,x-H*.012,y-H*.1,H*.012,1.5,'#c8c8d8'); return L(x-H*.012,y-H*.085,.18,.65);
+      case 'moon': HK.rect(o,x-1,y-H*.05,2,H*.05,'#c8c8d8'); HK.circ(o,x,y-H*.06,H*.012,'#f0e8d0'); return L(x,y-H*.06,.2,.6);
+      case 'wisps': for(let i=0;i<5;i++) HK.circ(o,x-H*.03+i*H*.012,y-H*.06-Math.sin(i*1.3)*H*.02,1.6,'#fff8ff'); return L(x-H*.006,y-H*.065,.2,.5,{small:1});
+      case 'nail': pole(H*.1,'#8a6a4a'); HK.rect(o,x-H*.004,y-H*.088,H*.004,2,iron); lantern(x-H*.01,y-H*.078,H*.01); return L(x-H*.01,y-H*.078);
+      case 'bulbs': { const a=HK.at(o,.05), b=o.pw-W*.01, top=y-H*.12; HK.rect(o,b-1,top,2,y-top,'#5a4030'); HK.curve(o,a,top+H*.02,(a+b)/2,top+H*.04,b,top,'#2a2a2e',1); for(let i=1;i<7;i++){ const u=i/7; HK.circ(o,a+(b-a)*u,top+H*.02+H*.028*(1-Math.pow(2*u-1,2))-u*H*.02+H*.004,1.8,'#ffe8a0'); } return L((a+b)/2,top+H*.04,.22,.45); }
+      case 'milkcan': HK.rect(o,x-H*.008,y-H*.024,H*.016,H*.024,'#a8b0b4'); lantern(x,y-H*.036,H*.01); return L(x,y-H*.036,.14);
+      case 'dripcandle': HK.rect(o,x-H*.004,y-H*.04,H*.008,H*.04,'#f4ece0'); HK.ell(o,x+H*.003,y-H*.03,1.2,H*.006,'#f4ece0'); HK.ell(o,x,y-H*.045,1.5,2.8,'#ffd060'); return L(x,y-H*.045,.13,.55,{small:1});
+      case 'cupcake': HK.poly(o,[x-H*.012,y-H*.014,x+H*.012,y-H*.014,x+H*.009,y,x-H*.009,y],'#d88a3a'); HK.ell(o,x,y-H*.016,H*.013,H*.007,'#f4a0b0'); for(let i=-1;i<=1;i++){ HK.rect(o,x+i*H*.006-1,y-H*.03,2,H*.012,'#7a8ad8'); HK.ell(o,x+i*H*.006,y-H*.033,1.1,2,'#ffd060'); } return L(x,y-H*.032,.13,.55,{small:1});
+      case 'jellymould': HK.poly(o,[x-H*.014,y,x-H*.01,y-H*.024,x+H*.01,y-H*.024,x+H*.014,y],v3rgba('#e84a6a',.7)); return L(x,y-H*.012,.14,.5);
+      case 'desk': HK.rect(o,x-H*.008,y-H*.004,H*.016,H*.004,'#3a3e4a'); HK.line(o,[x,y-H*.004,x-H*.008,y-H*.03,x+H*.004,y-H*.042],'#3a3e4a',1.6); HK.poly(o,[x+H*.002,y-H*.046,x+H*.014,y-H*.04,x+H*.008,y-H*.034],'#3a3e4a'); return L(x+H*.008,y-H*.036,.13);
+      case 'floor': pole(H*.11,'#3a3e4a'); HK.poly(o,[x-H*.012,y-H*.11,x+H*.012,y-H*.11,x+H*.008,y-H*.125,x-H*.008,y-H*.125],'#f4f6f8'); foot(); return L(x,y-H*.112,.17);
+      case 'sign': HK.rect(o,x-H*.02,y-H*.05,H*.036,H*.018,'#1e2e4a'); HK.rect(o,x-H*.018,y-H*.046,H*.032,H*.01,'#ff7ab8'); HK.rect(o,x-1,y-H*.032,2,H*.032,'#3a3e4a'); return L(x-H*.002,y-H*.041,.13,.45);
+      case 'lotus': HK.ell(o,x,y-H*.006,H*.01,H*.006,'#f0a8b8'); for(let i=-2;i<=2;i++) HK.ell(o,x+i*H*.004,y-H*.012,H*.003,H*.006,'#f0a8b8',i*.3); HK.ell(o,x,y-H*.02,1.4,2.6,'#ffd060'); return L(x,y-H*.018,.13,.5,{small:1});
+      case 'brazier': case 'goldbrazier': HK.line(o,[x-H*.012,y,x,y-H*.024,x+H*.012,y],'#a8743a',1.6); HK.poly(o,[x-H*.014,y-H*.03,x+H*.014,y-H*.03,x+H*.008,y-H*.022,x-H*.008,y-H*.022],kind==='goldbrazier'?'#d8a830':'#a8743a'); HK.poly(o,[x-H*.008,y-H*.03,x,y-H*.05,x+H*.008,y-H*.03],'#ff7a2a'); return L(x,y-H*.036,.2,.65);
+      case 'sundisclamp': pole(H*.09,'#a8743a'); HK.circ(o,x,y-H*.1,H*.012,'#f0c84a'); return L(x,y-H*.1,.18,.6);
+      case 'neontube': HK.rect(o,x-1,y-H*.04,2,H*.04,'#3a3e4a'); HK.rect(o,x-H*.016,y-H*.07,H*.032,3,'#ff4ab8'); o.x.fillStyle=v3rgba('#ff4ab8',.3); o.x.fillRect(x-H*.018,y-H*.073,H*.036,9); return L(x,y-H*.068,.18,.6);
+      case 'hologram': HK.rect(o,x-H*.008,y-H*.008,H*.016,H*.008,'#3a3e4a'); o.x.fillStyle=v3rgba('#3ae8ff',.3); o.x.beginPath(); o.x.moveTo(x-H*.004,y-H*.008); o.x.lineTo(x-H*.014,y-H*.05); o.x.lineTo(x+H*.014,y-H*.05); o.x.lineTo(x+H*.004,y-H*.008); o.x.fill(); HK.circ(o,x,y-H*.045,H*.006,'#3ae8ff'); return L(x,y-H*.04,.15,.5);
+      case 'orb': HK.circ(o,x,y-H*.06,H*.01,'#f4f8ff'); return L(x,y-H*.06,.18,.6);
+      case 'lightning': HK.rect(o,x-H*.006,y-H*.008,H*.012,H*.008,'#d8a830'); HK.circ(o,x,y-H*.022,H*.013,v3rgba('#c8e0ff',.4)); HK.line(o,[x-H*.004,y-H*.03,x+H*.002,y-H*.022,x-H*.002,y-H*.02,x+H*.004,y-H*.012],'#fff07a',1.4); return L(x,y-H*.022,.17,.6);
+      case 'laurel': pole(H*.1,'#a8743a'); for(let i=0;i<4;i++) HK.ell(o,x+(i%2?2:-2),y-H*.09+i*H*.008,2,1,'#6a8a4a',i%2?.5:-.5); HK.poly(o,[x-H*.005,y-H*.1,x,y-H*.12,x+H*.005,y-H*.1],'#ff7a2a'); return L(x,y-H*.108,.18,.6);
+      default: pole(H*.1); foot(); lantern(x,y-H*.105,H*.012); return L(x,y-H*.105); } },
+
+  /* ---------- seats (every home has one; resting sits the angler at its height) ---------- */
+  SEAT_H:{campchair:17,logbench:12,deckchair:15,stump:11,gardenbench:14,barrel:15,cushion:4,lowbench:9,stool:12,crate:12,bucket:11,driftbench:12,furbench:12,icechair:10,muskoka:13,stumpblanket:11,rocker:14,beachchair:9,hammock:13,peacock:13,captain:18,coolerseat:13,beanbag:7,fighting:18,teakbench:14,deckstool:15,wovenstool:10,logseat:10,floatcrate:12,steelbench:14,ropecoil:8,seachest:12,bathstool:8,warmrock:9,crescent:13,cloudcushion:9,crystalstool:13,haybale:12,milkcan:14,cupcake:12,teacup:12,macaron:10,swivel:16,executive:16,lionstool:12,xstool:13,throne:15,gaming:16,orbseat:14,arcadestool:15,marblethrone:15,cloudbench:12,klismos:15},
+  seatH:kind=>HK.SEAT_H[kind]||14,
+  seat(o,kind,col){ const s=HK.s(), x=HF.seatX(), y=o.dockY, sh=HK.seatH(kind)*s, top=y-sh, c=col, d=HK.dk(c,.3), metal='#3a3a40', lt=HK.lt(c,.2);
+    const legs=(w,cl)=>{ HK.rect(o,x-w*.45,top,2*s,sh,cl||d); HK.rect(o,x+w*.45-2*s,top,2*s,sh,cl||d); };
+    const back=(px,h,cl,lean)=>{ o.x.save(); o.x.translate(px,top); o.x.rotate(-(lean||0)); HK.rect(o,-1.2*s,-h,2.6*s,h,cl||c); o.x.restore(); };
+    switch(kind){
+      case 'campchair': { const w=14*s; HK.line(o,[x-w/2,y,x+w/2,top,x+w/2,y,x-w/2,top],metal,1.4*s); HK.ell(o,x,top+1,w*.5,1.6*s,c); back(x-w*.5,14*s,c,.12); break; }
+      case 'logbench': case 'driftbench': { const w=24*s; HK.rect(o,x-w*.38,top,3.4*s,sh,d); HK.rect(o,x+w*.38-3.4*s,top,3.4*s,sh,d); HK.rect(o,x-w/2,top,w,3.6*s,c); HK.circ(o,x+w/2-1,top+1.8*s,1.6*s,lt); break; }
+      case 'deckchair': case 'muskoka': { const w=16*s; legs(w); HK.rect(o,x-w/2,top-1.6*s,w,2.6*s,c); back(x-w*.45,(kind==='muskoka'?20:16)*s,c,kind==='muskoka'?.55:.42); HK.rect(o,x-w*.5,top-7*s,w*.9,1.8*s,d); break; }
+      case 'stump': case 'stumpblanket': HK.block(o,x-6*s,top,12*s,sh,c); HK.ell(o,x,top,6*s,1.6*s,lt); if(kind==='stumpblanket'){ HK.rect(o,x-6.5*s,top,13*s,6*s,'#b8322a'); for(let i=0;i<3;i++) HK.rect(o,x-6.5*s+i*4.4*s,top,1.4*s,6*s,'#2a2626'); } break;
+      case 'gardenbench': case 'teakbench': case 'steelbench': case 'lowbench': case 'furbench': { const w=26*s; legs(w,kind==='gardenbench'?metal:d); HK.rect(o,x-w/2,top-2*s,w,3*s,c); if(kind!=='lowbench'&&kind!=='furbench'){ HK.rect(o,x-w/2,top-11*s,2*s,9*s,kind==='gardenbench'?metal:d); for(let i=0;i<3;i++) HK.rect(o,x-w/2,top-10*s+i*3*s,w*.25,2*s,c); } if(kind==='furbench') for(let i=0;i<10;i++) HK.line(o,[x-w/2+i*w/10,top+s,x-w/2+i*w/10+s,top+3*s],lt); break; }
+      case 'barrel': HK.ell(o,x,top+sh/2,7*s,sh/2,c); HK.rect(o,x-7*s,top+sh*.25,14*s,1.4*s,metal); HK.rect(o,x-7*s,top+sh*.7,14*s,1.4*s,metal); HK.ell(o,x,top+1,6*s,1.6*s,'#c8a878'); break;
+      case 'cushion': case 'cloudcushion': if(kind==='cloudcushion'){ for(let i=0;i<4;i++) HK.circ(o,x-6*s+i*4*s,top+2*s,3.5*s,lt); } else HK.ell(o,x,top+2*s,9*s,2.4*s,c); break;
+      case 'stool': case 'deckstool': case 'arcadestool': case 'crystalstool': HK.rect(o,x-1.4*s,top,2.8*s,sh,kind==='crystalstool'?lt:metal); HK.ell(o,x,top,6*s,1.8*s,c); HK.rect(o,x-5*s,y-1,10*s,1.5,kind==='arcadestool'?'#3ae8ff':metal); break;
+      case 'crate': case 'floatcrate': HK.block(o,x-7*s,top,14*s,sh,c); for(let i=0;i<3;i++) HK.rect(o,x-7*s,top+i*sh/3,14*s,1.2,d); if(kind==='floatcrate'){ HK.circ(o,x-3*s,top-2*s,2.6*s,'#f0782a'); HK.circ(o,x+3*s,top-2*s,2.6*s,'#e85a2a'); } break;
+      case 'bucket': case 'milkcan': HK.poly(o,[x-6*s,top,x+6*s,top,x+5*s,y,x-5*s,y],c); HK.rect(o,x-6.3*s,top,12.6*s,1.6*s,lt); if(kind==='milkcan') HK.ell(o,x,top,5*s,2*s,'#b8322a'); break;
+      case 'icechair': { const w=14*s; legs(w,metal); HK.rect(o,x-w/2,top-1.4*s,w,2.4*s,c); back(x-w*.45,10*s,c,.2); break; }
+      case 'rocker': HK.curve(o,x-10*s,y-2*s,x,y+3*s,x+10*s,y-2*s,d,2*s); legs(14*s); HK.rect(o,x-7*s,top-1.4*s,14*s,2.4*s,c); back(x-6*s,16*s,c,.25); break;
+      case 'beachchair': { const w=16*s; HK.line(o,[x-w/2,y,x+w/2,top],'#b8b06a',1.4*s); HK.line(o,[x+w/2,y,x-w/3,top-6*s],'#b8b06a',1.4*s); HK.poly(o,[x-w/2,top-12*s,x+w/2,top,x+w/2,top+2*s,x-w/2+2*s,top-12*s],c); for(let i=0;i<3;i++) HK.line(o,[x-w/2+i*w/3,top-12*s+i*4*s,x-w/2+i*w/3+2*s,top-12*s+i*4*s+.5],'#f4efe6',1.2); break; }
+      case 'hammock': { const a=x-14*s, b=x+14*s, ty=top-10*s; HK.rect(o,a-1,ty,2,y-ty,d); HK.rect(o,b-1,ty,2,y-ty,d); o.x.fillStyle=HK.n(o,c); o.x.beginPath(); o.x.moveTo(a,ty+2*s); o.x.quadraticCurveTo(x,top+12*s,b,ty+2*s); o.x.quadraticCurveTo(x,top+6*s,a,ty+2*s); o.x.fill(); break; }
+      case 'peacock': HK.ell(o,x-3*s,top-12*s,10*s,14*s,c); HK.ell(o,x-3*s,top-12*s,7*s,10*s,HK.dk(c,.15)); HK.rect(o,x-6*s,top-1,12*s,3*s,c); HK.rect(o,x-1,top+2*s,2,sh-2*s,d); break;
+      case 'captain': case 'fighting': case 'swivel': case 'executive': case 'gaming': { HK.rect(o,x-1.6*s,top+2*s,3.2*s,sh-2*s,metal); HK.rect(o,x-6*s,y-1.5,12*s,1.5,metal); HK.rect(o,x-7*s,top-1,14*s,3.4*s,c); HK.rect(o,x-7*s,top-(kind==='executive'||kind==='gaming'?18:13)*s,4*s,(kind==='executive'||kind==='gaming'?17:12)*s,c); if(kind==='gaming'){ HK.rect(o,x-7.5*s,top-16*s,1.4*s,10*s,'#ff4ab8'); } if(kind==='fighting') HK.rect(o,x+5*s,top+5*s,6*s,1.6*s,metal); break; }
+      case 'coolerseat': HK.block(o,x-8*s,top,16*s,sh,'#f4f6f4'); HK.rect(o,x-8*s,top,16*s,3*s,c); HK.rect(o,x-8*s,top+5*s,16*s,1.5,'#d8483a'); break;
+      case 'beanbag': case 'macaron': if(kind==='macaron'){ HK.ell(o,x,top+3*s,8*s,3*s,c); HK.rect(o,x-8*s,top+3*s,16*s,2*s,'#fff6ee'); HK.ell(o,x,top+7*s,8*s,3*s,c); } else HK.ell(o,x,y-sh*.5,10*s,sh*.6,c); break;
+      case 'wovenstool': HK.poly(o,[x-6*s,top,x+6*s,top,x+5*s,y,x-5*s,y],c); for(let i=0;i<4;i++) HK.line(o,[x-6*s,top+i*sh/4,x+6*s,top+i*sh/4],d); break;
+      case 'logseat': HK.rect(o,x-10*s,top,20*s,sh,c); HK.circ(o,x+10*s,top+sh/2,sh/2,lt); HK.rect(o,x-10*s,top,20*s,1.4,HK.lt(c,.3)); break;
+      case 'ropecoil': for(let i=0;i<4;i++) HK.ell(o,x,y-2*s-i*1.8*s,9*s-i*.6*s,2.2*s,i%2?c:d); break;
+      case 'seachest': HK.block(o,x-9*s,top,18*s,sh,c); HK.rect(o,x-9*s,top+3*s,18*s,1.4,'#a8884a'); HK.rect(o,x-1.5*s,top+2*s,3*s,4*s,'#a8884a'); break;
+      case 'bathstool': HK.rect(o,x-6*s,top,12*s,2.4*s,c); HK.rect(o,x-5*s,top,2*s,sh,d); HK.rect(o,x+3*s,top,2*s,sh,d); break;
+      case 'warmrock': HK.ell(o,x,y-sh*.45,9*s,sh*.55,'#4a3a3a'); HK.ell(o,x,top+1.5*s,7*s,2.2*s,c); break;
+      case 'crescent': o.x.fillStyle=HK.n(o,c); o.x.beginPath(); o.x.arc(x,top-6*s,10*s,.2,Math.PI-.2); o.x.arc(x,top-9*s,9*s,Math.PI-.3,.3,true); o.x.fill(); HK.rect(o,x-1,top,2,sh,lt); break;
+      case 'haybale': HK.block(o,x-9*s,top,18*s,sh,'#e0c060'); HK.rect(o,x-9*s,top+sh*.35,18*s,1.2,'#a8843a'); HK.rect(o,x-9*s,top+sh*.7,18*s,1.2,'#a8843a'); break;
+      case 'cupcake': HK.poly(o,[x-6*s,top+4*s,x+6*s,top+4*s,x+5*s,y,x-5*s,y],'#d88a3a'); HK.ell(o,x,top+3*s,7*s,3.6*s,c); HK.circ(o,x,top-1*s,1.8*s,'#d8303a'); break;
+      case 'teacup': HK.ell(o,x,y-1,10*s,2*s,'#f0f0f4'); o.x.fillStyle=HK.n(o,c); o.x.beginPath(); o.x.moveTo(x-8*s,top); o.x.quadraticCurveTo(x-8*s,y-2*s,x,y-2*s); o.x.quadraticCurveTo(x+8*s,y-2*s,x+8*s,top); o.x.fill(); HK.curve(o,x+8*s,top+3*s,x+12*s,top+5*s,x+7*s,top+9*s,c,1.6*s); break;
+      case 'lionstool': case 'xstool': if(kind==='xstool') HK.line(o,[x-7*s,y,x+7*s,top,x+7*s,y,x-7*s,top],'#7a5a3a',1.6*s); else legs(14*s); HK.rect(o,x-7*s,top-1,14*s,2.6*s,c); break;
+      case 'throne': case 'marblethrone': HK.block(o,x-7*s,top,14*s,sh,c); HK.rect(o,x-8*s,top-24*s,4*s,24*s,c); HK.rect(o,x-9*s,top-26*s,6*s,2.4*s,kind==='throne'?'#d8a830':HK.lt(c,.2)); HK.rect(o,x+5*s,top-8*s,2.4*s,8*s,c); break;
+      case 'orbseat': HK.circ(o,x,top+4*s,7*s,c); HK.ell(o,x,top+2*s,6*s,1.6*s,lt); HK.ell(o,x,y-1,5*s,1.4*s,v3rgba('#3ae8ff',.5)); break;
+      case 'cloudbench': for(let i=0;i<5;i++) HK.circ(o,x-10*s+i*5*s,top+3*s,4*s,lt); for(let i=0;i<3;i++) HK.circ(o,x-9*s+i*3*s,top-6*s+i*2*s,3.4*s,lt); break;
+      case 'klismos': HK.curve(o,x-7*s,y,x-6*s,top+3*s,x-4*s,top,c,1.8*s); HK.curve(o,x+7*s,y,x+6*s,top+3*s,x+4*s,top,c,1.8*s); HK.rect(o,x-6*s,top-1,12*s,2.4*s,c); HK.curve(o,x-5*s,top,x-8*s,top-8*s,x-6*s,top-14*s,c,2*s); break;
+      default: HK.block(o,x-7*s,top,14*s,sh,c); } }
+};
+// =====================================================================
+// Every water's home (batch 5, 2026-11-22; designs in docs/HOME_DESIGNS.md, colours in docs/MAP_THEMES.md). Willow Pond (the
+// approved pilot) is in cv_homefmt.js; these 19 are built from the home kit (cw_homekit.js). Each home: the seat plus 5 features
+// made for that water, 3 styles each ("none" first where a feature can be left out), one list of 16 colours for every feature.
+// A home listed here replaces that water's older home (the scene draws HOMEF homes instead, f_v3scene.js).
+// =====================================================================
+function hfMake(id,d){ d.seatH=d.seat.map(k=>HK.seatH(k));
+  d.els.push({id:'seat',label:'Seat',styles:d.seatNames,def:d.seatDef||[0,0]});
+  d.paint=function(o){ o.lights=[]; const col=e=>hfColor(id,e);
+    for(const [e,fn] of d.order){ const r=e==='seat'?HK.seat(o,d.seat[hfStyle(id,'seat')],col('seat')):fn(o,hfStyle(id,e),col(e),col); if(r&&r.x!=null) o.lights.push(r); } };
+  HOMEF[id]=d; }
+const C16=s=>s.split(';').map(p=>{ const [n,h]=p.split('='); return [n.trim(),h.trim()]; });
+
+/* 2. Stonebrook River: the mill landing */
+hfMake('river',{ name:'Stonebrook mill landing', hname:'mill landing',
+  colors:C16('River stone=#bab2a2;Dark stone=#8a8478;Slate=#5a6470;Mill oak=#7a5a3e;Dark oak=#4a3626;Roof brick=#7a4a3a;Iron=#3a3a40;Moss=#6a9a5e;Fern=#4f8050;River blue=#5a9aa4;Deep teal=#28525e;Sky=#a8d0ec;Birch white=#eef0e2;Autumn orange=#c8783a;Maple red=#a8402e;Wheat=#d8c08a'),
+  els:[{id:'wheel',label:'Waterwheel',styles:['Overshot wheel','Iron-banded wheel','Paddle wheel'],def:[0,3]},{id:'landing',label:'Landing',styles:['Flagstones','Oak on stone','Millstone'],def:[0,0]},
+       {id:'shed',label:'Mill shed',none:true,styles:['No shed','Slate roof','Timber frame','Thatch'],def:[1,2]},{id:'rack',label:'Fly rack',none:true,styles:['No rack','Rod rack','Creel and net','Fly line'],def:[1,3]},
+       {id:'light',label:'Lantern',light:true,styles:['Cage lantern','Oil lamp','Millstone candle'],def:[0,13]}],
+  seat:['stump','gardenbench','barrel'], seatNames:['Stump stool','Garden bench','Barrel'], seatDef:[1,3],
+  order:[
+    ['landing',(o,s,c)=>{ HK.supports(o,'#9a948a',s===1?'stone':'stone',4); HK.deck(o,c,s===1?'planks':'stone'); if(s===2) HK.ell(o,HK.at(o,.6),o.dockY+HK.fh()*.5,W*.03,HK.fh()*.5,HK.dk(c,.1)); }],
+    ['wheel',(o,s,c)=>{ const cx=o.pw+W*.018, cy=o.wl-H*.01, R=s===2?H*.05:H*.075; o.x.strokeStyle=HK.n(o,s===1?'#3a3a40':c); o.x.lineWidth=3; o.x.beginPath(); o.x.arc(cx,cy,R,0,7); o.x.stroke(); for(let k=0;k<10;k++){ const a=k*Math.PI/5; HK.line(o,[cx,cy,cx+Math.cos(a)*R,cy+Math.sin(a)*R],HK.dk(c,.2),1.5); HK.rect(o,cx+Math.cos(a)*R-2,cy+Math.sin(a)*R-2,4,4,c); } HK.circ(o,cx,cy,H*.006,'#3a3a40'); o.posts.push({x:cx,w:R*1.2}); }],
+    ['rack',(o,s,c)=>{ const x=HK.at(o,.42), y=o.dockY; if(s===1){ HK.rect(o,x,y-H*.06,W*.02,2,c); for(let i=0;i<3;i++) HK.line(o,[x+i*W*.006,y,x+i*W*.007+W*.004,y-H*.12],HK.dk(c,.2),1.2); } if(s===2){ HK.poly(o,[x,y,x+W*.012,y,x+W*.014,y-H*.02,x-W*.002,y-H*.02],c); HK.line(o,[x+W*.018,y,x+W*.024,y-H*.1],'#5a4030',1.4); HK.ell(o,x+W*.025,y-H*.11,W*.006,H*.01,v3rgba('#3a3a40',.4)); } if(s===3){ HK.line(o,[x-W*.01,y-H*.1,x+W*.03,y-H*.1],'#c8a878',1); for(let i=0;i<5;i++) HK.circ(o,x-W*.006+i*W*.008,y-H*.094,1.6,[c,'#c8783a','#a8402e'][i%3]); } }],
+    ['shed',(o,s,c)=>{ if(s) HK.roof(o,c,['','slate','gable','thatch'][s],.02,.36); }],
+    ['seat'],
+    ['light',(o,s)=>HK.light(o,['cage','hanging','millcandle'][s])]] });
+
+/* 3. Cherry Blossom Lake: the tea house deck */
+hfMake('blossom',{ name:'Tea house deck', hname:'tea house deck',
+  colors:C16('Lacquer red=#b8322a;Vermilion=#d8503a;Cedar=#9a6a42;Dark cedar=#5a3a26;Black lacquer=#2a2426;Paper white=#f4ece0;Rice beige=#e0d0b0;Bamboo=#b8b06a;Moss=#6a8a52;Jade=#5a9a9a;Deep jade=#1e4a58;Blossom pink=#f4a8c4;Pale sakura=#ffe4ee;Wisteria=#a88ac8;Lantern amber=#f0a848;Stone grey=#9a948a'),
+  els:[{id:'engawa',label:'Veranda',styles:['Cedar veranda','Bamboo slats','Stepping stones'],def:[0,2]},{id:'roof',label:'Roof',none:true,styles:['Open sky','Curved tiles','Thatched gate','Torii'],def:[1,4]},
+       {id:'lanterns',label:'Lanterns',light:true,styles:['Paper lanterns','Stone tōrō','Red chōchin'],def:[0,14]},{id:'tree',label:'Cherry tree',none:true,styles:['No tree','Blossom branch','Bonsai','Weeping cherry'],def:[1,11]},
+       {id:'chime',label:'Wind chime',none:true,styles:['No chime','Glass fūrin','Bamboo chimes','Temple bell'],def:[1,5]}],
+  seat:['cushion','lowbench','stool'], seatNames:['Zabuton cushion','Bamboo bench','Lacquer stool'], seatDef:[0,0],
+  order:[
+    ['engawa',(o,s,c)=>{ HK.supports(o,'#b8322a',s===1?'bamboo':'square',5); HK.deck(o,c,s===1?'bamboo':s===2?'stone':'walnut'); }],
+    ['tree',(o,s,c)=>{ if(!s) return; const x=HK.at(o,.02), y=o.dockY; if(s===2){ HK.poly(o,[x+W*.04,y,x+W*.07,y,x+W*.066,y-H*.012,x+W*.044,y-H*.012],'#5a3a26'); HK.curve(o,x+W*.055,y-H*.012,x+W*.045,y-H*.04,x+W*.06,y-H*.05,'#5a3a26',2.5); for(let i=0;i<5;i++) HK.circ(o,x+W*.05+i*W*.005,y-H*.05-Math.sin(i)*H*.008,H*.008,c); return; }
+      HK.curve(o,x,y,x+W*.004,y-H*.14,x+W*.04,y-H*.17,'#5a3a26',4); HK.curve(o,x+W*.03,y-H*.165,x+W*.07,y-H*.16,x+W*.09,y-H*.13,'#5a3a26',2.4); for(let i=0;i<14;i++){ const u=i/13; HK.circ(o,x+W*(.02+.075*u),y-H*(.17-.04*u)+Math.sin(i*2.1)*H*.008,H*.009,i%3?c:HK.lt(c,.3)); }
+      if(s===3) for(let i=0;i<7;i++) HK.line(o,[x+W*(.03+i*.009),y-H*.16,x+W*(.03+i*.009),y-H*.09],v3rgba(c,.8),1.4); }],
+    ['roof',(o,s,c)=>{ if(s) HK.roof(o,c,['','curved','thatchgate','torii'][s],.04,.5); }],
+    ['chime',(o,s,c)=>{ if(!s) return; const x=HK.at(o,.48), y=o.dockY-H*.12; HK.line(o,[x,y-H*.02,x,y],'#3a2a20',1); if(s===1){ HK.ell(o,x,y+H*.006,H*.006,H*.007,v3rgba(HK.lt(c,.3),.7)); HK.rect(o,x-1,y+H*.012,2,H*.016,c); } if(s===2) for(let i=-2;i<=2;i++) HK.rect(o,x+i*H*.004-1,y,2,H*.02+Math.abs(i)*H*.004,'#b8b06a'); if(s===3){ HK.rect(o,x-H*.012,y-H*.02,H*.024,2,'#5a3a26'); HK.poly(o,[x-H*.008,y+H*.014,x-H*.006,y,x+H*.006,y,x+H*.008,y+H*.014],'#a8743a'); } }],
+    ['seat'],
+    ['lanterns',(o,s)=>HK.light(o,['paperline','toro','chochin'][s])]] });
+
+/* 4. Saltmarsh Coast: the pier end */
+hfMake('coast',{ name:'Saltmarsh pier end', hname:'pier',
+  colors:C16('Driftwood=#a8a090;Silver-grey=#8a8a84;Tar black=#2e2a28;Weathered blue=#5a7a8a;Sea glass=#9adcd8;Sea teal=#3aa0a8;Deep sea=#145a6a;Sand=#e8d6a4;Dune grass=#8aa85a;Rope tan=#c8a878;Buoy red=#c8483a;Buoy yellow=#e8c04a;Lighthouse white=#f4f0e6;Shingle brown=#6a5440;Gull grey=#c8ccd0;Oilskin yellow=#d8b030'),
+  els:[{id:'pilings',label:'Pilings',styles:['Tarred pilings','Braced pilings','Rock jetty'],def:[0,2]},{id:'deck',label:'Pier deck',styles:['Salt-grey boards','Tarred planks','Steel grating'],def:[0,0]},
+       {id:'shack',label:'Bait shack',none:true,styles:['No shack','Shingle shack','Lobster shack','Canvas lean-to'],def:[1,3]},{id:'gear',label:'Fishing gear',none:true,styles:['No gear','Lobster pots','Drying net','Buoys'],def:[3,10]},
+       {id:'light',label:'Lamp',light:true,styles:['Ship’s lantern','Lighthouse lamp','Buoy light'],def:[0,13]}],
+  seat:['crate','bucket','driftbench'], seatNames:['Fish crate','Upturned bucket','Driftwood bench'], seatDef:[0,0],
+  order:[
+    ['pilings',(o,s,c)=>HK.supports(o,c,['tarred','braced','jetty'][s],5)],
+    ['deck',(o,s,c)=>HK.deck(o,c,['boards','planks','grate'][s])],
+    ['shack',(o,s,c)=>{ if(s===1) HK.roof(o,c,'shackbox',.02,.3); if(s===2){ HK.roof(o,c,'shackbox',.02,.3); for(let i=0;i<3;i++) HK.circ(o,HK.at(o,.06+i*.07),o.dockY-H*.07,H*.006,['#c8483a','#e8c04a','#f4f0e6'][i]); } if(s===3) HK.roof(o,c,'canvas',.02,.34); }],
+    ['gear',(o,s,c)=>{ const x=HK.at(o,.4), y=o.dockY; if(s===1) for(let i=0;i<2;i++){ HK.block(o,x,y-H*.02*(i+1),W*.024,H*.02,HK.dk(c,.1)); for(let k=0;k<4;k++) HK.line(o,[x+k*W*.006,y-H*.02*(i+1),x+k*W*.006,y-H*.02*i],'#2e2a28'); }
+      if(s===2){ HK.rect(o,x+W*.01,y-H*.13,2,H*.13,'#6a5440'); o.x.fillStyle=v3rgba(c,.5); o.x.beginPath(); o.x.moveTo(x+W*.011,y-H*.13); o.x.quadraticCurveTo(x-W*.01,y-H*.08,x,y-H*.02); o.x.lineTo(x+W*.011,y-H*.04); o.x.fill(); }
+      if(s===3){ HK.line(o,[x-W*.01,y-H*.08,x+W*.03,y-H*.08],'#c8a878'); for(let i=0;i<4;i++) HK.ell(o,x-W*.006+i*W*.01,y-H*.068,H*.006,H*.009,[c,'#e8c04a','#f4f0e6','#c8483a'][i]); } }],
+    ['seat'],
+    ['light',(o,s)=>HK.light(o,['hook','lighthouse','buoy'][s])]] });
+
+/* 5. Frostbite Lake: the ice camp (stands on the ice) */
+hfMake('frost',{ name:'Ice camp', hname:'ice camp', ice:true,
+  colors:C16('Snow white=#f6f8ff;Frost=#d8e8f6;Ice blue=#8aaad0;Glacier=#4a6a9a;Deep ice=#1a2a4a;Spruce=#3e5a78;Birch=#e8e0d0;Birch bark=#4a4440;Timber=#7a5440;Dark timber=#4a3428;Wool red=#b8383a;Wool cream=#f0e6d0;Stove iron=#2a2a30;Lantern orange=#f0983a;Aurora green=#7af0b0;Dusk mauve=#9a88b8'),
+  els:[{id:'hut',label:'Ice hut',styles:['Canvas tent','Timber shanty','Snow igloo'],def:[0,10]},{id:'floor',label:'Floor',styles:['Packed snow','Plank floor','Fur rug'],def:[0,0]},
+       {id:'hole',label:'Ice hole',styles:['Tip-up flag','Skimmer','Twin holes'],def:[0,10]},{id:'stove',label:'Stove',light:true,styles:['Iron stove','Storm lantern','Campfire tray'],def:[0,13]},
+       {id:'sled',label:'Sled',none:true,styles:['No sled','Box sled','Snowmobile','Dog sled'],def:[1,8]}],
+  seat:['bucket','furbench','icechair'], seatNames:['Bucket stool','Fur bench','Ice chair'], seatDef:[0,12],
+  order:[
+    ['floor',(o,s,c)=>{ const x0=HF.x0(), y=o.dockY; const g=o.x.createLinearGradient(0,y,0,o.wl+H*.03); g.addColorStop(0,HK.n(o,'#e8f0fa')); g.addColorStop(1,HK.n(o,'#8aaad0')); o.x.fillStyle=g; o.x.fillRect(x0,y+HK.fh(),o.pw-x0+W*.01,o.wl-y-HK.fh()+H*.03); HK.deck(o,c,['snow','planks','fur'][s]); }],
+    ['hole',(o,s,c)=>{ const x=HK.at(o,.86), y=o.dockY+H*.004; HK.ell(o,x,y,W*.01,H*.003,'#1a2a4a'); if(s===0){ HK.line(o,[x+W*.006,y,x+W*.012,y-H*.03],'#4a4440',1.2); HK.poly(o,[x+W*.012,y-H*.03,x+W*.024,y-H*.026,x+W*.012,y-H*.022],c); } if(s===1){ HK.line(o,[x-W*.008,y,x-W*.018,y-H*.04],'#4a3428',1.4); HK.ell(o,x-W*.008,y,W*.004,H*.003,c); } if(s===2){ HK.ell(o,x-W*.02,y,W*.006,H*.003,'#1a2a4a'); HK.poly(o,[x-W*.012,y,x-W*.004,y,x-W*.005,y-H*.016,x-W*.011,y-H*.016],c); } }],
+    ['hut',(o,s,c)=>{ if(s===0) HK.roof(o,c,'walltent',.02,.4); if(s===1){ HK.roof(o,c,'shackbox',.02,.34); HK.rect(o,HK.at(o,.08),o.dockY-H*.09,W*.012,H*.014,'#f0983a'); } if(s===2){ const m=HK.at(o,.2), R=(HK.at(o,.4)-HK.at(o,.0))*.5; o.x.fillStyle=HK.n(o,c); o.x.beginPath(); o.x.arc(m,o.dockY,R,Math.PI,0); o.x.fill(); for(let i=1;i<4;i++){ o.x.strokeStyle=HK.n(o,HK.dk(c,.12)); o.x.beginPath(); o.x.arc(m,o.dockY,R*i/4+R*.2,Math.PI,0); o.x.stroke(); } HK.poly(o,[m+R*.3,o.dockY,m+R*.3,o.dockY-R*.4,m+R*.6,o.dockY-R*.4,m+R*.6,o.dockY],'#1a2a4a'); } }],
+    ['sled',(o,s,c)=>{ if(!s) return; const x=HK.at(o,.42), y=o.dockY; HK.curve(o,x-W*.002,y-1,x+W*.02,y,x+W*.034,y-H*.012,'#4a4440',1.6); if(s===1) HK.block(o,x+W*.002,y-H*.022,W*.024,H*.018,c); if(s===2){ HK.poly(o,[x,y-H*.008,x+W*.03,y-H*.008,x+W*.026,y-H*.03,x+W*.008,y-H*.034],c); HK.rect(o,x+W*.008,y-H*.044,W*.006,H*.01,'#2a2a30'); } if(s===3){ HK.line(o,[x,y-H*.004,x,y-H*.03,x+W*.024,y-H*.012],c,1.6); HK.line(o,[x+W*.002,y-H*.004,x+W*.03,y-H*.004],c,1.6); } }],
+    ['seat'],
+    ['stove',(o,s)=>HK.light(o,['stove','stake','firering'][s],HK.at(o,.62))]] });
+
+/* 6. Canadian Rockies: the lodge ledge */
+hfMake('rockies',{ name:'Lodge ledge', hname:'lodge ledge',
+  colors:C16('Cedar log=#9a6a42;Spruce log=#7a5a3e;Dark log=#4a3426;Granite=#9a948a;Dark granite=#5a5650;Glacier turquoise=#2a9aa8;Ice teal=#7ad8d8;Deep lake=#0a4858;Spruce green=#2e5040;Moss=#5a7a4a;Snow=#f4f8fc;Flannel red=#b8322a;Flannel black=#2a2626;Maple orange=#d8702a;Birch cream=#ece2cc;Canoe green=#3a6a4a'),
+  els:[{id:'deck',label:'Ledge deck',styles:['Log deck','Cedar planks','Granite slab'],def:[0,0]},{id:'footing',label:'Footing',styles:['Log cribbing','Granite boulders','Log stilts'],def:[0,1]},
+       {id:'shelter',label:'Lean-to',none:true,styles:['Open sky','Shingle lean-to','A-frame','Wall tent'],def:[1,2]},{id:'canoe',label:'Canoe',none:true,styles:['No canoe','Canoe on a rack','Canoe beside','Kayak'],def:[2,15]},
+       {id:'fire',label:'Campfire',light:true,styles:['Fire ring','Lodge lantern','Fire bowl'],def:[0,13]}],
+  seat:['muskoka','stumpblanket','rocker'], seatNames:['Muskoka chair','Stump and blanket','Log rocker'], seatDef:[0,11],
+  order:[
+    ['footing',(o,s,c)=>HK.supports(o,c,['crib','boulder','stilts'][s],s===1?4:5)],
+    ['deck',(o,s,c)=>HK.deck(o,c,['logs','planks','stone'][s])],
+    ['shelter',(o,s,c)=>{ if(s) HK.roof(o,c,['','shingle','aframe','walltent'][s],.02,.4); }],
+    ['canoe',(o,s,c)=>{ if(!s) return; const a=HK.at(o,s===1?.04:.42), y=o.dockY-(s===1?H*.07:0), L2=W*(s===3?.045:.06); if(s===1){ HK.rect(o,a+W*.006,y,2,o.dockY-y,'#4a3426'); HK.rect(o,a+L2-W*.006,y,2,o.dockY-y,'#4a3426'); }
+      o.x.fillStyle=HK.n(o,c); o.x.beginPath(); o.x.moveTo(a,y-H*.012); o.x.quadraticCurveTo(a+L2/2,y+H*.014,a+L2,y-H*.012); o.x.quadraticCurveTo(a+L2/2,y-H*.002,a,y-H*.012); o.x.fill(); if(s===2) HK.line(o,[a+L2*.3,y-H*.014,a+L2*.8,y-H*.03],'#ece2cc',1.6); }],
+    ['seat'],
+    ['fire',(o,s)=>HK.light(o,['firering','nail','firebowl'][s],HK.at(o,.62))]] });
+
+/* 7. Coral Shallows: the beach hut on stilts */
+hfMake('reef',{ name:'Beach hut', hname:'beach hut',
+  colors:C16('Palm wood=#9a7a52;Bleached wood=#c8b088;Thatch=#d8b46a;Dark thatch=#a8843a;Sand=#f4e2b0;Shell white=#fbf2e4;Turquoise=#18b0c0;Lagoon=#7ae8e0;Deep reef=#0a6a8a;Palm green=#3a9a4a;Frond dark=#22703a;Coral=#ff7a6a;Mango=#ffb84a;Orchid=#c86ad8;Hibiscus red=#e0403a;Sky blue=#6ccaf4'),
+  els:[{id:'stilts',label:'Stilts',styles:['Palm trunks','Bamboo','Coral stone'],def:[0,0]},{id:'deck',label:'Platform',styles:['Palm planks','Reed mat','Driftwood'],def:[0,1]},
+       {id:'roof',label:'Hut roof',none:true,styles:['Open sky','Thatch','Palm leaves','Beach umbrella'],def:[1,2]},{id:'gear',label:'Beach gear',none:true,styles:['No gear','Surfboard','Snorkel set','Shell garland'],def:[1,11]},
+       {id:'torch',label:'Torch',light:true,styles:['Tiki torch','Shell lantern','Glass floats'],def:[0,13]}],
+  seat:['beachchair','hammock','peacock'], seatNames:['Beach chair','Hammock','Peacock chair'], seatDef:[0,6],
+  order:[
+    ['stilts',(o,s,c)=>HK.supports(o,c,['palm','bamboo','stone'][s],5)],
+    ['deck',(o,s,c)=>HK.deck(o,c,['planks','mat','boards'][s])],
+    ['roof',(o,s,c)=>{ if(s===1) HK.roof(o,c,'thatch',.02,.42); if(s===2) HK.roof(o,c,'fronds',.02,.42); if(s===3) HK.roof(o,c,'beachumbrella',.08,.4); }],
+    ['gear',(o,s,c)=>{ const x=HK.at(o,.42), y=o.dockY; if(s===1){ HK.ell(o,x+W*.006,y-H*.05,W*.006,H*.05,c,-.08); HK.line(o,[x+W*.006,y-H*.09,x+W*.006,y-H*.01],'#f4efe6',1); } if(s===2){ HK.rect(o,x,y-H*.1,2,H*.1,'#9a7a52'); HK.ell(o,x+W*.006,y-H*.08,W*.004,H*.006,c); HK.poly(o,[x+W*.002,y-H*.06,x+W*.012,y-H*.06,x+W*.016,y-H*.035,x+W*.004,y-H*.04],HK.dk(c,.2)); } if(s===3){ HK.curve(o,x-W*.02,y-H*.11,x,y-H*.08,x+W*.02,y-H*.11,'#c8a878',1); for(let i=0;i<6;i++) HK.circ(o,x-W*.016+i*W*.0064,y-H*(.1-Math.sin(i/5*Math.PI)*.02),H*.004,i%2?c:'#fbf2e4'); } }],
+    ['seat'],
+    ['torch',(o,s)=>HK.light(o,['tiki','shells','floats'][s])]] });
+
+/* 8. Florida Keys: the flats skiff (floats) */
+hfMake('keys',{ name:'Flats skiff', hname:'skiff', floats:true,
+  colors:C16('Boat white=#f4f6f4;Fiberglass cream=#ece4d0;Aluminium=#b8c0c4;Teak=#9a6a3a;Flats aqua=#28c0c8;Shallow mint=#8af0e0;Deep channel=#0a7090;Conch pink=#f0a0a8;Flamingo=#f06a8a;Mint=#9ae0c0;Lemon=#f4e07a;Sunset orange=#f8a050;Sand=#f4e6c0;Palm green=#3a8a5a;Navy trim=#1e3a5a;Cooler red=#d8483a'),
+  els:[{id:'hull',label:'Hull',styles:['Flats skiff','Center console','Pastel jon boat'],def:[0,0]},{id:'top',label:'Top',none:true,styles:['Open sky','T-top','Bimini','Clamp umbrella'],def:[1,1]},
+       {id:'console',label:'Console',styles:['Center console','Poling platform','Tiller outboard'],def:[0,0]},{id:'gear',label:'Gear',styles:['Rod holders','Cooler and bucket','Flamingo float'],def:[0,15]},
+       {id:'light',label:'Nav lights',light:true,styles:['Bow lights','T-top light','Cooler lantern'],def:[0,13]}],
+  seat:['captain','coolerseat','beanbag'], seatNames:['Captain’s chair','Cooler seat','Bean bag'], seatDef:[0,14],
+  order:[
+    ['hull',(o,s,c)=>HK.hull(o,c,['skiff','console','jon'][s])],
+    ['console',(o,s,c)=>{ const x=HK.at(o,.5), y=o.dockY; if(s===0){ HK.block(o,x,y-H*.035,W*.02,H*.035,c); HK.poly(o,[x,y-H*.035,x+W*.006,y-H*.05,x+W*.016,y-H*.05,x+W*.02,y-H*.035],v3rgba('#9ad0e0',.6)); } if(s===1){ const a=HK.at(o,.04); for(const px of [a,a+W*.022]) HK.rect(o,px,y-H*.1,2,H*.1,'#b8c0c4'); HK.rect(o,a-W*.002,y-H*.1,W*.026,H*.006,c); } if(s===2){ const a=HF.x0(); HK.block(o,a-W*.012,y-H*.03,W*.014,H*.03,'#2a2a30'); HK.rect(o,a-W*.008,y,W*.004,H*.06,'#2a2a30'); } }],
+    ['top',(o,s,c)=>{ if(s===1) HK.roof(o,c,'ttop',.36,.72); if(s===2) HK.roof(o,c,'bimini',.3,.72); if(s===3) HK.roof(o,c,'beachumbrella',.1,.42); }],
+    ['gear',(o,s,c)=>{ const x=HK.at(o,.8), y=o.dockY; if(s===0) for(let i=0;i<3;i++) HK.line(o,[x+i*W*.005,y,x+i*W*.007+W*.01,y-H*.13],'#2a2a30',1.2); if(s===1){ HK.block(o,x,y-H*.024,W*.024,H*.024,c); HK.rect(o,x,y-H*.024,W*.024,H*.006,'#f4f6f4'); } if(s===2){ HK.ell(o,x+W*.016,o.wl,W*.016,H*.008,c); HK.curve(o,x+W*.03,o.wl-H*.006,x+W*.036,o.wl-H*.03,x+W*.03,o.wl-H*.034,c,2.4); } }],
+    ['seat'],
+    ['light',(o,s)=>HK.light(o,['navlight','post','table'][s])]] });
+
+/* 9. Brine Shelf: the sport-fishing boat (floats) */
+hfMake('shelf',{ name:'Sport-fishing boat', hname:'boat', floats:true,
+  colors:C16('Hull white=#f2f2ee;Deck teak=#a8743a;Dark teak=#6a4626;Brass=#c8a04a;Chrome=#c0c8cc;Navy hull=#1e2e4a;Ocean blue=#2a7a9a;Deep ocean=#0c3a5a;Foam=#e4f0f0;Sail canvas=#f4ead8;Rope=#c8a878;Flag red=#c8382e;Flag yellow=#e8c03a;Flag blue=#2a5aa8;Life-ring orange=#f0782a;Horizon gold=#ffe0a8'),
+  els:[{id:'hull',label:'Hull',styles:['Sport-fisher','Wooden cruiser','Steel workboat'],def:[0,0]},{id:'bridge',label:'Flybridge',styles:['Open flybridge','Wheelhouse','Tuna tower'],def:[0,0]},
+       {id:'rig',label:'Outriggers',styles:['Twin outriggers','Rod rack','Harpoon pulpit'],def:[0,4]},{id:'flags',label:'Flags',none:true,styles:['No flags','Signal flags','Marlin pennant','Burgee'],def:[1,11]},
+       {id:'light',label:'Deck light',light:true,styles:['Brass lantern','Masthead light','Floodlight'],def:[0,15]}],
+  seat:['fighting','teakbench','deckstool'], seatNames:['Fighting chair','Teak bench','Deck stool'], seatDef:[0,1],
+  order:[
+    ['hull',(o,s,c)=>HK.hull(o,c,['sport','cruiser','steel'][s])],
+    ['rig',(o,s,c)=>{ const x=HK.at(o,.55), y=o.dockY; if(s===0){ HK.line(o,[x,y,x-W*.05,y-H*.2],c,1.6); HK.line(o,[x+W*.01,y,x+W*.06,y-H*.18],c,1.6); } if(s===1){ HK.rect(o,HK.at(o,.02),y-H*.03,W*.04,2,c); for(let i=0;i<4;i++) HK.line(o,[HK.at(o,.03)+i*W*.009,y-H*.03,HK.at(o,.03)+i*W*.009-W*.004,y-H*.12],'#2a2a30',1); } if(s===2){ HK.rect(o,o.pw,y-H*.004,W*.03,H*.004,c); HK.line(o,[o.pw+W*.03,y,o.pw+W*.03,y-H*.04],c,1.4); } }],
+    ['bridge',(o,s,c)=>{ const a=HK.at(o,.45), b=HK.at(o,.8), y=o.dockY; if(s===0){ HK.rect(o,a,y-H*.07,2,H*.07,'#c0c8cc'); HK.rect(o,b,y-H*.07,2,H*.07,'#c0c8cc'); HK.rect(o,a-W*.004,y-H*.075,b-a+W*.01,H*.008,c); HK.rail(Object.assign({},o,{dockY:y-H*.075}),'#c0c8cc','iron'); } if(s===1){ HK.block(o,a,y-H*.09,b-a,H*.09,c); for(let i=0;i<3;i++) HK.rect(o,a+(b-a)*(.1+i*.3),y-H*.075,(b-a)*.2,H*.025,'#1e2e4a'); } if(s===2){ for(const px of [a,b]) HK.line(o,[px,y,px+(px===a?W*.015:-W*.015),y-H*.22],'#c0c8cc',1.6); HK.rect(o,a+W*.012,y-H*.225,b-a-W*.024,H*.008,c); } }],
+    ['flags',(o,s,c)=>{ if(!s) return; const x=HK.at(o,.62), top=o.dockY-H*.22; HK.rect(o,x,top,1.6,H*.22,'#c0c8cc'); if(s===1){ HK.line(o,[x,top,HK.at(o,.05),o.dockY-H*.04],'#c8a878',.8); for(let i=1;i<6;i++){ const u=i/6; HK.poly(o,[x+(HK.at(o,.05)-x)*u,top+(H*.18)*u,x+(HK.at(o,.05)-x)*u-W*.006,top+(H*.18)*u+H*.004,x+(HK.at(o,.05)-x)*u,top+(H*.18)*u+H*.012],['#c8382e','#e8c03a','#2a5aa8'][i%3]); } } if(s===2){ HK.poly(o,[x,top,x+W*.03,top+H*.01,x,top+H*.02],c); HK.ell(o,x+W*.012,top+H*.01,W*.006,H*.003,'#2a5aa8'); } if(s===3) HK.poly(o,[x,top,x+W*.022,top+H*.008,x,top+H*.016],c); }],
+    ['seat'],
+    ['light',(o,s)=>HK.light(o,['brass','mast','flood'][s],s===1?HK.at(o,.62):undefined)]] });
+
+/* 10. Amazon Rainforest: the stilt house */
+hfMake('amazon',{ name:'River stilt house', hname:'stilt house',
+  colors:C16('Hardwood=#7a5a3e;Dark hardwood=#4a3420;Vine=#5a6a2a;Palm thatch=#c8a85a;Dry thatch=#a8843a;River clay=#a8683a;Jungle green=#2e6a32;Deep jungle=#123a18;Fern=#6aa04a;Leaf highlight=#a8e07a;Tannin water=#3a5a32;Macaw red=#d8302a;Macaw blue=#2a6ad8;Macaw yellow=#f0c83a;Orchid pink=#e070b0;Mist=#e8f4e0'),
+  els:[{id:'stilts',label:'Stilts',styles:['Hardwood stilts','Mangrove roots','Bamboo bundles'],def:[0,1]},{id:'floor',label:'Floor',styles:['Lashed planks','Split bamboo','Reed mat'],def:[0,0]},
+       {id:'roof',label:'Roof',none:true,styles:['Open sky','Steep thatch','Giant leaf','Palm fronds'],def:[1,3]},{id:'canoe',label:'River gear',none:true,styles:['No gear','Dugout canoe','Paddle and trap','Hanging net'],def:[1,1]},
+       {id:'lamp',label:'Lamp',light:true,styles:['Gourd lamp','Firefly basket','Bamboo torch'],def:[0,13]}],
+  seat:['hammock','wovenstool','logseat'], seatNames:['Hammock','Woven stool','Carved log seat'], seatDef:[0,11],
+  order:[
+    ['stilts',(o,s,c)=>HK.supports(o,c,['stilts','mangrove','bamboo'][s],5)],
+    ['floor',(o,s,c)=>HK.deck(o,c,['planks','bamboo','mat'][s])],
+    ['canoe',(o,s,c)=>{ const x=HK.at(o,.3), y=o.dockY; if(s===1){ o.x.fillStyle=HK.n(o,c); o.x.beginPath(); o.x.moveTo(x,o.wl-H*.004); o.x.quadraticCurveTo(x+W*.04,o.wl+H*.016,x+W*.08,o.wl-H*.004); o.x.lineTo(x,o.wl-H*.004); o.x.fill(); o.posts.push({x:x+W*.08,w:W*.01}); } if(s===2){ HK.line(o,[HK.at(o,.42),y,HK.at(o,.46),y-H*.1],c,2); HK.ell(o,HK.at(o,.46),y-H*.1,W*.003,H*.012,c); HK.ell(o,HK.at(o,.5),y-H*.012,W*.008,H*.012,'#a8843a'); } if(s===3){ HK.rect(o,HK.at(o,.44),y-H*.13,2,H*.13,'#4a3420'); o.x.fillStyle=v3rgba(c,.5); o.x.beginPath(); o.x.moveTo(HK.at(o,.44),y-H*.13); o.x.lineTo(HK.at(o,.38),y-H*.04); o.x.lineTo(HK.at(o,.44),y-H*.05); o.x.fill(); } }],
+    ['roof',(o,s,c)=>{ if(s===1) HK.roof(o,c,'thatch',.02,.44); if(s===2) HK.roof(o,c,'leaf',.02,.46); if(s===3) HK.roof(o,c,'fronds',.02,.44); }],
+    ['seat'],
+    ['lamp',(o,s)=>HK.light(o,['gourd','fireflybasket','torch'][s])]] });
+
+/* 11. Midnight Deep: the trawler deck (floats) */
+hfMake('deep',{ name:'Trawler deck', hname:'trawler', floats:true,
+  colors:C16('Steel grey=#6a7480;Dark steel=#3a424c;Gunmetal=#2a2e34;Rust=#8a4a2a;Rust light=#b8683a;Safety orange=#f0782a;Float orange=#e85a2a;Oilskin yellow=#d8b030;Floodlight=#f4eccc;Net green=#4a6a5a;Deck black=#1a1c20;Sea grey=#6a8290;Deep sea=#0a1826;Foam white=#e8ecf0;Bruised amber=#c8704a;Cold rim=#8aa0d8'),
+  els:[{id:'hull',label:'Hull',styles:['Steel deck','Rusty trawler','Wood on steel'],def:[0,0]},{id:'house',label:'Wheelhouse',styles:['Boxy wheelhouse','Low pilothouse','Open helm'],def:[0,13]},
+       {id:'gear',label:'Trawl gear',styles:['Net drum','A-frame gantry','Crab pots'],def:[0,9]},{id:'mast',label:'Mast',none:true,styles:['No mast','Mast and boom','Radar mast','Antenna mast'],def:[1,1]},
+       {id:'light',label:'Floodlight',light:true,styles:['Floodlight','Caged lamp','Swinging lantern'],def:[0,8]}],
+  seat:['floatcrate','steelbench','ropecoil'], seatNames:['Crate of floats','Steel bench','Rope coil'], seatDef:[0,9],
+  order:[
+    ['hull',(o,s,c)=>HK.hull(o,c,['steel','rusty','woodsteel'][s])],
+    ['gear',(o,s,c)=>{ const x=HK.at(o,.08), y=o.dockY; if(s===0){ HK.rect(o,x,y-H*.035,W*.03,H*.035,'#3a424c'); HK.ell(o,x+W*.015,y-H*.035,W*.015,H*.02,c); for(let i=0;i<4;i++) HK.line(o,[x+W*.004,y-H*.05+i*H*.008,x+W*.026,y-H*.05+i*H*.008],HK.dk(c,.3)); } if(s===1){ HK.line(o,[x,y,x+W*.02,y-H*.16,x+W*.04,y],c,2.4); HK.line(o,[x+W*.02,y-H*.16,x+W*.02,y-H*.08],'#2a2e34',1); } if(s===2) for(let i=0;i<3;i++) for(let j=0;j<2;j++){ HK.block(o,x+j*W*.018,y-H*.02*(i+1),W*.016,H*.019,HK.dk(c,.05*i)); HK.line(o,[x+j*W*.018,y-H*.02*(i+.5),x+j*W*.018+W*.016,y-H*.02*(i+.5)],'#2a2e34'); } }],
+    ['house',(o,s,c)=>{ const a=HK.at(o,.5), b=HK.at(o,.86), y=o.dockY; if(s===0){ HK.block(o,a,y-H*.12,b-a,H*.12,c); for(let i=0;i<3;i++) HK.rect(o,a+(b-a)*(.1+i*.3),y-H*.105,(b-a)*.2,H*.03,'#2a2e34'); HK.rect(o,a-W*.004,y-H*.125,b-a+W*.008,H*.008,'#3a424c'); } if(s===1){ HK.poly(o,[a,y,a,y-H*.07,b-W*.01,y-H*.07,b,y-H*.04,b,y],c); HK.rect(o,a+W*.01,y-H*.06,(b-a)*.6,H*.02,'#2a2e34'); } if(s===2){ HK.rect(o,b-W*.01,y-H*.04,2,H*.04,'#3a424c'); HK.circ(o,b-W*.01,y-H*.045,H*.01,'#3a424c'); HK.rect(o,b-W*.02,y-H*.07,W*.004,H*.03,v3rgba('#c0c8cc',.6)); } }],
+    ['mast',(o,s,c)=>{ if(!s) return; const x=HK.at(o,.42), top=o.dockY-H*.23; HK.rect(o,x,top,2.4,H*.23,c); if(s===1) HK.line(o,[x,top+H*.04,HK.at(o,.05),o.dockY-H*.06],c,1.6); if(s===2){ HK.rect(o,x-W*.012,top,W*.024,H*.004,c); HK.ell(o,x,top-H*.012,W*.006,H*.01,'#c0c8cc'); } if(s===3) HK.line(o,[x+1,top,x+1,top-H*.06],c,1); }],
+    ['seat'],
+    ['light',(o,s)=>HK.light(o,['floodpole','workcage','hook'][s])]] });
+
+/* 12. Hollow Trench: the salvage raft (floats) */
+hfMake('trench',{ name:'Salvage raft', hname:'raft', floats:true,
+  colors:C16('Salvage plank=#6a5a48;Dark plank=#3a3028;Tarred barrel=#4a3a2a;Barrel band=#5a5a5a;Rope=#9a8868;Old brass=#a8884a;Lantern amber=#f0b050;Sail scrap=#c8bca0;Abyss black=#020e14;Deep teal=#123a44;Trench teal=#3a6a70;Bio cyan=#5afff0;Bio violet=#a080ff;Pale glow=#b8e8dc;Wet rock=#2a3e46;Bone=#e0dccc'),
+  els:[{id:'raft',label:'Raft',styles:['Barrel raft','Plank raft','Door raft'],def:[0,2]},{id:'mast',label:'Mast',styles:['Scrap sail','Crow’s nest','Oar flag'],def:[0,7]},
+       {id:'salvage',label:'Salvage',styles:['Sea chest','Anchor','Ship’s wheel'],def:[0,5]},{id:'shelter',label:'Shelter',none:true,styles:['No shelter','Sailcloth tent','Plank lean-to','Upturned boat'],def:[1,7]},
+       {id:'light',label:'Lantern',light:true,styles:['Pole lantern','Jellyfish jar','Wreck lamp'],def:[0,6]}],
+  seat:['barrel','seachest','crate'], seatNames:['Barrel','Sea chest','Broken crate'], seatDef:[0,2],
+  order:[
+    ['raft',(o,s,c)=>HK.hull(o,c,['barrels','planks','door'][s])],
+    ['shelter',(o,s,c)=>{ if(s===1) HK.roof(o,c,'tent',.02,.36); if(s===2) HK.roof(o,c,'leanto',.02,.36); if(s===3){ const a=HK.at(o,.02), b=HK.at(o,.38), y=o.dockY-H*.09; HK.rect(o,a+W*.004,y,2,o.dockY-y,'#3a3028'); HK.rect(o,b-W*.004,y,2,o.dockY-y,'#3a3028'); o.x.fillStyle=HK.n(o,c); o.x.beginPath(); o.x.moveTo(a-W*.01,y); o.x.quadraticCurveTo((a+b)/2,y-H*.05,b+W*.012,y); o.x.lineTo(a-W*.01,y); o.x.fill(); } }],
+    ['mast',(o,s,c)=>{ const x=HK.at(o,.5), top=o.dockY-H*.2; HK.rect(o,x,top,2.4,H*.2,'#3a3028'); if(s===0) HK.poly(o,[x+2,top+H*.01,x+W*.035,top+H*.03,x+W*.03,top+H*.1,x+2,top+H*.12],c); if(s===1) HK.poly(o,[x-W*.008,top,x+W*.01,top,x+W*.008,top+H*.02,x-W*.006,top+H*.02],c); if(s===2) HK.poly(o,[x+2,top,x+W*.02,top+H*.006,x+W*.016,top+H*.03,x+2,top+H*.024],c); }],
+    ['salvage',(o,s,c)=>{ const x=HK.at(o,.78), y=o.dockY; if(s===0){ HK.block(o,x,y-H*.024,W*.026,H*.024,'#4a3a2a'); HK.rect(o,x,y-H*.016,W*.026,1.6,c); } if(s===1){ HK.line(o,[x+W*.01,y,x+W*.01,y-H*.04],c,2.4); HK.curve(o,x,y-H*.012,x+W*.01,y+H*.004,x+W*.02,y-H*.012,c,2.4); HK.rect(o,x+W*.004,y-H*.036,W*.012,2,c); } if(s===2){ o.x.strokeStyle=HK.n(o,c); o.x.lineWidth=2; o.x.beginPath(); o.x.arc(x+W*.012,y-H*.03,H*.022,0,7); o.x.stroke(); for(let k=0;k<8;k++){ const a=k*Math.PI/4; HK.line(o,[x+W*.012,y-H*.03,x+W*.012+Math.cos(a)*H*.03,y-H*.03+Math.sin(a)*H*.03],c,1.4); } } }],
+    ['seat'],
+    ['light',(o,s)=>HK.light(o,['hook','jellyjar','wreck'][s])]] });
+
+/* 13. Ember Springs: the bathhouse */
+hfMake('ember',{ name:'Hot-spring bathhouse', hname:'bathhouse',
+  colors:C16('Basalt=#4a3a3a;Black basalt=#2a2024;Obsidian=#1a1418;Ash grey=#7a6e6a;Volcanic earth=#7a6258;Iron=#3a3436;Forged iron=#5a4a44;Copper=#b8683a;Ember orange=#ff7a2a;Lava gold=#ffc04a;Crimson=#a83030;Spring turquoise=#7ad8d0;Steam white=#f0e8e4;Onsen cedar=#a87a52;Tile red=#b8483a;Amber sky=#f0c8a0'),
+  els:[{id:'base',label:'Basalt base',styles:['Basalt columns','Stone blocks','Iron pillars'],def:[0,0]},{id:'floor',label:'Floor',styles:['Basalt slabs','Tiled floor','Onsen cedar'],def:[0,1]},
+       {id:'pool',label:'Hot pool',styles:['Stone bath','Cedar tub','Lava-rock ring'],def:[0,11]},{id:'roof',label:'Roof',none:true,styles:['Open sky','Iron frame','Onsen gable','Obsidian slab'],def:[2,13]},
+       {id:'light',label:'Lantern',light:true,styles:['Iron lantern','Lava bowl','Steam lamp'],def:[0,8]}],
+  seat:['steelbench','bathstool','warmrock'], seatNames:['Stone bench','Bath stool','Warm rock'], seatDef:[0,3],
+  order:[
+    ['base',(o,s,c)=>HK.supports(o,c,['hex','stone','iron'][s],5)],
+    ['floor',(o,s,c)=>HK.deck(o,c,['stone','tile','walnut'][s])],
+    ['roof',(o,s,c)=>{ if(s===1) HK.roof(o,c,'iron',.02,.38); if(s===2) HK.roof(o,c,'curved',.02,.38); if(s===3) HK.roof(o,c,'slab',.02,.38); }],
+    ['pool',(o,s,c)=>{ const x=HK.at(o,.4), y=o.dockY, w=W*.04, g=s===2?'#ffc04a':c; if(s===0) HK.block(o,x,y-H*.022,w,H*.022,'#5a4a44'); if(s===1){ HK.poly(o,[x,y-H*.024,x+w,y-H*.024,x+w-W*.003,y,x+W*.003,y],'#a87a52'); HK.rect(o,x,y-H*.018,w,1.5,'#3a3436'); HK.rect(o,x,y-H*.008,w,1.5,'#3a3436'); } if(s===2) for(let i=0;i<6;i++) HK.ell(o,x+i*w/5,y-H*.006,W*.004,H*.006,i%2?'#4a3a3a':'#2a2024');
+      HK.ell(o,x+w/2,y-H*.022,w*.42,H*.004,g); for(let i=0;i<3;i++) HK.circ(o,x+w*(.3+i*.2),y-H*.035-i*H*.01,H*.007,v3rgba('#f0e8e4',.25)); }],
+    ['seat'],
+    ['light',(o,s)=>HK.light(o,['chain','lavabowl','steam'][s])]] });
+
+/* 14. Starfall Lake: the floating crystal platform (floats) */
+hfMake('starfall',{ name:'Crystal platform', hname:'crystal platform', floats:true,
+  colors:C16('Moonstone=#e8e0f4;Silver=#c8c8d8;Starlight=#fff8ff;Crystal violet=#b88aff;Crystal cyan=#7ae0ff;Deep violet=#6a5ab0;Night indigo=#2a1a5a;Lilac=#c8a0e8;Cloud lavender=#c8b8e0;Moon gold=#f0d080;Planet peach=#f0b890;Rose=#ff9ab0;Plum=#7a3a8a;Island moss=#5a8a6a;Twilight blue=#4a4aa8;Star ring=#e8d0ff'),
+  els:[{id:'platform',label:'Platform',styles:['Crystal disc','Moonstone slab','Cloud platform'],def:[0,3]},{id:'under',label:'Underglow',styles:['Crystal spires','Floating stones','Glowing roots'],def:[0,4]},
+       {id:'arch',label:'Arch',none:true,styles:['Open sky','Crescent moon','Planet ring','Star-blossom bower'],def:[1,9]},{id:'scope',label:'Telescope',none:true,styles:['None','Brass telescope','Astrolabe','Star chart'],def:[1,9]},
+       {id:'light',label:'Star lantern',light:true,styles:['Star lantern','Moon orb','Constellation wisps'],def:[0,2]}],
+  seat:['crescent','cloudcushion','crystalstool'], seatNames:['Crescent bench','Cloud cushion','Crystal stool'], seatDef:[0,0],
+  order:[
+    ['under',(o,s,c)=>HK.supports(o,c,['spires','floatstones','glowroots'][s],5)],
+    ['platform',(o,s,c)=>HK.deck(o,c,['crystal','moonstone','cloud'][s])],
+    ['arch',(o,s,c)=>{ if(s) HK.roof(o,c,['','crescent','ring','bower'][s],.02,.46); }],
+    ['scope',(o,s,c)=>{ if(!s) return; const x=HK.at(o,.42), y=o.dockY; if(s===1){ HK.line(o,[x,y,x+W*.008,y-H*.04,x+W*.016,y],'#5a4030',1.2); HK.line(o,[x+W*.002,y-H*.042,x+W*.022,y-H*.062],c,3); } if(s===2){ HK.rect(o,x+W*.006,y-H*.03,2,H*.03,c); o.x.strokeStyle=HK.n(o,c); o.x.lineWidth=1.4; o.x.beginPath(); o.x.arc(x+W*.007,y-H*.045,H*.014,0,7); o.x.stroke(); HK.line(o,[x-W*.004,y-H*.045,x+W*.018,y-H*.045],c,1); } if(s===3){ HK.line(o,[x,y,x+W*.01,y-H*.06,x+W*.02,y],'#5a4030',1.2); HK.rect(o,x+W*.002,y-H*.07,W*.018,H*.03,'#2a1a5a'); for(let i=0;i<5;i++) HK.circ(o,x+W*(.005+i*.003),y-H*(.065-(i%2)*.012),1,c); } }],
+    ['seat'],
+    ['light',(o,s)=>HK.light(o,['star','moon','wisps'][s])]] });
+
+/* 15. Animal Farm: the barn dock */
+hfMake('farm',{ name:'Barn dock', hname:'barn dock',
+  colors:C16('Barn red=#b8322a;Dark barn=#7a2a22;Trim white=#f4f0e6;Fence grey=#9a948a;Weathered board=#8a6a4a;Hay gold=#e0c060;Straw=#d8b46a;Tin=#a8b0b4;Rust tin=#a8683a;Grass green=#6aaa4a;Field green=#3a6a2a;Pond green=#5a7a4a;Sky blue=#a8d8f4;Gingham blue=#5a8ad8;Sunflower=#f0c83a;Mud brown=#6a5038'),
+  els:[{id:'deck',label:'Deck',styles:['Barn-red boards','Weathered boards','Hay-strewn planks'],def:[0,0]},{id:'footing',label:'Footing',styles:['Fence posts','Hay bales','Tractor tyres'],def:[0,4]},
+       {id:'fence',label:'Fence',none:true,styles:['No fence','Picket fence','Post-and-rail','Wagon wheel'],def:[1,2]},{id:'roof',label:'Barn roof',none:true,styles:['Open sky','Tin lean-to','Barn gable','Windmill vane'],def:[2,0]},
+       {id:'light',label:'Lantern',light:true,styles:['Lantern on a nail','String of bulbs','Milk-can lantern'],def:[0,14]}],
+  seat:['haybale','milkcan','rocker'], seatNames:['Hay bale','Milk-can stool','Rocking chair'], seatDef:[0,5],
+  order:[
+    ['footing',(o,s,c)=>HK.supports(o,c,['fence','hay','tyres'][s],5)],
+    ['deck',(o,s,c)=>HK.deck(o,c,['red','boards','hay'][s])],
+    ['fence',(o,s,c)=>{ if(s) HK.rail(o,c,['','picket','postrail','wheel'][s]); }],
+    ['roof',(o,s,c)=>{ if(s===1) HK.roof(o,c,'tin',.02,.4); if(s===2) HK.roof(o,c,'barn',.02,.4); if(s===3){ const x=HK.at(o,.04); HK.rect(o,x,o.dockY-H*.16,2,H*.16,'#7a2a22'); HK.poly(o,[x,o.dockY-H*.16,x+W*.06,o.dockY-H*.14,x+W*.06,o.dockY-H*.12,x,o.dockY-H*.135],c); } }],
+    ['seat'],
+    ['light',(o,s)=>HK.light(o,['nail','bulbs','milkcan'][s])]] });
+
+/* 16. The Buffet: the gingerbread platter */
+hfMake('buffet',{ name:'Gingerbread platter', hname:'platter',
+  colors:C16('Gingerbread=#b8743a;Dark gingerbread=#7a4a22;Wafer=#e8c890;Biscuit=#d8a860;Chocolate=#5a3420;Milk chocolate=#8a5a3a;Icing white=#fff6ee;Strawberry=#f4a0b0;Mint=#a8e0c8;Lemon=#f8e08a;Blueberry=#7a8ad8;Cherry red=#d8303a;Caramel=#d88a3a;Candle gold=#ffd060;Porcelain=#f0f0f4;Broth gold=#e8b060'),
+  els:[{id:'platter',label:'Platter',styles:['Silver platter','Porcelain plate','Giant cracker'],def:[0,14]},{id:'posts',label:'Posts',styles:['Pretzel sticks','Wafer pillars','Candy canes'],def:[0,1]},
+       {id:'trim',label:'Trim',none:true,styles:['No trim','Icing piping','Licorice rope','Breadsticks'],def:[1,6]},{id:'roof',label:'Roof',none:true,styles:['Open sky','Gingerbread roof','Cloche lid','Waffle-cone parasol'],def:[1,0]},
+       {id:'light',label:'Candle',light:true,styles:['Dripping candle','Cupcake candles','Jelly mould'],def:[0,13]}],
+  seat:['cupcake','teacup','macaron'], seatNames:['Cupcake stool','Teacup chair','Macaron pouf'], seatDef:[0,7],
+  order:[
+    ['posts',(o,s,c)=>HK.supports(o,s===2?'#d8303a':c,['pretzel','wafer','cane'][s],5)],
+    ['platter',(o,s,c)=>HK.deck(o,c,['platter','plate','cracker'][s])],
+    ['trim',(o,s,c)=>{ if(s) HK.rail(o,c,['','icing','licorice','breadstick'][s]); }],
+    ['roof',(o,s,c)=>{ if(s===1){ HK.roof(o,c,'gable',.02,.4); for(let i=0;i<10;i++) HK.ell(o,HK.at(o,.02+i*.04),o.dockY-H*.12+H*.004,H*.003,H*.006,'#fff6ee'); } if(s===2) HK.roof(o,c,'cloche',.02,.4); if(s===3) HK.roof(o,c,'cone',.04,.4); }],
+    ['seat'],
+    ['light',(o,s)=>HK.light(o,['dripcandle','cupcake','jellymould'][s])]] });
+
+/* 17. Corporate Pond: the office deck */
+hfMake('corporate',{ name:'Office deck', hname:'office deck',
+  colors:C16('Brushed steel=#a8b0b8;Dark steel=#5a6470;Concrete=#9a9a98;Light concrete=#c8c8c4;Glass cyan=#9ad0e0;Glass blue=#4a6a88;Corporate navy=#1e2e4a;Carpet grey=#6a6e74;Office white=#f4f6f8;Ficus green=#4a8a4a;Coffee brown=#6a4a32;Sticky yellow=#f8e070;Ticker green=#4ad86a;Ticker red=#e84a4a;Lanyard blue=#2a6ad8;Walnut=#8a5a3a'),
+  els:[{id:'floor',label:'Floor',styles:['Carpet tiles','Polished concrete','Walnut boardroom'],def:[0,7]},{id:'supports',label:'Supports',styles:['Steel columns','Glass legs','Filing cabinets'],def:[0,0]},
+       {id:'partition',label:'Partition',none:true,styles:['None','Glass balustrade','Cubicle wall','Velvet rope'],def:[1,4]},{id:'awning',label:'Awning',none:true,styles:['Open sky','Glass awning','Logo umbrella','Ceiling tiles'],def:[1,4]},
+       {id:'light',label:'Lamp',light:true,styles:['Desk lamp','Floor lamp','Open 9–5 sign'],def:[0,8]}],
+  seat:['swivel','executive','beanbag'], seatNames:['Swivel chair','Executive chair','Beanbag'], seatDef:[0,6],
+  order:[
+    ['supports',(o,s,c)=>HK.supports(o,c,['iron','glass','cabinet'][s],5)],
+    ['floor',(o,s,c)=>HK.deck(o,c,['carpet','concrete','walnut'][s])],
+    ['partition',(o,s,c)=>{ if(s) HK.rail(o,c,['','glass','cubicle','velvet'][s]); }],
+    ['awning',(o,s,c)=>{ if(s===1) HK.roof(o,c,'glass',.02,.44); if(s===2) HK.roof(o,c,'logoumbrella',.06,.4); if(s===3) HK.roof(o,c,'ceiling',.02,.44); }],
+    ['seat'],
+    ['light',(o,s)=>HK.light(o,['desk','floor','sign'][s])]] });
+
+/* 18. The Nile: the reed boat (floats) */
+hfMake('nile',{ name:'Reed boat', hname:'reed boat', floats:true,
+  colors:C16('Sandstone=#d8b880;Dark sandstone=#a8844a;Limestone=#ece0c4;Papyrus reed=#c8b060;Papyrus green=#6a9a4a;Palm wood=#7a5a3a;Linen=#f0e8d4;Gold leaf=#d8a830;Bright gold=#f0c84a;Lapis blue=#2a4a9a;Turquoise=#3ab0a8;Nile teal=#2a7a80;Carnelian=#b8402e;Ochre=#c8803a;Kohl black=#2a2428;Lotus pink=#f0a8b8'),
+  els:[{id:'hull',label:'Hull',styles:['Papyrus reeds','Wooden felucca','Gilded barque'],def:[0,3]},{id:'sail',label:'Sail',styles:['Lateen sail','Square sail','Painted eye sail'],def:[0,6]},
+       {id:'cabin',label:'Cabin',none:true,styles:['No cabin','Linen awning','Shrine canopy','Striped tent'],def:[1,6]},{id:'cargo',label:'Cargo',none:true,styles:['No cargo','Amphorae','Fish baskets','Scroll chest'],def:[1,13]},
+       {id:'light',label:'Lamp',light:true,styles:['Lotus lamp','Bronze brazier','Sun-disc lantern'],def:[0,15]}],
+  seat:['lionstool','xstool','throne'], seatNames:['Lion-foot stool','Folding X stool','Gilded throne'], seatDef:[0,5],
+  order:[
+    ['hull',(o,s,c)=>HK.hull(o,c,['reed','felucca','barque'][s])],
+    ['sail',(o,s,c)=>{ const x=HK.at(o,.6), y=o.dockY, top=y-H*.24; HK.rect(o,x,top,2.4,H*.24,'#7a5a3a'); if(s===0){ HK.line(o,[x-W*.04,y-H*.04,x+W*.02,top-H*.02],'#7a5a3a',1.6); HK.poly(o,[x-W*.036,y-H*.05,x+W*.018,top-H*.012,x+W*.03,y-H*.05],c); } else { HK.rect(o,x-W*.03,top+H*.02,W*.06,2,'#7a5a3a'); HK.poly(o,[x-W*.03,top+H*.022,x+W*.03,top+H*.022,x+W*.026,y-H*.06,x-W*.026,y-H*.06],c); if(s===2){ HK.ell(o,x,top+H*.09,W*.01,H*.008,'#f4f0e6'); HK.circ(o,x,top+H*.09,H*.006,'#2a4a9a'); HK.line(o,[x-W*.012,top+H*.09,x-W*.016,top+H*.1],'#2a2428',1.4); } } }],
+    ['cabin',(o,s,c)=>{ if(s===1) HK.roof(o,c,'flat',.04,.4); if(s===2) HK.roof(o,c,'pediment',.04,.4); if(s===3) HK.roof(o,c,'stripedtent',.04,.4); }],
+    ['cargo',(o,s,c)=>{ if(!s) return; const x=HK.at(o,.78), y=o.dockY; if(s===1) for(let i=0;i<2;i++){ HK.ell(o,x+i*W*.012,y-H*.016,W*.005,H*.016,c); HK.rect(o,x+i*W*.012-W*.002,y-H*.036,W*.004,H*.006,c); } if(s===2) for(let i=0;i<2;i++){ HK.poly(o,[x+i*W*.014,y,x+i*W*.014+W*.012,y,x+i*W*.014+W*.014,y-H*.018,x+i*W*.014-W*.002,y-H*.018],c); HK.ell(o,x+i*W*.014+W*.006,y-H*.02,W*.006,H*.004,'#c0c8cc'); } if(s===3){ HK.block(o,x,y-H*.022,W*.024,H*.022,'#7a5a3a'); HK.rect(o,x+W*.004,y-H*.03,W*.016,H*.008,c); } }],
+    ['seat'],
+    ['light',(o,s)=>HK.light(o,['lotus','brazier','sundisclamp'][s])]] });
+
+/* 19. Circuit Lake: the hover pad (hovers above the water) */
+hfMake('circuit',{ name:'Hover pad', hname:'hover pad',
+  colors:C16('Chrome=#c8ccd8;Gunmetal=#3a3e4a;Carbon=#1a1c22;Hot pink=#ff4ab8;Neon magenta=#d83ad8;Electric cyan=#3ae8ff;Deep blue=#1a1a4a;Violet=#8a3a9a;Hologram lilac=#c8a0ff;Acid green=#7aff4a;Warning yellow=#ffe04a;LED white=#f4f8ff;Night purple=#2a1050;Cable black=#0e0e14;Sunset pink=#ff7ab8;Teal glow=#2ad8c8'),
+  els:[{id:'pad',label:'Pad',styles:['Chrome plate','Carbon deck','Circuit glass'],def:[0,0]},{id:'thrust',label:'Thrusters',styles:['Anti-gravity rings','Thruster jets','Magnetic coils'],def:[0,5]},
+       {id:'trim',label:'Trim',none:true,styles:['No trim','Neon strip','Hologram rail','Cable rail'],def:[1,3]},{id:'canopy',label:'Canopy',none:true,styles:['Open sky','Hologram canopy','Neon arch','Vending machine'],def:[1,8]},
+       {id:'light',label:'Neon light',light:true,styles:['Neon tube','Hologram','LED orb'],def:[0,3]}],
+  seat:['gaming','orbseat','arcadestool'], seatNames:['Gaming chair','Orb seat','Arcade stool'], seatDef:[0,2],
+  order:[
+    ['thrust',(o,s,c)=>HK.supports(o,c,['rings','jets','coils'][s],4)],
+    ['pad',(o,s,c)=>HK.deck(o,c,['chrome','carbon','glass'][s])],
+    ['trim',(o,s,c)=>{ if(s) HK.rail(o,c,['','neon','holo','cable'][s]); }],
+    ['canopy',(o,s,c)=>{ if(s===1) HK.roof(o,c,'holo',.02,.44); if(s===2) HK.roof(o,c,'neonarch',.04,.44); if(s===3){ const a=HK.at(o,.02); HK.block(o,a,o.dockY-H*.13,W*.034,H*.13,c); HK.rect(o,a+W*.004,o.dockY-H*.12,W*.02,H*.06,'#3ae8ff'); for(let i=0;i<3;i++) HK.rect(o,a+W*.006,o.dockY-H*.115+i*H*.018,W*.016,H*.008,['#ff4ab8','#7aff4a','#ffe04a'][i]); } }],
+    ['seat'],
+    ['light',(o,s)=>HK.light(o,['neontube','hologram','orb'][s])]] });
+
+/* 20. Mount Olympus: the temple porch */
+hfMake('olympus',{ name:'Temple porch', hname:'temple porch',
+  colors:C16('White marble=#f0ecf4;Veined marble=#d8d4e4;Shadow marble=#b8b4c8;Gold=#d8a830;Bright gold=#f4d060;Bronze=#a8743a;Laurel green=#6a8a4a;Olive=#8a9a5a;Royal blue=#2a4aa8;Cerulean=#4aa0d8;Sky blue=#a0c0f4;Cloud white=#ffffff;Storm violet=#5a4a9a;Lightning yellow=#fff07a;Tyrian purple=#7a2a6a;Terracotta=#c8683a'),
+  els:[{id:'floor',label:'Floor',styles:['White marble','Mosaic','Cloud floor'],def:[0,0]},{id:'columns',label:'Columns',styles:['Fluted columns','Cloud pillars','Yggdrasil roots'],def:[0,1]},
+       {id:'balustrade',label:'Balustrade',none:true,styles:['None','Marble balustrade','Laurel garland','Golden rail'],def:[0,0]},{id:'roof',label:'Roof',none:true,styles:['Open sky','Pediment','Winged sun disc','Rainbow arch'],def:[1,0]},
+       {id:'light',label:'Brazier',light:true,styles:['Golden brazier','Lightning orb','Laurel torch'],def:[0,3]}],
+  seat:['marblethrone','cloudbench','klismos'], seatNames:['Marble throne','Cloud bench','Klismos chair'], seatDef:[0,0],
+  order:[
+    ['columns',(o,s,c)=>HK.supports(o,c,['column','cloud','mangrove'][s],5)],
+    ['floor',(o,s,c)=>HK.deck(o,c,['marble','mosaic','cloud'][s])],
+    ['balustrade',(o,s,c)=>{ if(s) HK.rail(o,c,['','balustrade','garland','gold'][s]); }],
+    ['roof',(o,s,c)=>{ if(s) HK.roof(o,c,['','pediment','sundisc','rainbow'][s],.02,.44); }],
+    ['seat'],
+    ['light',(o,s)=>HK.light(o,['goldbrazier','lightning','laurel'][s])]] });
 // =====================================================================
 // 0.4.9 fish features for the new waters (director: "visually scan the new maps and oddities and fish ... don't overly use duplicated
 // assets ... Everything should feel original"). The body is the usual fish; these features sit on top so each end-game water's fish read
@@ -18961,10 +19631,12 @@ body.phone-app #panel .hm-note,body.phone-land #panel .hm-note{margin:8px 2px 4p
       if(P.querySelector(':scope > .hf-mark')){ const sp=hfSpec(S.loc), land=document.body.classList.contains('phone-land'); P.dataset.dkLand=land?'1':'0';
         P.classList.add('aq07','dk08'); P.classList.toggle('aq07-open',DK_OPEN);
         const stage=h('div','aq07-stage'); tile.before(stage); tile.classList.add('dk08-view'); tile.removeAttribute('style'); stage.appendChild(tile); cv.removeAttribute('style');
-        const bar=h('div','aq07-bar'); stage.after(bar);
-        bar.appendChild(h('div','aq07-bank dk08-bank',`<div><span class="sub">Your home</span><b>${esc(sp.name)}</b></div><div><span class="sub">Parts</span><b>${sp.els.length} to change</b></div><div><span class="sub">Cost</span><b>All free</b></div>`));
+        /* no strip under the view (director, 2026-11-21: it ate space and said little): where you are is a small label on the view, and
+           Options / Hide sits on the view's corner */
+        stage.appendChild(h('div','dk08-where',`${esc(LOCS[locIdx(S.loc)].name)}<span> · ${esc(sp.hname)}</span>`));
+        const bar=h('div','aq07-bar dk08-ov'); stage.appendChild(bar);
         mkTog(P,bar,land,'Show the parts of your '+sp.hname,'Hide the parts and see your whole '+sp.hname);
-        const sheet=h('div','aq07-sheet'), body=h('div','aq07-body'), sec=h('div','aq07-sec dk08-sec-home'); bar.after(sheet); sheet.appendChild(nav); sheet.appendChild(body); body.appendChild(sec);
+        const sheet=h('div','aq07-sheet'), body=h('div','aq07-body'), sec=h('div','aq07-sec dk08-sec-home'); stage.after(sheet); sheet.appendChild(nav); sheet.appendChild(body); body.appendChild(sec);
         P.querySelectorAll(':scope > [data-hel]').forEach(el=>sec.appendChild(el));
         [...P.children].forEach(ch=>{ if(ch!==stage&&ch!==bar&&ch!==sheet&&!ch.classList.contains('crumb')&&!ch.classList.contains('hf-mark')) ch.remove(); });
         nav.addEventListener('click',()=>{ body.scrollTop=0; });
@@ -19035,6 +19707,12 @@ body.phone-app #panel .hm-note,body.phone-land #panel .hm-note{margin:8px 2px 4p
 document.head.insertAdjacentHTML('beforeend',`<style>
 html body.phone-app #menuov #panel.dk08 .aq07-stage > .dk08-view,html body.phone-land #menuov #panel.dk08 .aq07-stage > .dk08-view{flex:1 1 auto;min-height:0;margin:0!important;padding:0!important;border-radius:16px;overflow:hidden;display:block}
 html body.phone-app #menuov #panel.dk08 .dk08-view > canvas,html body.phone-land #menuov #panel.dk08 .dk08-view > canvas{width:100%!important;height:100%!important;display:block;touch-action:pan-y}
+html body.phone-app #menuov #panel.dk08 .aq07-stage,html body.phone-land #menuov #panel.dk08 .aq07-stage{position:relative}
+html body.phone-app #menuov:has(#panel.dk08) .mo-tools > .mo-coin,html body.phone-land #menuov:has(#panel.dk08) .mo-tools > .mo-coin{display:none} html body.phone-app #menuov:has(#panel.dk08) [data-mo="settings"],html body.phone-land #menuov:has(#panel.dk08) [data-mo="settings"]{visibility:hidden;width:0!important;min-width:0!important;padding:0!important;margin:0!important;border:0!important;overflow:hidden}
+html body.phone-app #menuov #panel.dk08 .chips.mb-swrow > *,html body.phone-land #menuov #panel.dk08 .chips.mb-swrow > *{flex:0 0 calc(12.5% - 7px)!important;min-width:0!important;width:calc(12.5% - 7px)!important;padding-left:0!important;padding-right:0!important;justify-content:center} /* 16 colours = 2 full rows of 8 (director) */
+html body.phone-app #menuov #panel.dk08 .dk08-where,html body.phone-land #menuov #panel.dk08 .dk08-where{position:absolute;left:8px;top:8px;z-index:2;max-width:calc(100% - 16px);padding:3px 10px;border-radius:999px;background:#050e14b8;color:#eaf3fa;font:800 11px var(--display);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;pointer-events:none}
+html body.phone-app #menuov #panel.dk08 .dk08-where span,html body.phone-land #menuov #panel.dk08 .dk08-where span{color:#9fb2c8;font-weight:700}
+html body.phone-app #menuov #panel.dk08 .aq07-bar.dk08-ov,html body.phone-land #menuov #panel.dk08 .aq07-bar.dk08-ov{position:absolute!important;right:8px;bottom:8px;left:auto!important;top:auto!important;z-index:2;width:auto!important;min-height:0!important;margin:0!important;padding:0!important;background:none!important;border:0!important;box-shadow:none!important}
 html body.phone-app #menuov #panel.dk08 .dk08-hint,html body.phone-land #menuov #panel.dk08 .dk08-hint{position:absolute;left:50%;bottom:8px;transform:translateX(-50%);margin:0;padding:3px 10px;border-radius:999px;background:#050e14b0;color:#cfe0ee;font:700 10.5px var(--display);white-space:nowrap;pointer-events:none}
 html body.phone-app #menuov #panel.dk08 .dk08-bank,html body.phone-land #menuov #panel.dk08 .dk08-bank{grid-template-columns:repeat(3,minmax(0,1fr))!important}
 html body.phone-app #menuov #panel.dk08 .dk08-bank b,html body.phone-land #menuov #panel.dk08 .dk08-bank b{display:block;font:800 14px var(--display)!important;color:#fff;overflow:hidden;text-overflow:ellipsis}
@@ -19571,7 +20249,7 @@ html body.phone-land .hud > .mb-stat8 > .stat.loc .lbl::after,html body.phone-ap
     if(!h){ h=document.createElement('button'); h.type='button'; h.id='mbhome'; h.className='stat hudx mb-x mb-home'; h.innerHTML='<span class="lbl">Home</span><b></b>'; h.title='Your home at this water. Tap to open it.';
       h.addEventListener('pointerdown',e=>e.stopPropagation()); h.addEventListener('click',e=>{ e.stopPropagation(); e.preventDefault(); try{ startAudio(); }catch(er){} openMenu('home'); }); }
     if(h.previousElementSibling!==aq) aq.after(h);
-    let v='—'; try{ v=cozy()+' ♥'; }catch(e){} const b=h.querySelector('b'); if(b.textContent!==v) b.textContent=v; };
+    let v='—'; try{ const hn=((HOMEF[S.loc]&&HOMEF[S.loc].hname)||'home').split(' ').pop(); v=hn.charAt(0).toUpperCase()+hn.slice(1); /* the last word fits the narrowest chip */ }catch(e){} /* the home's name (batch 5: the cozy score is gone) */ const b=h.querySelector('b'); if(b.textContent!==v) b.textContent=v; };
   ensure(); setInterval(ensure,1000); addEventListener('resize',()=>setTimeout(ensure,220)); } /* built as the page loads (a 60 ms delay let the top bar open without Home and then shift; the QA top-bar check caught it right after a reload) */
 document.head.insertAdjacentHTML('beforeend',`<style>html body.phone-land .hud > .mb-stat8,html body.phone-land .hud > .mb-stat8 > .stat{flex:0 0 auto!important;min-width:max-content!important}html body.phone-land .hud > .mb-stat8 > .stat .lbl,html body.phone-land .hud > .mb-stat8 > .stat b{white-space:nowrap!important;overflow:visible!important;text-overflow:clip!important}html body.phone-land .hud.mb-compact{column-gap:3px!important}html body.phone-land .hud.mb-compact > .stat,html body.phone-land .hud.mb-compact > .hud-link,html body.phone-land .hud.mb-compact > .stat.mb-x,html body.phone-land .hud.mb-compact > .mb-stat8 > .stat{padding-left:3px!important;padding-right:3px!important}html body.phone-land .hud.mb-compact > .mb-stat8{padding:0 2px!important}</style>`); /* the info box never squeezes its words (when even that is not enough, .mb-compact trims every chip’s padding, fit() above); the chips to its right make room (Tasks steps aside first) */
 /* round 8 (director, 2026-11-18: "goal shouldn't be on the top header. Bait should move up there instead"): the goal lives in Quests
@@ -20194,7 +20872,7 @@ PATCHES.unshift({v:'0.4.8', name:'Rewards Worth Chasing', items:phoneNotes([
 PATCHES.unshift({v:'0.4.8.1', name:'Smoother and Steadier', items:phoneNotes([
   '## Shiny fish come alive',
   'Shiny fish sparkle for real: flashes of light that pop on new spots of the fish, flare and fade, with glitter and sweeping shine. It shows everywhere: in the water, the aquarium tank, the catch card and every list.',
-  'Every shiny fish has its own style of sparkle, and each prismatic kind has its own signature: Rainbow shifts colour, Starry twinkles with shooting stars, Spectral sheds ghostly wisps, Ancient drifts gold dust.',
+  'Every shiny fish has its own style of sparkle, and each prismatic kind has its own signature: Rainbow shifts color, Starry twinkles with shooting stars, Spectral sheds ghostly wisps, Ancient drifts gold dust.',
   '## A cleaner look',
   'Teal means you can tap it, gold means it is open or chosen (your current water, your favourite pet, the page you are on).',
   'Held sideways, the side panel is a tidy card with even buttons, the same open and closed; hide and show sits at the bottom.',
@@ -20220,7 +20898,7 @@ PATCHES.unshift({v:'0.4.8.1', name:'Smoother and Steadier', items:phoneNotes([
   '## Waters and fixes',
   'Stonebrook River has been reworked: a village on the hill, the river running on through the bridge arches, a rowboat tied at the mill jetty and a new waterwheel.',
   'The Saltmarsh seal is a real seal now. Aquarium fish and decorations are a little smaller, so every piece can be seen.',
-  'Prismatic fish keep their colours in the Aquarium list; Market Rush shows a clear money bag.',
+  'Prismatic fish keep their colors in the Aquarium list; Market Rush shows a clear money bag.',
   'Your angler’s nearer shoe is drawn in front, the Ocean Sunfish’s fins sit on its body, and the otters swim clear of the rocks.'])});
 PATCHES.unshift({v:'0.4.8.3', name:'One Look, Easy Aquarium', items:phoneNotes([
   {android:'Full screen stays on: if you left the game in full screen, closing or switching away from the app no longer forgets it; your first tap when you come back puts it back.'},
@@ -20249,7 +20927,7 @@ PATCHES.unshift({v:'0.4.8.3', name:'One Look, Easy Aquarium', items:phoneNotes([
   'Upright, page tabs (Tackle, Rods, Skills, Paths...) always fit on screen with an icon each: no more sideways scrolling to find a page.',
   'Upright, the Fishing tab lights up gold while you fish, like the side panel does sideways.',
   '## A new aquarium',
-  'The tank stays on screen while you scroll: upright it sits at the top, sideways it is on the left. Every new fish, water colour and decoration shows the moment you pick it.',
+  'The tank stays on screen while you scroll: upright it sits at the top, sideways it is on the left. Every new fish, water color and decoration shows the moment you pick it.',
   'The tank is bigger and always fully drawn (it used to stop short of the bottom). Earnings, Collect and Feed sit right under it.',
   'Switching between Your tank, Decorate and Add fish is instant, and the tank keeps swimming while you try, place or buy things (it used to blink and restart).',
   'New Add fish tab: put fish from your Cooler on display without leaving the aquarium.',
@@ -20287,7 +20965,7 @@ PATCHES.unshift({v:'0.4.8.5', name:'Easy Finds', items:phoneNotes([
   {ios:'Hints speak touch only (no keyboard keys), and homes are called homes everywhere, not docks. Save, App shows how to put Driftline on your Home Screen.'},
   'The top bar is tidier: a small Goal chip shows your next goal in a few words and opens exactly the right page; live events get their own Live chip; Tasks and Tide Pass sit up there too when there is room.',
   'Your home shows the real home of every water (boat, pier, ice camp, beach, raft, ledge...), live, with only the options that fit it.',
-  'Colour choices are small round swatches, with the chosen colour named next to the heading.',
+  'Colour choices are small round swatches, with the chosen color named next to the heading.',
   'Every menu page is now organised like the aquarium: the important numbers and the main button first (Sell all, Reset skills...), the sections as tabs at the top, one list that scrolls. Badges show where a reward is waiting.',
   'The Wardrobe shows your angler big, with the categories in Options. Pages keep your place when something changes, and open faster.',
   'Your home is laid out like the aquarium: your home fills the screen, with Options to open Your home and Decorations. Tap a decoration to try it, tap again to buy or place.',
@@ -20352,7 +21030,7 @@ PATCHES.unshift({v:'0.4.8.6.2', name:'Fixes', items:phoneNotes([
   'Much smoother with a decorated home: decorations on the dock (and on boats and floating docks) no longer slow the game down.',
   'Smoother fights, storms, dusk, dawn and weather changes on phones.',
   'Stardust is now always the best rare bait at Starfall Lake (odds ×2.5 there).',
-  'Lighter on phones: glowing lights (lanterns, lamps, Starfall’s sky) and coloured pets cost far less to draw, and the game no longer stays at a lower sharpness after switching waters.',
+  'Lighter on phones: glowing lights (lanterns, lamps, Starfall’s sky) and colored pets cost far less to draw, and the game no longer stays at a lower sharpness after switching waters.',
   'Opening and closing a menu no longer shows another water’s scenery for a moment.',
   'After moving your progress from another device, patch notes you already saw on this phone don’t come back.',
   'Android draws a steady 60 frames a second (also on 120 Hz screens) and iPhone runs at its natural rate; the frame-rate choice is gone from Settings.',
@@ -20360,7 +21038,7 @@ PATCHES.unshift({v:'0.4.8.6.2', name:'Fixes', items:phoneNotes([
   'Android: the game is always full screen, like on iPhone: the installed game opens without the bars, and a tap brings full screen back if they appear.'])});
 PATCHES.unshift({v:'0.4.8.7', name:'Lighter and Smoother', items:phoneNotes([
   'Willow Pond runs much smoother on phones.',
-  'Less work on every frame, everything looks the same: lights and glows, still home decorations, coloured pets, the top bar and Starfall’s sky all cost less to draw.',
+  'Less work on every frame, everything looks the same: lights and glows, still home decorations, colored pets, the top bar and Starfall’s sky all cost less to draw.',
   'In narrow windows (split-screen), the top bar shows Home again and your coins, level and water are readable instead of cut off.'])});
 PATCHES.unshift({v:'0.4.8.8', name:'Fixes and Small Wishes', items:phoneNotes([
   '## New',
@@ -20495,6 +21173,10 @@ PATCHES.unshift({v:'0.4.9', name:'Work in progress', items:phoneNotes([
   'Small iPhones: the top bar keeps every word whole; when room runs out, the chips sit a little closer together instead of cutting the bait name.',
   'Menus use much less memory: pictures a page no longer shows are let go at once, and outfit previews share their drawing space (iPhones could run short of memory after opening many pages).',
   'A few fish that shared a name with another now have names of their own (your Fish Log keeps every catch). Tall creatures show whole in their pictures, and picking an option in a menu no longer makes the page jump.',
+  '## Homes and music',
+  'Every water has its own home now, built from that water’s look and story, from a mill landing with a waterwheel to a hover pad and a temple porch. Each has a seat plus 5 parts of its own, 3 styles each and 16 colors, all free.',
+  'Every water has its own music, softer at night.',
+  'Home decorations and the cozy bonus are gone. The Tide Pass gives aquarium decorations instead, and the Homebody path is now Pet Nap: rest, and your pets grow closer by themselves.',
   '## Fixes',
   'Aquarium boosts show what you really get: a titled shiny’s lift on the other fish now counts on the Aquarium page, in each fish’s line and on the catch card.',
   'Catch cards always show what you caught (after a shiny or mythic fish, the next card kept showing that fish), and the side panel stays on screen while one shows.',
@@ -20508,6 +21190,15 @@ PATCHES.unshift({v:'0.4.9', name:'Work in progress', items:phoneNotes([
 // text changes. Released notes live in notes_release.js.
 const TEST_NOTES={v:'test', label:'Test build · '+(window.DL_BUILD==='ios'?'iPhone':'Android'), name:'0.4.9 test build (newest first)', items:[
   '## New in this build',
+  'Every water now has its own home, made from that water’s look and story: a mill landing with a waterwheel, a tea house deck, a pier end, an ice camp, a lodge ledge, a beach hut, a flats skiff, a sport-fishing boat, a stilt house, a trawler, a salvage raft, a bathhouse, a crystal platform, a barn dock, a gingerbread platter, an office deck, a reed boat, a hover pad and a temple porch.',
+  'Every home has a seat plus 5 parts of its own, 3 styles each, and one list of 16 colors. Boats, rafts and platforms bob on the water. Resting sits you in your seat.',
+  'Every water has its own music now (12 new themes), and each plays softer at night.',
+  'Home decorations and the cozy bonus are gone (decorations were cheap and every home part is free). The Tide Pass gives aquarium decorations instead, and the Homebody path is now Pet Nap: while you rest, your pets nap beside you and their bond grows by itself.',
+  'Your home at Willow Pond, reworked from the director’s notes: 6 parts (Light, Deck, Posts, Rail, Canopy and a new Seat), 3 styles each, and one list of 16 colors shared by every part so pieces can match.',
+  'New styles: a log deck, round piles with rope, a low log rail, a lean-to roof and a sailcloth shade (drawn from the side like the umbrella), and three seats: a camp chair, a log bench and a deck chair. Resting sits you in your seat.',
+  'The posts run all the way down and fade into the water, the water flows past them instead of rings growing and shrinking, and the umbrella stands on the deck instead of the rail.',
+  'The Home preview shows just your home. Where you are is a small label on the view; the strip under it is gone.',
+  '## Test build 2338',
   'Cam’s fish feel update: tension builds a little while you reel and only falls when you stop (steadily, slower during a move). Temper empties in about 3 s once you stop; a fish at full temper moves up to 3 times as often (each move costs it less Fight). Reeling into a move drains its Fight faster.',
   'Between moves a fish sometimes swims toward you for a moment: reel faster then. Tired fish come in faster, most for common fish.',
   'Second winds: rare and epic fish can get one more, legendary and mythic two more, each a coin flip while the fish is tired, so a fish can no longer just be waited out.',
@@ -21205,12 +21896,14 @@ T('page tabs: a part hidden by a page tab never stays on screen (a forced style 
     for(const p of PETS) if((p.src==='crate'||p.src==='gift')&&p.name&&word(p.name).test(items)) e.push(p.src+' pet: '+p.name);
     const odds=items.match(/\b\d+(\.\d+)?\s?% (chance|odds)\b/gi); if(odds) e.push('exact odds: '+odds.join(', '));
     return e.length?{ok:false,detail:e.slice(0,10).join(' | ')}:{ok:true,detail:'version '+P0.v+', '+(P0.items||[]).length+' lines'}; });
-  T('home format (docs/HOME_STANDARD.md): every format home has 5 parts (the light first), 3 styles and 6-9 colors each, every style and color paints by day and night, choices survive a save, the pets keep their fixed spots',()=>{ const e=[]; let n=0; const keepDock=JSON.parse(JSON.stringify(S.dock)), keepLoc=S.loc;
+  T('home format (docs/HOME_STANDARD.md): every format home has 6 features (a seat and one carrying its light), 3 styles each and one shared list of 16+ colours, every style and color paints by day and night, choices survive a save, the pets keep their fixed spots',()=>{ const e=[]; let n=0; const keepDock=JSON.parse(JSON.stringify(S.dock)), keepLoc=S.loc;
     try{ for(const id in HOMEF){ const sp=HOMEF[id]; if(!LOCS.some(L=>L.id===id)) e.push(id+': not a water');
-        if(sp.els.length!==5) e.push(id+': '+sp.els.length+' parts (5)'); if(!sp.els[0]||sp.els[0].id!=='light') e.push(id+': the light is not the first part');
-        for(const el of sp.els){ if(el.styles.length!==(el.none?4:3)) e.push(id+' '+el.id+': '+el.styles.length+' styles ('+(el.none?'nothing + 3':'3')+')'); if(el.colors.length<6||el.colors.length>9) e.push(id+' '+el.id+': '+el.colors.length+' colors (6-9)'); }
+        if(sp.els.length!==6) e.push(id+': '+sp.els.length+' features (6)'); if(!sp.els.some(x=>x.id==='seat')) e.push(id+': no seat'); if(!Array.isArray(sp.colors)||sp.colors.length<16) e.push(id+': '+(sp.colors||[]).length+' shared colours (16+)'); if(!sp.els.some(x=>x.light||x.id==='light')) e.push(id+': no feature carries its light');
+        for(const el of sp.els){ if(el.styles.length!==(el.none?4:3)) e.push(id+' '+el.id+': '+el.styles.length+' styles ('+(el.none?'nothing + 3':'3')+')'); }
         S.loc=id; const P0=v3palette.v||v3palette(id,0,.1,0);
-        for(const el of sp.els) for(let s=0;s<el.styles.length;s++) for(let c=0;c<el.colors.length;c++){ S.dock.el=Object.assign({},S.dock.el||{},{[el.id]:[s,c]}); for(const nt of [0,.9]){ delete HF_CACHE[id]; try{ const cc=hfPaintCache(LOCS[locIdx(id)],P0,nt,HF.dockY()); n++; if(!cc.cv.width||!cc.cv.height) e.push(id+' '+el.id+' '+s+'/'+c+': empty picture'); if(el.id==='light'&&!cc.lights.length) e.push(id+' light style '+s+': no light spot'); }catch(er){ e.push(id+' '+el.id+' '+s+'/'+c+': '+er.message); } } }
+        /* every style (default colour, by day and night) and every colour (first style, by day), painted small: the same coverage of every drawing path at a fraction of the work (batch 5: 20 homes at full size blocked the page for minutes) */
+        for(const el of sp.els){ const dc=(el.def||[0,0])[1]; const runs=[]; for(let s=0;s<el.styles.length;s++) for(const nt of [0,.9]) runs.push([s,dc,nt]); for(let c=0;c<sp.colors.length;c++) runs.push([0,c,0]);
+          for(const [s,c,nt] of runs){ S.dock.el=Object.assign({},S.dock.el||{},{[el.id]:[s,c]}); delete HF_CACHE[id]; try{ const cc=hfPaintCache(LOCS[locIdx(id)],P0,nt,HF.dockY(),.25); n++; if(!cc.cv.width||!cc.cv.height) e.push(id+' '+el.id+' '+s+'/'+c+': empty picture'); if((el.light||el.id==='light')&&!cc.lights.length) e.push(id+' light style '+s+': no light spot'); }catch(er){ e.push(id+' '+el.id+' '+s+'/'+c+': '+er.message); } } }
         S.dock.el={light:[2,3],deck:[1,4]}; const back=dockCopy(JSON.parse(JSON.stringify(S.dock))); if(JSON.stringify(back.el)!==JSON.stringify({light:[2,3],deck:[1,4]})) e.push(id+': choices lost in a save ('+JSON.stringify(back.el)+')');
         const bad=dockCopy({el:{light:[99,0],deck:'x',posts:[1,2,3]}}); if(Object.keys(bad.el||{}).length) e.push(id+': a broken choice survived ('+JSON.stringify(bad.el)+')'); }
     } finally{ S.dock=keepDock; S.loc=keepLoc; for(const k in HF_CACHE) delete HF_CACHE[k]; }
