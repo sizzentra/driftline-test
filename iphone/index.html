@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="DL Test iPhone">
 <script>
-window.DL_BUILD='ios'; window.DL_PREVIEW=true; if(/[?&]sweep\b/.test(location.search)){ window.__bootErr=[]; addEventListener("error",function(e){ __bootErr.push(String(e.message||e)+(e.lineno?" (line "+e.lineno+")":"")); }); addEventListener("unhandledrejection",function(e){ __bootErr.push("promise: "+String(e.reason&&e.reason.message||e.reason)); }); window.requestAnimationFrame=function(f){ return setTimeout(function(){ f(performance.now()); },16); }; window.cancelAnimationFrame=function(i){ clearTimeout(i); }; } if(/[?&]frozen\b/.test(location.search)){ var __fz=20261122; Math.random=function(){ __fz|=0; __fz=__fz+0x6D2B79F5|0; var t=Math.imul(__fz^__fz>>>15,1|__fz); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; var __fc=0, __pn=performance.now.bind(performance); performance.now=function(){ __fc+=0.01; return 100000+__fc; }; Date.now=function(){ return 1795300000000+Math.floor(__fc); }; window.__frozenClock=function(){ return __fc; }; window.requestAnimationFrame=function(){ return 0; }; window.cancelAnimationFrame=function(){}; } window.DL_VERSION='2026.11.22-1509';
+window.DL_BUILD='ios'; window.DL_PREVIEW=true; if(/[?&]sweep\b/.test(location.search)){ window.__bootErr=[]; addEventListener("error",function(e){ __bootErr.push(String(e.message||e)+(e.lineno?" (line "+e.lineno+")":"")); }); addEventListener("unhandledrejection",function(e){ __bootErr.push("promise: "+String(e.reason&&e.reason.message||e.reason)); }); window.requestAnimationFrame=function(f){ return setTimeout(function(){ f(performance.now()); },16); }; window.cancelAnimationFrame=function(i){ clearTimeout(i); }; } if(/[?&]frozen\b/.test(location.search)){ var __fz=20261122; Math.random=function(){ __fz|=0; __fz=__fz+0x6D2B79F5|0; var t=Math.imul(__fz^__fz>>>15,1|__fz); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; var __fc=0, __pn=performance.now.bind(performance); performance.now=function(){ __fc+=0.01; return 100000+__fc; }; Date.now=function(){ return 1795300000000+Math.floor(__fc); }; window.__frozenClock=function(){ return __fc; }; window.requestAnimationFrame=function(){ return 0; }; window.cancelAnimationFrame=function(){}; } window.DL_VERSION='2026.11.22-1605';
 window.addEventListener('beforeinstallprompt',function(e){ e.preventDefault(); window.__dlInstallPrompt=e; });
 </script>
 </head>
@@ -5369,6 +5369,7 @@ function v3fishRing(P,t,hz,per,x0,x1){ const k=(t%per)/per, i=Math.floor(t/per),
 // STONEBROOK RIVER: fresh morning, a stone arch bridge, a mossy waterwheel mill,
 // fast current lines, foam around rocks, a kingfisher, a heron, leaping trout
 // =====================================================================
+// its colours below; the scene and everything drawn on it: src/w_river.js
 V3PAL.river = {
   day:  {top:'#6aa6d8', mid:'#a8d0ec', bot:'#eef0e2', glow:'#fff6d8', far:'#9ab8b0', farHaze:'#d0e2dc', hill:'#6a9a5e', back:'#4f8050', front:'#36603c', bank:'#5a8a4e', wTop:'#a8d4d8', wMid:'#5a9aa4', wBot:'#28525e', rim:'#fff4cc', stone:'#bab2a2', stoneD:'#8a8478', roof:'#7a4a3a', wood:'#7a5a3e', leaf:'#6aa65a', leafHi:'#c8e89a', cloud:'#ffffff', cloudLit:'#fff4e0', cabin:'#8a6a4a'},
   dusk: {top:'#2a2a5a', mid:'#c0607a', bot:'#ffc890', glow:'#ffd090', far:'#8a6a8e', farHaze:'#e89a98', hill:'#4a4a6a', back:'#3a3a5e', front:'#2a2a48', bank:'#3a3a5a', wTop:'#f0a088', wMid:'#7a5a86', wBot:'#1e2446', rim:'#ffc890', stone:'#9a8a98', stoneD:'#6a5a70', roof:'#5a3040', wood:'#5a3a3a', leaf:'#4a5a5a', leafHi:'#ffc08a', cloud:'#c87090', cloudLit:'#ffc8a0', cabin:'#5a4050'},
@@ -5379,6 +5380,7 @@ V3PAL.river = {
 // SALTMARSH COAST: breezy sea air, dunes with marram grass, a striped lighthouse on a rocky
 // headland whose beam sweeps at dusk, rolling waves with foam, gulls, a crab on the pier
 // =====================================================================
+// its colours below; the scene and everything drawn on it: src/w_coast.js
 V3PAL.coast = {
   day:  {top:'#5aa8e0', mid:'#9cd0ee', bot:'#e8f4f0', glow:'#fffbe8', far:'#9ec4c8', farHaze:'#d8ecec', sand:'#e8d6a4', sandD:'#c8b07a', grass:'#8aa85a', wTop:'#9adcd8', wMid:'#3aa0a8', wBot:'#145a6a', rim:'#fffae0', stone:'#9a948a', stoneD:'#6a665e', lh:'#f4f0e6', lhS:'#c8483a', leaf:'#7a9a4a', leafHi:'#c8e08a', cloud:'#ffffff', cloudLit:'#fff8ea', wood:'#8a6a4a'},
   dusk: {top:'#2a2c5e', mid:'#d0687a', bot:'#ffcf8a', glow:'#ffd890', far:'#8a6a8a', farHaze:'#f0a08e', sand:'#c89a8a', sandD:'#8a6a7a', grass:'#6a6a5a', wTop:'#f8b088', wMid:'#8a5a88', wBot:'#1c2448', rim:'#ffcf90', stone:'#7a6a7a', stoneD:'#4a3a54', lh:'#f0d0c0', lhS:'#a8384a', leaf:'#5a5a50', leafHi:'#ffc890', cloud:'#d07890', cloudLit:'#ffd0a0', wood:'#5a3a3a'},
@@ -5390,6 +5392,7 @@ const V3CN=v3noise(17);
 // FROSTBITE LAKE: blue hour over a frozen lake, snowy pines, an ice-fishing hut with a smoking
 // stovepipe, an aurora rippling overhead, falling snow, glinting cracks, an owl and an arctic fox
 // =====================================================================
+// its colours below; the scene and everything drawn on it: src/w_frost.js
 V3PAL.frost = {
   day:  {top:'#6a8ad0', mid:'#a8bce8', bot:'#e8e4f4', glow:'#fff4f0', far:'#a0aad8', farHaze:'#dcdcf0', hill:'#c8d0ec', back:'#3e5a78', front:'#2a4058', snow:'#f6f8ff', snowD:'#b8c4e4', ice:'#d8e8f6', iceD:'#8aaad0', wTop:'#a8c0e0', wMid:'#4a6a9a', wBot:'#1a2a4a', rim:'#fff4ea', wood:'#7a5440', roof:'#5a3a30', leaf:'#3e5a78', cloud:'#f4f4ff', cloudLit:'#ffffff', aur:'#7af0b0'},
   dusk: {top:'#1e1e50', mid:'#8a5a9e', bot:'#f0a0b0', glow:'#ffc8b8', far:'#6a5a96', farHaze:'#c890b0', hill:'#9a88b8', back:'#2a2a4e', front:'#1e1e3a', snow:'#f0d8e8', snowD:'#9a88b8', ice:'#d8c0dc', iceD:'#7a6aa0', wTop:'#d8a0c0', wMid:'#5a4a86', wBot:'#141a3a', rim:'#ffd0c0', wood:'#5a3a3a', roof:'#40263a', leaf:'#2a2a4e', cloud:'#b07aa0', cloudLit:'#ffc8c0', aur:'#8af0c0'},
@@ -5402,6 +5405,7 @@ function v3snowPine(c,x,base,h,P,rimA){ v3pine(c,x,base,h,P.back,P.rim,rimA); co
 // CORAL SHALLOWS: tropical noon, turquoise water so clear the reef shows through, caustic light
 // dancing on the sand, palms with a hammock, a beach hut on stilts, a turtle and parrots
 // =====================================================================
+// its colours below; the scene and everything drawn on it: src/w_reef.js
 V3PAL.reef = {
   day:  {top:'#2a9ae8', mid:'#6ccaf4', bot:'#d8f6f8', glow:'#fffcea', far:'#5aa88a', farHaze:'#b8e8e0', isl:'#3a8a5a', sand:'#f4e2b0', sandD:'#d8bc80', wTop:'#7ae8e0', wMid:'#18b0c0', wBot:'#0a6a8a', rim:'#fffbe0', trunk:'#9a7a52', frond:'#3a9a4a', frondD:'#22703a', hut:'#c89a5a', thatch:'#d8b46a', coral:'#ff7a6a', coral2:'#ffb84a', coral3:'#c86ad8', cloud:'#ffffff', cloudLit:'#fffaf0', leaf:'#3a9a4a'},
   dusk: {top:'#2a2a6a', mid:'#e0607a', bot:'#ffc070', glow:'#ffd080', far:'#6a4a6a', farHaze:'#f09a8a', isl:'#4a3a5a', sand:'#e8b090', sandD:'#a87a7a', wTop:'#ffa888', wMid:'#a05a8a', wBot:'#2a2058', rim:'#ffd090', trunk:'#6a4a40', frond:'#3a4a4a', frondD:'#2a3040', hut:'#8a5a50', thatch:'#a87a60', coral:'#ff8a7a', coral2:'#ffb070', coral3:'#c070c0', cloud:'#e07890', cloudLit:'#ffd0a0', leaf:'#3a4a4a'},
@@ -5420,6 +5424,7 @@ function v3palm(c,x,base,h,lean,P,seed){ const r=v3rng(seed), tx=x+lean*h, ty=ba
 // BRINE SHELF: open sea at golden hour, nothing but water to the horizon, a big slow swell that
 // tilts the world, a tall ship sailing far off, a bell buoy, dolphins and an albatross
 // =====================================================================
+// its colours below; the scene and everything drawn on it: src/w_shelf.js
 V3PAL.shelf = {
   day:  {top:'#4a8ad0', mid:'#9cc4e4', bot:'#ffe8b8', glow:'#fff0c0', far:'#c8b8a0', farHaze:'#f8dcb0', wTop:'#a8d0d8', wMid:'#2a7a9a', wBot:'#0c3a5a', rim:'#fff0c8', ship:'#5a5060', sail:'#f4ead8', cloud:'#ffffff', cloudLit:'#fff0d0', buoy:'#d8483a', leaf:'#5a7a6a'},
   dusk: {top:'#2a2458', mid:'#e0705a', bot:'#ffc060', glow:'#ffcc70', far:'#a86a6a', farHaze:'#ffb070', wTop:'#ffb070', wMid:'#8a4a6a', wBot:'#1a1a40', rim:'#ffd080', ship:'#3a2a3a', sail:'#ffd8b0', cloud:'#e0708a', cloudLit:'#ffd0a0', buoy:'#c8383a', leaf:'#3a3a4a'},
@@ -5430,6 +5435,7 @@ V3PAL.shelf = {
 // MIDNIGHT DEEP: far offshore in weather, low storm clouds racing, lightning that lights the whole sea,
 // rain sheets slanting past, a huge swell, the trawler's floodlights, a whale tail in the swell
 // =====================================================================
+// its colours below; the scene and everything drawn on it: src/w_deep.js
 V3PAL.deep = {
   day:  {top:'#3a4a5e', mid:'#6a7a8a', bot:'#a8b0b4', glow:'#e8ecf0', far:'#4a5866', farHaze:'#8a96a0', wTop:'#6a8290', wMid:'#2a4256', wBot:'#0a1826', rim:'#d8e0e8', cl1:'#4a5662', cl2:'#2e3a46', cloud:'#6a7682', cloudLit:'#9aa6b0', leaf:'#2a3a4a'},
   dusk: {top:'#1e1a36', mid:'#4a3048', bot:'#c8704a', glow:'#ff9a5a', far:'#3a2a3e', farHaze:'#7a4a4a', wTop:'#8a5a5a', wMid:'#2a2240', wBot:'#08081a', rim:'#ffb080', cl1:'#3a2a3e', cl2:'#221a2e', cloud:'#4a3448', cloudLit:'#a8606a', leaf:'#1a1a2a'},
@@ -5440,6 +5446,7 @@ V3PAL.deep = {
 // HOLLOW TRENCH: eerie twilight over black water, sea stacks in the mist, the mast of a sunken ship,
 // glowing jellyfish drifting below, plankton trails, a dark middle that swallows light, eyes in the deep
 // =====================================================================
+// its colours below; the scene and everything drawn on it: src/w_trench.js
 V3PAL.trench = {
   day:  {top:'#1e3a48', mid:'#3a6a70', bot:'#8ab0a8', glow:'#d8f0e8', far:'#2a4a52', farHaze:'#5a8a88', rock:'#2a3e46', rockD:'#162630', wTop:'#3a6a70', wMid:'#123a44', wBot:'#020e14', rim:'#b8e8dc', bio:'#5afff0', bio2:'#a080ff', wood:'#3a3a38', cloud:'#4a6a70', cloudLit:'#7aa0a0', leaf:'#1a3a3a'},
   dusk: {top:'#1a1a3a', mid:'#3a3a5e', bot:'#7a6a8a', glow:'#e0c0e0', far:'#2a2844', farHaze:'#5a5276', rock:'#24223a', rockD:'#141428', wTop:'#4a4a6e', wMid:'#14163a', wBot:'#03030e', rim:'#d8c0ff', bio:'#6afff0', bio2:'#c080ff', wood:'#2e2a34', cloud:'#3a3656', cloudLit:'#7a6a9a', leaf:'#1a1a2e'},
@@ -5461,6 +5468,7 @@ function v3stack(c,x,base,w,h,P,seed){ const r=v3rng(seed), L=[], R=[], n=11;
 // EMBER SPRINGS: a volcanic valley, a smouldering volcano with glowing veins, stone terraces of hot pools,
 // steam lifting off warm water, embers drifting up, glowing moths, a fire salamander
 // =====================================================================
+// its colours below; the scene and everything drawn on it: src/w_ember.js
 V3PAL.ember = {
   day:  {top:'#6a5a6a', mid:'#b88a7a', bot:'#f0c8a0', glow:'#ffe0b0', far:'#6a5050', farHaze:'#c89a88', rock:'#4a3a3a', rockD:'#2a2024', terr:'#7a6258', wTop:'#e8b090', wMid:'#8a5a5a', wBot:'#2a1a20', rim:'#ffd8b0', lava:'#ff7a2a', lava2:'#ffc04a', pool:'#7ad8d0', cloud:'#9a8080', cloudLit:'#e8c0a0', leaf:'#4a5a3a'},
   dusk: {top:'#2a1430', mid:'#8a2a3a', bot:'#ff7a3a', glow:'#ffa060', far:'#3a1a24', farHaze:'#a84a3a', rock:'#2e1c22', rockD:'#180e14', terr:'#5a3a38', wTop:'#ff9060', wMid:'#6a2a3a', wBot:'#1a0a14', rim:'#ffb070', lava:'#ff6a1a', lava2:'#ffb030', pool:'#6ab8b8', cloud:'#5a2a34', cloudLit:'#d06040', leaf:'#2e2a24'},
@@ -5472,6 +5480,7 @@ V3PAL.ember = {
 // floating islands with waterfalls, crystal spires, shooting stars that fall into the water, light wisps,
 // and a constellation of a fish that slowly draws itself
 // =====================================================================
+// its colours below; the scene and everything drawn on it: src/w_starfall.js
 V3PAL.starfall = {
   day:  {top:'#4a4aa8', mid:'#9a8ad8', bot:'#f0d8f0', glow:'#fff4ff', far:'#c8b8e8', farHaze:'#f0e0f8', cloudSea:'#f4ecfa', cloudSh:'#c8b8e0', isl:'#5a8a6a', islD:'#4a3a5a', wTop:'#c8b0f0', wMid:'#6a5ab0', wBot:'#1a1440', rim:'#fff0ff', cry:'#b88aff', cry2:'#7ae0ff', planet:'#f0b890', ring:'#e8d0ff', star:'#ffffff', cloud:'#ffffff', cloudLit:'#fff4ff', leaf:'#5a8a6a'},
   dusk: {top:'#1a1040', mid:'#7a3a8a', bot:'#ff9ab0', glow:'#ffd0e0', far:'#7a5a9a', farHaze:'#e8a0c0', cloudSea:'#f0b8c8', cloudSh:'#8a6a9a', isl:'#4a5a5a', islD:'#2e2440', wTop:'#e8a0d0', wMid:'#4a2a7a', wBot:'#0e0828', rim:'#ffd8f0', cry:'#c890ff', cry2:'#8ae8ff', planet:'#ffb080', ring:'#ffd0e8', star:'#ffffff', cloud:'#d890b0', cloudLit:'#ffd8e0', leaf:'#4a5a5a'},
@@ -5610,8 +5619,8 @@ function v3willowDraw(c,P,t,hz,part){ /* part: undefined = the whole tree; 0, 1,
 // =====================================================================
 const M33={};
 // one owner per water and hook (Clean Scenes 5, batch 7): the original hook first, then every extra in the order the files added it.
-// It replaced 96 nested wrappers (one per extra and water); same order, same size guard, same error report, one call per hook. Proven 2026-11-22: every water drawn at a frozen time is pixel-identical to the nested version rebuilt from list.base (kept for that proof).
-function m33wrap(id,hook,fn){ const S0=V3SCENES[id]; if(!S0) return; const X=S0.__x||(S0.__x={}); if(!X[hook]){ const list=X[hook]=[], old=list.base=S0[hook];
+// It replaced 96 nested wrappers (one per extra and water); same order, same size guard, same error report, one call per hook. Proven 2026-11-22: every water drawn at a frozen time is pixel-identical to the nested version.
+function m33wrap(id,hook,fn){ const S0=V3SCENES[id]; if(!S0) return; const X=S0.__x||(S0.__x={}); if(!X[hook]){ const list=X[hook]=[], old=S0[hook];
     S0[hook]=function(){ if(old) old.apply(this,arguments); if(!(W>8&&H>8)||window.__noExtras) return; /* never draw extras on a zero-size canvas (some loops step by a fraction of W) */
       for(const f of list){ try{ f.apply(this,arguments); }catch(e){ if(!M33.err){ M33.err=1; console.error(e); } } } }; }
   X[hook].push(fn); }
@@ -5619,45 +5628,17 @@ function m33wrap(id,hook,fn){ const S0=V3SCENES[id]; if(!S0) return; const X=S0.
 function m33reflect(x,hz,depth,alpha,col,pathFn){ x.save(); x.beginPath(); x.rect(0,hz,W,depth); x.clip(); x.translate(0,hz*2); x.scale(1,-1); x.globalAlpha=alpha; x.fillStyle=col; pathFn(); x.fill(); x.restore(); }
 const m33dot=(c,x,y,r,col)=>{ c.fillStyle=col; c.beginPath(); c.arc(x,y,r,0,7); c.fill(); };
 
-// ---------------------------------------------------------------------
-// SALTMARSH COAST: a cliffed headland with a fishing village on the left, a sailboat on the horizon,
-// a seal basking on a rock, and tide-pool rocks with weed and a starfish in front
-// ---------------------------------------------------------------------
+// ---------- shapes the water files draw with (their scenes and moments: src/w_<id>.js) ----------
+// Saltmarsh Coast (w_coast.js): the headland and the village houses on it
 M33.headland=(c,hz)=>{ c.beginPath(); c.moveTo(-2,hz+1); c.lineTo(-2,hz-H*.072); c.bezierCurveTo(W*.05,hz-H*.086,W*.12,hz-H*.07,W*.18,hz-H*.064); c.bezierCurveTo(W*.21,hz-H*.062,W*.235,hz-H*.058,W*.246,hz-H*.05); c.lineTo(W*.252,hz-H*.03); c.lineTo(W*.262,hz-H*.016); c.lineTo(W*.27,hz+1); c.closePath(); };
 M33.houses=[[.04,.016,'#d8483a'],[.062,.02,'#3a6f9a'],[.086,.017,'#c8853a'],[.132,.019,'#4f8a4a'],[.155,.016,'#d8483a'],[.176,.018,'#7a5a9a']];
-
-// ---------------------------------------------------------------------
-// OPEN SHELF: a far island with a sea arch, a whale that surfaces and blows, drifting kelp with a
-// gull riding it, and a big swell rolling in along the bottom
-// ---------------------------------------------------------------------
+// Brine Shelf (w_shelf.js): the far island with its sea arch
 M33.island=(c,hz)=>{ const x0=W*.3; c.beginPath(); c.moveTo(x0,hz+1); c.bezierCurveTo(x0+W*.015,hz-H*.02,x0+W*.03,hz-H*.042,x0+W*.06,hz-H*.046); c.bezierCurveTo(x0+W*.085,hz-H*.048,x0+W*.1,hz-H*.03,x0+W*.11,hz-H*.024); c.lineTo(x0+W*.118,hz-H*.024); c.bezierCurveTo(x0+W*.124,hz-H*.03,x0+W*.13,hz-H*.03,x0+W*.134,hz-H*.022); c.lineTo(x0+W*.14,hz+1); c.closePath(); };
-
-// ---------------------------------------------------------------------
-// MIDNIGHT DEEP: a far rock pillar taking the spray, a cargo ship pitching on the horizon with its
-// lights on, lightning you can actually see, and whitecaps on every crest
-// ---------------------------------------------------------------------
+// Midnight Deep (w_deep.js): the far rock pillar
 M33.pillar=(c,hz)=>{ const x0=W*.33; c.beginPath(); c.moveTo(x0,hz+1); c.lineTo(x0+W*.004,hz-H*.05); c.lineTo(x0+W*.012,hz-H*.062); c.lineTo(x0+W*.022,hz-H*.056); c.lineTo(x0+W*.028,hz-H*.03); c.lineTo(x0+W*.034,hz+1); c.closePath(); };
-
-// ---------------------------------------------------------------------
-// FROSTBITE LAKE: an ice-fishing camp on the far ice (two tents, tip-up flags, a snowman), smoke from a
-// tent stove, and the ice shelf you stand on gets layers, trapped bubbles and a fish frozen in the ice
-// ---------------------------------------------------------------------
-// ---------------------------------------------------------------------
-// EMBER SPRINGS: steaming lava islets with glowing cracks out on the lake, bubbling vents, and warm
-// pumice stones bobbing in the foreground
-// ---------------------------------------------------------------------
+// Ember Springs (w_ember.js): the steaming lava islets
 M33.islets=[[.38,.1,.05,.018],[.86,.19,.065,.024],[.6,.33,.04,.016]];
 M33.islet=(c,hz,i)=>{ const [ix,iy,iw,ih]=M33.islets[i], X=W*ix, Y=hz+H*iy, w=W*iw, h=H*ih; c.beginPath(); c.moveTo(X-w,Y); c.lineTo(X-w*.7,Y-h*.7); c.lineTo(X-w*.3,Y-h); c.lineTo(X+w*.1,Y-h*.8); c.lineTo(X+w*.5,Y-h*1.05); c.lineTo(X+w*.85,Y-h*.5); c.lineTo(X+w,Y); c.closePath(); };
-
-// ---------------------------------------------------------------------
-// STONEBROOK RIVER: a pair of otters that pop up and play (the moored rowboat now sits at the mill jetty, cc_river06.js)
-// ---------------------------------------------------------------------
-
-// ---------------------------------------------------------------------
-// MOONLIT TRENCH: drifting ribbons of glowing plankton that brighten where your float stirs the water
-// ---------------------------------------------------------------------
-
-// river leaves carried down the current, turning slowly, wrapping well off screen so they never pop
 
 // ---------- Starfall waterfalls: a ribbon that widens and shimmers as it falls, then lands properly in the cloud sea
 // with billowing mist, droplets arcing out, spreading rings and a few glints
@@ -8683,7 +8664,14 @@ function fishDesign(sp){
   if(has('loach')){ d.plan='long'; d.h=Math.min(d.h,.22); d.barbel=d.barbel||'short'; d.tail='round'; if(d.pat==='none') d.pat='marble'; }
   if(has('snakehead')){ d.plan='long'; d.h=Math.min(d.h,.24); d.dorsal='long'; d.mouth='big'; d.tail='round'; if(d.pat==='none') d.pat='blotch'; }
   if(has('goby')) d.plan='blenny';
-  if(has('catfish','bullhead','corydoras','namazu','shovelnose','arowana','arapaima','knifefish','electric eel','piranha','pacu','cichlid','oscar','tilapia','discus','peacock bass','tetra','lungfish','bichir','pleco','loach','snakehead','goby')) d.fam=1; /* a real family: the new waters' random body (cq_traits) leaves it alone */
+  if(has('catfish','bullhead','corydoras','namazu','shovelnose','arowana','arapaima','knifefish','electric eel','piranha','pacu','cichlid','oscar','tilapia','discus','peacock bass','tetra','lungfish','bichir','pleco','loach','snakehead','goby')) d.fam=1;
+  // second families pass (proposal 8, director 2026-11-22): a fish named after a real fish gets that fish's body, never a random one
+  if(has('mackerel','tuna','bonito','wahoo')&&d.plan==='fusi'){ d.plan='tuna'; d.tail='lunate'; }
+  if(has('marlin','swordfish','sailfish','spearfish')&&d.plan==='fusi') d.plan='bill';
+  if(has('sole','flounder','halibut','plaice','turbot','fluke')&&!has('console','solemn')) d.plan='flat';
+  if(has('moonfish','opah')) d.plan='disc';
+  if(has('puffer','blowfish','porcupinefish')) d.plan='ball';
+  if(has('perch','bass','crappie','bluegill','bream','snapper','carp','tench','barbel','koi','chub','roach','rudd','dace','shiner','minnow','herring','shad','sardine','smelt','trout','salmon','char','pike','cod','pollock','wrasse','tang','mullet','grouper','mackerel','tuna','marlin','sole','flounder','halibut','barb','gourami','mormyrid','elephantnose','sturgeon','gar','eel','ray','shark','puffer','moonfish','grunt','drum','croaker','whiting','hake','ling','bonefish','tarpon','snook','pompano','wahoo','dorado','mahi','jack','trevally','bonito','sculpin','blenny','bichir','killifish','molly','guppy','swordtail','platy','danio','rasbora','betta','angelfish','butterflyfish','damsel','clownfish','surgeonfish','triggerfish','filefish','boxfish','cowfish','lionfish','scorpionfish','stonefish','hogfish','parrotfish','goatfish','barracuda','needlefish','halfbeak','flyingfish','anchovy','sprat')) d.fam=1; /* the same flag as the families above: a real fish keeps its body */ /* a real family: the new waters' random body (cq_traits) leaves it alone */
   // element touches from the area
   if(sp.loc==='ember'&&!has('jelly')) d.ember=1; if(sp.loc==='starfall') d.cosmic=1; if(sp.loc==='frost') d.frost=1; if(sp.loc==='trench'||sp.loc==='deep') d.deepsea=1;
   if(has('glow','lantern','light','firefly','aurora','neon','twinkle','star','comet','pulsar','galaxy','nebula')) d.glow=1;
@@ -14701,7 +14689,7 @@ document.addEventListener('click',e=>{ const b=e.target.closest&&e.target.closes
   new MutationObserver(soon).observe(document.body,{childList:true,subtree:true}); addEventListener('resize',soon); setTimeout(scan,800); }
 document.head.insertAdjacentHTML('beforeend',`<style>
 .sc-host{position:relative}
-.sc-arrow{position:absolute;z-index:6;width:18px;height:26px;margin-top:-13px;display:flex;align-items:center;justify-content:center;border-radius:9px;background:linear-gradient(180deg,#1f8a86,#14666a);border:1px solid #7fe3c4;color:#fff;font:900 16px/1 system-ui;font-style:normal;pointer-events:none;box-shadow:0 2px 8px #0009;opacity:.92}
+.sc-arrow{position:absolute;z-index:6;width:18px;height:26px;margin-top:-13px;display:flex;align-items:center;justify-content:center;border-radius:9px;background:linear-gradient(180deg,#197a76,#14666a);border:1px solid #7fe3c4;color:#fff;font:900 16px/1 system-ui;font-style:normal;pointer-events:none;box-shadow:0 2px 8px #0009;opacity:.92}
 .sc-arrow[hidden]{display:none}
 </style>`);
 
@@ -17054,7 +17042,7 @@ hfMake('olympus',{ name:'Temple porch', hname:'temple porch',
 // more body variety in the new waters: a fish that would get the plain default body gets a plan, tail and fin of its own (from its id)
 { const NEWW=new Set(WATERS_NEW.map(w=>w.id)), EGP=['fusi','deep','long','disc','grouper','tuna','mahi','ball','box','koi','goldfish','sculpin','mola','hatchet','tadpole','bill','carp','guppy'],
     NP=['fusi','deep','long','disc','grouper','tuna','koi','carp','sculpin','blenny','guppy','bill'], TAILS=['fork','round','lunate','fan','fork'], DORS=['round','long','sail','spiny','trail','trigger','round'];
-  for(const sp of SP){ if(!NEWW.has(sp.loc)||sp.shape!=='f') continue; const d=fishDesign(sp); if(d.plan!=='fusi'||d.fam) continue; let h=0; for(let i=0;i<sp.id.length;i++) h=(h*33+sp.id.charCodeAt(i))>>>0;
+  for(const sp of SP){ if(!NEWW.has(sp.loc)||sp.shape!=='f') continue; const d=fishDesign(sp); if(d.plan!=='fusi'||d.fam) continue; /* real fish keep their own body */ let h=0; for(let i=0;i<sp.id.length;i++) h=(h*33+sp.id.charCodeAt(i))>>>0;
     const L2=sp.eg?EGP:NP; d.plan=L2[h%L2.length]; d.tail=TAILS[(h>>>4)%TAILS.length]; d.dorsal=DORS[(h>>>8)%DORS.length]; if(d.plan==='mola'||d.plan==='ball'||d.plan==='box') d.h=Math.max(d.h,.5); } }
 // =====================================================================
 // 0.4.9 [2] Oddities to 300 (director, 2026-11-19: "Increase the amount of oddities to 300. Go hard. Do memes ... household objects,
@@ -17919,7 +17907,7 @@ document.head.insertAdjacentHTML('beforeend',`<style>
 #dl-install p{margin:0 0 10px;color:#9fb2c8;font-size:14px;line-height:1.45}
 #dl-install .dli-steps{color:#e6efe8;background:#0a1424;border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:10px 12px}
 #dl-install .dli-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:4px}
-#dl-install .dli-go{font:800 15px var(--display,system-ui);min-height:42px;padding:0 20px;border:0;border-radius:10px;color:#fff;background:linear-gradient(180deg,#1f8a86,#14666a);cursor:pointer}
+#dl-install .dli-go{font:800 15px var(--display,system-ui);min-height:42px;padding:0 20px;border:0;border-radius:10px;color:#fff;background:linear-gradient(180deg,#197a76,#14666a);cursor:pointer}
 #dl-install .dli-alt{font:800 15px var(--display,system-ui);min-height:42px;padding:0 18px;border:1px solid rgba(255,255,255,.12);border-radius:10px;color:#e6efe8;background:#0a1424;cursor:pointer}
 #dl-install button:focus-visible{outline:3px solid #7fe3c4;outline-offset:2px}
 #dl-install .dli-note{font-size:12.5px;margin:10px 0 0}
@@ -18022,7 +18010,7 @@ PLAT.fpsText=fps=>(MOB()&&typeof mobFpsText==='function')?mobFpsText(fps):null;
 //  - plain information stays on navy (coins, level, the goal, cards)
 // =====================================================================
 document.head.insertAdjacentHTML('beforeend',`<style>
-:root{--mt-teal:linear-gradient(180deg,#1f8a86,#14666a);--mt-teal-b:#7fe3c4;--mt-gold:linear-gradient(180deg,#ffe08a,#f3b94e);--mt-gold-b:#ffe6a3;--mt-navy:#0e1a2c}
+:root{--mt-teal:linear-gradient(180deg,#197a76,#14666a);--mt-teal-b:#7fe3c4;--mt-gold:linear-gradient(180deg,#ffe08a,#f3b94e);--mt-gold-b:#ffe6a3;--mt-navy:#0e1a2c}
 /* header: chips that open a page */
 body.phone-app .hud .hud-link,body.phone-app .hud button.stat,body.phone-app .hud .stat.opt,
 body.phone-land .hud .hud-link,body.phone-land .hud button.stat,body.phone-land .hud .stat.opt{background:var(--mt-teal)!important;border-color:var(--mt-teal-b)!important;box-shadow:inset 0 1px 0 #ffffff40,0 2px 0 #0b3a3c!important;color:#fff!important}
@@ -18164,7 +18152,7 @@ const mask=(k)=>`-webkit-mask:${ICO(IC[k])} center/contain no-repeat;mask:${ICO(
 const subIcons=Object.keys(IC).map(k=>`${B(`#menuov .subbar .subp[data-sub="${k}"] .subi`)}{${mask(k)}}`).join('\n');
 
 document.head.insertAdjacentHTML('beforeend',`<style id="th07">
-:root{--th-surf:linear-gradient(180deg,#16263d,#111e31);--th-surf-flat:#13233a;--th-deep:#0c1626;--th-edge:#ffffff17;--th-edge2:#ffffff24;--th-ink:#7fe3c4;--th-dim:#9fb3c8;--th-gold:linear-gradient(180deg,#ffe08a,#f3b94e);--th-gold-b:#ffe6a3;--th-gold-ink:#2a1c05;--th-teal:linear-gradient(180deg,#1f8a86,#14666a);--th-teal-b:#7fe3c4;--th-r:12px}
+:root{--th-surf:linear-gradient(180deg,#16263d,#111e31);--th-surf-flat:#13233a;--th-deep:#0c1626;--th-edge:#ffffff17;--th-edge2:#ffffff24;--th-ink:#7fe3c4;--th-dim:#9fb3c8;--th-gold:linear-gradient(180deg,#ffe08a,#f3b94e);--th-gold-b:#ffe6a3;--th-gold-ink:#2a1c05;--th-teal:linear-gradient(180deg,#197a76,#14666a);--th-teal-b:#7fe3c4;--th-r:12px}
 
 /* ---------- top bar: every chip on the same navy; a chip you can tap has a teal label (and an arrow when there is room) ---------- */
 ${B('.hud > .stat,.hud > #goalchip,.hud > .hudbtns > button')}{background:var(--th-surf)!important;border:1px solid var(--th-edge)!important;border-radius:var(--th-r)!important;box-shadow:none!important;color:#fff!important}
@@ -18322,7 +18310,7 @@ document.head.insertAdjacentHTML('beforeend',`<style>
 // Aquarium chip turns gold when coins are ready to collect. ----------
 document.head.insertAdjacentHTML('beforeend',`<style>
 html body.phone-app .hud > .hud-link,html body.phone-app .hud > button.stat,html body.phone-app .hud > #goalchip,html body.phone-app .hud > .hudbtns > button,
-html body.phone-land .hud > .hud-link,html body.phone-land .hud > button.stat,html body.phone-land .hud > #goalchip,html body.phone-land .hud > .hudbtns > button{background:linear-gradient(180deg,#1f8a86,#14666a)!important;border:1px solid #7fe3c4!important;box-shadow:0 3px 10px #0007!important;color:#fff!important}
+html body.phone-land .hud > .hud-link,html body.phone-land .hud > button.stat,html body.phone-land .hud > #goalchip,html body.phone-land .hud > .hudbtns > button{background:linear-gradient(180deg,#197a76,#14666a)!important;border:1px solid #7fe3c4!important;box-shadow:0 3px 10px #0007!important;color:#fff!important}
 html body.phone-app .hud > .hud-link .lbl,html body.phone-app .hud > button.stat .lbl,html body.phone-app .hud > #goalchip .gl-k,
 html body.phone-land .hud > .hud-link .lbl,html body.phone-land .hud > button.stat .lbl,html body.phone-land .hud > #goalchip .gl-k{color:#c8fff0!important}
 html body.phone-app .hud > .hud-link b,html body.phone-app .hud > button.stat b,html body.phone-app .hud > #goalchip .gl-t,
@@ -18487,7 +18475,7 @@ html body.phone-app #menuov #panel.aq07 .aq07-bank .sub,html body.phone-land #me
 html body.phone-app #menuov #panel.aq07 .aq07-bank b.coin,html body.phone-land #menuov #panel.aq07 .aq07-bank b.coin{font:800 14px var(--display)!important}
 html body.phone-app #menuov #panel.aq07 .aq07-bank .btn,html body.phone-land #menuov #panel.aq07 .aq07-bank .btn{min-height:34px!important;padding:0 10px!important;margin:0!important;font-size:12.5px!important;white-space:nowrap}
 html body.phone-app #menuov #panel.aq07 #collectbtn:not(:disabled),html body.phone-land #menuov #panel.aq07 #collectbtn:not(:disabled){background:linear-gradient(180deg,#ffe08a,#f3b94e)!important;border-color:#ffe6a3!important;color:#2a1c05!important}
-html body.phone-app #menuov #panel.aq07 .aq07-tog,html body.phone-land #menuov #panel.aq07 .aq07-tog{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;min-width:58px;padding:0 6px;border-radius:12px;border:1px solid #7fe3c4;background:linear-gradient(180deg,#1f8a86,#14666a);color:#fff;font:800 11px var(--display);cursor:pointer;box-shadow:0 3px 10px #0007}
+html body.phone-app #menuov #panel.aq07 .aq07-tog,html body.phone-land #menuov #panel.aq07 .aq07-tog{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;min-width:58px;padding:0 6px;border-radius:12px;border:1px solid #7fe3c4;background:linear-gradient(180deg,#197a76,#14666a);color:#fff;font:800 11px var(--display);cursor:pointer;box-shadow:0 3px 10px #0007}
 html body.phone-app #menuov #panel.aq07.aq07-open .aq07-tog,html body.phone-land #menuov #panel.aq07.aq07-open .aq07-tog{background:#13233a;border-color:#ffffff24;color:#c8fff0;box-shadow:none}
 html body.phone-app #menuov #panel.aq07 .aq07-bar.aq07-trying-on > .aq07-bank,html body.phone-land #menuov #panel.aq07 .aq07-bar.aq07-trying-on > .aq07-bank{display:none!important}
 /* ---- the panel: tabs and sections ---- */
@@ -19599,7 +19587,7 @@ html body.phone-land #menuov #panel .rp8 .rp8-info em,html body.phone-app #menuo
 html body.phone-land #menuov #panel .rp8 .rp-n,html body.phone-app #menuov #panel .rp8 .rp-n{display:flex;align-items:center;gap:6px}
 html body.phone-land #menuov #panel .rp8 .rp8-tag,html body.phone-app #menuov #panel .rp8 .rp8-tag{padding:1px 7px;border-radius:999px;background:linear-gradient(180deg,#ffd36a,#f0b43c);color:#2a1a04;font:800 10px var(--display,system-ui);letter-spacing:.04em}
 html body.phone-land #menuov #panel .rp8 .rp8-acts,html body.phone-app #menuov #panel .rp8 .rp8-acts{display:flex;gap:6px;flex:0 0 auto;align-items:center}
-html body.phone-land .hud > .st-lvl[data-mbtap],html body.phone-app .hud > .st-lvl[data-mbtap]{background:linear-gradient(180deg,#1f8a86,#14666a)!important;border:1px solid #7fe3c4!important;box-shadow:0 3px 10px #0007!important;color:#fff!important;cursor:pointer}
+html body.phone-land .hud > .st-lvl[data-mbtap],html body.phone-app .hud > .st-lvl[data-mbtap]{background:linear-gradient(180deg,#197a76,#14666a)!important;border:1px solid #7fe3c4!important;box-shadow:0 3px 10px #0007!important;color:#fff!important;cursor:pointer}
 html body.phone-land .hud > .st-lvl[data-mbtap] .lbl,html body.phone-app .hud > .st-lvl[data-mbtap] .lbl{color:#c8fff0!important}
 html body.phone-land .hud > .st-lvl[data-mbtap]:active,html body.phone-app .hud > .st-lvl[data-mbtap]:active{transform:translateY(1px)}
 </style>`);
@@ -20433,6 +20421,8 @@ PATCHES.unshift({v:'0.4.9', name:'Work in progress', items:phoneNotes([
 // text changes. Released notes live in notes_release.js.
 const TEST_NOTES={v:'test', label:'Test build · '+(window.DL_BUILD==='ios'?'iPhone':'Android'), name:'0.4.9 test build (newest first)', items:[
   '## New in this build',
+  'Fish named after a real fish (tuna, mackerel, marlin, sole, moonfish, puffer and many more) now have that fish’s body in the newer waters, instead of a random shape.',
+  'The main teal buttons are a touch deeper, so their white text is easier to read.',
   'Behind the scenes: every water’s drawing now lives in a file of its own (20 files), checked to draw pixel for pixel the same at day and at night. Nothing should look different; tell us if anything does.',
   '## Test build 1447',
   'Fish no longer wear their water’s costume: the headdresses, ankhs, laurels, ties, glasses, ears, horns, food toppings and circuit lines are gone. Every fish is drawn as just the fish.',
@@ -20841,7 +20831,7 @@ ui(){ QA.sys='UI';
     } finally{ restore(keep); save=sv; toast=ts; } return e.length?{ok:false,detail:e.join(' | ')}:{ok:true,detail:'ok'}; });
   TOLD('C21/C23/C24 fights: a jump starts with a wind-up; letting go of a run drops the tension at once and only fish over 5 lb take line; reeling into a run takes no line; second winds are limited by rarity',()=>{ const e=[], sv=save, ts=toast, rf=reelInput, R=Math.random; save=()=>{}; toast=()=>{}; const keep=snap(); try{
       const start=(sp,kg)=>{ G.pend=rollFish(sp,{noHybrid:true,noPrey:true}); if(kg) G.pend.kg=kg; G.lastCast=.8; G.waitT=0; G.biteEnd=0; hookIt(); G.fightT=3; G.d=G.d0*.8; G.eatAt=null; G.eatDone=true; }; /* no predator swallowing the test fish (a forced dice roll could swap in a rarer one) */
-      const jumper=SP.find(s=>s.beh==='jump'&&s.r<=2&&!s.meme); if(jumper){ start(jumper); G.run=false; G.runT=9; G.ev=null; G.evT=0; reelInput=()=>0; G.hold=false; let saw=[]; for(let i=0;i<120&&G.st==='reeling';i++){ fight(1/60); if(G.ev&&saw[saw.length-1]!==G.ev) saw.push(G.ev); if(saw.includes('jump')) break; } if(saw[0]!=='windup'||saw[1]!=='jump') e.push('jump order: '+saw.join(' → ')); }
+      const jumper=SP.find(s=>s.beh==='jump'&&s.r<=2&&!s.meme); if(jumper){ start(jumper); G.run=false; G.runT=9; G.ev=null; G.evT=0; reelInput=()=>0; G.hold=false; let saw=[]; for(let i=0;i<600&&G.st==='reeling';i++){ fight(1/60); if(G.ev&&saw[saw.length-1]!==G.ev) saw.push(G.ev); if(saw.includes('jump')) break; } const ji=saw.indexOf('jump'); if(ji>=0&&saw[ji-1]!=='windup') e.push('jump order: '+saw.join(' → ')); /* the rule is that a jump starts with a wind-up; a head shake may come first by chance (2026-11-22: flaky when it did) */ }
       const big=SP.find(s=>s.r===1&&s.max>4&&!s.meme&&s.beh!=='jump'), small=SP.find(s=>s.r===0&&s.max<2&&!s.meme&&s.beh!=='jump');
       if(big){ start(big,4); G.run=true; G.runT=5; G.surge=null; G.ten=70; reelInput=()=>0; G.hold=false; const d0=G.d; fight(1/60); if(G.ten>6.01) e.push('letting go of a run left tension at '+G.ten.toFixed(1)); fight(.5); if(!(G.d>d0)) e.push('a 4 kg fish took no line on a run'); }
       if(small){ start(small,1); G.run=true; G.runT=5; G.surge=null; reelInput=()=>0; G.hold=false; const d0=G.d; for(let i=0;i<30;i++) fight(1/60); if(G.d>d0+1e-6) e.push('a 1 kg fish took line on a run'); }
@@ -21669,7 +21659,7 @@ function renderJournal(P){
   paintFish(P); P.querySelectorAll('canvas[data-junk]').forEach(c=>{ const cx=c.getContext('2d'); cx.clearRect(0,0,c.width,c.height); if(c.dataset.known==='1') drawJunk(cx,c.width,c.height,c.dataset.junk,null); else mysteryThumb(cx,c.width,c.height,c.dataset.junk); });
 }
 function renderMap(P){
-  P.innerHTML=`<h2>Waters</h2><p class="sub">${LOCS.every(L=>S.unlocked.includes(L.id))?`All ${LOCS.length} waters are open. Every one has ${spAt("pond").length} fish of its own, its own junk and treasure.`:`Open a new water with coins after catching ${unlockNeed()} fish at the water before it. Each voyage adds 10 more, up to 50. Every water has ${spAt("pond").length} fish of its own, its own junk and treasure, and is a little tougher than the last.`}</p><div class="grid">`+
+  P.innerHTML=`<h2>Waters</h2><p class="sub">${LOCS.every(L=>S.unlocked.includes(L.id))?`All ${LOCS.length} waters are open. Every one has`:`Open a new water with coins after catching ${unlockNeed()} fish at the water before it. Each voyage adds 10 more, up to 50. Every water has`} ${spAt("pond").length} fish of its own, its own junk and treasure${LOCS.every(L=>S.unlocked.includes(L.id))?"":", and is a little tougher than the last"}.</p><div class="grid">`+
   LOCS.map((L,i)=>{ const open=S.unlocked.includes(L.id), here=S.loc===L.id; const prev=i?LOCS[i-1]:null; const met=unlockMet(i); const sps=spAt(L.id);
     const btn = here ? '<button class="btn alt" disabled>Fishing here</button>' : open ? `<button class="btn" data-act="goto" data-k="${L.id}" ${G.st==='idle'?'':'disabled'}>Travel here</button>`
       : L.eg&&!egCharted(L) ? `<button class="btn" disabled>Complete voyage ${L.eg} to unlock</button>` /* Cam's list #12 */
