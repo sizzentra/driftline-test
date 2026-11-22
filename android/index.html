@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="DL Test Android">
 <script>
-window.DL_BUILD='android'; window.DL_PREVIEW=true; if(/[?&]sweep\b/.test(location.search)){ window.__bootErr=[]; addEventListener("error",function(e){ __bootErr.push(String(e.message||e)+(e.lineno?" (line "+e.lineno+")":"")); }); addEventListener("unhandledrejection",function(e){ __bootErr.push("promise: "+String(e.reason&&e.reason.message||e.reason)); }); window.requestAnimationFrame=function(f){ return setTimeout(function(){ f(performance.now()); },16); }; window.cancelAnimationFrame=function(i){ clearTimeout(i); }; } window.DL_VERSION='2026.11.22-0351';
+window.DL_BUILD='android'; window.DL_PREVIEW=true; if(/[?&]sweep\b/.test(location.search)){ window.__bootErr=[]; addEventListener("error",function(e){ __bootErr.push(String(e.message||e)+(e.lineno?" (line "+e.lineno+")":"")); }); addEventListener("unhandledrejection",function(e){ __bootErr.push("promise: "+String(e.reason&&e.reason.message||e.reason)); }); window.requestAnimationFrame=function(f){ return setTimeout(function(){ f(performance.now()); },16); }; window.cancelAnimationFrame=function(i){ clearTimeout(i); }; } window.DL_VERSION='2026.11.22-0407';
 window.addEventListener('beforeinstallprompt',function(e){ e.preventDefault(); window.__dlInstallPrompt=e; });
 </script>
 </head>
@@ -3905,7 +3905,7 @@ function autoBackup(now){ if(window.__dlUnreadable||!S) return; const t=Date.now
 document.addEventListener('visibilitychange',()=>{ if(document.hidden) autoBackup(true); });
 addEventListener('pagehide',()=>autoBackup(true));
 function agoText(t){ const m=Math.max(0,Math.round((Date.now()-t)/60000)); return m<1?'just now':m<60?m+' min ago':m<1440?Math.round(m/60)+' h ago':Math.round(m/1440)+' days ago'; }
-function autoBackupHTML(){ const a=bkRead(AUTO_BK), k=bkRead(AUTO_BK_KEEP), row=(s,act,label,note)=>s?`<div class="toggle"><div><b>${label}</b><div class="meta">${note} · saved ${agoText(s.bkAt||s.savedAt||Date.now())} · level ${s.lvl||1}, ${Object.keys(s.journal||{}).length} species</div></div><button class="btn alt sm" data-act="${act}">${bkAsk===act?'Tap again to restore':'Restore'}</button></div>`:'';
+function autoBackupHTML(){ const a=bkRead(AUTO_BK), k=bkRead(AUTO_BK_KEEP), row=(s,act,label,note)=>s?`<div class="toggle"><div><b>${label}</b><div class="meta">${note} · saved ${agoText(s.bkAt||s.savedAt||Date.now())} · level ${s.lvl||1}, ${Object.keys(s.journal||{}).length} species</div></div><button class="btn alt sm" data-act="${act}">==act?(PLAT.touch()?'Tap':'Click')+' again to restore':'Restore'</button></div>`:'';
   return `<details class="tile" style="margin-top:12px"><summary style="cursor:pointer"><b>Backup on this device</b> <span class="meta">· made automatically</span></summary>
    <p class="sub">Your progress is copied every few minutes and whenever you leave the game. If your save ever breaks, restore it here. Restoring replaces your current progress.</p>
    ${row(a,'autobk','Latest backup','Made by itself')}${row(k,'autobkkept','Earlier backup','Kept when your progress dropped')}${a||k?'':'<p class="meta">No backup yet: the first one is made a few minutes after you start playing.</p>'}</details>`; }
@@ -3962,7 +3962,7 @@ function extraAct2(b){ const k=b.dataset.k, i=+b.dataset.i;
       S=fresh(); S.seenPatch=GAME_VERSION; S.tab='settings'; S.savedAt=Date.now(); G.st='idle'; fillBounties(); toast('Progress erased. A backup was kept. You can restore it in Settings.'); return 'render'; }
     case 'restorebk': { try{ const raw=localStorage.getItem(BACKUP_KEY); if(!raw) return 'skip'; S=migrate(JSON.parse(raw)); S.savedAt=Date.now(); localStorage.removeItem(BACKUP_KEY); G.st='idle'; toast('Backup restored. Welcome back!'); }catch(e){ toast('That backup couldn’t be read.'); } return 'render'; }
     case 'autobk': case 'autobkkept': { if(bkAsk!==b.dataset.act){ bkAsk=b.dataset.act; return 'render'; } bkAsk=null; const s=bkRead(b.dataset.act==='autobk'?AUTO_BK:AUTO_BK_KEEP); if(!s) return 'skip';
-      try{ localStorage.setItem(BACKUP_KEY, JSON.stringify(S)); }catch(e){} /* the progress being replaced becomes the backup above, so a restore can be undone */
+      try{ if(!localStorage.getItem(BACKUP_KEY)) localStorage.setItem(BACKUP_KEY, JSON.stringify(S)); }catch(e){} /* the progress being replaced becomes the backup above (when that slot is free, so a pre-reset copy is never overwritten), so a restore can be undone */
       try{ S=migrate(s); delete S.bkAt; S.savedAt=Date.now(); G.st='idle'; window.__dlUnreadable=false; save(); toast('Backup restored. Welcome back!'); }catch(e){ toast('That backup couldn’t be read.'); } return 'render'; }
     case 'duckagain': { const c=bestLoot(); if(S.money<c) return 'skip'; S.money-=c; newDuck(); taskProgress('game',1); return 'render'; }
     case 'duckpick': { if(!duck||duck.pick>=0) return 'skip'; duck.pick=i; const p=duck.prizes[i]; if(p.k==='crate'){ S.tokens.small++; duck.msg='A small Mystery Crate! Quack.'; sfx.shiny(); } else if(p.k==='coins'){ duck.msg='+'+fmt(bwEarn(bestLoot()*p.m*coinMult()))+' coins. Quack quack.'; sfx.coin(); } else { duck.msg='+'+addTickets(p.n)+' tickets. Quack.'; tone(1200,.08,'triangle',.05); } return 'render'; }
@@ -17911,7 +17911,7 @@ document.head.insertAdjacentHTML('beforeend',`<style>
 body.phone-app #menuov .mo-tools .mo-tb.on,body.phone-land #menuov .mo-tools .mo-tb.on{background:var(--mt-gold)!important;border-color:var(--mt-gold-b)!important;color:#2a1c05!important}
 </style>`);
 // Pets: your favourite's "★ Favourite" reads as chosen (gold), not as a greyed-out button
-{ const _rp=renderPanel; renderPanel=function(){ const r=_rp.apply(this,arguments); try{ if(MOB()&&S.tab==='pets') $('panel').querySelectorAll('.tile .btn:disabled').forEach(b=>{ if(/^★\s*Favourite$/.test(b.textContent.trim())) b.classList.add('mt-chosen'); }); }catch(e){} return r; }; }
+pageDone('pets',P=>{ if(MOB()) P.querySelectorAll('.tile .btn:disabled').forEach(b=>{ if(/^★\s*Favourite$/.test(b.textContent.trim())) b.classList.add('mt-chosen'); }); }); /* Clean Pages 2: a page step, not a renderPanel layer */
 document.head.insertAdjacentHTML('beforeend',`<style>
 body.phone-app #panel .btn.mt-chosen,body.phone-land #panel .btn.mt-chosen{background:var(--mt-gold)!important;border-color:var(--mt-gold-b)!important;color:#2a1c05!important;opacity:1!important}
 </style>`);
@@ -19079,7 +19079,7 @@ document.addEventListener('click',e=>{ const b=e.target.closest&&e.target.closes
 { const SHORT={'Move to another device':'Move progress','Aquarium & pets':'Tank & pets'};
   const _rp=renderPanel; renderPanel=function(){ const r=_rp.apply(this,arguments); try{ if(MOB()) document.querySelectorAll('#panel .aq07-sheet > .bwx-nav > button[data-sect]').forEach(b=>{ const s=SHORT[b.dataset.sect]; if(s&&b.firstChild&&b.firstChild.nodeType===3) b.firstChild.nodeValue=s+(b.firstChild.nodeValue.endsWith(' ')?' ':''); }); }catch(e){} return r; }; }
 /* Waters, Set sail again: the locked button's label is shortened on phones so it fits its card ("Reach Hollow Trench first" -> "Reach Hollow Trench") */
-{ const _rp=renderPanel; renderPanel=function(){ const r=_rp.apply(this,arguments); try{ if(MOB()&&S.tab==='map') document.querySelectorAll('#panel button[data-act="retire"][disabled]').forEach(b=>{ const m=b.textContent.trim().match(/^Reach (.+) first$/); if(m) b.textContent='Reach '+m[1]; }); }catch(e){} return r; }; }
+pageDone('map',P=>{ if(MOB()) P.querySelectorAll('button[data-act="retire"][disabled]').forEach(b=>{ const m=b.textContent.trim().match(/^Reach (.+) first$/); if(m) b.textContent='Reach '+m[1]; }); }); /* Clean Pages 2: a page step, not a renderPanel layer */
 /* color choices (director: "color choices in customization don't look good and take up too much space, descriptions can be condensed
    with proper coloring"): every color chip (home light, hull paint, pet color) becomes a compact round swatch; the chosen color's
    name sits next to its heading ("Light · Golden"); the name stays as the button's label for screen readers and long-press */
@@ -19366,6 +19366,7 @@ document.head.insertAdjacentHTML('beforeend','<style>html body.phone-land .hud >
 //    behind the settings gear; the gear keeps Settings and Save. Your Level in the top bar also opens Stats (teal: tap me).
 // Android + iPhone + tablets.
 // =====================================================================
+const AFTER_EVERY=[]; /* steps run after every page draw, in order (Clean Pages 3; the wrapper is at the end of this file) */
 /* Stats is its own section on the side panel (director, 2026-11-18); the list itself lives in bm_ui04.js since PC Reborn */
 try{ if(typeof SECT==='object'&&SECT.settings==='Save & codes') delete SECT.settings; }catch(e){}
 
@@ -19434,7 +19435,7 @@ html body.phone-land .hud > .st-lvl[data-mbtap]:active,html body.phone-app .hud 
 </style>`);
 /* Skills (director: "In skill tabs it doesn't make sense for each category to have a badge, just the skill points"): the category tabs
    carry no counts; your unspent skill points stay the one badge (the Skills tab and the side panel) */
-{ const _rp=renderPanel; renderPanel=function(){ const r=_rp.apply(this,arguments); try{ if(MOB()&&S.tab==='skills') document.querySelectorAll('#panel .bwx-nav > button[data-sect] .sdot').forEach(d=>d.remove()); }catch(e){} return r; }; }
+pageDone('skills',P=>{ if(MOB()) P.querySelectorAll('.bwx-nav > button[data-sect] .sdot').forEach(d=>d.remove()); }); /* Clean Pages 2: a page step */
 /* Skills: an XP bar next to your Level (director, 2026-11-18: "We could use a xp bar next to the Level that functions and looks neat
    in this tab"). Fills with your XP toward the next level and says how much ("120 / 400 XP"); it follows every catch live while the
    page is open (a light check twice a second, only on this page) and fills up in a short glide. */
@@ -19443,10 +19444,10 @@ html body.phone-land .hud > .st-lvl[data-mbtap]:active,html body.phone-app .hud 
   const paint=()=>{ const P=$('panel'); if(!MOB()||S.tab!=='skills'||!P){ clearInterval(tm); tm=0; return; } const cell=P.querySelector('.mb-lvcell'); if(!cell){ clearInterval(tm); tm=0; return; }
     const key=S.lvl+'|'+Math.floor(S.xp); if(key===last) return; last=key; const b=cell.querySelector('b'); if(b) b.textContent=S.lvl; const w=cell.querySelector('.mb-xp'); if(!w) return;
     const need=xpNeed(S.lvl), k=Math.max(0,Math.min(1,S.xp/need)), bar=w.querySelector('.mb-xpbar'); w.querySelector('i').style.width=(k*100).toFixed(1)+'%'; w.querySelector('.mb-xpt').textContent=fmt(Math.floor(S.xp))+' / '+fmt(need)+' XP'; bar.setAttribute('aria-valuenow',Math.floor(S.xp)); bar.setAttribute('aria-valuemax',need); bar.setAttribute('aria-label','XP to level '+(S.lvl+1)); };
-  const _rp=renderPanel; renderPanel=function(){ const r=_rp.apply(this,arguments); try{ if(!MOB()||S.tab!=='skills') return r; const P=$('panel'); const bank=P&&P.querySelector('.pg08-bank'); if(!bank) return r;
-      const cell=[...bank.children].find(c=>c.tagName==='DIV'&&/^Level\b/.test((c.querySelector('.sub')||{}).textContent||'')); if(!cell||cell.querySelector('.mb-xp')) return r;
+  pageDone('skills',P=>{ if(!MOB()) return; const bank=P.querySelector('.pg08-bank'); if(!bank) return; /* Clean Pages 2: a page step, not a renderPanel layer */
+      const cell=[...bank.children].find(c=>c.tagName==='DIV'&&/^Level\b/.test((c.querySelector('.sub')||{}).textContent||'')); if(!cell||cell.querySelector('.mb-xp')) return;
       cell.classList.add('mb-lvcell'); cell.title='Your XP toward the next level. Catches give XP; every level gives a skill point.'; cell.insertAdjacentHTML('beforeend',`<span class="mb-xp">${xpHTML()}</span>`); last=S.lvl+'|'+Math.floor(S.xp);
-      if(!tm) tm=setInterval(paint,500); }catch(e){ console.error(e); } return r; }; }
+      if(!tm) tm=setInterval(paint,500); }); }
 
 /* side panel (director's screenshot: the Challenges count covered its label): counts sit on the corner of the icon, never over the name */
 document.head.insertAdjacentHTML('beforeend',`<style>
@@ -19516,14 +19517,14 @@ document.head.insertAdjacentHTML('beforeend',`<style>html body.phone-land #fpsbo
   menuTidy2=function(){ if(MOB()){ try{ quick(); }catch(e){} if(!q) q=requestAnimationFrame(()=>{ q=0; try{ _mt(); }catch(e){} }); return; } return _mt.apply(this,arguments); }; try{ menuTidy=menuTidy2; }catch(e){} } /* the page switch calls the older alias menuTidy */
 /* TROPHY ROOM fits one screen (director, 2026-11-18): a compact wall, each plaque just the fish and its name (about eight across);
    tap a plaque to see its details in a bar under the wall (rarity, weight, water, date) with To cooler. The intro line steps aside. */
-{ const _rp=renderPanel; renderPanel=function(){ const r=_rp.apply(this,arguments); try{ if(!MOB()||S.tab!=='trophy') return r; const P=$('panel'), room=P.querySelector('.tp-room'); if(!room||room.classList.contains('tp8')) return r;
-      room.classList.add('tp8'); const emp=room.querySelector('.tp-empty'); if(emp&&!emp.querySelector('.tp8-wall')){ const g=emp.querySelector('.tp-ghost'); if(g) g.remove(); emp.insertAdjacentHTML('afterbegin','<div class="tp8-wall" aria-hidden="true"><div class="tp-plaque tp-ghost"></div><div class="tp-plaque tp-ghost"></div><div class="tp-plaque tp-ghost"></div></div>'); } /* empty room (director, 2026-11-19: "super small ui when empty"): a wall of three empty plaques fills the page */ const grid=room.querySelector('.tp-grid'); if(!grid) return r;
+pageDone('trophy',P=>{ try{ if(!MOB()) return; const room=P.querySelector('.tp-room'); if(!room||room.classList.contains('tp8')) return; /* Clean Pages 3: a page step */
+      room.classList.add('tp8'); const emp=room.querySelector('.tp-empty'); if(emp&&!emp.querySelector('.tp8-wall')){ const g=emp.querySelector('.tp-ghost'); if(g) g.remove(); emp.insertAdjacentHTML('afterbegin','<div class="tp8-wall" aria-hidden="true"><div class="tp-plaque tp-ghost"></div><div class="tp-plaque tp-ghost"></div><div class="tp-plaque tp-ghost"></div></div>'); } /* empty room (director, 2026-11-19: "super small ui when empty"): a wall of three empty plaques fills the page */ const grid=room.querySelector('.tp-grid'); if(!grid) return;
       let bar=room.querySelector('.tp8-bar'); if(!bar){ bar=document.createElement('div'); bar.className='tp8-bar'; bar.innerHTML='<span class="meta">Tap a trophy to see it up close.</span>'; grid.after(bar); }
       grid.querySelectorAll('.tp-item').forEach((it,i)=>{ it.tabIndex=0; it.setAttribute('role','button');
         it.addEventListener('click',e=>{ if(e.target.closest('.tp-out')) return; grid.querySelectorAll('.tp-item.sel').forEach(x=>x.classList.remove('sel')); it.classList.add('sel');
           const nm=it.querySelector('.tp-plate b'), sub=it.querySelector('.tp-plate span'), meta=it.querySelector('.tp-meta'), out=it.querySelector('.tp-out');
           bar.innerHTML=`<div class="tp8-info"><b>${nm?nm.innerHTML:''}</b><span class="meta">${sub?sub.textContent:''}${meta?' · '+meta.textContent:''}</span></div>`; if(out){ const c=out.cloneNode(true); c.classList.add('tp8-out'); bar.appendChild(c); } }); });
-    }catch(e){ console.error(e); } return r; }; }
+    }catch(e){ console.error(e); } });
 /* TIDE PASS: the "next Tide reward" is one slim row (small picture, name, what it is, levels to go) instead of a big card */
 /* BOARDWALK: two wider game cards a row on phones (three narrow ones stretched each game to 360-560 px), game pictures capped */
 /* "Waters" is called "Map" (director, 2026-11-18) */
@@ -19583,8 +19584,8 @@ document.head.insertAdjacentHTML('beforeend',`<style>#menuov #panel .tp-room.tp8
 /* EVENTS (director, 2026-11-18: "Events tab shows duplicates across the calendar, challenges and derby menus"): the intro line no longer
    tops every tab, the big "Challenges" / "Fishing Derby" headings (the tab names them) are gone, and Derby rewards no longer repeats
    "four minutes, one water, heaviest catch wins" (the derby card above says it). */
-{ const _rp=renderPanel; renderPanel=function(){ const r=_rp.apply(this,arguments); try{ if(!MOB()||S.tab!=='events') return r; const P=$('panel');
-      P.querySelectorAll('.tile').forEach(t=>{ const h=t.querySelector('h4,b'); if(h&&/^Derby rewards/.test(h.textContent.trim())){ const m=t.querySelector(':scope > .meta, :scope > div > .meta'); if(m&&/heaviest/i.test(m.textContent)) m.style.display='none'; } }); }catch(e){} return r; }; }
+pageDone('events',P=>{ try{ if(!MOB()) return; /* Clean Pages 3: a page step */
+      P.querySelectorAll('.tile').forEach(t=>{ const h=t.querySelector('h4,b'); if(h&&/^Derby rewards/.test(h.textContent.trim())){ const m=t.querySelector(':scope > .meta, :scope > div > .meta'); if(m&&/heaviest/i.test(m.textContent)) m.style.display='none'; } }); }catch(e){} });
 /* FEATS (director: "Feats can definitely shrink in size overall when it comes to each card"): each card is two short lines and a thin
    bar (title + progress, then what to do + the reward), about half the height */
 document.head.insertAdjacentHTML('beforeend',`<style>
@@ -19675,7 +19676,7 @@ document.head.insertAdjacentHTML('beforeend',`<style>
     const t=h.textContent.trim(); if(t===N){ h.classList.add('dl-dupname'); h.dataset.dupDone=N; return; }
     if(t.startsWith(N+' ·')||t.startsWith(N+' -')){ const w=document.createTreeWalker(h,NodeFilter.SHOW_TEXT), texts=[]; let n; while(n=w.nextNode()) if(n.textContent.trim()) texts.push(n); const f=texts[0]; if(!f) return; if(f.textContent.trim()===N){ f.textContent=''; if(texts[1]) texts[1].textContent=texts[1].textContent.replace(/^\s*[·-]\s*/,''); } else f.textContent=f.textContent.replace(N,'').replace(/^\s*[·-]\s*/,''); const g=texts.find(x=>x.textContent.trim()); if(g) g.textContent=g.textContent.replace(/^(\s*)(\S)/,(m,s,c)=>s+c.toUpperCase()); h.dataset.dupDone=N; } };
   /* after every other renderPanel step (later files wrap it again and add their headings after this one runs) */
-  const _rp=renderPanel; renderPanel=function(){ const r=_rp.apply(this,arguments); queueMicrotask(()=>{ try{ dedupe(); }catch(e){} }); return r; };
+  AFTER_EVERY.push(()=>queueMicrotask(()=>{ try{ dedupe(); }catch(e){} })); /* after every other renderPanel step: run by the one wrapper at the end of this file */
   /* twice after a tab switch: the page engine can show the new tab after the first run, which left "Decorate" under the Decorate tab until the next redraw (and then the list jumped up 35 px, found by __snapQC) */
   document.addEventListener('click',e=>{ if(e.target.closest&&e.target.closest('#menuov .sect-nav [data-sect]')){ const run=()=>{ try{ dedupe(); }catch(er){} }; setTimeout(run,0); setTimeout(()=>setTimeout(run,0),0); } },true); /* the second pass queues behind the page engine's own zero-delay switch */
   PHONE_DEDUPE=dedupe; document.head.insertAdjacentHTML('beforeend','<style>#menuov #panel .dl-dupname{display:none!important}</style>'); }
@@ -19692,7 +19693,7 @@ document.head.insertAdjacentHTML('beforeend','<style>html body.phone-land #menuo
       const r=bar.getBoundingClientRect(), b=box.getBoundingClientRect(), want=Math.floor(b.bottom-r.top-6);
       if(want>120&&(b.bottom-r.bottom>24||bar.scrollHeight>bar.clientHeight+1)) bar.style.setProperty('height',want+'px','important'); }catch(e){} };
   const later=()=>{ requestAnimationFrame(fit); setTimeout(fit,120); };
-  const _rp=renderPanel; renderPanel=function(){ const r=_rp.apply(this,arguments); later(); return r; };
+  AFTER_EVERY.push(later);
   addEventListener('resize',()=>{ const bar=document.querySelector('#menuov #tabs .secbar'); if(bar) bar.style.removeProperty('height'); later(); });
   if(/[?&]test\b/.test(location.search)) window.__fitRail=fit; }
 /* the name a page tab shows (its own text, without a badge); data-sect can differ ("Dock" shows as "Your boat") */
@@ -19725,7 +19726,9 @@ document.head.insertAdjacentHTML('beforeend','<style>html body.phone-land .hud >
       b.addEventListener('click',e=>{ e.stopPropagation(); openMenu(S.tab==='cooler'?'aquarium':'cooler'); }); const set=tools.querySelector('[data-mo="settings"]'); if(set) set.after(b); else tools.appendChild(b); }
     const on=S.tab==='cooler'||S.tab==='aquarium'; b.hidden=!on; if(on){ const to=S.tab==='cooler'?'Aquarium':'Cooler'; b.textContent=(to==='Aquarium'?'🐠 ':'🧊 ')+to; b.setAttribute('aria-label','Switch to the '+to); } }catch(e){} };
   /* kept in step with every page change: menu changes and page draws (2026-11-20: opening the Fish Log from a fish left the Cooler switch showing) */
-  const _ms=menuSync; menuSync=function(){ const r=_ms.apply(this,arguments); swapSync(); return r; }; const _rp=renderPanel; renderPanel=function(){ const r=_rp.apply(this,arguments); swapSync(); return r; }; }
+  const _ms=menuSync; menuSync=function(){ const r=_ms.apply(this,arguments); swapSync(); return r; }; AFTER_EVERY.push(swapSync);
+  /* Clean Pages 3: the steps that follow every page draw (names not repeated, the rail fitted, the Cooler switch) have one owner: this wrapper runs them in their old order */
+  const _rp=renderPanel; renderPanel=function(){ const r=_rp.apply(this,arguments); for(const fn of AFTER_EVERY){ try{ fn(); }catch(e){} } return r; }; }
 document.head.insertAdjacentHTML('beforeend','<style>html body.phone-land #menuov .mo-tools > .mo-tb.mo-swap,html body.phone-app #menuov .mo-tools > .mo-tb.mo-swap{width:auto!important;min-width:0!important;padding:0 12px!important;font:800 13px var(--display,system-ui)!important;font-size:13px!important;color:#dbe7f3!important;white-space:nowrap}html body.phone-land #menuov .mo-tools > .mo-tb.mo-swap[hidden],html body.phone-app #menuov .mo-tools > .mo-tb.mo-swap[hidden]{display:none!important}html body.phone-land #menuov .mo-tools > .mo-tb.mo-swap::before,html body.phone-app #menuov .mo-tools > .mo-tb.mo-swap::before,html body.phone-land #menuov .mo-tools > .mo-tb.mo-swap::after,html body.phone-app #menuov .mo-tools > .mo-tb.mo-swap::after{content:none!important;display:none!important}</style>');
 /* C12 (director + Cam, 2026-11-20): a chosen color keeps its own color and gets a gold box around it (the general "chosen chip" gold
    used to fill the whole swatch, so you couldn't see which color you had) */
@@ -20260,6 +20263,9 @@ PATCHES.unshift({v:'0.4.9', name:'Work in progress', items:phoneNotes([
 // text changes. Released notes live in notes_release.js.
 const TEST_NOTES={v:'test', label:'Test build · '+(window.DL_BUILD==='ios'?'iPhone':'Android'), name:'0.4.9 test build (newest first)', items:[
   '## New in this build',
+  'Save › Backup on this device: your progress is copied every few minutes and whenever you leave the game; Restore brings it back (tap twice). If your progress suddenly drops, the better copy is kept as an earlier backup.',
+  'Behind the scenes: tidier code for the Map, Skills, Pets, Trophy Room and Events pages. Nothing should look different; tell us if anything does.',
+  '## Test build 0351',
   'Your home: color buttons have a faint light ring, so the darkest colors stay visible.',
   '## Test build 0305',
   'Roofs, umbrellas, sheds and tents now cover you: each one reaches from before your seat to past where you stand, and stands tall enough to clear your hat.',
@@ -21313,6 +21319,10 @@ window.__mapQC=async(o={})=>{ const keep={loc:S.loc,off:window.__off,np:window._
 if(/[?&]test\b/.test(location.search)) window.__shot=async(name,id,rest,full)=>{ __go(id); dockSync(); V3CACHE=null; G.st=rest?'rest':'idle'; if(rest) restCast(); draw(performance.now()); draw(performance.now()+16);
   const d=cv.width/W; let url; if(full) url=cv.toDataURL('image/png'); else { const sx=0, sy=H*.2*d, sw=W*.34*d, sh=H*.72*d, k=Math.max(1,900/sw), o=document.createElement('canvas'); o.width=Math.round(sw*k); o.height=Math.round(sh*k); const x=o.getContext('2d'); x.imageSmoothingQuality='high'; x.drawImage(cv,sx,sy,sw,sh,0,0,o.width,o.height); url=o.toDataURL('image/png'); }
   const r=await fetch('/shot/'+name,{method:'POST',body:url}); return r.status; };
+// test builds: __fingerprint(root) lists every visible element under the page (its path, text, place, size and key styles), so an
+// untangling step can prove nothing visible changed: take one before, one after, and compare (Clean Pages, docs/PLAN.md › Untangling plan)
+if(/[?&]test\b/.test(location.search)) window.__fingerprint=(root=document.getElementById('panel'))=>{ const out=[]; const walk=(el,path)=>{ for(const c of el.children){ const r=c.getBoundingClientRect(); if(!r.width&&!r.height) continue; const cs=getComputedStyle(c); if(cs.display==='none'||cs.visibility==='hidden') continue; const p=path+'>'+c.tagName.toLowerCase()+(c.className&&typeof c.className==='string'?'.'+c.className.trim().split(/\s+/).sort().join('.'):''); const own=[...c.childNodes].filter(n=>n.nodeType===3).map(n=>n.textContent.trim()).join(' ').slice(0,40);
+  out.push([p,own,Math.round(r.left),Math.round(r.top),Math.round(r.width),Math.round(r.height),cs.color,cs.backgroundColor,cs.backgroundImage.slice(0,40),cs.fontSize,cs.fontWeight].join('|')); walk(c,p); } }; walk(root,''); return out; };
 
 // ---------- loop ----------
 let last=performance.now();
