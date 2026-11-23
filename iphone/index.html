@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="DL Test iPhone">
 <script>
-window.DL_BUILD='ios'; window.DL_PREVIEW=true; if(/[?&]sweep\b/.test(location.search)){ window.__bootErr=[]; addEventListener("error",function(e){ __bootErr.push(String(e.message||e)+(e.lineno?" (line "+e.lineno+")":"")); }); addEventListener("unhandledrejection",function(e){ __bootErr.push("promise: "+String(e.reason&&e.reason.message||e.reason)); }); window.requestAnimationFrame=function(f){ return setTimeout(function(){ f(performance.now()); },16); }; window.cancelAnimationFrame=function(i){ clearTimeout(i); }; } try{ window.__tOff=/[?&](test|sweep|frozen)\b/.test(location.search)?0:(+(localStorage.getItem("dl-test-toff")||0)||0); }catch(e){ window.__tOff=0; } (function(){ var rn=Date.now.bind(Date); Date.now=function(){ return rn()+window.__tOff; }; })(); if(/[?&]frozen\b/.test(location.search)){ var __fz=20261122; Math.random=function(){ __fz|=0; __fz=__fz+0x6D2B79F5|0; var t=Math.imul(__fz^__fz>>>15,1|__fz); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; var __fc=0, __pn=performance.now.bind(performance); performance.now=function(){ __fc+=0.01; return 100000+__fc; }; Date.now=function(){ return 1795300000000+Math.floor(__fc); }; window.__frozenClock=function(){ return __fc; }; window.requestAnimationFrame=function(){ return 0; }; window.cancelAnimationFrame=function(){}; } window.DL_VERSION='2026.11.23-1521';
+window.DL_BUILD='ios'; window.DL_PREVIEW=true; if(/[?&]sweep\b/.test(location.search)){ window.__bootErr=[]; addEventListener("error",function(e){ __bootErr.push(String(e.message||e)+(e.lineno?" (line "+e.lineno+")":"")); }); addEventListener("unhandledrejection",function(e){ __bootErr.push("promise: "+String(e.reason&&e.reason.message||e.reason)); }); window.requestAnimationFrame=function(f){ return setTimeout(function(){ f(performance.now()); },16); }; window.cancelAnimationFrame=function(i){ clearTimeout(i); }; } try{ window.__tOff=/[?&](test|sweep|frozen)\b/.test(location.search)?0:(+(localStorage.getItem("dl-test-toff")||0)||0); }catch(e){ window.__tOff=0; } (function(){ var rn=Date.now.bind(Date); Date.now=function(){ return rn()+window.__tOff; }; })(); if(/[?&]frozen\b/.test(location.search)){ var __fz=20261122; Math.random=function(){ __fz|=0; __fz=__fz+0x6D2B79F5|0; var t=Math.imul(__fz^__fz>>>15,1|__fz); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; var __fc=0, __pn=performance.now.bind(performance); performance.now=function(){ __fc+=0.01; return 100000+__fc; }; Date.now=function(){ return 1795300000000+Math.floor(__fc); }; window.__frozenClock=function(){ return __fc; }; window.requestAnimationFrame=function(){ return 0; }; window.cancelAnimationFrame=function(){}; } window.DL_VERSION='2026.11.23-1543';
 window.addEventListener('beforeinstallprompt',function(e){ e.preventDefault(); window.__dlInstallPrompt=e; });
 </script>
 </head>
@@ -318,7 +318,7 @@ body.side-wide .wrap{grid-template-columns:minmax(0,.62fr) minmax(0,1.38fr)}}
     <button role="tab" data-tab="quests" aria-selected="false" data-label="🧭 Quests">🧭 Quests</button>
     <button role="tab" data-tab="cooler" aria-selected="true" data-label="🧊 Cooler">🧊 Cooler</button>
     <button role="tab" data-tab="shop" aria-selected="false" data-label="🛒 Tackle">🛒 Tackle</button>
-    <button role="tab" data-tab="bait" aria-selected="false" data-label="🪱 Bait">🪱 Bait</button>
+    <button role="tab" data-tab="bait" aria-selected="false" data-label="🎣 Bait">🎣 Bait</button>
     <button role="tab" data-tab="rods" aria-selected="false" data-label="🎣 Rods">🎣 Rods</button>
     <button role="tab" data-tab="bounties" aria-selected="false" data-label="📜 Bounties">📜 Bounties</button>
     <button role="tab" data-tab="pass" aria-selected="false" data-label="🌊 Tide Pass">🌊 Tide Pass</button>
@@ -10469,7 +10469,7 @@ function bwCard(icon,col,title,meta,body,foot){ return `<div class="bwx-card" st
 function bwGamesHTML(){ const tk=S.tokens, base=bestLoot(), nextIn=Math.max(0,Math.ceil((spinEvery()-(Date.now()-S.wheelT))/60000));
   const crateRow=(k,name,desc)=>`<div class="bwx-row"><div style="min-width:0"><b>${name}</b>${tk[k]?` <span class="badge g">${tk[k]} free</span>`:''}<div class="meta">${desc}</div></div>${tk[k]?`<button class="btn sm" data-act="crate" data-k="${k}" data-free="1">Open free</button>`:`<button class="btn sm" data-act="crate" data-k="${k}" ${S.money>=crateCost(k)?'':'disabled'}>Open · <span class="coin">${fmtShort(crateCost(k))}</span></button>`}</div>`;
   const betBtn=f=>{ const amt=Math.min(Math.floor(S.money*f), base*60); return `<button class="btn alt sm" data-act="flip" data-k="${f}" ${amt>=10?'':'disabled'}>${Math.round(f*100)}% · <span class="coin">${fmtShort(Math.max(0,amt))}</span></button>`; };
-  const ducks = duck ? duck.prizes.map((p,i)=>{ const open=duck.pick>=0; const lab=p.k==='crate'?'🎁':p.k==='wear'?'👕':p.k==='coins'?'🪙':'🎟'+p.n; return `<button class="duckb ${open?(i===duck.pick?'picked':'open'):''}" data-act="duckpick" data-i="${i}" ${open?'disabled':''} aria-label="Duck ${i+1}" style="animation-delay:${i*.3}s">${open?`<span>${lab}</span>`:'🦆'}</button>`; }).join('') : '';
+  const ducks = duck ? duck.prizes.map((p,i)=>{ const open=duck.pick>=0; const lab=p.k==='crate'?'🎁':p.k==='wear'?'👕':p.k==='coins'?'💰':'🎟'+p.n; return `<button class="duckb ${open?(i===duck.pick?'picked':'open'):''}" data-act="duckpick" data-i="${i}" ${open?'disabled':''} aria-label="Duck ${i+1}" style="animation-delay:${i*.3}s">${open?`<span>${lab}</span>`:'🦆'}</button>`; }).join('') : '';
   return `<div class="bwx-grid">
    ${bwCard('🎡','#ff8a5c','Lucky wheel','A free spin every hour, up to '+SPIN_BANK+' saved.'+(S.freeSpins<SPIN_BANK?' Next in '+nextIn+' min.':''),
      `<div class="wheelwrap"><div class="wheelring"><canvas id="wheelcv" width="520" height="520"></canvas></div>${WH.result?`<div class="val bwx-res">${esc(WH.result)}</div>`:''}</div>`,
@@ -10482,8 +10482,8 @@ function bwGamesHTML(){ const tk=S.tokens, base=bestLoot(), nextIn=Math.max(0,Ma
    ${bwCard('🃏','#7fe3c4','Higher or lower','Guess the next fish card. Every right guess grows the ticket pot by half. Cash out any time.',
      hilo&&!hilo.done?`<div class="hilocard"><b>${hilo.card}</b><span>${CARD_FISH[hilo.card]}</span></div><div class="val bwx-res">Pot 🎟 ${fmt(hilo.pot)} tickets · streak ${hilo.streak}</div>`:`<div class="bwx-art">🂠 🂡</div>${hilo&&hilo.done?`<div class="val bwx-res">${esc(hilo.msg)}</div>`:''}`,
      hilo&&!hilo.done?`<button class="btn sm" data-act="hilo" data-k="hi">Higher ▲</button><button class="btn sm" data-act="hilo" data-k="lo">Lower ▼</button><button class="btn alt sm" data-act="hilocash" ${hilo.streak?'':'disabled'}>Cash out</button>`:`<button class="btn" data-act="hilostart" ${S.money>=base*2?'':'disabled'}>Deal · <span class="coin">${fmtShort(base*2)}</span></button>`)}
-   ${bwCard('🪙','#ffd36a','Coin flip','Heads you double it, tails the Fishmonger keeps it. '+S.gstats.flips+' flips, '+S.gstats.flipWins+' won.',
-     flipRes?`<div class="val bwx-res" style="color:${flipRes.win?'var(--gold)':'var(--muted)'}">${esc(flipRes.txt)}</div>`:'<div class="bwx-art">🪙</div>', betBtn(.1)+betBtn(.25)+betBtn(.5))}
+   ${bwCard('💰','#ffd36a','Coin flip','Heads you double it, tails the Fishmonger keeps it. '+S.gstats.flips+' flips, '+S.gstats.flipWins+' won.',
+     flipRes?`<div class="val bwx-res" style="color:${flipRes.win?'var(--gold)':'var(--muted)'}">${esc(flipRes.txt)}</div>`:'<div class="bwx-art">💰</div>', betBtn(.1)+betBtn(.25)+betBtn(.5))}
    ${bwCard('🎫','#ff9ac0','Scratch card','Three of a kind wins: 🐟 30 · 🦀 60 · 🐚 120 tickets · 💎 a crate · 👑 Boardwalk-only wear.',
      scratch&&!scratch.done?`<div class="scratch">${scratch.cells.map((s,i)=>`<button data-act="scratch" data-i="${i}" class="${scratch.open[i]?'open':''}" aria-label="Scratch box ${i+1}">${scratch.open[i]?scratch.sym[s]:''}</button>`).join('')}</div>`
       :scratch&&scratch.done?`<div class="scratch">${scratch.cells.map(s=>`<button class="open" disabled>${scratch.sym[s]}</button>`).join('')}</div><div class="val bwx-res" style="color:${scratch.win>=0?'var(--gold)':'var(--muted)'}">${scratch.win>=0?'Winner! '+(scratch.txt||''):'No match this time.'}</div>`:'<div class="bwx-art">🎫</div>',
@@ -10682,7 +10682,7 @@ openEvent = function(kind){ if(!MG_NEW.includes(kind)) return _openEvent0(kind);
   if(kind==='memory') box.innerHTML=head('Tackle box shuffle','Your lures got mixed up. Find the matching pairs in eight tries or fewer.')+`<div class="row" style="justify-content:center;margin-top:12px"><button class="btn" data-ev="mgstart">Open the box</button>${skip}</div>`;
   if(kind==='skip') box.innerHTML=head('Skip a stone','The water is glassy. Throw when the marker is in the green: the closer to the middle, the more skips. Three throws.')+`<div class="row" style="justify-content:center;margin-top:12px"><button class="btn" data-ev="mgstart">Pick up a stone</button>${skip}</div>`;
   $('evcard').hidden=false; sfx.hot(); };
-const MG_ARROWS=['←','↑','→','↓'], MG_LURES=['🐟','🦀','🐚','🪱','🦐','🐙'];
+const MG_ARROWS=['←','↑','→','↓'], MG_LURES=['🐟','🦀','🐚','🐛','🦐','🐙'];
 function mgDone(title,coins,extra){ clearInterval(MG&&MG.iv); const c=coins>0?bwEarn(coins*coinMult()):0; S.gstats.minis=(S.gstats.minis||0)+1; MG=null; sfx.catch(c?3:1); if(c) sfx.coin();
   $('evin').innerHTML=`<h3>${esc(title)}</h3><p class="sub">${c?'You earned <b class="coin">'+fmt(c)+'</b>.':'Nothing this time.'}${extra?' '+esc(extra):''}</p><button class="btn" data-ev="skip">Keep fishing</button>`; checkFeats(); save(); lastHud=''; }
 function mgRender(){ const box=$('evin'), base=bestLoot();
@@ -12866,7 +12866,7 @@ const CATCHES_PER_MIN = 3.6; // a steady pace (about one landed fish every 16 se
 const SCHED=[
   {id:'shoal', name:'Shoal Run',   icon:'🐟', every:90,  len:8, off:0,  col:'#7fe3c4', fx:{bite:.6, rare:.15}, what:'Bites +60% and more rare fish', d:'A great shoal passes through every water: bites come 60% faster and rare fish are more common.'},
   {id:'gold',  name:'Golden Hour', icon:'✨', every:120, len:6, off:50, col:'#ffd36a', fx:{shiny:1},          what:'Shiny fish twice as common',  d:'The light turns gold over every water and shiny fish come out twice as often.'},
-  {id:'market',name:'Market Rush', icon:'🪙', every:75,  len:6, off:25, col:'#ffb36a', fx:{sell:()=>.3*(sellBase()+_bonus_036('sell'))}, /* a true +30% of your sale price, whatever your level */          what:'Fish sell for 30% more',      d:'Buyers crowd the harbour: the fishmonger pays 30% more for everything you sell.'},
+  {id:'market',name:'Market Rush', icon:'💰', every:75,  len:6, off:25, col:'#ffb36a', fx:{sell:()=>.3*(sellBase()+_bonus_036('sell'))}, /* a true +30% of your sale price, whatever your level */          what:'Fish sell for 30% more',      d:'Buyers crowd the harbour: the fishmonger pays 30% more for everything you sell.'},
 ];
 const schedLeft = e => { const p=e.every*MIN, t=(Date.now()-e.off*MIN)%p, tt=t<0?t+p:t; return tt<e.len*MIN ? e.len*MIN-tt : 0; };
 const schedNext = e => { const p=e.every*MIN, t=(Date.now()-e.off*MIN)%p, tt=t<0?t+p:t; return p-tt; };
@@ -14846,7 +14846,7 @@ document.addEventListener('click',e=>{ const btn=e.target.closest&&e.target.clos
   setTimeout(()=>{ if(S.bounties.includes(b)) return; const t=bountyBxGive(x); if(t){ save(); setTimeout(()=>{ try{ toast('Bounty bonus: '+t+'!'); }catch(er){} },1100); } },0); },true);
 { const _rb=renderBounties; renderBounties=function(P){ try{ for(const b of S.bounties) bountyBx(b); }catch(e){} _rb(P); try{
       P.querySelectorAll('[data-act="reroll"][data-i],[data-act="claim"][data-i]').forEach(btn=>{ const b=S.bounties[+btn.dataset.i], card=btn.closest('.tile'); if(!b||!card||card.querySelector('.bx')) return; const t=bountyBxText(b.x); if(!t) return;
-        const ic=b.x.k==='bait'?(BAIT[b.x.id]&&BAIT[b.x.id].junk?'✨':'🪱'):b.x.k==='scales'?'🔷':'🌊'; const row=btn.closest('.row'); (row||btn).insertAdjacentHTML('beforebegin',`<div class="bx${b.x.k==='bait'&&BAIT[b.x.id]&&BAIT[b.x.id].junk?' sp':''}"><span>${ic}</span>+ ${esc(t)}</div>`); });
+        const ic=b.x.k==='bait'?(BAIT[b.x.id]&&BAIT[b.x.id].junk?'✨':'🎣'):b.x.k==='scales'?'🔷':'🌊'; const row=btn.closest('.row'); (row||btn).insertAdjacentHTML('beforebegin',`<div class="bx${b.x.k==='bait'&&BAIT[b.x.id]&&BAIT[b.x.id].junk?' sp':''}"><span>${ic}</span>+ ${esc(t)}</div>`); });
     }catch(e){ console.error(e); } }; }
 document.head.insertAdjacentHTML('beforeend',`<style>
 #panel .bx{display:flex;align-items:center;gap:6px;margin:2px 0 4px;padding:4px 10px;border-radius:999px;background:#7fe3c41a;border:1px solid #7fe3c455;color:#bff3e2;font:700 12px var(--display,system-ui);width:max-content;max-width:100%}
@@ -15694,7 +15694,7 @@ function gamblePlay(i){ const f=S.cooler[i]; if(!f||!SPI[f.id]) return 'skip'; c
 function chestPrize(){ const r=Math.random(), base=bestLoot(); const caught=Object.keys(S.journal||{}).filter(id=>SPI[id]);
   if(r<.34) return {k:'tix', n:rint(60,260)}; if(r<.54) return {k:'scales', n:rint(6,24)}; if(r<.70&&caught.length) return {k:'nib', id:pick(caught), n:rint(2,6)};
   if(r<.84) return {k:'food', id:pick(FOOD_KEYS), n:10}; if(r<.97) return {k:'coins', n:rnd(8,30)}; return {k:'petcol'}; }
-function chestLabel(p){ return p.k==='tix'?'🎟 '+p.n+' tickets':p.k==='scales'?'◆ '+p.n+' Scales':p.k==='nib'?'🍬 '+p.n+' '+SPI[p.id].name+' Nibbles':p.k==='food'?'🪱 10 '+BAIT[p.id].name:p.k==='coins'?'🪙 Coins':'🎨 Pet color'; }
+function chestLabel(p){ return p.k==='tix'?'🎟 '+p.n+' tickets':p.k==='scales'?'◆ '+p.n+' Scales':p.k==='nib'?'🍬 '+p.n+' '+SPI[p.id].name+' Nibbles':p.k==='food'?'🎣 10 '+BAIT[p.id].name:p.k==='coins'?'💰 Coins':'🎨 Pet color'; }
 function chestGive(p){ if(p.k==='tix') return '+'+addTickets(p.n)+' tickets'; if(p.k==='scales'){ S.scales+=p.n; return '+'+p.n+' Scales'; }
   if(p.k==='nib'){ nibAdd(p.id,p.n); return '+'+p.n+' '+nibRarName(p.id)+' Nibbles'; }
   if(p.k==='food'){ S.bait[p.id]=(S.bait[p.id]||0)+10; return '+10 '+BAIT[p.id].name; }
@@ -21572,7 +21572,7 @@ document.head.insertAdjacentHTML('beforeend','<style>html body.phone-land #menuo
 document.head.insertAdjacentHTML('beforeend','<style>html body.phone-app #menuov .chips .sw[aria-pressed="true"],html body.phone-land #menuov .chips .sw[aria-pressed="true"]{background:var(--swc)!important;border-color:transparent!important;box-shadow:0 0 0 2px #0b1626,0 0 0 4px #ffd36a!important}</style>');
 pageDone('games',P=>{ /* Fishmonger's Gamble with an empty cooler: the card's idle picture, like the other game cards (batch 2; the rest is in ui_boardwalk.js) */
   const c=[...P.querySelectorAll('.bwx-card')].find(x=>/Gamble/.test(x.textContent)); const m=c&&[...c.querySelectorAll('.meta')].find(x=>/cooler is empty/i.test(x.textContent));
-  if(m&&!c.querySelector('.bwx-art')) m.insertAdjacentHTML('beforebegin','<div class="bwx-art" aria-hidden="true">🐟 ⚖️ 🪙</div>'); });
+  if(m&&!c.querySelector('.bwx-art')) m.insertAdjacentHTML('beforebegin','<div class="bwx-art" aria-hidden="true">🐟 ⚖️ 💰</div>'); });
 // =====================================================================
 // Phones: the SET MEASUREMENTS (director, 2026-11-18: "I want standards and set measurements for each platform going forward,
 // I'm tired of the same mistakes"). The numbers are written down in docs/PLATFORM_DESIGN.md ("Phone frame: set measurements")
@@ -22101,6 +22101,8 @@ PATCHES.unshift({v:'0.4.9', name:'Work in progress', items:phoneNotes([
 // text changes. Released notes live in notes_release.js.
 const TEST_NOTES={v:'test', label:'Test build · '+(window.DL_BUILD==='ios'?'iPhone':'Android'), name:'0.4.9 test build (newest first)', items:[
   '## New in this build',
+  'Some icons showed as an empty box on older PCs and phones (the bait reward on daily tasks, the Bait tab, Boardwalk coins): they use icons every device has now.',
+  '## Test build 2026.11.23-1521',
   'Less grace at full tension: the line now snaps after about a third of a second of reeling at 100% (was half a second).',
   'Long runs: every 3 good pulls in rhythm give +1 combo and shorten the run (was every 5).',
   'Tired Rare, Epic, Legendary and Mythic fish come in a little slower.',
