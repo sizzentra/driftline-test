@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="DL Test iPhone">
 <script>
-window.DL_BUILD='ios'; window.DL_PREVIEW=true; if(/[?&]sweep\b/.test(location.search)){ window.__bootErr=[]; addEventListener("error",function(e){ __bootErr.push(String(e.message||e)+(e.lineno?" (line "+e.lineno+")":"")); }); addEventListener("unhandledrejection",function(e){ __bootErr.push("promise: "+String(e.reason&&e.reason.message||e.reason)); }); window.requestAnimationFrame=function(f){ return setTimeout(function(){ f(performance.now()); },16); }; window.cancelAnimationFrame=function(i){ clearTimeout(i); }; } try{ window.__tOff=/[?&](test|sweep|frozen)\b/.test(location.search)?0:(+(localStorage.getItem("dl-test-toff")||0)||0); }catch(e){ window.__tOff=0; } (function(){ var rn=Date.now.bind(Date); Date.now=function(){ return rn()+window.__tOff; }; })(); if(/[?&]frozen\b/.test(location.search)){ var __fz=20261122; Math.random=function(){ __fz|=0; __fz=__fz+0x6D2B79F5|0; var t=Math.imul(__fz^__fz>>>15,1|__fz); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; var __fc=0, __pn=performance.now.bind(performance); performance.now=function(){ __fc+=0.01; return 100000+__fc; }; Date.now=function(){ return 1795300000000+Math.floor(__fc); }; window.__frozenClock=function(){ return __fc; }; window.requestAnimationFrame=function(){ return 0; }; window.cancelAnimationFrame=function(){}; } window.DL_VERSION='2026.11.23-0727';
+window.DL_BUILD='ios'; window.DL_PREVIEW=true; if(/[?&]sweep\b/.test(location.search)){ window.__bootErr=[]; addEventListener("error",function(e){ __bootErr.push(String(e.message||e)+(e.lineno?" (line "+e.lineno+")":"")); }); addEventListener("unhandledrejection",function(e){ __bootErr.push("promise: "+String(e.reason&&e.reason.message||e.reason)); }); window.requestAnimationFrame=function(f){ return setTimeout(function(){ f(performance.now()); },16); }; window.cancelAnimationFrame=function(i){ clearTimeout(i); }; } try{ window.__tOff=/[?&](test|sweep|frozen)\b/.test(location.search)?0:(+(localStorage.getItem("dl-test-toff")||0)||0); }catch(e){ window.__tOff=0; } (function(){ var rn=Date.now.bind(Date); Date.now=function(){ return rn()+window.__tOff; }; })(); if(/[?&]frozen\b/.test(location.search)){ var __fz=20261122; Math.random=function(){ __fz|=0; __fz=__fz+0x6D2B79F5|0; var t=Math.imul(__fz^__fz>>>15,1|__fz); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; var __fc=0, __pn=performance.now.bind(performance); performance.now=function(){ __fc+=0.01; return 100000+__fc; }; Date.now=function(){ return 1795300000000+Math.floor(__fc); }; window.__frozenClock=function(){ return __fc; }; window.requestAnimationFrame=function(){ return 0; }; window.cancelAnimationFrame=function(){}; } window.DL_VERSION='2026.11.23-0737';
 window.addEventListener('beforeinstallprompt',function(e){ e.preventDefault(); window.__dlInstallPrompt=e; });
 </script>
 </head>
@@ -17846,6 +17846,43 @@ const SO = {
     q.strokeStyle=v3rgba('#7ae0ff',.5); q.lineWidth=1; q.beginPath(); for(let k=0;k<5;k++){ const rx=mx-W*.04+k*W*.02; q.moveTo(rx,tip-H*.05+Math.abs(k-2)*H*.01); q.quadraticCurveTo(rx+W*.006,tip+H*.01,rx-W*.004,tip+H*.04); } q.stroke(); /* glowing roots trailing below */ }
 };
 // =====================================================================
+// ANIMAL FARM: THE RED BARN (overnight, 2026-11-23; its own design, MAP_THEMES › Animal Farm: Midwest red barns, county fairs, picture books).
+// A red barn at the pond's edge, seen from its gable end: a gambrel roof (two slopes on each side, the barn shape everyone knows) with white
+// trim, a hayloft door near the peak with a hay hoist beam and a bundle of hay, big white X-braced doors below; around it a grassy bank with
+// a hay stack and sunflowers, the dock running out from the barn on fence-post supports.
+// Parts: walls, roof (gambrel), hayloft, doors, fence, lantern, seat.
+// =====================================================================
+const AB = {
+  geo(o){ const C=BH.cab(o,{h:1.25,ratio:1.4}), wh=C.wh, x0=Math.max(HF.x0(),0)+W*.004, w=Math.min(wh*1.35,o.pw*.42), x1=x0+w, k1=C.wallTop-w*.2, pk=C.wallTop-w*.42; return {x0,x1,vx:x0,w,wh,wallTop:C.wallTop,k1,pk,mid:(x0+x1)/2}; },
+  pts(g,ov){ const a=g.x0-ov, b=g.x1+ov; return [a,g.wallTop+ov*.6, g.x0+g.w*.1,g.k1, g.mid,g.pk, g.x1-g.w*.1,g.k1, b,g.wallTop+ov*.6]; },
+  /* the gable-end wall up to the gambrel line, white trim along it and at the corners */
+  walls(o,g,kind,c){ const q=o.x, y=o.dockY, p=AB.pts(g,0); q.save(); q.beginPath(); q.moveTo(g.x0,y); for(let i=0;i<p.length;i+=2) q.lineTo(p[i],p[i+1]); q.lineTo(g.x1,y); q.closePath(); q.clip(); BH.walls(o,{x0:g.x0,x1:g.x1,vx:g.x0,wallTop:g.pk},['batten','batten','clapboard'][kind],kind===1?mix('#8a6a4a',c,.4):c); q.restore();
+    for(const e of [g.x0,g.x1-W*.005]) HK.rect(o,e,g.wallTop,W*.005,y-g.wallTop,'#f4f0e6'); },
+  /* the gambrel roof's edge: a broad band following the two-pitch outline, shingles, tin or rusty tin */
+  roof(o,g,kind,c){ const q=o.x, lit=HK.lit(o), ov=W*.012, th=Math.max(5,H*.012), p=AB.pts(g,ov), col=kind===2?mix('#a8683a',c,.4):c;
+    q.strokeStyle=HK.n(o,col); q.lineWidth=th; q.lineJoin='round'; q.beginPath(); q.moveTo(p[0],p[1]); for(let i=2;i<p.length;i+=2) q.lineTo(p[i],p[i+1]); q.stroke(); q.lineJoin='miter';
+    q.strokeStyle=HK.n(o,'#f4f0e6'); q.lineWidth=2; q.beginPath(); const p2=AB.pts(g,ov*.3); q.moveTo(p2[0],p2[1]+th*.55); for(let i=2;i<p2.length;i+=2) q.lineTo(p2[i],p2[i+1]+th*.55); q.stroke(); /* white trim under the eaves */
+    q.strokeStyle=v3rgba(o.P.rim||'#fff0d0',.35*lit); q.lineWidth=1; q.beginPath(); q.moveTo(p[0],p[1]-th*.5); q.lineTo(p[2],p[3]-th*.5); q.lineTo(p[4],p[5]-th*.5); q.stroke();
+    if(kind===2){ q.fillStyle=v3rgba('#8a4a2a',.6); for(let k=0;k<6;k++){ const u=(k+.5)/6, i=u<.5?0:4, f=(u<.5?u*2:(u-.5)*2); q.fillRect(p[i]+(p[i+4]-p[i])*f*.5,p[i+1]+(p[i+5]-p[i+1])*f*.5-2,3,4); } } /* rust spots */
+    o.top=Math.min(o.top==null?o.dockY-H*.23:o.top,g.pk-H*.04); o.low=Math.max(o.low==null?-1e9:o.low,g.wallTop); },
+  /* the hayloft: an open loft door with hay and a hoist beam with a pulley and a bundle on its rope, closed X-braced loft doors, or a round window */
+  loft(o,g,s,c){ const lw=g.w*.26, lx=g.mid-lw/2, ly=g.k1+H*.008, lh=(g.wallTop-g.k1)*.8+H*.02;
+    if(s===0){ HK.rect(o,lx-2,ly-2,lw+4,lh+4,'#f4f0e6'); HK.rect(o,lx,ly,lw,lh,'#2a1a10'); HK.poly(o,[lx,ly+lh,lx+lw*.2,ly+lh*.55,lx+lw*.5,ly+lh*.45,lx+lw*.85,ly+lh*.6,lx+lw,ly+lh],'#e0c060'); const by=g.pk+H*.004; HK.rect(o,g.mid-W*.002,by,W*.004,ly-by,c); HK.rect(o,g.mid-W*.002,by,g.w*.32,W*.004,c); const hx=g.mid+g.w*.3; HK.circ(o,hx,by+H*.006,H*.004,'#3a3a40'); HK.line(o,[hx,by+H*.008,hx,ly+lh*.6],'#c8a878',1); HK.ell(o,hx,ly+lh*.75,W*.006,H*.01,'#d8b46a'); }
+    if(s===1){ HK.rect(o,lx-2,ly-2,lw+4,lh+4,'#f4f0e6'); HK.rect(o,lx,ly,lw,lh,c); HK.line(o,[lx,ly,lx+lw,ly+lh],'#f4f0e6',2); HK.line(o,[lx+lw,ly,lx,ly+lh],'#f4f0e6',2); HK.line(o,[g.mid,ly,g.mid,ly+lh],'#f4f0e6',1.5); }
+    if(s===2){ HK.circ(o,g.mid,ly+lh*.5,lw*.38+2,'#f4f0e6'); HK.circ(o,g.mid,ly+lh*.5,lw*.38,'#2a3440'); HK.line(o,[g.mid-lw*.38,ly+lh*.5,g.mid+lw*.38,ly+lh*.5],'#f4f0e6',1.2); HK.line(o,[g.mid,ly+lh*.5-lw*.38,g.mid,ly+lh*.5+lw*.38],'#f4f0e6',1.2); o.lights.push({x:g.mid,y:ly+lh*.5,r:.08,a:.45,small:1}); } },
+  /* the big doors: white X-braced sliding doors on a track, a Dutch door, or doors rolled open showing hay inside */
+  doors(o,g,s,c){ const y=o.dockY, dw=g.w*.6, dx=g.mid-dw/2, dh=(y-g.wallTop)*.82, top=y-dh;
+    HK.rect(o,dx-W*.006,top-H*.008,dw+W*.012,H*.004,'#3a3a40');
+    if(s===0) for(const a of [dx,dx+dw/2]){ HK.rect(o,a,top,dw/2,dh,c); HK.line(o,[a+2,top+2,a+dw/2-2,y-2],'#f4f0e6',2.5); HK.line(o,[a+dw/2-2,top+2,a+2,y-2],'#f4f0e6',2.5); HK.line(o,[a,top,a+dw/2,top,a+dw/2,y,a,y,a,top],'#f4f0e6',2.5); }
+    if(s===1){ const w2=dw*.45; HK.rect(o,g.mid-w2/2,top,w2,dh,c); HK.line(o,[g.mid-w2/2,top+dh*.5,g.mid+w2/2,top+dh*.5],'#f4f0e6',2); HK.line(o,[g.mid-w2/2,top,g.mid+w2/2,top,g.mid+w2/2,y,g.mid-w2/2,y,g.mid-w2/2,top],'#f4f0e6',2); }
+    if(s===2){ HK.rect(o,dx,top,dw,dh,'#1a120c'); HK.block(o,dx+dw*.15,y-dh*.35,dw*.35,dh*.35,'#d8b46a'); HK.block(o,dx+dw*.5,y-dh*.25,dw*.3,dh*.25,'#e0c060'); for(const a of [dx-dw*.32,dx+dw+dw*.02]){ HK.rect(o,a,top,dw*.3,dh,c); HK.line(o,[a,top,a+dw*.3,y],'#f4f0e6',2); } } /* doors rolled open, hay bales inside */ },
+  /* the bank: grass sloping up behind, a hay stack, sunflowers */
+  ground(o){ const x=o.x, y=o.dockY, N=c0=>HK.n(o,c0), x0=HF.x0(), xe=o.pw-W*.02, top=X=>y-H*.1+(X-x0)/(xe-x0)*H*.1;
+    x.fillStyle=N('#4a8a3a'); x.beginPath(); x.moveTo(x0,y); for(let X=x0;X<=xe;X+=4) x.lineTo(X,top(X)); x.lineTo(xe,y); x.closePath(); x.fill(); x.fillStyle=N('#6aaa4a'); x.beginPath(); x.moveTo(x0,y); for(let X=x0;X<=xe;X+=4) x.lineTo(X,top(X)+H*.008); x.lineTo(xe,y); x.closePath(); x.fill();
+    const g=AB.geo(o), hx=g.x1+W*.006; x.fillStyle=N('#d8b46a'); x.beginPath(); x.ellipse(hx+W*.016,y-H*.002,W*.018,H*.036,0,Math.PI,0); x.fill(); x.strokeStyle=N('#b8943a'); x.lineWidth=1; x.beginPath(); for(let k=-3;k<=3;k++){ x.moveTo(hx+W*.016+k*W*.004,y-H*.03+Math.abs(k)*H*.006); x.lineTo(hx+W*.016+k*W*.005,y); } x.stroke(); /* a hay stack */
+    for(let k=0;k<3;k++){ const sx=hx+W*.04+k*W*.012, sh=H*(.05+k%2*.012); HK.line(o,[sx,y,sx,y-sh],'#4a7a2a',1.5); HK.ell(o,sx-W*.004,y-sh*.5,W*.004,H*.003,'#4a7a2a'); for(let p=0;p<8;p++){ const a=p*Math.PI/4; HK.ell(o,sx+Math.cos(a)*H*.007,y-sh+Math.sin(a)*H*.007,H*.004,H*.004,'#f0c020'); } HK.circ(o,sx,y-sh,H*.005,'#5a3a1a'); } /* sunflowers */ }
+};
+// =====================================================================
 // Every water's home (batch 5, 2026-11-22; designs in docs/HOME_DESIGNS.md, colours in docs/MAP_THEMES.md). Willow Pond (the
 // approved pilot) is in cv_homefmt.js; these 19 are built from the home kit (cw_homekit.js). Each home: the seat plus 5 features
 // made for that water, 3 styles each ("none" first where a feature can be left out), one list of 16 colours for every feature.
@@ -18298,18 +18335,25 @@ hfMake('starfall',{ name:'Star observatory', hname:'observatory', floats:true, g
     ['seat'],
     ['light',(o,s)=>HK.light(o,['star','moon','wisps'][s])]] });
 
-/* 15. Animal Farm: the barn dock */
-hfMake('farm',{ name:'Barn dock', hname:'barn dock',
+/* 15. Animal Farm: the red barn (overnight, 2026-11-23; its own design, src/cw_barn.js): a red barn seen from its gable end with a gambrel roof,
+   white trim, a hayloft with a hoist and big white X-braced doors; a grassy bank with a hay stack and sunflowers; the dock on fence posts. The old
+   deck, footing and roof choices became this one building; the fence and lantern keep their ids */
+hfMake('farm',{ name:'Red barn', hname:'barn', glow:'255,205,130', seatX:()=>HF.pw()-W*.03, front:null, smoke:null,
   colors:C16('Barn red=#b8322a;Dark barn=#7a2a22;Trim white=#f4f0e6;Fence grey=#9a948a;Weathered board=#8a6a4a;Hay gold=#e0c060;Straw=#d8b46a;Tin=#a8b0b4;Rust tin=#a8683a;Grass green=#6aaa4a;Field green=#3a6a2a;Pond green=#5a7a4a;Sky blue=#a8d8f4;Gingham blue=#5a8ad8;Sunflower=#f0c83a;Mud brown=#6a5038'),
-  els:[{id:'deck',label:'Deck',styles:['Barn-red boards','Weathered boards','Hay-strewn planks'],def:[0,0]},{id:'footing',label:'Footing',styles:['Fence posts','Hay bales','Tractor tyres'],def:[0,4]},
-       {id:'fence',label:'Fence',none:true,styles:['No fence','Picket fence','Post-and-rail','Wagon wheel'],def:[1,2]},{id:'roof',label:'Barn roof',none:true,styles:['Open sky','Tin lean-to','Barn gable','Windmill vane'],def:[2,0]},
+  els:[{id:'walls',label:'Walls',styles:['Barn-red boards','Weathered boards','White clapboard'],def:[0,0],palS:[[0,1,4],[4,1],[2,3]]},
+       {id:'gambrel',label:'Roof',styles:['Shingles','Tin roof','Rusty tin'],def:[0,1],palS:[[1,4,3],[7,3],[8,7]]},
+       {id:'loft',label:'Hayloft',styles:['Open loft and hoist','Closed loft doors','Round window'],def:[0,1],pal:[0,1,4,2]},
+       {id:'doors',label:'Doors',styles:['X-braced doors','Dutch door','Doors rolled open'],def:[0,0],pal:[0,1,4,2]},
+       {id:'fence',label:'Fence',none:true,styles:['No fence','Picket fence','Post-and-rail','Wagon wheel'],def:[1,2]},
        {id:'light',label:'Lantern',light:true,styles:['Lantern on a nail','String of bulbs','Milk-can lantern'],def:[0,14]}],
   seat:['haybale','milkcan','rocker'], seatNames:['Hay bale','Milk-can stool','Rocking chair'], seatDef:[0,5],
   order:[
-    ['footing',(o,s,c)=>HK.supports(o,c,['fence','hay','tyres'][s],5)],
-    ['deck',(o,s,c)=>HK.deck(o,c,['red','boards','hay'][s])],
+    ['base',(o)=>{ AB.ground(o); HK.supports(o,'#9a948a','fence',5); HK.deck(o,'#8a6a4a','boards'); }],
+    ['walls',(o,s,c)=>AB.walls(o,AB.geo(o),s,c)],
+    ['doors',(o,s,c)=>AB.doors(o,AB.geo(o),s,c)],
+    ['loft',(o,s,c)=>AB.loft(o,AB.geo(o),s,c)],
+    ['gambrel',(o,s,c)=>AB.roof(o,AB.geo(o),s,c)],
     ['fence',(o,s,c)=>{ if(s) HK.rail(o,c,['','picket','postrail','wheel'][s]); }],
-    ['roof',(o,s,c)=>{ if(s===1) HK.roof(o,c,'tin',.02,.4); if(s===2) HK.roof(o,c,'barn',.02,.4); if(s===3){ const x=HK.at(o,.04); HK.rect(o,x,o.dockY-H*.16,2,H*.16,'#7a2a22'); HK.poly(o,[x,o.dockY-H*.16,x+W*.06,o.dockY-H*.14,x+W*.06,o.dockY-H*.12,x,o.dockY-H*.135],c); } }],
     ['seat'],
     ['light',(o,s)=>HK.light(o,['nail','bulbs','milkcan'][s])]] });
 
@@ -21776,6 +21820,8 @@ PATCHES.unshift({v:'0.4.9', name:'Work in progress', items:phoneNotes([
 // text changes. Released notes live in notes_release.js.
 const TEST_NOTES={v:'test', label:'Test build · '+(window.DL_BUILD==='ios'?'iPhone':'Android'), name:'0.4.9 test build (newest first)', items:[
   '## New in this build',
+  'Animal Farm, redone in its own style: your home is a red barn with the classic two-pitch barn roof and white trim, a hayloft with a hoist and a bundle of hay, and big white X-braced doors (or a Dutch door, or doors rolled open with hay inside). A grassy bank with a hay stack and sunflowers runs behind it. Your fence and lantern choices carry over.',
+  '## Test build 2026.11.23-0727',
   'Starfall Lake, redone in its own style: your home is a round star observatory of moonstone with a crystal, silver or star-blossom dome and a gold star on top, a moon-shaped door and a frieze of tiny constellations, standing on a floating rock island with crystals hanging beneath. Your telescope and star lantern choices carry over.',
   '## Test build 2026.11.23-0716',
   'Ember Springs, redone in its own style: your home is a basalt bathhouse on hexagonal basalt columns rising from the hot water, with a curved iron barrel roof, round windows that glow at night, a vent that lets off steam, and the steaming pool beside it. Pick the walls, roof, door, hot pool, lantern and seat in Your home.',
