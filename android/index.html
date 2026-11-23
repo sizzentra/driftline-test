@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="DL Test Android">
 <script>
-window.DL_BUILD='android'; window.DL_PREVIEW=true; if(/[?&]sweep\b/.test(location.search)){ window.__bootErr=[]; addEventListener("error",function(e){ __bootErr.push(String(e.message||e)+(e.lineno?" (line "+e.lineno+")":"")); }); addEventListener("unhandledrejection",function(e){ __bootErr.push("promise: "+String(e.reason&&e.reason.message||e.reason)); }); window.requestAnimationFrame=function(f){ return setTimeout(function(){ f(performance.now()); },16); }; window.cancelAnimationFrame=function(i){ clearTimeout(i); }; } try{ window.__tOff=/[?&](test|sweep|frozen)\b/.test(location.search)?0:(+(localStorage.getItem("dl-test-toff")||0)||0); }catch(e){ window.__tOff=0; } (function(){ var rn=Date.now.bind(Date); Date.now=function(){ return rn()+window.__tOff; }; })(); if(/[?&]frozen\b/.test(location.search)){ var __fz=20261122; Math.random=function(){ __fz|=0; __fz=__fz+0x6D2B79F5|0; var t=Math.imul(__fz^__fz>>>15,1|__fz); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; var __fc=0, __pn=performance.now.bind(performance); performance.now=function(){ __fc+=0.01; return 100000+__fc; }; Date.now=function(){ return 1795300000000+Math.floor(__fc); }; window.__frozenClock=function(){ return __fc; }; window.requestAnimationFrame=function(){ return 0; }; window.cancelAnimationFrame=function(){}; } window.DL_VERSION='2026.11.23-0352';
+window.DL_BUILD='android'; window.DL_PREVIEW=true; if(/[?&]sweep\b/.test(location.search)){ window.__bootErr=[]; addEventListener("error",function(e){ __bootErr.push(String(e.message||e)+(e.lineno?" (line "+e.lineno+")":"")); }); addEventListener("unhandledrejection",function(e){ __bootErr.push("promise: "+String(e.reason&&e.reason.message||e.reason)); }); window.requestAnimationFrame=function(f){ return setTimeout(function(){ f(performance.now()); },16); }; window.cancelAnimationFrame=function(i){ clearTimeout(i); }; } try{ window.__tOff=/[?&](test|sweep|frozen)\b/.test(location.search)?0:(+(localStorage.getItem("dl-test-toff")||0)||0); }catch(e){ window.__tOff=0; } (function(){ var rn=Date.now.bind(Date); Date.now=function(){ return rn()+window.__tOff; }; })(); if(/[?&]frozen\b/.test(location.search)){ var __fz=20261122; Math.random=function(){ __fz|=0; __fz=__fz+0x6D2B79F5|0; var t=Math.imul(__fz^__fz>>>15,1|__fz); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; var __fc=0, __pn=performance.now.bind(performance); performance.now=function(){ __fc+=0.01; return 100000+__fc; }; Date.now=function(){ return 1795300000000+Math.floor(__fc); }; window.__frozenClock=function(){ return __fc; }; window.requestAnimationFrame=function(){ return 0; }; window.cancelAnimationFrame=function(){}; } window.DL_VERSION='2026.11.23-0403';
 window.addEventListener('beforeinstallprompt',function(e){ e.preventDefault(); window.__dlInstallPrompt=e; });
 </script>
 </head>
@@ -17336,38 +17336,29 @@ const C16=s=>s.split(';').map(p=>{ const [n,h]=p.split('='); return [n.trim(),h.
       ['shade',(o,s,c)=>BH.shade(o,P1(),[null,'umbrella','awning','porch'][s],c,hfColor('pond','roof'))],
       ['seat']] }); }
 
-/* 2. Stonebrook River: the mill landing */
-hfMake('river',{ name:'Stonebrook mill landing', hname:'mill landing',
-  colors:C16('River stone=#bab2a2;Dark stone=#8a8478;Slate=#5a6470;Mill oak=#7a5a3e;Dark oak=#4a3626;Roof brick=#7a4a3a;Iron=#3a3a40;Moss=#6a9a5e;Fern=#4f8050;River blue=#5a9aa4;Deep teal=#28525e;Sky=#a8d0ec;Birch white=#eef0e2;Autumn orange=#c8783a;Maple red=#a8402e;Wheat=#d8c08a'),
-  /* map redo (director, 2026-11-22): the waterwheel feature is gone (the mill already has one, and it didn't turn): a mooring feature
-     instead; the landing styles are three different builds; the lantern offers no open candle on a river landing */
-  els:[{id:'moor',label:'Mooring',styles:['Mooring post','Flour sacks','Sack barrow'],def:[0,3]},{id:'landing',label:'Landing',styles:['Flagstones','Oak boards','Brick quay'],def:[0,0]},
-       {id:'shed',label:'Mill shed',none:true,styles:['No shed','Slate roof','Timber frame','Thatch'],def:[1,2]},{id:'rack',label:'Fly rack',none:true,styles:['No rack','Rod rack','Creel and net','Fly line'],def:[1,3]},
-       {id:'light',label:'Lantern',light:true,styles:['Cage lantern','Oil lamp','Wall bracket'],def:[0,13]}],
-  seat:['stump','gardenbench','barrel'], seatNames:['Stump stool','Garden bench','Barrel'], seatDef:[1,3],
-  order:[
-    ['landing',(o,s,c)=>{
-      if(s===0){ HK.supports(o,'#9a948a','stone',4); HK.deck(o,c,'stone'); }
-      if(s===1){ HK.supports(o,HK.dk(c,.15),'square',5); HK.deck(o,c,'planks'); }
-      if(s===2){ /* a solid brick quay wall down into the water instead of supports */ const x0=HF.x0(), top=o.dockY+HK.fh(), x=o.x, bc=HK.n(o,c), wl=o.wl;
-        x.fillStyle=bc; x.fillRect(x0,top,o.pw-x0,wl-top); x.strokeStyle=HK.n(o,HK.dk(c,.35)); x.lineWidth=.8; const rh=H*.009;
-        for(let yy=top,row=0;yy<wl;yy+=rh,row++){ x.beginPath(); x.moveTo(x0,yy); x.lineTo(o.pw,yy); for(let xx=x0+(row%2)*W*.006;xx<o.pw;xx+=W*.012){ x.moveTo(xx,yy); x.lineTo(xx,Math.min(wl,yy+rh)); } x.stroke(); }
-        const wg=x.createLinearGradient(0,wl-H*.03,0,wl); wg.addColorStop(0,'rgba(26,36,24,0)'); wg.addColorStop(1,'rgba(26,36,24,.5)'); x.fillStyle=wg; x.fillRect(x0,wl-H*.03,o.pw-x0,H*.03);
-        const deep=o.P.wBot||'#1a3040', ug=x.createLinearGradient(0,wl,0,wl+H*.16); ug.addColorStop(0,v3rgba(mix(c,deep,.7),.6)); ug.addColorStop(1,v3rgba(deep,0)); x.fillStyle=ug; x.fillRect(x0,wl,o.pw-x0,H*.16);
-        for(let i=0;i<5;i++) o.posts.push({x:x0+(o.pw-x0)*(i+.5)/5,w:W*.02}); HK.deck(o,'#9a948a','stone'); } }],
-    ['rack',(o,s,c)=>{ const x=HK.at(o,.42), y=o.dockY; if(s===1){ HK.rect(o,x,y-H*.06,W*.02,2,c); for(let i=0;i<3;i++) HK.line(o,[x+i*W*.006,y,x+i*W*.007+W*.004,y-H*.12],HK.dk(c,.2),1.2); } if(s===2){ HK.poly(o,[x,y,x+W*.012,y,x+W*.014,y-H*.02,x-W*.002,y-H*.02],c); HK.line(o,[x+W*.018,y,x+W*.024,y-H*.1],'#5a4030',1.4); HK.ell(o,x+W*.025,y-H*.11,W*.006,H*.01,v3rgba('#3a3a40',.4)); }
-      if(s===3){ /* a fly line strung between two posts, sagging under its own weight, with tied flies hanging on short threads (director: it had no physics) */ const a=x-W*.012, b=x+W*.034, ty=y-H*.1, sag=H*.016; HK.rect(o,a-1,ty,2,y-ty,c); HK.rect(o,b-1,ty,2,y-ty,c);
-        HK.curve(o,a,ty,(a+b)/2,ty+sag*2,b,ty,'#d8c8a0',1); for(let i=1;i<6;i++){ const u=i/6, px=a+(b-a)*u, py=ty+sag*4*u*(1-u); HK.line(o,[px,py,px,py+H*.008],v3rgba('#e8e0c8',.8),.7); HK.circ(o,px,py+H*.009,1.7,['#c8783a','#a8402e','#d8c08a','#6a9a5e','#5a9aa4'][i-1]); } } }],
-    ['shed',(o,s,c)=>{ if(s) HK.roof(o,c,['','slate','timberframe','thatch'][s],.02,.36); }],
-    ['moor',(o,s,c)=>{ const x=HK.at(o,.7), y=o.dockY, sc=HF.sc(); /* on the landing's front half, clear of the angler */
-      if(s===0){ HK.rect(o,x-3.5*sc,y-9*sc,7*sc,9*sc,'#3a3a40'); HK.ell(o,x,y-9*sc,5*sc,1.6*sc,'#4a4a52'); HK.ell(o,x+9*sc,y-1.6*sc,6*sc,1.8*sc,c); HK.ell(o,x+9*sc,y-1.6*sc,3.5*sc,1*sc,HK.dk(c,.3)); /* an iron bollard and a coil of rope */
-        HK.curve(o,x+3*sc,y-7*sc,x+12*sc,y+2*sc,x+16*sc,o.wl,c,Math.max(1.2,1.1*sc)); }
-      if(s===1){ for(const [dx,dy,k] of [[0,0,1],[9,0,1],[4.5,-7,1]]){ const bx=x+dx*sc, by=y+dy*sc; HK.poly(o,[bx-4.5*sc,by,bx+4.5*sc,by,bx+4*sc,by-7*sc,bx-4*sc,by-7*sc],'#e8dcc0'); HK.rect(o,bx-4.4*sc,by-4.6*sc,8.8*sc,1.6*sc,c); HK.ell(o,bx,by-7.4*sc,1.4*sc,1*sc,'#c8b890'); } } /* flour sacks with the mill's band */
-      if(s===2){ const wx=x+2*sc; HK.line(o,[x-4*sc,y-18*sc,x+1*sc,y-2*sc,x+10*sc,y-2*sc],HK.dk(c,.2),Math.max(1.4,1.4*sc)); HK.circ(o,wx,y-3*sc,3*sc,'#3a3a40'); HK.circ(o,wx,y-3*sc,1.2*sc,c);
-        for(const k of [0,1]){ const by=y-3*sc-k*6.5*sc, bx=x+5*sc-k*1.5*sc; HK.poly(o,[bx-4*sc,by,bx+4*sc,by,bx+3.6*sc,by-6*sc,bx-3.6*sc,by-6*sc],'#e8dcc0'); HK.rect(o,bx-3.9*sc,by-3.8*sc,7.8*sc,1.4*sc,c); } } }],
-    ['seat'],
-    ['light',(o,s)=>HK.light(o,['cage','hanging','bracket'][s])]] });
-
+/* 2. Stonebrook River: the stone mill shed (the Rockies standard, overnight batch 5, 2026-11-23): one base building, the miller's little
+   fishing shed on fieldstone piers beside the mill (MAP_THEMES › Stonebrook: stacked fieldstone, river-worn timber, slate). Its walls,
+   roof, chimney, lantern, door, windows and seat change aspects of it; autumn woods on the bank behind it */
+{ const P2=()=>BH.cab({pw:HF.pw(),dockY:HF.dockY()});
+  hfMake('river',{ name:'Mill shed', hname:'mill shed', glow:'255,205,140', seatX:()=>HF.pw()-W*.028,
+    colors:C16('River stone=#bab2a2;Dark stone=#8a8478;Slate=#5a6470;Mill oak=#7a5a3e;Dark oak=#4a3626;Roof brick=#7a4a3a;Iron=#3a3a40;Moss=#6a9a5e;Fern=#4f8050;River blue=#5a9aa4;Deep teal=#28525e;Sky=#a8d0ec;Birch white=#eef0e2;Autumn orange=#c8783a;Maple red=#a8402e;Wheat=#d8c08a'),
+    front:null, smoke:(n,t)=>BH.smoke(n,t,BH.chimTop(P2(),['stone','brick','pipe'][hfStyle('river','chimney')]),hfStyle('river','chimney')===2?.7:1),
+    els:[{id:'walls',label:'Walls',styles:['Fieldstone','Timber frame','Clapboard'],def:[0,0],pal:[0,1,2,3,4,12,15]},
+         {id:'roof',label:'Roof',styles:['Slate','Cedar shakes','Thatch'],def:[0,2],palS:[[2,1,5,6],[3,4,1],[15,3,13]]},
+         {id:'chimney',label:'Chimney',styles:['Fieldstone','Brick','Stovepipe'],def:[0,1],palS:[[0,1,2],[5,14,13],[6,4,10]]},
+         {id:'light',label:'Lantern',light:true,styles:['Iron cage lantern','Lamp post','Lantern string'],def:[0,6],pal:[6,4,3,13]},
+         {id:'door',label:'Door',styles:['Plank door','Dutch door','Arched door'],def:[0,3],pal:[3,4,5,7,8,9,10,14]},
+         {id:'windows',label:'Windows',styles:['Four-pane windows','Arched windows','Shuttered windows'],def:[0,4],pal:[3,4,5,7,8,9,10,14]}],
+    seat:['stump','gardenbench','barrel'], seatNames:['Stump stool','Slatted bench','Barrel'], seatDef:[1,3], seatPal:[0,1,3,4,7,8,13,14,15],
+    order:[
+      ['base',(o)=>{ BH.bank(o,{trees:'round',g1:'#4a6a3e',g2:'#2c4228',grass:'#6a9a5e',rock:'#8a8478',t1:'#c8783a',t2:'#4f8050',seed:31}); BH.piles(o,'stone','#8a8478'); HK.deck(o,'#7a5a3e','boards'); }],
+      ['chimney',(o,s,c)=>BH.chimney(o,P2(),['stone','brick','pipe'][s],c)],
+      ['walls',(o,s,c)=>BH.walls(o,P2(),['stone','plaster','clapboard'][s],c)],
+      ['door',(o,s,c)=>BH.door(o,P2(),['plank','dutch','arched'][s],c)],
+      ['windows',(o,s,c)=>BH.windows(o,P2(),['four','arched','shutters'][s],c)],
+      ['roof',(o,s,c)=>BH.roof(o,P2(),['tiles','shakes','thatch'][s],c)],
+      ['light',(o,s,c)=>BH.lantern(o,P2(),['hurricane','lamppost','string'][s],c)],
+      ['seat']] }); }
 /* 3. Cherry Blossom Lake: the tea house deck */
 hfMake('blossom',{ name:'Tea house deck', hname:'tea house deck',
   colors:C16('Lacquer red=#b8322a;Vermilion=#d8503a;Cedar=#9a6a42;Dark cedar=#5a3a26;Black lacquer=#2a2426;Paper white=#f4ece0;Rice beige=#e0d0b0;Bamboo=#b8b06a;Moss=#6a8a52;Jade=#5a9a9a;Deep jade=#1e4a58;Blossom pink=#f4a8c4;Pale sakura=#ffe4ee;Wisteria=#a88ac8;Lantern amber=#f0a848;Stone grey=#9a948a'),
@@ -21209,6 +21200,8 @@ PATCHES.unshift({v:'0.4.9', name:'Work in progress', items:phoneNotes([
 // text changes. Released notes live in notes_release.js.
 const TEST_NOTES={v:'test', label:'Test build · '+(window.DL_BUILD==='ios'?'iPhone':'Android'), name:'0.4.9 test build (newest first)', items:[
   '## New in this build',
+  'Stonebrook River: your home is now a stone mill shed on fieldstone piers you customise: walls, roof (slate, shakes or thatch), chimney with smoke, lantern, door, windows and seat, with autumn woods on the bank behind it.',
+  '## Test build 2026.11.23-0352',
   'Willow Pond: your home is now a pine boathouse you customise: walls, roof, lantern, shade (including the patio umbrella), door, windows and seat, on a pine bank with round piles. Your seat sits at the deck’s edge.',
   'Willow Pond: the weeping willow is green again by day.',
   '## Test build 2026.11.23-0332',
