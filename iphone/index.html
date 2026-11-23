@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="DL Test iPhone">
 <script>
-window.DL_BUILD='ios'; window.DL_PREVIEW=true; if(/[?&]sweep\b/.test(location.search)){ window.__bootErr=[]; addEventListener("error",function(e){ __bootErr.push(String(e.message||e)+(e.lineno?" (line "+e.lineno+")":"")); }); addEventListener("unhandledrejection",function(e){ __bootErr.push("promise: "+String(e.reason&&e.reason.message||e.reason)); }); window.requestAnimationFrame=function(f){ return setTimeout(function(){ f(performance.now()); },16); }; window.cancelAnimationFrame=function(i){ clearTimeout(i); }; } try{ window.__tOff=/[?&](test|sweep|frozen)\b/.test(location.search)?0:(+(localStorage.getItem("dl-test-toff")||0)||0); }catch(e){ window.__tOff=0; } (function(){ var rn=Date.now.bind(Date); Date.now=function(){ return rn()+window.__tOff; }; })(); if(/[?&]frozen\b/.test(location.search)){ var __fz=20261122; Math.random=function(){ __fz|=0; __fz=__fz+0x6D2B79F5|0; var t=Math.imul(__fz^__fz>>>15,1|__fz); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; var __fc=0, __pn=performance.now.bind(performance); performance.now=function(){ __fc+=0.01; return 100000+__fc; }; Date.now=function(){ return 1795300000000+Math.floor(__fc); }; window.__frozenClock=function(){ return __fc; }; window.requestAnimationFrame=function(){ return 0; }; window.cancelAnimationFrame=function(){}; } window.DL_VERSION='2026.11.23-0322';
+window.DL_BUILD='ios'; window.DL_PREVIEW=true; if(/[?&]sweep\b/.test(location.search)){ window.__bootErr=[]; addEventListener("error",function(e){ __bootErr.push(String(e.message||e)+(e.lineno?" (line "+e.lineno+")":"")); }); addEventListener("unhandledrejection",function(e){ __bootErr.push("promise: "+String(e.reason&&e.reason.message||e.reason)); }); window.requestAnimationFrame=function(f){ return setTimeout(function(){ f(performance.now()); },16); }; window.cancelAnimationFrame=function(i){ clearTimeout(i); }; } try{ window.__tOff=/[?&](test|sweep|frozen)\b/.test(location.search)?0:(+(localStorage.getItem("dl-test-toff")||0)||0); }catch(e){ window.__tOff=0; } (function(){ var rn=Date.now.bind(Date); Date.now=function(){ return rn()+window.__tOff; }; })(); if(/[?&]frozen\b/.test(location.search)){ var __fz=20261122; Math.random=function(){ __fz|=0; __fz=__fz+0x6D2B79F5|0; var t=Math.imul(__fz^__fz>>>15,1|__fz); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; var __fc=0, __pn=performance.now.bind(performance); performance.now=function(){ __fc+=0.01; return 100000+__fc; }; Date.now=function(){ return 1795300000000+Math.floor(__fc); }; window.__frozenClock=function(){ return __fc; }; window.requestAnimationFrame=function(){ return 0; }; window.cancelAnimationFrame=function(){}; } window.DL_VERSION='2026.11.23-0332';
 window.addEventListener('beforeinstallprompt',function(e){ e.preventDefault(); window.__dlInstallPrompt=e; });
 </script>
 </head>
@@ -1598,7 +1598,7 @@ const LS_KEY = 'driftline-save-next'; try{ if(!localStorage.getItem(LS_KEY)){ co
 const baitZero = () => Object.fromEntries(Object.keys(BAIT).filter(k=>k!=='worm').map(k=>[k,0]));
 const fresh = () => ({v:3, money:0, xp:0, lvl:1, gear:{rod:0,reel:0,line:0,hook:0,cooler:0,finder:0}, bait:baitZero(), baitSel:'worm',
   unlocked:['pond'], loc:'pond', cooler:[], journal:{}, bounties:[], egPaid:[], setDone:{},
-  perks:{}, bonusPts:0, tank:[], tankSlots:3, tankT:0, tankBank:0, feats:{}, pearls:0, tides:0, streak:0,
+  perks:{}, bonusPts:0, tank:[], tankSlots:3, tankT:0, tankBank:0, feats:{}, pearls:0, pearlV:2, tides:0, streak:0,
   buffs:[], look:{g:'m',skin:1,hair:1,shirt:'#3a6f9a',pat:'none',pants:'#2f3b4a',hat:'cap',hatCol:'#c8553a',hairStyle:'auto',beard:'none',glasses:'none',outfit:'none',outCol:'#d8a020',build:'average',eye:0,shoes:'boots',neck:'none',back:'none',accCol:'#c8553a',nose:'button',brows:'soft',mouth:'smile',blush:'on',aura:'none',bob:'none',line:'none',face:'natural',eyeShape:'round'},
   owned:{hats:['none','cap','bucket'],cols:[],pats:['none'],pets:['dog'],outfits:['none','vest'],glasses:['none','round'],shoes:['boots','sneakers','barefoot'],necks:['none'],backs:['none'],auras:[],bobs:[],lines:[]}, pet:'dog', junk:{}, tickets:0, freeSpins:1,
   settings:{master:.8, music:.55, sfx:.7, amb:.5, musicOn:true, ambient:true, style:'auto', castMode:'meter', dist:'m', vibrate:true, minigames:true, rest:false, effects:true, boostsOnScreen:true, hints:true, protectRare:true, units:'kg', hand:'r', uiScale:'auto', renderQ:'auto'},
@@ -18661,7 +18661,7 @@ document.head.insertAdjacentHTML('beforeend',`<style>
 // those later rules own are copied into S, before anything can be saved. Later loads (import, link, cloud, backup) already use the
 // full chain.
 // =====================================================================
-const BOOTFIX_KEYS=['egPaid','pearls','pearlOld','pearlMig','pshop','boons','boonPts','boonMig','pathXP','specs','pass','passMig','owned','look','petTints'];
+const BOOTFIX_KEYS=['egPaid','pearls','pearlV','pearlOld','pearlMig','pshop','boons','boonPts','boonMig','pathXP','specs','pass','passMig','owned','look','petTints'];
 function bootFixFrom(raw){ try{ if(raw){ const o=JSON.parse(raw); if(o&&typeof o==='object'){ const m=migrate(o); for(const k of BOOTFIX_KEYS) if(m[k]!==undefined) S[k]=m[k]; try{ voyApplyCooler(); }catch(e){} return true; } } }catch(e){ try{ console.error("boot fix",e); }catch(_){} } return false; }
 try{ bootFixFrom(localStorage.getItem(LS_KEY)); }catch(e){}
 // =====================================================================
@@ -21164,6 +21164,8 @@ PATCHES.unshift({v:'0.4.9', name:'Work in progress', items:phoneNotes([
 // text changes. Released notes live in notes_release.js.
 const TEST_NOTES={v:'test', label:'Test build · '+(window.DL_BUILD==='ios'?'iPhone':'Android'), name:'0.4.9 test build (newest first)', items:[
   '## New in this build',
+  'Fixed: a brand-new save no longer loses most of its Wisdom Pearls the first time the game reloads.',
+  '## Test build 2026.11.23-0322',
   'New skill, Second Bite: one more try per bite at ranks 3, 6 and 9, better rare odds on every try after a miss, and at full rank a missed hotspot bite doesn’t break your streak. Water Reader no longer gives the extra try.',
   'Gourmet: fish caught on their favourite food also sell for more (6% a rank).',
   'Naturalist is now a mastery skill: each mastery star adds a little more value, and at full rank the first star comes at 2 catches.',
@@ -21566,6 +21568,7 @@ ui(){ QA.sys='UI';
     act('decorhide',{k:ids[0]}); if(!aqView().decor.includes(ids[0])) e.push('not shown again'); act('decorhide',{k:ids[1]}); act('decor',{k:ids[1]}); if((S.aq.hid||[]).includes(ids[1])) e.push('removed decoration stayed in the hidden list');
     const m=migrate(Object.assign(JSON.parse(JSON.stringify(S)),{aq:Object.assign({},S.aq,{hid:[ids[1],'nope',ids[0]],decor:[ids[0]]})})); if(JSON.stringify(m.aq.hid)!==JSON.stringify([ids[0]])) e.push('save loaded hidden list '+JSON.stringify(m.aq.hid));
     return e.length?{ok:false,detail:e.join(' | ')}:{ok:true,detail:'ok'}; });
+  T('a brand-new save keeps its Wisdom Pearls when it is loaded again (#121: fresh() had no pearlV, so the old-save conversion cut them to 40%)',()=>{ const f=fresh(); f.pearls=10; f.journal={}; const m=migrate(JSON.parse(JSON.stringify(f))); return m.pearls===10&&m.pearlV===2?{ok:true,detail:'10 kept'}:{ok:false,detail:'pearls '+m.pearls+', pearlV '+m.pearlV}; });
   T('fight pass: with the best gear a top mythic takes 30–60 s, never letting go loses almost every legendary and mythic fish (Cam: tension always matters, but no instant snaps), voyages make fish harder up to a cap',()=>{ const e=[], MAX=[9,10,11,6,9,5], last=LOCS[LOCS.length-1].id;
     const m=(l)=>{ const x=l.match(/: (\d+)% in ([\d.]+|-)s/); return x?{p:+x[1],t:x[2]==='-'?null:+x[2]}:{p:0,t:null}; };
     const a=__fightSim({tides:0, places:[[last,80,MAX,'starrod']], rars:[4,5], players:[['watcher',.18,82],['holder',0,999]], N:36}); /* 36: at 16 the mythic rate swung 69-87% between runs (batch 1), at 24 a run fell to 67% (2026-11-23) */
