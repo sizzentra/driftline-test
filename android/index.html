@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="DL Test Android">
 <script>
-window.DL_BUILD='android'; window.DL_PREVIEW=true; if(/[?&]sweep\b/.test(location.search)){ window.__bootErr=[]; addEventListener("error",function(e){ __bootErr.push(String(e.message||e)+(e.lineno?" (line "+e.lineno+")":"")); }); addEventListener("unhandledrejection",function(e){ __bootErr.push("promise: "+String(e.reason&&e.reason.message||e.reason)); }); window.requestAnimationFrame=function(f){ return setTimeout(function(){ f(performance.now()); },16); }; window.cancelAnimationFrame=function(i){ clearTimeout(i); }; } try{ window.__tOff=/[?&](test|sweep|frozen)\b/.test(location.search)?0:(+(localStorage.getItem("dl-test-toff")||0)||0); }catch(e){ window.__tOff=0; } (function(){ var rn=Date.now.bind(Date); Date.now=function(){ return rn()+window.__tOff; }; })(); if(/[?&]frozen\b/.test(location.search)){ var __fz=20261122; Math.random=function(){ __fz|=0; __fz=__fz+0x6D2B79F5|0; var t=Math.imul(__fz^__fz>>>15,1|__fz); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; var __fc=0, __pn=performance.now.bind(performance); performance.now=function(){ __fc+=0.01; return 100000+__fc; }; Date.now=function(){ return 1795300000000+Math.floor(__fc); }; window.__frozenClock=function(){ return __fc; }; window.requestAnimationFrame=function(){ return 0; }; window.cancelAnimationFrame=function(){}; } window.DL_VERSION='2026.11.23-0757';
+window.DL_BUILD='android'; window.DL_PREVIEW=true; if(/[?&]sweep\b/.test(location.search)){ window.__bootErr=[]; addEventListener("error",function(e){ __bootErr.push(String(e.message||e)+(e.lineno?" (line "+e.lineno+")":"")); }); addEventListener("unhandledrejection",function(e){ __bootErr.push("promise: "+String(e.reason&&e.reason.message||e.reason)); }); window.requestAnimationFrame=function(f){ return setTimeout(function(){ f(performance.now()); },16); }; window.cancelAnimationFrame=function(i){ clearTimeout(i); }; } try{ window.__tOff=/[?&](test|sweep|frozen)\b/.test(location.search)?0:(+(localStorage.getItem("dl-test-toff")||0)||0); }catch(e){ window.__tOff=0; } (function(){ var rn=Date.now.bind(Date); Date.now=function(){ return rn()+window.__tOff; }; })(); if(/[?&]frozen\b/.test(location.search)){ var __fz=20261122; Math.random=function(){ __fz|=0; __fz=__fz+0x6D2B79F5|0; var t=Math.imul(__fz^__fz>>>15,1|__fz); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; var __fc=0, __pn=performance.now.bind(performance); performance.now=function(){ __fc+=0.01; return 100000+__fc; }; Date.now=function(){ return 1795300000000+Math.floor(__fc); }; window.__frozenClock=function(){ return __fc; }; window.requestAnimationFrame=function(){ return 0; }; window.cancelAnimationFrame=function(){}; } window.DL_VERSION='2026.11.23-0800';
 window.addEventListener('beforeinstallprompt',function(e){ e.preventDefault(); window.__dlInstallPrompt=e; });
 </script>
 </head>
@@ -17923,6 +17923,39 @@ const GB = {
     q.fillStyle=N('#fff6ee'); q.beginPath(); q.ellipse(o.pw-W*.012,y-H*.008,W*.012,H*.012,0,Math.PI,0); q.fill(); q.beginPath(); q.ellipse(o.pw-W*.012,y-H*.018,W*.006,H*.01,0,Math.PI,0); q.fill(); HK.line(o,[o.pw-W*.012,y-H*.028,o.pw-W*.009,y-H*.034],'#fff6ee',2); /* a dollop of whipped cream */ }
 };
 // =====================================================================
+// CORPORATE POND: THE GLASS PAVILION (overnight, 2026-11-23; its own design, MAP_THEMES › Corporate Pond: business-park plazas, mid-century
+// modern, office humour). A small modernist glass office standing on steel columns in the reflecting pool, seen from the side: a thin flat
+// roof slab cantilevering past the glass, steel mullions, the office visible inside (a desk with a glowing monitor, a ficus and a water
+// cooler, or a whiteboard covered in charts), a company logo on the slab's edge; around it a concrete plaza edge with a planter and a coffee
+// cup left on the deck. Parts: walls, roof, inside, partition, lamp, seat.
+// =====================================================================
+const CO = {
+  geo(o){ const C=BH.cab(o,{h:1.05,ratio:2}), wh=C.wh, x0=Math.max(HF.x0(),0)+W*.006, w=Math.min(wh*2.1,o.pw*.5), x1=x0+w; return {x0,x1,vx:x0,w,wh,wallTop:C.wallTop,mid:(x0+x1)/2}; },
+  walls(o,g,kind,c){ const q=o.x, y=o.dockY, lit=HK.lit(o), top=g.wallTop;
+    if(kind===2){ HK.rect(o,g.x0,top,g.w*.3,y-top,'#9a9a98'); for(let k=1;k<5;k++) HK.rect(o,g.x0,top+(y-top)*k/5,g.w*.3,1,'#7a7a78'); }
+    const ga=kind===2?g.x0+g.w*.3:g.x0, gl=q.createLinearGradient(0,top,0,y); gl.addColorStop(0,HK.n(o,v3rgba(c,kind===1?.9:.72))); gl.addColorStop(1,HK.n(o,v3rgba(HK.dk(c,.35),kind===1?.92:.8))); q.fillStyle=gl; q.fillRect(ga,top,g.x1-ga,y-top);
+    q.fillStyle=v3rgba('#ffffff',.2*lit); q.beginPath(); q.moveTo(ga+g.w*.1,top); q.lineTo(ga+g.w*.2,top); q.lineTo(ga+g.w*.05,y); q.lineTo(ga,y); q.lineTo(ga,y-(y-top)*.3); q.closePath(); q.fill(); /* a sheen across the glass */
+    const n=Math.round((g.x1-ga)/(W*.03)); for(let k=0;k<=n;k++) HK.rect(o,ga+(g.x1-ga)*k/n-1.5,top,3,y-top,'#5a6470'); HK.rect(o,ga,top+(y-top)*.55,g.x1-ga,2,'#5a6470'); /* steel mullions and a transom */ },
+  /* the inside, seen through the glass: a desk with a glowing monitor and an office chair, a ficus and a water cooler, or a whiteboard of charts */
+  inside(o,g,s,c){ const y=o.dockY, top=g.wallTop, a=g.x0+g.w*.45;
+    if(s===0){ HK.rect(o,a,y-H*.03,g.w*.3,H*.004,'#8a6a4a'); HK.rect(o,a+g.w*.02,y-H*.03,2,H*.03,'#5a6470'); HK.rect(o,a+g.w*.27,y-H*.03,2,H*.03,'#5a6470'); HK.rect(o,a+g.w*.1,y-H*.058,g.w*.12,H*.026,'#1a1c20'); HK.rect(o,a+g.w*.11,y-H*.055,g.w*.1,H*.02,v3rgba(c,.9)); HK.rect(o,a+g.w*.155,y-H*.032,3,H*.002,'#1a1c20'); o.lights.push({x:a+g.w*.16,y:y-H*.045,r:.06,a:.4,small:1}); } /* the desk and its monitor */
+    if(s===1){ const fx=a+g.w*.05; HK.rect(o,fx-W*.005,y-H*.016,W*.01,H*.016,'#c8c8c4'); for(let k=0;k<9;k++) HK.ell(o,fx+(k%3-1)*W*.005,y-H*(.03+Math.floor(k/3)*.012),W*.005,H*.007,k%2?'#4a8a4a':'#3a7a3a'); const wx=a+g.w*.3; HK.rect(o,wx,y-H*.03,W*.01,H*.03,'#f4f6f8'); HK.ell(o,wx+W*.005,y-H*.04,W*.006,H*.012,v3rgba(c,.8)); } /* a ficus and the water cooler */
+    if(s===2){ const bx=a, bw=g.w*.4, by=top+(y-top)*.15, bh=(y-top)*.35; HK.rect(o,bx-2,by-2,bw+4,bh+4,'#a8b0b8'); HK.rect(o,bx,by,bw,bh,'#f4f6f8'); HK.line(o,[bx+bw*.1,by+bh*.8,bx+bw*.3,by+bh*.6,bx+bw*.5,by+bh*.7,bx+bw*.8,by+bh*.2],c,1.5); HK.line(o,[bx+bw*.74,by+bh*.2,bx+bw*.8,by+bh*.2,bx+bw*.8,by+bh*.28],c,1.5); HK.rect(o,bx+bw*.85,by+bh*.55,bw*.1,bh*.25,'#f4d040'); } /* a whiteboard: line going up and a sticky note */ },
+  /* the roof: a thin flat slab cantilevering past the glass, plain, planted, or with solar panels; the company logo on its edge */
+  roof(o,g,kind,c){ const q=o.x, lit=HK.lit(o), L=g.x0-W*.01, R=g.x1+W*.03, t=Math.max(5,H*.014), y0=g.wallTop-t;
+    HK.rect(o,L,y0,R-L,t,c); HK.rect(o,L,y0,R-L,1.5,v3rgba('#ffffff',.3*lit)); HK.rect(o,L,y0+t,R-L,2,v3rgba('#000000',.3));
+    if(kind===1){ for(let X=L;X<R;X+=W*.006) HK.ell(o,X,y0,W*.005,H*.006,X%2?'#4a8a4a':'#5a9a4a'); } /* a green roof */
+    if(kind===2) for(let k=0;k<4;k++){ const px=L+W*.01+k*(R-L-W*.02)/4; HK.poly(o,[px,y0,px+W*.02,y0-H*.016,px+W*.024,y0-H*.012,px+W*.004,y0+1],'#1e2e4a'); HK.line(o,[px+W*.005,y0-H*.002,px+W*.021,y0-H*.012],'#4a6a88',1); } /* solar panels */
+    q.fillStyle=HK.n(o,'#f4f6f8'); q.font='bold '+Math.round(t*.8)+'px sans-serif'; q.fillText('SYNERGY',g.x0+g.w*.1,y0+t*.8); HK.circ(o,g.x0+g.w*.05,y0+t*.5,t*.35,'#f4d040'); /* the logo */
+    o.top=Math.min(o.top==null?o.dockY-H*.23:o.top,y0-H*.04); o.low=Math.max(o.low==null?-1e9:o.low,y0+t); },
+  /* the plaza edge: a concrete coping and a planter with clipped shrubs, steel columns into the pool, a coffee cup left on the deck */
+  ground(o){ const y=o.dockY, wl=o.wl, q=o.x, N=c0=>HK.n(o,c0), x0=HF.x0(), under=y+HK.fh();
+    for(let i=0;i<=5;i++){ const px=x0+(o.pw-x0)*(.04+.92*i/5); q.fillStyle=N('#5a6470'); q.fillRect(px-W*.003,under,W*.006,H-under); q.fillStyle=v3rgba('#ffffff',.2); q.fillRect(px-W*.003,under,1.5,H-under); }
+    q.fillStyle=v3rgba(o.P.wMid||'#4a6a88',.5); q.fillRect(x0,wl,o.pw-x0+W*.02,H-wl); /* the columns under the water */
+    const g=CO.geo(o), px=g.x1+W*.035; HK.rect(o,px,y-H*.022,W*.03,H*.022,'#9a9a98'); HK.rect(o,px,y-H*.022,W*.03,2,'#c8c8c4'); for(let k=0;k<3;k++) HK.ell(o,px+W*(.006+k*.009),y-H*.028,W*.006,H*.009,'#3a7a3a'); /* a planter with clipped box shrubs */
+    HK.rect(o,o.pw-W*.012,y-H*.012,W*.006,H*.012,'#f4f6f8'); HK.rect(o,o.pw-W*.012,y-H*.009,W*.006,H*.004,'#8a5a3a'); /* a coffee cup */ }
+};
+// =====================================================================
 // Every water's home (batch 5, 2026-11-22; designs in docs/HOME_DESIGNS.md, colours in docs/MAP_THEMES.md). Willow Pond (the
 // approved pilot) is in cv_homefmt.js; these 19 are built from the home kit (cw_homekit.js). Each home: the seat plus 5 features
 // made for that water, 3 styles each ("none" first where a feature can be left out), one list of 16 colours for every feature.
@@ -18419,18 +18452,23 @@ hfMake('buffet',{ name:'Gingerbread house', hname:'gingerbread house', glow:'255
     ['seat'],
     ['light',(o,s)=>HK.light(o,['dripcandle','cupcake','jellymould'][s])]] });
 
-/* 17. Corporate Pond: the office deck */
-hfMake('corporate',{ name:'Office deck', hname:'office deck',
+/* 17. Corporate Pond: the glass pavilion (overnight, 2026-11-23; its own design, src/cw_officebox.js): a modernist glass office on steel columns
+   with a thin cantilevered roof slab and a logo, the office visible inside; a concrete planter and a coffee cup on the deck. The old floor,
+   supports and awning choices became this one building; the partition and lamp keep their ids */
+hfMake('corporate',{ name:'Glass pavilion', hname:'glass pavilion', glow:'230,240,255', seatX:()=>HF.pw()-W*.03, front:null, smoke:null,
   colors:C16('Brushed steel=#a8b0b8;Dark steel=#5a6470;Concrete=#9a9a98;Light concrete=#c8c8c4;Glass cyan=#9ad0e0;Glass blue=#4a6a88;Corporate navy=#1e2e4a;Carpet grey=#6a6e74;Office white=#f4f6f8;Ficus green=#4a8a4a;Coffee brown=#6a4a32;Sticky yellow=#f8e070;Ticker green=#4ad86a;Ticker red=#e84a4a;Lanyard blue=#2a6ad8;Walnut=#8a5a3a'),
-  els:[{id:'floor',label:'Floor',styles:['Carpet tiles','Polished concrete','Walnut boardroom'],def:[0,7]},{id:'supports',label:'Supports',styles:['Steel columns','Glass legs','Filing cabinets'],def:[0,0]},
-       {id:'partition',label:'Partition',none:true,styles:['None','Glass balustrade','Cubicle wall','Velvet rope'],def:[1,4]},{id:'awning',label:'Awning',none:true,styles:['Open sky','Glass awning','Logo umbrella','Ceiling tiles'],def:[1,4]},
+  els:[{id:'glass',label:'Walls',styles:['Glass curtain wall','Frosted glass','Concrete and glass'],def:[0,4],palS:[[4,5],[8,4],[4,5]]},
+       {id:'slab',label:'Roof',styles:['Flat slab','Green roof','Solar panels'],def:[0,0],palS:[[0,1,2,6],[2,3],[0,1]]},
+       {id:'inside',label:'Inside',styles:['Desk and monitor','Ficus and water cooler','Whiteboard'],def:[0,4],pal:[4,5,6,11,12]},
+       {id:'partition',label:'Partition',none:true,styles:['None','Glass balustrade','Cubicle wall','Velvet rope'],def:[1,4]},
        {id:'light',label:'Lamp',light:true,styles:['Desk lamp','Floor lamp','Open 9–5 sign'],def:[0,8]}],
   seat:['swivel','executive','beanbag'], seatNames:['Swivel chair','Executive chair','Beanbag'], seatDef:[0,6],
   order:[
-    ['supports',(o,s,c)=>HK.supports(o,c,['iron','glass','cabinet'][s],5)],
-    ['floor',(o,s,c)=>HK.deck(o,c,['carpet','concrete','walnut'][s])],
+    ['base',(o)=>{ CO.ground(o); HK.deck(o,'#c8c8c4','concrete'); }],
+    ['glass',(o,s,c)=>CO.walls(o,CO.geo(o),s,c)],
+    ['inside',(o,s,c)=>CO.inside(o,CO.geo(o),s,c)],
+    ['slab',(o,s,c)=>CO.roof(o,CO.geo(o),s,c)],
     ['partition',(o,s,c)=>{ if(s) HK.rail(o,c,['','glass','cubicle','velvet'][s]); }],
-    ['awning',(o,s,c)=>{ if(s===1) HK.roof(o,c,'glass',.02,.44); if(s===2) HK.roof(o,c,'logoumbrella',.06,.4); if(s===3) HK.roof(o,c,'ceiling',.02,.44); }],
     ['seat'],
     ['light',(o,s)=>HK.light(o,['desk','floor','sign'][s])]] });
 
@@ -21867,6 +21905,8 @@ PATCHES.unshift({v:'0.4.9', name:'Work in progress', items:phoneNotes([
 // text changes. Released notes live in notes_release.js.
 const TEST_NOTES={v:'test', label:'Test build · '+(window.DL_BUILD==='ios'?'iPhone':'Android'), name:'0.4.9 test build (newest first)', items:[
   '## New in this build',
+  'Corporate Pond, redone in its own style: your home is a modernist glass pavilion on steel columns in the reflecting pool, with a thin roof slab and the company logo, steel frames, and the office visible inside (a desk and glowing monitor, a ficus and water cooler, or a whiteboard of charts). A concrete planter and a coffee cup sit on the deck. Your partition and lamp choices carry over.',
+  '## Test build 2026.11.23-0757',
   'Cherry Blossom Lake, redrawn to the director’s picture: Fuji large and to the right, a big cherry tree painted in thousands of petals over the house, a grassy bank behind the house whose stone path climbs away to the red bridge with its fence and lantern posts getting smaller with distance, cherry trees on that bank, a little island past the bridge, a forested cliff with the waterfall and its pavilion, a row of cherries on the right shore, a larger torii on its rocks, and pink flowers in the bottom-left corner.',
   '## Test build 2026.11.23-0749',
   'Cherry Blossom Lake, rebuilt to match the director’s picture: the house has a low, wide roof of dark grey tiles with a heavy ridge over glowing shoji walls and round windows, on brown wooden posts, with a much bigger cherry tree spilling over it.',
