@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="DL Test Android">
 <script>
-window.DL_BUILD='android'; window.DL_PREVIEW=true; if(/[?&]sweep\b/.test(location.search)){ window.__bootErr=[]; addEventListener("error",function(e){ __bootErr.push(String(e.message||e)+(e.lineno?" (line "+e.lineno+")":"")); }); addEventListener("unhandledrejection",function(e){ __bootErr.push("promise: "+String(e.reason&&e.reason.message||e.reason)); }); window.requestAnimationFrame=function(f){ return setTimeout(function(){ f(performance.now()); },16); }; window.cancelAnimationFrame=function(i){ clearTimeout(i); }; } try{ window.__tOff=/[?&](test|sweep|frozen)\b/.test(location.search)?0:(+(localStorage.getItem("dl-test-toff")||0)||0); }catch(e){ window.__tOff=0; } (function(){ var rn=Date.now.bind(Date); Date.now=function(){ return rn()+window.__tOff; }; })(); if(/[?&]frozen\b/.test(location.search)){ var __fz=20261122; Math.random=function(){ __fz|=0; __fz=__fz+0x6D2B79F5|0; var t=Math.imul(__fz^__fz>>>15,1|__fz); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; var __fc=0, __pn=performance.now.bind(performance); performance.now=function(){ __fc+=0.01; return 100000+__fc; }; Date.now=function(){ return 1795300000000+Math.floor(__fc); }; window.__frozenClock=function(){ return __fc; }; window.requestAnimationFrame=function(){ return 0; }; window.cancelAnimationFrame=function(){}; } window.DL_VERSION='2026.11.23-0624';
+window.DL_BUILD='android'; window.DL_PREVIEW=true; if(/[?&]sweep\b/.test(location.search)){ window.__bootErr=[]; addEventListener("error",function(e){ __bootErr.push(String(e.message||e)+(e.lineno?" (line "+e.lineno+")":"")); }); addEventListener("unhandledrejection",function(e){ __bootErr.push("promise: "+String(e.reason&&e.reason.message||e.reason)); }); window.requestAnimationFrame=function(f){ return setTimeout(function(){ f(performance.now()); },16); }; window.cancelAnimationFrame=function(i){ clearTimeout(i); }; } try{ window.__tOff=/[?&](test|sweep|frozen)\b/.test(location.search)?0:(+(localStorage.getItem("dl-test-toff")||0)||0); }catch(e){ window.__tOff=0; } (function(){ var rn=Date.now.bind(Date); Date.now=function(){ return rn()+window.__tOff; }; })(); if(/[?&]frozen\b/.test(location.search)){ var __fz=20261122; Math.random=function(){ __fz|=0; __fz=__fz+0x6D2B79F5|0; var t=Math.imul(__fz^__fz>>>15,1|__fz); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; var __fc=0, __pn=performance.now.bind(performance); performance.now=function(){ __fc+=0.01; return 100000+__fc; }; Date.now=function(){ return 1795300000000+Math.floor(__fc); }; window.__frozenClock=function(){ return __fc; }; window.requestAnimationFrame=function(){ return 0; }; window.cancelAnimationFrame=function(){}; } window.DL_VERSION='2026.11.23-0634';
 window.addEventListener('beforeinstallprompt',function(e){ e.preventDefault(); window.__dlInstallPrompt=e; });
 </script>
 </head>
@@ -17633,6 +17633,42 @@ const FK = {
   ground(o){ const g=FK.geo(o), y=g.y; HK.line(o,[g.x0-W*.04,g.wl+H*.05,g.x0-W*.036,y-H*.16],'#e8e0c8',Math.max(2,H*.0035)); HK.rect(o,g.x0-W*.042,g.wl+H*.03,W*.006,H*.006,'#3a3a40'); HK.line(o,[g.x0-W*.038,y-H*.02,g.x0+W*.004,y-H*.002],'#c8a878',1); }
 };
 // =====================================================================
+// BRINE SHELF: THE SPORT-FISHER (overnight, 2026-11-23; its own design, MAP_THEMES › Brine Shelf: big-game boats off Cabo, Hawaii, the Azores).
+// The after half of a big-game boat floating on the swell, its stern toward the fish where the fighting chair is: a tall flared hull with
+// the bow running off the left edge, a sheer stepping down to the cockpit, a transom with a tuna door and a swim platform, a cabin with a raked
+// windscreen and portholes, a life ring; on top a flybridge with a ladder, an enclosed wheelhouse or a tuna tower; outriggers splayed out,
+// a rod rack or a gaff rack; signal flags, a marlin pennant or a burgee. The ids are the old boat's, so saved choices still fit.
+// =====================================================================
+const SF = {
+  geo(o){ const xs=o.pw+W*.008, x0=Math.min(HF.x0(),0)-W*.02, y=o.dockY, wl=o.wl, ck=xs-(xs-Math.max(HF.x0(),0))*.42, cab0=Math.max(HF.x0(),0)+W*.01; return {x0,xs,y,wl,ck,cab0,len:xs-x0}; },
+  /* the hull: high at the bow (off the left edge), stepping down to the cockpit, transom with a swim platform; kind 0 sport-fisher, 1 wooden cruiser, 2 steel workboat */
+  hull(o,kind,c){ const q=o.x, g=SF.geo(o), lit=HK.lit(o), y=g.y, wl=g.wl, hb=y-H*(kind===2?.03:.05), bot=wl+H*.02;
+    q.save(); q.beginPath(); q.moveTo(g.x0,hb-H*.02); q.lineTo(g.ck-W*.02,hb); q.quadraticCurveTo(g.ck,hb,g.ck+W*.01,y); q.lineTo(g.xs,y); q.lineTo(g.xs-W*.004,bot); q.lineTo(g.x0,bot+H*.01); q.closePath();
+    const hg=q.createLinearGradient(0,hb,0,bot); hg.addColorStop(0,HK.n(o,HK.lt(c,.06))); hg.addColorStop(1,HK.n(o,HK.dk(c,.22))); q.fillStyle=hg; q.fill(); q.clip();
+    if(kind===1){ q.strokeStyle=HK.n(o,HK.dk(c,.25)); q.lineWidth=1; q.beginPath(); for(let Y=hb+H*.012;Y<bot;Y+=H*.012){ q.moveTo(g.x0,Y); q.lineTo(g.xs,Y); } q.stroke(); } /* carvel planking */
+    if(kind===2){ q.strokeStyle=HK.n(o,HK.dk(c,.3)); q.lineWidth=1; q.beginPath(); for(let X=g.x0+W*.03;X<g.xs;X+=W*.04){ q.moveTo(X,hb); q.lineTo(X,bot); } q.stroke(); HK.rect(o,g.x0,y+H*.03,g.len,H*.004,'#c8382e'); } /* welded plates and a red band */
+    q.fillStyle=HK.n(o,kind===0?'#1e2e4a':'#f2f2ee'); q.fillRect(g.x0,wl-H*.012,g.len+W*.01,H*.006); q.fillStyle=v3rgba(o.P.wMid||'#2a7a9a',.6); q.fillRect(g.x0-2,wl,g.len+W*.02,H*.04); q.restore(); /* boot stripe; the part under the swell seen through it */
+    HK.line(o,[g.x0,hb-H*.02,g.ck-W*.02,hb],'#c0c8cc',2); HK.line(o,[g.ck+W*.01,y,g.xs,y],'#c0c8cc',2); /* chrome rub rails */
+    HK.rect(o,g.xs-W*.004,y,W*.002,(wl-y)*.6,HK.dk(c,.3)); HK.rect(o,g.xs-W*.03,y+H*.004,W*.002,(wl-y)*.55,HK.dk(c,.25)); /* the tuna door in the transom */
+    HK.rect(o,g.xs-W*.004,wl-H*.024,W*.022,H*.006,'#a8743a'); HK.rect(o,g.xs+W*.016,wl-H*.024,W*.002,H*.01,'#c0c8cc'); /* swim platform */
+    q.fillStyle=HK.n(o,HK.dk(c,.45)); q.font='italic bold '+Math.round(H*.013)+'px sans-serif'; q.fillText('REEL DEAL',g.ck-W*.08,(hb+wl)/2+H*.01); /* her name */
+    o.low=Math.max(o.low==null?-1e9:o.low,y-H*.004); },
+  /* the cabin behind the cockpit, with a raked windscreen, portholes and a life ring; then the flybridge, wheelhouse or tuna tower on top */
+  bridge(o,s,c,hullC){ const g=SF.geo(o), y=g.y, hb=y-H*.05, a=g.cab0, b=g.ck-W*.004, ct=hb-H*.07, q=o.x;
+    q.fillStyle=HK.n(o,HK.lt(hullC,.04)); q.beginPath(); q.moveTo(a,hb); q.lineTo(a,ct); q.lineTo(b-W*.024,ct); q.lineTo(b,hb); q.closePath(); q.fill();
+    HK.poly(o,[b-W*.03,ct+H*.006,b-W*.022,ct+H*.006,b-W*.004,hb-H*.004,b-W*.014,hb-H*.004],v3rgba('#2a3440',.9)); for(let k=0;k<3;k++) HK.circ(o,a+W*.02+k*W*.024,ct+H*.035,H*.007,'#2a3440'); { q.strokeStyle=HK.n(o,'#e85a2a'); q.lineWidth=Math.max(3,H*.006); q.beginPath(); q.arc(a+W*.084,ct+H*.035,H*.01,0,7); q.stroke(); } /* windscreen, portholes, a life ring */
+    const ft=ct-H*.055;
+    if(s===0){ for(const px of [a+W*.01,b-W*.03]) HK.line(o,[px,ct,px,ft],'#c0c8cc',2); HK.rect(o,a-W*.004,ft-H*.006,b-a-W*.016,H*.008,c); HK.poly(o,[b-W*.03,ct,b-W*.02,ct-H*.03,b-W*.03,ct-H*.03],v3rgba('#9ad0e0',.6)); HK.line(o,[b-W*.03,ct,b+W*.004,hb],'#c0c8cc',1.5); for(let k=1;k<4;k++){ const u=k/4; HK.line(o,[b-W*.03+(W*.034)*u-W*.004,ct+(hb-ct)*u,b-W*.03+(W*.034)*u+W*.004,ct+(hb-ct)*u],'#c0c8cc',1); } } /* open flybridge with a hardtop and a ladder down to the cockpit */
+    if(s===1){ HK.block(o,a+W*.01,ft,b-a-W*.05,ct-ft,c); HK.rect(o,a+W*.016,ft+H*.012,b-a-W*.062,H*.018,'#2a3440'); HK.rect(o,a+W*.006,ft-H*.006,b-a-W*.04,H*.006,HK.dk(c,.2)); } /* an enclosed wheelhouse */
+    if(s===2){ const tt=ft-H*.11, m=(a+b)/2; for(const px of [m-W*.03,m+W*.02]) HK.line(o,[px,ct,px+(m-px)*.3,tt],'#c0c8cc',2); HK.line(o,[m-W*.025,ct-H*.06,m+W*.018,ct-H*.06],'#c0c8cc',1.5); HK.rect(o,m-W*.026,tt-H*.006,W*.05,H*.008,c); HK.line(o,[m-W*.026,tt-H*.024,m+W*.024,tt-H*.024],'#c0c8cc',1.5); } /* a tuna tower */
+    o.top=Math.min(o.top==null?y-H*.23:o.top,ft-H*(s===2?.14:.02)); },
+  /* outriggers splayed back over the stern, a rod rack on the cabin, or a gaff rack */
+  rig(o,s,c){ const g=SF.geo(o), y=g.y, ct=y-H*.12, a=g.cab0;
+    if(s===0){ HK.line(o,[g.ck-W*.03,ct,g.ck+W*.06,ct-H*.2],c,1.8); HK.line(o,[g.ck-W*.04,ct,g.ck+W*.03,ct-H*.22],HK.dk(c,.2),1.4); HK.line(o,[g.ck+W*.06,ct-H*.2,g.xs+W*.01,y-H*.02],'rgba(230,230,230,.5)',.6); }
+    if(s===1) for(let k=0;k<5;k++){ const rx=a+W*.016+k*W*.012; HK.line(o,[rx,ct-H*.004,rx+W*.004,ct-H*.1],'#2a2a30',1.2); HK.rect(o,rx-W*.002,ct-H*.01,W*.004,H*.008,c); }
+    if(s===2){ const rx=g.ck+W*.016; HK.rect(o,rx,y-H*.05,W*.03,H*.004,c); for(let k=0;k<3;k++){ HK.line(o,[rx+W*.006+k*W*.009,y-H*.05,rx+W*.006+k*W*.009,y-H*.012],'#c0c8cc',1.2); HK.curve(o,rx+W*.006+k*W*.009,y-H*.012,rx+W*.009+k*W*.009,y-H*.004,rx+W*.012+k*W*.009,y-H*.012,'#c0c8cc',1.2); } } /* gaffs hung by the cockpit */ }
+};
+// =====================================================================
 // Every water's home (batch 5, 2026-11-22; designs in docs/HOME_DESIGNS.md, colours in docs/MAP_THEMES.md). Willow Pond (the
 // approved pilot) is in cv_homefmt.js; these 19 are built from the home kit (cw_homekit.js). Each home: the seat plus 5 features
 // made for that water, 3 styles each ("none" first where a feature can be left out), one list of 16 colours for every feature.
@@ -17973,17 +18009,19 @@ hfMake('keys',{ name:'Flats skiff', hname:'skiff', floats:true, seatX:()=>HF.pw(
     ['seat'],
     ['light',(o,s)=>HK.light(o,['navlight','post','table'][s])]] });
 
-/* 9. Brine Shelf: the sport-fishing boat (floats) */
-hfMake('shelf',{ name:'Sport-fishing boat', hname:'boat', floats:true,
+/* 9. Brine Shelf: the sport-fisher (overnight, 2026-11-23; its own design, src/cw_sportfisher.js; floats): the after half of a big-game boat,
+   stern toward the fish, bow off the left edge; cabin, flybridge / wheelhouse / tuna tower, outriggers. Same ids as before, so saved choices fit */
+hfMake('shelf',{ name:'Sport-fisher', hname:'boat', floats:true, seatX:()=>HF.pw()-W*.03, front:null, smoke:null,
   colors:C16('Hull white=#f2f2ee;Deck teak=#a8743a;Dark teak=#6a4626;Brass=#c8a04a;Chrome=#c0c8cc;Navy hull=#1e2e4a;Ocean blue=#2a7a9a;Deep ocean=#0c3a5a;Foam=#e4f0f0;Sail canvas=#f4ead8;Rope=#c8a878;Flag red=#c8382e;Flag yellow=#e8c03a;Flag blue=#2a5aa8;Life-ring orange=#f0782a;Horizon gold=#ffe0a8'),
   els:[{id:'hull',label:'Hull',styles:['Sport-fisher','Wooden cruiser','Steel workboat'],def:[0,0]},{id:'bridge',label:'Flybridge',styles:['Open flybridge','Wheelhouse','Tuna tower'],def:[0,0]},
-       {id:'rig',label:'Outriggers',styles:['Twin outriggers','Rod rack','Harpoon pulpit'],def:[0,4]},{id:'flags',label:'Flags',none:true,styles:['No flags','Signal flags','Marlin pennant','Burgee'],def:[1,11]},
+       {id:'rig',label:'Outriggers',styles:['Twin outriggers','Rod rack','Gaff rack'],def:[0,4]},
+{id:'flags',label:'Flags',none:true,styles:['No flags','Signal flags','Marlin pennant','Burgee'],def:[1,11]},
        {id:'light',label:'Deck light',light:true,styles:['Brass lantern','Masthead light','Floodlight'],def:[0,15]}],
   seat:['fighting','teakbench','deckstool'], seatNames:['Fighting chair','Teak bench','Deck stool'], seatDef:[0,1],
   order:[
-    ['hull',(o,s,c)=>HK.hull(o,c,['sport','cruiser','steel'][s])],
-    ['rig',(o,s,c)=>{ const x=HK.at(o,.55), y=o.dockY; if(s===0){ HK.line(o,[x,y,x-W*.05,y-H*.2],c,1.6); HK.line(o,[x+W*.01,y,x+W*.06,y-H*.18],c,1.6); } if(s===1){ HK.rect(o,HK.at(o,.02),y-H*.03,W*.04,2,c); for(let i=0;i<4;i++) HK.line(o,[HK.at(o,.03)+i*W*.009,y-H*.03,HK.at(o,.03)+i*W*.009-W*.004,y-H*.12],'#2a2a30',1); } if(s===2){ HK.rect(o,o.pw,y-H*.004,W*.03,H*.004,c); HK.line(o,[o.pw+W*.03,y,o.pw+W*.03,y-H*.04],c,1.4); } }],
-    ['bridge',(o,s,c)=>{ const a=HK.at(o,.45), b=HK.at(o,.8), y=o.dockY; if(s===0){ HK.rect(o,a,y-H*.07,2,H*.07,'#c0c8cc'); HK.rect(o,b,y-H*.07,2,H*.07,'#c0c8cc'); HK.rect(o,a-W*.004,y-H*.075,b-a+W*.01,H*.008,c); HK.rail(Object.assign({},o,{dockY:y-H*.075}),'#c0c8cc','iron'); } if(s===1){ HK.block(o,a,y-H*.09,b-a,H*.09,c); for(let i=0;i<3;i++) HK.rect(o,a+(b-a)*(.1+i*.3),y-H*.075,(b-a)*.2,H*.025,'#1e2e4a'); } if(s===2){ for(const px of [a,b]) HK.line(o,[px,y,px+(px===a?W*.015:-W*.015),y-H*.22],'#c0c8cc',1.6); HK.rect(o,a+W*.012,y-H*.225,b-a-W*.024,H*.008,c); } }],
+    ['hull',(o,s,c)=>SF.hull(o,s,c)],
+    ['bridge',(o,s,c)=>SF.bridge(o,s,c,hfColor('shelf','hull'))],
+    ['rig',(o,s,c)=>SF.rig(o,s,c)],
     ['flags',(o,s,c)=>{ if(!s) return; const x=HK.at(o,.62), top=o.dockY-H*.22; HK.rect(o,x,top,1.6,H*.22,'#c0c8cc'); if(s===1){ HK.line(o,[x,top,HK.at(o,.05),o.dockY-H*.04],'#c8a878',.8); for(let i=1;i<6;i++){ const u=i/6; HK.poly(o,[x+(HK.at(o,.05)-x)*u,top+(H*.18)*u,x+(HK.at(o,.05)-x)*u-W*.006,top+(H*.18)*u+H*.004,x+(HK.at(o,.05)-x)*u,top+(H*.18)*u+H*.012],['#c8382e','#e8c03a','#2a5aa8'][i%3]); } } if(s===2){ HK.poly(o,[x,top,x+W*.03,top+H*.01,x,top+H*.02],c); HK.ell(o,x+W*.012,top+H*.01,W*.006,H*.003,'#2a5aa8'); } if(s===3) HK.poly(o,[x,top,x+W*.022,top+H*.008,x,top+H*.016],c); }],
     ['seat'],
     ['light',(o,s)=>HK.light(o,['brass','mast','flood'][s],s===1?HK.at(o,.62):undefined)]] });
@@ -21542,6 +21580,8 @@ PATCHES.unshift({v:'0.4.9', name:'Work in progress', items:phoneNotes([
 // text changes. Released notes live in notes_release.js.
 const TEST_NOTES={v:'test', label:'Test build · '+(window.DL_BUILD==='ios'?'iPhone':'Android'), name:'0.4.9 test build (newest first)', items:[
   '## New in this build',
+  'Brine Shelf: your boat is rebuilt as a big-game sport-fisher, stern toward the fish: a tall hull with chrome rails, a transom door and swim platform, her name on the side, a cabin with a raked windscreen, portholes and a life ring, and a flybridge with a ladder (or a wheelhouse, or a tuna tower) with outriggers splayed out. Your saved choices carry over.',
+  '## Test build 2026.11.23-0624',
   'Florida Keys: your skiff is rebuilt as a real flats skiff, bow toward the fish: a low fiberglass hull with a rub rail, a stripe at the waterline and its registration, an outboard on the back, a center console with a windscreen (or a poling platform, or a tiller boat), and a T-top, bimini or umbrella. It is staked out with a push pole in the sand. Your saved choices carry over.',
   'Florida Keys: a green channel marker stands in the flats with a pelican resting on top; its light blinks green at night.',
   '## Test build 2026.11.23-0610',
