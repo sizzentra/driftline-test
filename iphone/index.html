@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="DL Test iPhone">
 <script>
-window.DL_BUILD='ios'; window.DL_PREVIEW=true; if(/[?&]sweep\b/.test(location.search)){ window.__bootErr=[]; addEventListener("error",function(e){ __bootErr.push(String(e.message||e)+(e.lineno?" (line "+e.lineno+")":"")); }); addEventListener("unhandledrejection",function(e){ __bootErr.push("promise: "+String(e.reason&&e.reason.message||e.reason)); }); window.requestAnimationFrame=function(f){ return setTimeout(function(){ f(performance.now()); },16); }; window.cancelAnimationFrame=function(i){ clearTimeout(i); }; } try{ window.__tOff=/[?&](test|sweep|frozen)\b/.test(location.search)?0:(+(localStorage.getItem("dl-test-toff")||0)||0); }catch(e){ window.__tOff=0; } (function(){ var rn=Date.now.bind(Date); Date.now=function(){ return rn()+window.__tOff; }; })(); if(/[?&]frozen\b/.test(location.search)){ var __fz=20261122; Math.random=function(){ __fz|=0; __fz=__fz+0x6D2B79F5|0; var t=Math.imul(__fz^__fz>>>15,1|__fz); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; var __fc=0, __pn=performance.now.bind(performance); performance.now=function(){ __fc+=0.01; return 100000+__fc; }; Date.now=function(){ return 1795300000000+Math.floor(__fc); }; window.__frozenClock=function(){ return __fc; }; window.requestAnimationFrame=function(){ return 0; }; window.cancelAnimationFrame=function(){}; } window.DL_VERSION='2026.11.23-0600';
+window.DL_BUILD='ios'; window.DL_PREVIEW=true; if(/[?&]sweep\b/.test(location.search)){ window.__bootErr=[]; addEventListener("error",function(e){ __bootErr.push(String(e.message||e)+(e.lineno?" (line "+e.lineno+")":"")); }); addEventListener("unhandledrejection",function(e){ __bootErr.push("promise: "+String(e.reason&&e.reason.message||e.reason)); }); window.requestAnimationFrame=function(f){ return setTimeout(function(){ f(performance.now()); },16); }; window.cancelAnimationFrame=function(i){ clearTimeout(i); }; } try{ window.__tOff=/[?&](test|sweep|frozen)\b/.test(location.search)?0:(+(localStorage.getItem("dl-test-toff")||0)||0); }catch(e){ window.__tOff=0; } (function(){ var rn=Date.now.bind(Date); Date.now=function(){ return rn()+window.__tOff; }; })(); if(/[?&]frozen\b/.test(location.search)){ var __fz=20261122; Math.random=function(){ __fz|=0; __fz=__fz+0x6D2B79F5|0; var t=Math.imul(__fz^__fz>>>15,1|__fz); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; var __fc=0, __pn=performance.now.bind(performance); performance.now=function(){ __fc+=0.01; return 100000+__fc; }; Date.now=function(){ return 1795300000000+Math.floor(__fc); }; window.__frozenClock=function(){ return __fc; }; window.requestAnimationFrame=function(){ return 0; }; window.cancelAnimationFrame=function(){}; } window.DL_VERSION='2026.11.23-0610';
 window.addEventListener('beforeinstallprompt',function(e){ e.preventDefault(); window.__dlInstallPrompt=e; });
 </script>
 </head>
@@ -17582,6 +17582,36 @@ const FS = {
     const sx=g.x1+W*.034, sc=HF.sc()*.8; HK.curve(o,sx-2*sc,y-.5*sc,sx+12*sc,y+.6*sc,sx+20*sc,y-4*sc,'#4a4440',1.4*sc); HK.block(o,sx,y-11*sc,17*sc,8*sc,'#b8383a'); for(let k=1;k<4;k++) HK.line(o,[sx+k*17*sc/4,y-11*sc,sx+k*17*sc/4,y-3*sc],'#7a2428',.8); HK.rect(o,sx,y-11.5*sc,17*sc,1.5*sc,'#f6f8ff'); /* the box sled, a little snow on its load */ }
 };
 // =====================================================================
+// CORAL SHALLOWS: THE OVERWATER BUNGALOW (overnight, 2026-11-23; its own design, MAP_THEMES › Coral: Maldives and Pacific overwater huts).
+// A small hut raised high on palm stilts over the shallows, seen from the side: a tall, steep thatched hip roof with a thick shaggy fringe
+// and a little gablet vent at the top, woven walls, a ladder down into the water; around it the sandbar showing through the clear water with
+// coral heads and a starfish, and a coconut palm leaning out over the roof from the shore behind.
+// Parts: walls, roof (thatch), door, windows, gear, torch, seat.
+// =====================================================================
+const RB = {
+  geo(o){ const C=BH.cab(o,{h:1.05,ratio:1.5}), wh=C.wh, x0=Math.max(HF.x0(),0)+W*.006, w=Math.min(wh*1.6,o.pw*.42), x1=x0+w;
+    return {x0,x1,vx:x0,w,wh,wallTop:C.wallTop,roofTop:C.wallTop-wh*1.05,mid:(x0+x1)/2}; },
+  walls(o,g,kind,c){ BH.walls(o,{x0:g.x0,x1:g.x1,vx:g.x0,wallTop:g.wallTop},kind,c); for(const e of [g.x0,g.x1-W*.004]) HK.rect(o,e,g.wallTop,W*.004,o.dockY-g.wallTop,'#7a5a3a'); },
+  /* the thatch: a tall hip roof with rounded shoulders, rows of straw, a shaggy fringe hanging past the walls, a gablet vent at the top */
+  roof(o,g,kind,c){ const q=o.x, lit=HK.lit(o), ov=W*.02, eb=g.wallTop+H*.014, L=g.x0-ov, R=g.x1+ov, top=g.roofTop, col=c;
+    const path=()=>{ q.beginPath(); q.moveTo(L,eb); q.quadraticCurveTo(L+(R-L)*.12,top+(eb-top)*.35,g.mid-(R-L)*.1,top+H*.01); q.lineTo(g.mid+(R-L)*.1,top+H*.01); q.quadraticCurveTo(R-(R-L)*.12,top+(eb-top)*.35,R,eb); q.closePath(); };
+    q.fillStyle=HK.n(o,col); path(); q.fill(); q.save(); path(); q.clip();
+    const rows=kind===1?9:6; for(let k=0;k<rows;k++){ const yy=top+(eb-top)*(k+1)/rows; q.fillStyle=HK.n(o,k%2?HK.dk(col,.12):HK.lt(col,.05)); q.fillRect(L,yy-H*.004,R-L,H*.004); }
+    q.strokeStyle=HK.n(o,HK.dk(col,.3)); q.lineWidth=1; q.beginPath(); const st=kind===2?W*.008:W*.0035; for(let X=L;X<R;X+=st){ q.moveTo(X,top); q.lineTo(X+(X-g.mid)*.06,eb); } q.stroke(); q.restore(); /* straw, or palm-leaf shingles */
+    q.fillStyle=HK.n(o,HK.dk(col,.08)); q.beginPath(); q.moveTo(L-W*.003,eb-H*.006); for(let X=L-W*.003;X<=R+W*.003;X+=W*.004) q.lineTo(X,eb+H*(.006+.006*Math.abs(Math.sin(X*.7)))); q.lineTo(R+W*.003,eb-H*.006); q.closePath(); q.fill(); /* the shaggy fringe */
+    const vx=g.mid, vw=(R-L)*.1; HK.poly(o,[vx-vw,top+H*.012,vx,top-H*.03,vx+vw,top+H*.012],HK.dk(col,.2)); HK.poly(o,[vx-vw*.5,top+H*.008,vx,top-H*.012,vx+vw*.5,top+H*.008],'#3a2a1a'); HK.line(o,[vx,top-H*.03,vx,top-H*.045],'#7a5a3a',2); /* gablet vent and finial */
+    HK.line(o,[L,eb,L+(R-L)*.12,top+(eb-top)*.35],v3rgba(o.P.rim||'#fff0d0',.35*lit),1.2);
+    o.top=Math.min(o.top==null?o.dockY-H*.23:o.top,top-H*.06); o.low=Math.max(o.low==null?-1e9:o.low,eb+H*.01); },
+  /* the shallows around it: sand showing through the clear water under the hut, coral heads and a starfish, the ladder down, a leaning palm */
+  ground(o){ const y=o.dockY, wl=o.wl, q=o.x, N=c0=>HK.n(o,c0), x0=HF.x0(), xe=o.pw+W*.04, g=RB.geo(o), sb=wl+H*.07;
+    q.fillStyle=v3rgba(N('#f4e2b0'),.45); q.beginPath(); q.moveTo(x0,H); q.lineTo(x0,sb); q.quadraticCurveTo((x0+xe)/2,sb-H*.015,xe,sb+H*.03); q.lineTo(xe+W*.04,H); q.closePath(); q.fill(); /* the sandbar under the water */
+    for(const [f,cl,s] of [[.3,'#ff7a6a',1],[.62,'#c86ad8',.8],[.95,'#ffb84a',1.1]]){ const cx=x0+(xe-x0)*f, cy=sb+H*.01; q.fillStyle=v3rgba(N(cl),.55); for(let k=0;k<5;k++){ q.beginPath(); q.arc(cx+(k-2)*W*.004*s,cy-H*.006*s*(1-Math.abs(k-2)/3),H*.008*s,0,7); q.fill(); } } /* coral heads */
+    HK.poly(o,[xe-W*.03,sb+H*.016,xe-W*.027,sb+H*.008,xe-W*.024,sb+H*.016,xe-W*.032,sb+H*.011,xe-W*.022,sb+H*.011],v3rgba('#ff8a5a',.7)); /* a starfish */
+    const lx=o.pw-W*.01; q.strokeStyle=N('#7a5a3a'); q.lineWidth=2; q.beginPath(); q.moveTo(lx-W*.004,y); q.lineTo(lx-W*.004,wl+H*.03); q.moveTo(lx+W*.004,y); q.lineTo(lx+W*.004,wl+H*.03); for(let yy=y+H*.014;yy<wl+H*.02;yy+=H*.016){ q.moveTo(lx-W*.004,yy); q.lineTo(lx+W*.004,yy); } q.stroke(); /* the ladder into the water */
+    const px=x0-W*.03, pb=y+H*.2, tx=g.x1+W*.02, ty=g.roofTop-H*.06; q.strokeStyle=N('#8a6a4a'); q.lineCap='round'; q.lineWidth=Math.max(5,H*.012); q.beginPath(); q.moveTo(px,pb-H*.2); q.quadraticCurveTo(px+W*.01,ty+H*.02,tx,ty); q.stroke(); q.lineCap='butt';
+    for(let i=0;i<7;i++){ const a=-Math.PI*.95+i*Math.PI/6.5, L2=W*(.032+(i%2)*.008); q.strokeStyle=N(i%2?'#3a9a4a':'#22703a'); q.lineWidth=Math.max(3,H*.006); q.beginPath(); q.moveTo(tx,ty); q.quadraticCurveTo(tx+Math.cos(a)*L2*.6,ty+Math.sin(a)*L2*.6-H*.02,tx+Math.cos(a)*L2,ty+Math.sin(a)*L2*.5+H*.03); q.stroke(); } HK.circ(o,tx-W*.002,ty+H*.008,H*.006,'#6a4a2a'); HK.circ(o,tx+W*.004,ty+H*.01,H*.005,'#7a5a2a'); /* a coconut palm leaning out over the roof, fronds and coconuts */ }
+};
+// =====================================================================
 // Every water's home (batch 5, 2026-11-22; designs in docs/HOME_DESIGNS.md, colours in docs/MAP_THEMES.md). Willow Pond (the
 // approved pilot) is in cv_homefmt.js; these 19 are built from the home kit (cw_homekit.js). Each home: the seat plus 5 features
 // made for that water, 3 styles each ("none" first where a feature can be left out), one list of 16 colours for every feature.
@@ -17880,21 +17910,29 @@ function rkLedge(o){ const x=o.x, y=o.dockY, yu=y+HK.fh(), wl=o.wl, at=f=>HK.at(
     HK.rect(o,px-pw2/2-1,wl-1,pw2+2,1.5,v3rgba('#e8f4f0',.35*lit+.05)); /* the bright line where the surface meets it */
     o.posts.push({x:px,w:pw2}); } }
 
-/* 7. Coral Shallows: the beach hut on stilts */
-hfMake('reef',{ name:'Beach hut', hname:'beach hut',
+/* 7. Coral Shallows: the overwater bungalow (overnight, 2026-11-23; its own design, src/cw_bungalow.js): a hut high on palm stilts over the
+   shallows with a tall thatched hip roof, a shaggy fringe and a gablet vent; a ladder into the clear water, the sandbar with coral heads and a
+   starfish showing through, a coconut palm leaning over the roof. The old stilts, platform and cover choices became this one building */
+{ const G7=()=>RB.geo({pw:HF.pw(),dockY:HF.dockY()}), WN=()=>{ const g=G7(); return {x0:g.x0,x1:g.x1,vx:g.x0,wallTop:g.wallTop,winA:g.x0+g.w*.45,winB:g.x0+g.w*.72}; };
+hfMake('reef',{ name:'Overwater bungalow', hname:'bungalow', glow:'255,200,140', seatX:()=>HF.pw()-W*.03,
   colors:C16('Palm wood=#9a7a52;Bleached wood=#c8b088;Thatch=#d8b46a;Dark thatch=#a8843a;Sand=#f4e2b0;Shell white=#fbf2e4;Turquoise=#18b0c0;Lagoon=#7ae8e0;Deep reef=#0a6a8a;Palm green=#3a9a4a;Frond dark=#22703a;Coral=#ff7a6a;Mango=#ffb84a;Orchid=#c86ad8;Hibiscus red=#e0403a;Sky blue=#6ccaf4'),
-  els:[{id:'stilts',label:'Stilts',styles:['Palm trunks','Bamboo','Coral stone'],def:[0,0]},{id:'deck',label:'Platform',styles:['Palm planks','Reed mat','Driftwood'],def:[0,1]},
-       {id:'roof',label:'Hut roof',none:true,styles:['Open sky','Palapa','Scallop shell','Shade sail'],def:[1,2]},{id:'gear',label:'Beach gear',none:true,styles:['No gear','Surfboard','Snorkel set','Shell garland'],def:[1,11]},
+  front:null, smoke:null,
+  els:[{id:'walls',label:'Walls',styles:['Woven bamboo','Palm planks','Reed screens'],def:[0,1],palS:[[1,0,4],[0,1,5,6],[1,2,3]]},
+       {id:'thatch',label:'Roof',styles:['Palm thatch','Layered reed thatch','Palm-leaf shingles'],def:[0,2],palS:[[2,3],[2,3,1],[9,10,3]]},
+       {id:'door',label:'Door',styles:['Cloth curtain','Plank door','Arched door'],def:[0,11],palS:[[11,12,13,14,6,5],[0,1,6,8],[0,1,6,8]]},
+       {id:'windows',label:'Windows',styles:['Shuttered windows','Round windows','Four-pane windows'],def:[0,6],pal:[0,1,5,6,8,11,12]},
+       {id:'gear',label:'Beach gear',none:true,styles:['No gear','Surfboard','Snorkel set','Shell garland'],def:[1,11]},
        {id:'torch',label:'Torch',light:true,styles:['Tiki torch','Shell lantern','Glass floats'],def:[0,13]}],
   seat:['beachchair','hammock','peacock'], seatNames:['Beach chair','Hammock','Peacock chair'], seatDef:[0,6],
   order:[
-    ['stilts',(o,s,c)=>HK.supports(o,c,['palm','bamboo','stone'][s],5)],
-    ['deck',(o,s,c)=>HK.deck(o,c,['planks','mat','boards'][s])],
-    ['roof',(o,s,c)=>{ if(s===1) HK.roof(o,c,'palapa',.02,.42); if(s===2) HK.roof(o,c,'scallop',.02,.42); if(s===3) HK.roof(o,c,'shadesail',.02,.42); /* its own covers (map redo: thatch, fronds and the beach umbrella were shared with other homes) */ }],
+    ['base',(o)=>{ RB.ground(o); HK.supports(o,'#9a7a52','palm',5); HK.deck(o,'#c8b088','planks'); }],
+    ['walls',(o,s,c)=>RB.walls(o,RB.geo(o),['woven','shiplap','bamboo'][s],c)],
+    ['door',(o,s,c)=>BH.door(o,RB.geo(o),['noren','plank','arched'][s],c)],
+    ['windows',(o,s,c)=>BH.windows(o,WN(),['shutters','round','four'][s],c)],
+    ['thatch',(o,s,c)=>RB.roof(o,RB.geo(o),s,c)],
     ['gear',(o,s,c)=>{ const x=HK.at(o,.42), y=o.dockY; if(s===1){ HK.ell(o,x+W*.006,y-H*.05,W*.006,H*.05,c,-.08); HK.line(o,[x+W*.006,y-H*.09,x+W*.006,y-H*.01],'#f4efe6',1); } if(s===2){ HK.rect(o,x,y-H*.1,2,H*.1,'#9a7a52'); HK.ell(o,x+W*.006,y-H*.08,W*.004,H*.006,c); HK.poly(o,[x+W*.002,y-H*.06,x+W*.012,y-H*.06,x+W*.016,y-H*.035,x+W*.004,y-H*.04],HK.dk(c,.2)); } if(s===3){ HK.curve(o,x-W*.02,y-H*.11,x,y-H*.08,x+W*.02,y-H*.11,'#c8a878',1); for(let i=0;i<6;i++) HK.circ(o,x-W*.016+i*W*.0064,y-H*(.1-Math.sin(i/5*Math.PI)*.02),H*.004,i%2?c:'#fbf2e4'); } }],
     ['seat'],
-    ['torch',(o,s)=>HK.light(o,['tiki','shells','floats'][s])]] });
-
+    ['torch',(o,s)=>HK.light(o,['tiki','shells','floats'][s])]] }); }
 /* 8. Florida Keys: the flats skiff (floats) */
 hfMake('keys',{ name:'Flats skiff', hname:'skiff', floats:true,
   colors:C16('Boat white=#f4f6f4;Fiberglass cream=#ece4d0;Aluminium=#b8c0c4;Teak=#9a6a3a;Flats aqua=#28c0c8;Shallow mint=#8af0e0;Deep channel=#0a7090;Conch pink=#f0a0a8;Flamingo=#f06a8a;Mint=#9ae0c0;Lemon=#f4e07a;Sunset orange=#f8a050;Sand=#f4e6c0;Palm green=#3a8a5a;Navy trim=#1e3a5a;Cooler red=#d8483a'),
@@ -21479,6 +21517,9 @@ PATCHES.unshift({v:'0.4.9', name:'Work in progress', items:phoneNotes([
 // text changes. Released notes live in notes_release.js.
 const TEST_NOTES={v:'test', label:'Test build · '+(window.DL_BUILD==='ios'?'iPhone':'Android'), name:'0.4.9 test build (newest first)', items:[
   '## New in this build',
+  'Coral Shallows, redone in its own style: your home is an overwater bungalow high on palm stilts, with a tall thatched roof, a shaggy fringe and a little vent at the top. Pick the walls, roof, door, windows, beach gear, torch and seat in Your home.',
+  'Coral Shallows: a ladder goes down into the clear water, the sandbar with coral and a starfish shows through under the bungalow, and a coconut palm leans out over the roof.',
+  '## Test build 2026.11.23-0600',
   'Frostbite Lake, redone in its own style: your home is a timber ice shanty on sled skids, with a snow-capped roof and icicles, a stovepipe with smoke and a window that glows at night. Pick the walls, roof, stovepipe, door, windows, gear and seat in Your home.',
   'Frostbite Lake: snow drifts against the shanty, footprints lead to a tip-up flag over its hole, and a box sled waits beside it.',
   '## Test build 2026.11.23-0547',
