@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="DL Test iPhone">
 <script>
-window.DL_BUILD='ios'; window.DL_PREVIEW=true; if(/[?&]sweep\b/.test(location.search)){ window.__bootErr=[]; addEventListener("error",function(e){ __bootErr.push(String(e.message||e)+(e.lineno?" (line "+e.lineno+")":"")); }); addEventListener("unhandledrejection",function(e){ __bootErr.push("promise: "+String(e.reason&&e.reason.message||e.reason)); }); window.requestAnimationFrame=function(f){ return setTimeout(function(){ f(performance.now()); },16); }; window.cancelAnimationFrame=function(i){ clearTimeout(i); }; } try{ window.__tOff=/[?&](test|sweep|frozen)\b/.test(location.search)?0:(+(localStorage.getItem("dl-test-toff")||0)||0); }catch(e){ window.__tOff=0; } (function(){ var rn=Date.now.bind(Date); Date.now=function(){ return rn()+window.__tOff; }; })(); if(/[?&]frozen\b/.test(location.search)){ var __fz=20261122; Math.random=function(){ __fz|=0; __fz=__fz+0x6D2B79F5|0; var t=Math.imul(__fz^__fz>>>15,1|__fz); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; var __fc=0, __pn=performance.now.bind(performance); performance.now=function(){ __fc+=0.01; return 100000+__fc; }; Date.now=function(){ return 1795300000000+Math.floor(__fc); }; window.__frozenClock=function(){ return __fc; }; window.requestAnimationFrame=function(){ return 0; }; window.cancelAnimationFrame=function(){}; } window.DL_VERSION='2026.11.23-0634';
+window.DL_BUILD='ios'; window.DL_PREVIEW=true; if(/[?&]sweep\b/.test(location.search)){ window.__bootErr=[]; addEventListener("error",function(e){ __bootErr.push(String(e.message||e)+(e.lineno?" (line "+e.lineno+")":"")); }); addEventListener("unhandledrejection",function(e){ __bootErr.push("promise: "+String(e.reason&&e.reason.message||e.reason)); }); window.requestAnimationFrame=function(f){ return setTimeout(function(){ f(performance.now()); },16); }; window.cancelAnimationFrame=function(i){ clearTimeout(i); }; } try{ window.__tOff=/[?&](test|sweep|frozen)\b/.test(location.search)?0:(+(localStorage.getItem("dl-test-toff")||0)||0); }catch(e){ window.__tOff=0; } (function(){ var rn=Date.now.bind(Date); Date.now=function(){ return rn()+window.__tOff; }; })(); if(/[?&]frozen\b/.test(location.search)){ var __fz=20261122; Math.random=function(){ __fz|=0; __fz=__fz+0x6D2B79F5|0; var t=Math.imul(__fz^__fz>>>15,1|__fz); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; var __fc=0, __pn=performance.now.bind(performance); performance.now=function(){ __fc+=0.01; return 100000+__fc; }; Date.now=function(){ return 1795300000000+Math.floor(__fc); }; window.__frozenClock=function(){ return __fc; }; window.requestAnimationFrame=function(){ return 0; }; window.cancelAnimationFrame=function(){}; } window.DL_VERSION='2026.11.23-0645';
 window.addEventListener('beforeinstallprompt',function(e){ e.preventDefault(); window.__dlInstallPrompt=e; });
 </script>
 </head>
@@ -17694,6 +17694,33 @@ const SF = {
     if(s===2){ const rx=g.ck+W*.016; HK.rect(o,rx,y-H*.05,W*.03,H*.004,c); for(let k=0;k<3;k++){ HK.line(o,[rx+W*.006+k*W*.009,y-H*.05,rx+W*.006+k*W*.009,y-H*.012],'#c0c8cc',1.2); HK.curve(o,rx+W*.006+k*W*.009,y-H*.012,rx+W*.009+k*W*.009,y-H*.004,rx+W*.012+k*W*.009,y-H*.012,'#c0c8cc',1.2); } } /* gaffs hung by the cockpit */ }
 };
 // =====================================================================
+// AMAZON RAINFOREST: THE PALAFITO (overnight, 2026-11-23; its own design, MAP_THEMES › Amazon: river stilt villages, palafitos).
+// A stilt house high above the river on lashed hardwood poles, seen from the side: a very steep, tall A-frame roof of palm thatch whose
+// eaves hang low over half-height walls, an open gap under the eave for air, a loft vent at the peak; the stilts tied with vine at their
+// cross-braces, a notched log ladder down to the water, giant Victoria lily pads with upturned rims around the poles, and the buttress roots
+// of a huge rainforest tree on the left. Parts: walls, roof, door, river gear, lamp, seat.
+// =====================================================================
+const AP = {
+  geo(o){ const C=BH.cab(o,{h:.8,ratio:1.6}), wh=C.wh, x0=Math.max(HF.x0(),0)+W*.012, w=Math.min(wh*2.2,o.pw*.46), x1=x0+w; return {x0,x1,vx:x0,w,wh,wallTop:C.wallTop,peak:C.wallTop-w*.75,mid:(x0+x1)/2}; },
+  walls(o,g,kind,c){ const gap=H*.012; BH.walls(o,{x0:g.x0,x1:g.x1,vx:g.x0,wallTop:g.wallTop+gap},kind,c); HK.rect(o,g.x0,g.wallTop,g.w,gap,'#1a140e'); for(let k=0;k<=4;k++) HK.rect(o,g.x0+g.w*k/4-W*.002,g.wallTop,W*.004,o.dockY-g.wallTop,'#4a3420'); /* the air gap under the eave, posts */ },
+  /* the steep A-frame thatch: thick, ragged eaves hanging low, rows of palm, a ridge cap and a vent at the peak */
+  roof(o,g,kind,c){ const q=o.x, lit=HK.lit(o), ov=W*.022, eb=g.wallTop+H*.026, L=g.x0-ov, R=g.x1+ov, col=kind===2?'#3a8a3a':c;
+    q.fillStyle=HK.n(o,col); q.beginPath(); q.moveTo(L,eb); q.lineTo(g.mid,g.peak); q.lineTo(R,eb); q.closePath(); q.fill(); q.save(); q.clip();
+    if(kind===2){ for(let k=0;k<9;k++){ const yy=g.peak+(eb-g.peak)*(k+.5)/9, hw=(R-L)/2*((yy-g.peak)/(eb-g.peak)); for(let X=g.mid-hw;X<g.mid+hw;X+=W*.016){ q.fillStyle=HK.n(o,(k+Math.round(X))%2?'#2e6a32':'#4a9a3a'); q.beginPath(); q.ellipse(X,yy,W*.012,H*.012,(X<g.mid?-.5:.5),0,7); q.fill(); } } } /* layered giant leaves */
+    else { for(let k=0;k<10;k++){ const yy=g.peak+(eb-g.peak)*(k+1)/10; q.fillStyle=HK.n(o,k%2?HK.dk(col,.14):HK.lt(col,.06)); q.fillRect(L,yy-H*.005,R-L,H*.005); } q.strokeStyle=HK.n(o,HK.dk(col,.3)); q.lineWidth=1; q.beginPath(); for(let X=L;X<R;X+=W*.004){ q.moveTo(g.mid+(X-g.mid)*.05,g.peak); q.lineTo(X,eb); } q.stroke(); } q.restore(); /* palm rows and straw */
+    q.fillStyle=HK.n(o,HK.dk(col,.1)); q.beginPath(); q.moveTo(L-W*.004,eb-H*.008); for(let X=L-W*.004;X<=R+W*.004;X+=W*.004) q.lineTo(X,eb+H*(.004+.008*Math.abs(Math.sin(X*.53)))); q.lineTo(R+W*.004,eb-H*.008); q.closePath(); q.fill(); /* ragged eave */
+    HK.poly(o,[g.mid-W*.008,g.peak+H*.03,g.mid,g.peak+H*.012,g.mid+W*.008,g.peak+H*.03],'#1a140e'); HK.line(o,[g.mid-W*.012,g.peak+H*.016,g.mid,g.peak-H*.004,g.mid+W*.012,g.peak+H*.016],HK.dk(col,.3),3); /* loft vent and ridge cap */
+    HK.line(o,[L,eb,g.mid,g.peak],v3rgba(o.P.rim||'#fff0d0',.35*lit),1.2);
+    o.top=Math.min(o.top==null?o.dockY-H*.23:o.top,g.peak-H*.03); o.low=Math.max(o.low==null?-1e9:o.low,eb+H*.01); },
+  /* below and around: tall lashed stilts with cross braces, a notched log ladder, giant lily pads, a dugout tied up, buttress roots on the left */
+  ground(o){ const y=o.dockY, wl=o.wl, q=o.x, N=c0=>HK.n(o,c0), x0=HF.x0(), under=y+HK.fh(), n=5, xs=[...Array(n+1)].map((_,i)=>x0+(o.pw-x0)*(.04+.92*i/n)), pw=Math.max(5,W*.008);
+    const tx=Math.max(x0,0)-W*.02; q.fillStyle=N('#5a4630'); q.beginPath(); q.moveTo(tx-W*.02,wl+H*.02); q.quadraticCurveTo(tx+W*.03,wl-H*.004,tx+W*.05,wl+H*.012); q.quadraticCurveTo(tx+W*.03,y-H*.02,tx+W*.02,y-H*.25); q.lineTo(tx-W*.02,y-H*.25); q.closePath(); q.fill(); q.strokeStyle=N('#3a2a1c'); q.lineWidth=1.5; q.beginPath(); for(let k=0;k<4;k++){ q.moveTo(tx+W*.004*k,y-H*.22); q.quadraticCurveTo(tx+W*.012+k*W*.006,y,tx+W*(.02+k*.008),wl+H*.01); } q.stroke(); q.fillStyle=N('#4a7a2a'); for(let k=0;k<6;k++){ q.beginPath(); q.ellipse(tx+W*(.006+k*.006),y-H*(.05+k*.03),W*.006,H*.004,.6,0,7); q.fill(); } /* buttress roots of a giant tree with moss */
+    for(let i=0;i<n;i++){ q.strokeStyle=N('#4a3420'); q.lineWidth=Math.max(2,H*.004); q.beginPath(); q.moveTo(xs[i],under+H*.01); q.lineTo(xs[i+1],wl-H*.01); q.stroke(); const mx=(xs[i]+xs[i+1])/2, my=(under+wl)/2; HK.rect(o,mx-2,my-2,4,4,'#5a6a2a'); }
+    for(const px of xs){ q.fillStyle=N('#6a4a30'); q.fillRect(px-pw/2,under,pw,H-under); q.fillStyle=v3rgba('#000000',.25); q.fillRect(px+pw*.2,under,pw*.3,H-under); for(const ly of [under+H*.006,wl-H*.012]){ q.fillStyle=N('#5a6a2a'); q.fillRect(px-pw*.65,ly,pw*1.3,H*.005); } q.fillStyle=N('#3a5a2a'); q.fillRect(px-pw/2,wl-H*.004,pw,H*.006); } /* stilts lashed with vine, a green tide mark */
+    const lx=o.pw-W*.008; q.fillStyle=N('#7a5a3e'); q.save(); q.translate(lx,y); q.rotate(.12); q.fillRect(-W*.004,0,W*.008,wl-y+H*.02); q.fillStyle=N('#3a2a1c'); for(let yy=H*.012;yy<wl-y;yy+=H*.016) q.fillRect(-W*.004,yy,W*.008,H*.004); q.restore(); /* a notched log ladder */
+    for(const [f,s] of [[.2,1],[.5,.8],[.8,.9]]){ const cx=x0+(o.pw-x0)*f, cy=wl+H*.012*s; q.fillStyle=N('#3a7a2a'); q.beginPath(); q.ellipse(cx,cy,W*.03*s,H*.008*s,0,0,7); q.fill(); q.strokeStyle=N('#a8402a'); q.lineWidth=Math.max(2,H*.004*s); q.beginPath(); q.ellipse(cx,cy-H*.002,W*.03*s,H*.008*s,0,Math.PI,0); q.stroke(); } /* giant Victoria lily pads with their red upturned rims */ }
+};
+// =====================================================================
 // Every water's home (batch 5, 2026-11-22; designs in docs/HOME_DESIGNS.md, colours in docs/MAP_THEMES.md). Willow Pond (the
 // approved pilot) is in cv_homefmt.js; these 19 are built from the home kit (cw_homekit.js). Each home: the seat plus 5 features
 // made for that water, 3 styles each ("none" first where a feature can be left out), one list of 16 colours for every feature.
@@ -18051,20 +18078,26 @@ hfMake('shelf',{ name:'Sport-fisher', hname:'boat', floats:true, seatX:()=>HF.pw
     ['seat'],
     ['light',(o,s)=>HK.light(o,['brass','mast','flood'][s],s===1?HK.at(o,.62):undefined)]] });
 
-/* 10. Amazon Rainforest: the stilt house */
-hfMake('amazon',{ name:'River stilt house', hname:'stilt house',
+/* 10. Amazon Rainforest: the palafito (overnight, 2026-11-23; its own design, src/cw_palafito.js): a stilt house high on lashed poles with a
+   very steep A-frame thatch roof hanging low over half walls; vine-lashed braces, a notched log ladder, giant Victoria lily pads, buttress roots.
+   The old stilts, floor and roof choices became this one building; river gear and lamp keep their ids */
+{
+hfMake('amazon',{ name:'Palafito', hname:'palafito', glow:'255,190,110', seatX:()=>HF.pw()-W*.03, front:null, smoke:null,
   colors:C16('Hardwood=#7a5a3e;Dark hardwood=#4a3420;Vine=#5a6a2a;Palm thatch=#c8a85a;Dry thatch=#a8843a;River clay=#a8683a;Jungle green=#2e6a32;Deep jungle=#123a18;Fern=#6aa04a;Leaf highlight=#a8e07a;Tannin water=#3a5a32;Macaw red=#d8302a;Macaw blue=#2a6ad8;Macaw yellow=#f0c83a;Orchid pink=#e070b0;Mist=#e8f4e0'),
-  els:[{id:'stilts',label:'Stilts',styles:['Hardwood stilts','Mangrove roots','Bamboo bundles'],def:[0,1]},{id:'floor',label:'Floor',styles:['Lashed planks','Split bamboo','Reed mat'],def:[0,0]},
-       {id:'roof',label:'Roof',none:true,styles:['Open sky','Maloca roof','Giant leaf','Palm fronds'],def:[1,3]},{id:'canoe',label:'River gear',none:true,styles:['No gear','Dugout canoe','Paddle and trap','Hanging net'],def:[1,1]},
+  els:[{id:'walls',label:'Walls',styles:['Split palm','Woven cane','Clay plaster'],def:[0,0],palS:[[0,1,3],[3,4,0],[5,3,4]]},
+       {id:'thatch',label:'Roof',styles:['Palm thatch','Dry thatch','Giant leaves'],def:[0,3],palS:[[3,4],[4,3],[6]]},
+       {id:'door',label:'Door',styles:['Woven mat','Plank door','Bead curtain'],def:[0,4],palS:[[3,4,2],[0,1],[11,12,13,14,15]]},
+       {id:'canoe',label:'River gear',none:true,styles:['No gear','Dugout canoe','Paddle and trap','Hanging net'],def:[1,1]},
        {id:'lamp',label:'Lamp',light:true,styles:['Gourd lamp','Firefly basket','Bamboo torch'],def:[0,13]}],
   seat:['hammock','wovenstool','logseat'], seatNames:['Hammock','Woven stool','Carved log seat'], seatDef:[0,11],
   order:[
-    ['stilts',(o,s,c)=>HK.supports(o,c,['stilts','mangrove','bamboo'][s],5)],
-    ['floor',(o,s,c)=>HK.deck(o,c,['planks','bamboo','mat'][s])],
+    ['base',(o)=>{ AP.ground(o); HK.deck(o,'#7a5a3e','planks'); }],
+    ['walls',(o,s,c)=>AP.walls(o,AP.geo(o),['batten','woven','plaster'][s],c)],
+    ['door',(o,s,c)=>BH.door(o,AP.geo(o),['noren','plank','noren'][s],c)],
     ['canoe',(o,s,c)=>{ const x=HK.at(o,.3), y=o.dockY; if(s===1){ o.x.fillStyle=HK.n(o,c); o.x.beginPath(); o.x.moveTo(x,o.wl-H*.004); o.x.quadraticCurveTo(x+W*.04,o.wl+H*.016,x+W*.08,o.wl-H*.004); o.x.lineTo(x,o.wl-H*.004); o.x.fill(); o.posts.push({x:x+W*.08,w:W*.01}); } if(s===2){ HK.line(o,[HK.at(o,.42),y,HK.at(o,.46),y-H*.1],c,2); HK.ell(o,HK.at(o,.46),y-H*.1,W*.003,H*.012,c); HK.ell(o,HK.at(o,.5),y-H*.012,W*.008,H*.012,'#a8843a'); } if(s===3){ HK.rect(o,HK.at(o,.44),y-H*.13,2,H*.13,'#4a3420'); o.x.fillStyle=v3rgba(c,.5); o.x.beginPath(); o.x.moveTo(HK.at(o,.44),y-H*.13); o.x.lineTo(HK.at(o,.38),y-H*.04); o.x.lineTo(HK.at(o,.44),y-H*.05); o.x.fill(); } }],
-    ['roof',(o,s,c)=>{ if(s===1) HK.roof(o,c,'maloca',.02,.44); if(s===2) HK.roof(o,c,'leaf',.02,.46); if(s===3) HK.roof(o,c,'fronds',.02,.44); }],
+    ['thatch',(o,s,c)=>AP.roof(o,AP.geo(o),s,c)],
     ['seat'],
-    ['lamp',(o,s)=>HK.light(o,['gourd','fireflybasket','torch'][s])]] });
+    ['lamp',(o,s)=>HK.light(o,['gourd','fireflybasket','torch'][s])]] }); }
 
 /* 11. Midnight Deep: the trawler deck (floats) */
 hfMake('deep',{ name:'Trawler deck', hname:'trawler', floats:true,
@@ -21605,6 +21638,9 @@ PATCHES.unshift({v:'0.4.9', name:'Work in progress', items:phoneNotes([
 // text changes. Released notes live in notes_release.js.
 const TEST_NOTES={v:'test', label:'Test build · '+(window.DL_BUILD==='ios'?'iPhone':'Android'), name:'0.4.9 test build (newest first)', items:[
   '## New in this build',
+  'Amazon Rainforest, redone in its own style: your home is a palafito, a stilt house high on vine-lashed poles with a very steep thatched roof hanging low over its walls. Pick the walls, roof, door, river gear, lamp and seat in Your home.',
+  'Amazon Rainforest: a notched log ladder climbs down to the water, giant water lilies with red rims float around the stilts, and the buttress roots of a huge tree reach in from the left.',
+  '## Test build 2026.11.23-0634',
   'Brine Shelf: your boat is rebuilt as a big-game sport-fisher, stern toward the fish: a tall hull with chrome rails, a transom door and swim platform, her name on the side, a cabin with a raked windscreen, portholes and a life ring, and a flybridge with a ladder (or a wheelhouse, or a tuna tower) with outriggers splayed out. Your saved choices carry over.',
   '## Test build 2026.11.23-0624',
   'Florida Keys: your skiff is rebuilt as a real flats skiff, bow toward the fish: a low fiberglass hull with a rub rail, a stripe at the waterline and its registration, an outboard on the back, a center console with a windscreen (or a poling platform, or a tiller boat), and a T-top, bimini or umbrella. It is staked out with a push pole in the sand. Your saved choices carry over.',
