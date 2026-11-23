@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="DL Test Android">
 <script>
-window.DL_BUILD='android'; window.DL_PREVIEW=true; if(/[?&]sweep\b/.test(location.search)){ window.__bootErr=[]; addEventListener("error",function(e){ __bootErr.push(String(e.message||e)+(e.lineno?" (line "+e.lineno+")":"")); }); addEventListener("unhandledrejection",function(e){ __bootErr.push("promise: "+String(e.reason&&e.reason.message||e.reason)); }); window.requestAnimationFrame=function(f){ return setTimeout(function(){ f(performance.now()); },16); }; window.cancelAnimationFrame=function(i){ clearTimeout(i); }; } try{ window.__tOff=/[?&](test|sweep|frozen)\b/.test(location.search)?0:(+(localStorage.getItem("dl-test-toff")||0)||0); }catch(e){ window.__tOff=0; } (function(){ var rn=Date.now.bind(Date); Date.now=function(){ return rn()+window.__tOff; }; })(); if(/[?&]frozen\b/.test(location.search)){ var __fz=20261122; Math.random=function(){ __fz|=0; __fz=__fz+0x6D2B79F5|0; var t=Math.imul(__fz^__fz>>>15,1|__fz); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; var __fc=0, __pn=performance.now.bind(performance); performance.now=function(){ __fc+=0.01; return 100000+__fc; }; Date.now=function(){ return 1795300000000+Math.floor(__fc); }; window.__frozenClock=function(){ return __fc; }; window.requestAnimationFrame=function(){ return 0; }; window.cancelAnimationFrame=function(){}; } window.DL_VERSION='2026.11.23-0259';
+window.DL_BUILD='android'; window.DL_PREVIEW=true; if(/[?&]sweep\b/.test(location.search)){ window.__bootErr=[]; addEventListener("error",function(e){ __bootErr.push(String(e.message||e)+(e.lineno?" (line "+e.lineno+")":"")); }); addEventListener("unhandledrejection",function(e){ __bootErr.push("promise: "+String(e.reason&&e.reason.message||e.reason)); }); window.requestAnimationFrame=function(f){ return setTimeout(function(){ f(performance.now()); },16); }; window.cancelAnimationFrame=function(i){ clearTimeout(i); }; } try{ window.__tOff=/[?&](test|sweep|frozen)\b/.test(location.search)?0:(+(localStorage.getItem("dl-test-toff")||0)||0); }catch(e){ window.__tOff=0; } (function(){ var rn=Date.now.bind(Date); Date.now=function(){ return rn()+window.__tOff; }; })(); if(/[?&]frozen\b/.test(location.search)){ var __fz=20261122; Math.random=function(){ __fz|=0; __fz=__fz+0x6D2B79F5|0; var t=Math.imul(__fz^__fz>>>15,1|__fz); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; var __fc=0, __pn=performance.now.bind(performance); performance.now=function(){ __fc+=0.01; return 100000+__fc; }; Date.now=function(){ return 1795300000000+Math.floor(__fc); }; window.__frozenClock=function(){ return __fc; }; window.requestAnimationFrame=function(){ return 0; }; window.cancelAnimationFrame=function(){}; } window.DL_VERSION='2026.11.23-0322';
 window.addEventListener('beforeinstallprompt',function(e){ e.preventDefault(); window.__dlInstallPrompt=e; });
 </script>
 </head>
@@ -910,7 +910,8 @@ const PERKS = {
   lucky:    {name:'Lucky Charm',    max:10, per:'Better rare odds, +0.3% shiny chance', d:'Rarer fish and more shinies.'},
   caster:   {name:'Long Caster',    max:10, per:'Far casts count sooner and give more', d:'Better rewards for casting far.'},
   trophy:   {name:'Trophy Hunter',  max:10, per:'+6% trophy-size chance', d:'Heavier fish, more wall mounts.'},
-  reader:   {name:'Water Reader',   max:10, per:'Hotspots +10% more often, last longer', d:'Spot the ripples where rare fish gather. Full rank: one more try per bite.'},
+  reader:   {name:'Water Reader',   max:10, per:'Hotspots +10% more often, last longer', d:'Spot the ripples where rare fish gather.'}, /* the extra try per bite moved to Second Bite (director, 2026-11-23) */
+  secondbite:{name:'Second Bite',   max:9,  per:'+5% rare odds on every try after a miss; ranks 3, 6 and 9: one more try per bite', d:'Missed it? The fish comes back for another look.'}, /* director, 2026-11-23 */
   scavenger:{name:'Scavenger',      max:10, per:'+10% junk and treasure chance', d:'Hook more of humanity’s lost things.'},
   haggler:  {name:'Haggler',        max:10, per:'+4% sale price', d:'The fishmonger pays you more.'},
   keeper:   {name:'Fish Keeper',    max:10, per:'+8% aquarium income', d:'Happier fish, more visitors.'},
@@ -918,7 +919,7 @@ const PERKS = {
   streaker: {name:'On a Roll',      max:5,  per:'+10% max streak bonus', d:'Long catch streaks pay more XP.'},
   nightowl: {name:'Night Owl',      max:5,  per:'Better rare odds at dusk and night', d:'The dark is where the good fish hide.'},
   weatherwise:{name:'Weatherwise',  max:10, per:'+4% bite speed in any weather but clear', d:'You read the sky like a book.'},
-  naturalist:{name:'Naturalist',    max:10, per:'+5% XP from fish you’ve caught fewer than 3 times', d:'New discoveries teach you the most.'},
+  naturalist:{name:'Naturalist',    max:10, per:'Each mastery star adds 1% more value', d:'You know every species inside out.'}, /* director, 2026-11-23: was XP for species caught under 3 times, best only when bought first; now a mastery buff */
   aquarist: {name:'Aquarist',       max:10, per:'+3% to aquarium fish boosts', d:'Your fish thrive under your care.'},
   derbypro: {name:'Derby Pro',      max:5,  per:'Derby rivals score 4% less', d:'You know the competition’s tricks.'},
   tidewalker:{name:'Tidewalker',    max:10, per:'+6% Tide Pass XP', d:'The tide carries you further.'},
@@ -926,9 +927,9 @@ const PERKS = {
   dozer:    {name:'Lazy Days',      max:5,  per:'Rest mode bites come sooner', d:'While resting, fish bite in 30 s to 3 min at full rank (3 to 10 min to start).'},
   /* 0.4.9 [15] (director: "More skills. More ways to get skill points") */
   grappler: {name:'Grappler',       max:5,  per:'Rare fish hold back 4% less while you reel', d:'Strong hands for the big ones.'},
-  snagwise: {name:'Snag Sense',     max:5,  per:'Oddities strain the line 8% less', d:'You feel a snag before it bites.'},
-  gourmet:  {name:'Gourmet',        max:5,  per:'Favourite foods pull 6% harder', d:'You know exactly what every fish likes.'},
-  nibbler:  {name:'Candy Maker',    max:5,  per:'+4% chance that scrapping gives Nibbles', d:'Nothing goes to waste.'},
+  snagwise: {name:'Snag Sense',     max:5,  per:'Oddities strain the line 8% less', d:'Better at avoiding snags.'},
+  gourmet:  {name:'Gourmet',        max:5,  per:'Favourite foods pull 6% harder; fish caught on them sell for 6% more', d:'You know exactly what every fish likes.'},
+  nibbler:  {name:'Candy Maker',    max:10, per:'+4% chance that scrapping gives Nibbles; +1% chance they are a rarity higher', d:'Nothing goes to waste.'},
   prismkeeper:{name:'Prism Keeper', max:5,  per:'Titled shinies lift your other fish 2% more', d:'Your titled shinies shine for everyone.'},
 };
 const WEATHERS = [
@@ -1517,7 +1518,7 @@ const WATER_EG = WATERS_NEW.filter(w=>w.eg);
     let idx; if(Wd.eg){ idx=LOCS.length; } else { idx=fidx(Wd.after)+1; }
     const prev=Wd.eg?'starfall':LOCS[idx-1].id, next=Wd.eg?'starfall':LOCS[idx].id;
     LOCS.splice(idx,0,{id:Wd.id, name:Wd.name, cost:Wd.cost, bonus:Wd.bonus, plat:Wd.plat, blurb:Wd.blurb, sky:Wd.sky, water:Wd.water, hill:Wd.hill, amp:Wd.amp, freq:Wd.freq, depth:Wd.depth, loot:Wd.loot, eg:Wd.eg||0});
-    if(Wd.eg){ const o=LOCS[idx]; Object.defineProperty(o,'name',{get(){ return egCharted(this)?Wd.name:'Uncharted Waters'; },configurable:true,enumerable:true}); Object.defineProperty(o,'blurb',{get(){ return egCharted(this)?Wd.blurb:'Complete voyage '+Wd.eg+' to chart these waters.'; },configurable:true,enumerable:true}); } /* Cam's list #12 */
+    if(Wd.eg){ const o=LOCS[idx]; Object.defineProperty(o,'name',{get(){ return egCharted(this)?Wd.name:'Uncharted Waters'; },configurable:true,enumerable:true}); Object.defineProperty(o,'blurb',{get(){ return egCharted(this)?Wd.blurb:'Complete voyage '+egVoy(this)+' to chart these waters.'; },configurable:true,enumerable:true}); } /* Cam's list #12 */
     const lpA=LOCS[fidx(prev)], lpB=LOCS[fidx(next)], w=Wd.eg?0:cl(Math.log(Wd.loot/lpA.loot)/Math.log(lpB.loot/lpA.loot),0,1);
     const R=r=>{ const a=ref(prev,r), b=ref(next,r), g=(x,y)=>x>0&&y>0?Math.exp(Math.log(x)*(1-w)+Math.log(y)*w):(x||y); return {base:g(a.base,b.base),min:g(a.min,b.min),max:g(a.max,b.max),str:a.str*(1-w)+b.str*w}; };
     Wd.fish.forEach((e,i)=>{ const [name,note]=e.split('|'); const id=Wd.pre+'_'+slug(name), r=RAR_OF[i], meme=i>=50, nm=name.toLowerCase(); if(SPI[id]) return;
@@ -1540,7 +1541,8 @@ const isEgLoc = id => { const L=LOCS[locIdx(id)]; return !!(L&&L.eg); };
 /* Cam's list #12: an end-game water is "Uncharted Waters" (name and card) until you reach its voyage; then it opens for coins like any
    water and stays open for good once paid for (S.egPaid). Waters a save already had open count as paid. */
 /* (function declarations: the name getters below can run while the page is still loading) */
-function egCharted(L){ try{ return !!L && ((S.tides||0) >= (L.eg||0) || S.unlocked.includes(L.id)); }catch(e){ return false; } } /* a water you can already travel to is charted (director, 2026-11-22: open waters were still called Uncharted Waters after Unlock everything) */
+const egVoy = L => Math.max(1,(L.eg||0)-1); /* the voyages an end-game water needs: Animal Farm after the first voyage, one more for each after it (director, 2026-11-23: was one later) */
+function egCharted(L){ try{ return !!L && ((S.tides||0) >= egVoy(L) || S.unlocked.includes(L.id)); }catch(e){ return false; } } /* a water you can already travel to is charted (director, 2026-11-22: open waters were still called Uncharted Waters after Unlock everything) */
 const egCost = L => Math.max(1000, Math.round(30*bestNormalLoot()*(1+.15*((L.eg||2)-2))/1000)*1000); /* balance first version (the director and Cam decide): about 30 catches' worth at your best water */
 function egOpenAdd(st){ st=st||S; if(!st||!Array.isArray(st.unlocked)) return; if(!Array.isArray(st.egPaid)) st.egPaid=[];
   for(const Wd of WATER_EG){ if(st.unlocked.includes(Wd.id)&&!st.egPaid.includes(Wd.id)) st.egPaid.push(Wd.id); if(st.egPaid.includes(Wd.id)&&!st.unlocked.includes(Wd.id)) st.unlocked.push(Wd.id); } }
@@ -1748,7 +1750,7 @@ function caughtAt(loc){ return SP.filter(s=>s.loc===loc && S.journal[s.id]).leng
 const unlockNeed = () => Math.max(5,Math.round(Math.min(50, 10*((S.tides||0)+1))*pathMul('unlock')));
 const voyCatchAt = loc => (S.voyCatch&&S.voyCatch[loc])||0;
 const unlockMet = i => i<=0 || S.unlocked.includes(LOCS[i].id) || (LOCS[i].eg ? egCharted(LOCS[i]) : voyCatchAt(LOCS[i-1].id) >= unlockNeed()); /* [69] end-game waters open by voyages, not catches */
-const unlockLine = i => { if(LOCS[i].eg) return egCharted(LOCS[i]) ? 'Voyage '+LOCS[i].eg+' complete: open it for coins' : 'Complete voyage '+LOCS[i].eg+' to unlock ('+(S.tides||0)+' so far)'; const prev=LOCS[i-1]; return Math.min(voyCatchAt(prev.id),unlockNeed())+' / '+unlockNeed()+' fish caught at '+prev.name+' this voyage'; };
+const unlockLine = i => { if(LOCS[i].eg) return egCharted(LOCS[i]) ? 'Voyage '+egVoy(LOCS[i])+' complete: open it for coins' : 'Complete voyage '+egVoy(LOCS[i])+' to unlock ('+(S.tides||0)+' so far)'; const prev=LOCS[i-1]; return Math.min(voyCatchAt(prev.id),unlockNeed())+' / '+unlockNeed()+' fish caught at '+prev.name+' this voyage'; };
 const spAt = loc => SP.filter(s=>s.loc===loc);
 
 const CYCLE = 360;
@@ -1835,7 +1837,7 @@ function beginWait(){ G.st='waiting'; G.waitT=0; G.missN=0; const b=BAIT[S.baitS
 function biteSpeed(hot){ const b=BAIT[S.baitSel], wx=weather(); return b.speed*(1+.01*(S.lvl-1))*(1+.05*pr('patience'))*(wx.bite||1)*(1+bonus('bite'))*(hot?1.3:1)*(spec('speedy')?1.2:1)*((wx.k!=='Clear'||maxed('weatherwise'))?1+.04*pr('weatherwise'):1); }
 function rareScore(dm,far,hot,p){ const b=BAIT[S.baitSel], wx=weather(); p=p==null?phase():p;
   let rare = dm.rare + PEARL_RARE*(S.pearlOld||0) + b.rare + (ROD_RARE[S.gear.rod]||0) + (far ? .2+.03*pr('caster') : 0) + .06*pr('lucky') + (wx.rare||0) + bonus('rare')*2 + (isNight(p)?.1*pr('nightowl'):0) + (hot?1:0);
-  if(S.baitSel==='glow' && isNight(p)) rare*=1.5; if(b.loc===S.loc) rare*=(b.locMul||2); if(b.sea && SEA.includes(S.loc)) rare*=1.5; if(b.night && isNight(p)) rare*=b.night; rare*=(spec('patient')?1.2:1)*specLocRare(S.loc); return rare; }
+  if(S.baitSel==='glow' && isNight(p)) rare*=1.5; if(b.loc===S.loc) rare*=(b.locMul||2); if(b.sea && SEA.includes(S.loc)) rare*=1.5; if(b.night && isNight(p)) rare*=b.night; rare*=(spec('patient')?1.2:1)*specLocRare(S.loc)*(G.missN>0?1+.05*pr('secondbite'):1); return rare; } /* Second Bite: better odds on every try after a miss */
 function shinyChance(hot){ const b=BAIT[S.baitSel], wx=weather(); return Math.min(.15, (.02 + .003*pr('lucky')) * (wx.shiny||1) * (b.shiny||1) * (1+bonus('shiny')) * (hot?HOT_SHINY_K:1) * (spec('shinyhunter')?1.6:1) * (relic('luckypearl')?1.5:1)); } /* batch 6: at most 15% shiny, whatever stacks */
 const junkChance = () => Math.min(.2, .05*(1+.1*pr('scavenger'))*(1+bonus('treasure'))*(BAIT[S.baitSel].treasure||1)*(G.inHot?1.5:1)*(spec('tinker')?1.6:1)*(weather().treasure||1)*pathMul('junk')); /* batch 6: at most 1 cast in 5 brings up an oddity, however it is stacked */
 function pickJunk(){ const ws=JUNK.map(j=>JUNK_W[j.t]); let x=Math.random()*ws.reduce((a,b)=>a+b,0); for(let i=0;i<JUNK.length;i++){ x-=ws[i]; if(x<=0) return JUNK[i]; } return JUNK[0]; }
@@ -1876,7 +1878,7 @@ function hookIt(){ const perfect = (G.waitT - (G.biteEnd - hookWin())) < .3*hook
 function breakStreak(why){ const n=S.streak; if(!n){ if(why) toast(why); return; } const keep=maxed("streaker")?Math.floor(n/2):0; /* director 2026-11-18: a streak ends only when a fish that bit gets away; On a Roll maxed keeps half */ S.streak=keep; const msg=keep?"Fish lost: streak "+n+" halved to "+keep:"Streak of "+n+" ended"; if(why) toast(n>=3?why+' '+msg+'.':why); else if(n>=3) setTimeout(()=>toast(msg),1200); save(); } /* why: Cam's list #10 puts the reason into the streak message */ /* 0.3.6: saved at once, so a refresh can't bring a broken streak back */
 function endFight(kind){
   if(kind==='caught'){ G.st='landing'; G.land={t:0, dur:.85, x0:G.bob.x, y0:G.bob.y}; splash(G.bob.x,G.bob.y,24); sfx.pull(); return; }
-  if(kind==='baited'){ G.st='idle'; G.fish=null; G.inHot=false; sfx.lost(); if(S.baitSel!=='worm'&&(S.bait[S.baitSel]||0)>0&&!pathSave()){ S.bait[S.baitSel]--; if(!S.bait[S.baitSel]) toast(BAIT[S.baitSel].name+' used up. Back to worms.'); renderBait(); } breakStreak('You waited too long, the fish got your bait!'); return; } /* Cam's list #10: every try missed at a hotspot */
+  if(kind==='baited'){ G.st='idle'; G.fish=null; G.inHot=false; sfx.lost(); if(S.baitSel!=='worm'&&(S.bait[S.baitSel]||0)>0&&!pathSave()){ S.bait[S.baitSel]--; if(!S.bait[S.baitSel]) toast(BAIT[S.baitSel].name+' used up. Back to worms.'); renderBait(); } if(!maxed('secondbite')) breakStreak('You waited too long, the fish got your bait!'); return; } /* Second Bite at full rank: a missed hotspot bite keeps the streak */ /* Cam's list #10: every try missed at a hotspot */
   G.st='idle'; G.fish=null; G.inHot=false; if(kind!=='nohook') breakStreak(); /* director 2026-11-18: a missed strike keeps the streak; only a hooked fish that gets away ends it */
   if(kind==='snap'){ S.stats.snapped++; sfx.snap(); toast((G.temper>1.6 ? 'Snap! Let go when it gets angry. ' : fishNew() ? 'Snap! Short pulls when it fights. ' : 'Snap! Ease off when it runs. ')+quip('snap')); checkFeats(); save(); }
   else if(kind==='nohook'){ sfx.lost(); toast('Missed a bite'); } /* a missed strike said "slipped off the hook" before */
@@ -1891,8 +1893,8 @@ function landFish(){
   journalAdd(f);
   S.streak++; S.stats.bestStreak=Math.max(S.stats.bestStreak,S.streak); const streakBonus = Math.min(streakCap(),.05*(S.streak-1));
   if(G.perfect && relic('goldhook')) f.value=Math.round(f.value*1.1);
-  const xp = Math.round((5+Math.sqrt(f.value/(f.shiny?4:1))*3)*RAR[sp.r].xp*(f.shiny?2:1)*(1+streakBonus)*xpMult()*(weather().xp||1)*(relic('mentor')?1.25:1)*(spec('collector')&&isNew?3:1)*((!j||j.n<3)?1+.05*pr('naturalist'):1));
-  if(isNew && maxed('naturalist')) S.scales+=5;
+  const xp = Math.round((5+Math.sqrt(f.value/(f.shiny?4:1))*3)*RAR[sp.r].xp*(f.shiny?2:1)*(1+streakBonus)*xpMult()*(weather().xp||1)*(relic('mentor')?1.25:1)*(spec('collector')&&isNew?3:1)*1);
+  /* (Naturalist's Scales for new species moved: it is a mastery skill now, director 2026-11-23) */
   f.demand = demandSp().id===sp.id; if(f.demand) S.stats.demand++; f.streakBonus=streakBonus;
   { const ce=coolerEntry(f); S.cooler.push(ce); G.lastEntry=ce; } S.stats.caught++; if(f.shiny===2) S.stats.prism=(S.stats.prism||0)+1; if(f.hy) S.stats.hybrid=(S.stats.hybrid||0)+1;
   const preyB=[]; for(const p of (f.prey||[])){ journalAdd(p); S.stats.caught++; S.cooler.push(coolerEntry(p)); preyB.push(['k','Swallowed '+p.sp.name+' ('+kgStr(p.kg)+'): in your cooler'+(S.cooler.length>gv('cooler')?' (over its limit)':'')]); } /* C19 (director + Cam, 2026-11-20): fish a predator swallowed always go to the cooler, even past its limit */
@@ -1906,7 +1908,7 @@ function landFish(){
   if(f.demand) b.push(['g','Fishmonger wants it: ×2 if sold now']); if(G.perfect) b.push(['','Perfect hook']); if(S.streak>=2) b.push(['','Streak '+S.streak+' · +'+Math.round(streakBonus*100)+'% XP']);
   if(scl) b.push(['k','+'+scl+' Scales']); if(tok) b.push(['g','+1 '+(tok==='big'?'big':'small')+' Mystery Crate']);
   if(isNew) b.push(['','New species']); if(record) b.push(['g','Personal record']); const ae=G.lastEntry&&!G.lastEntry.hy&&aqEff(G.lastEntry); if(ae && isNew) b.push(['k','In the aquarium: '+fmtB(ae.k,ae.v)]);
-  const ms=mastery(sp.id); if(ms && [3,10,30,100][ms-1]===S.journal[sp.id].n) b.push(['g','Mastery '+'★'.repeat(ms)+': +'+ms*10+'% value for this fish']);
+  const ms=mastery(sp.id); if(ms && masteryT()[ms-1]===S.journal[sp.id].n) b.push(['g','Mastery '+'★'.repeat(ms)+': +'+Math.round(ms*masteryK()*100)+'% value for this fish']);
   const rk=checkRank(); if(rk) b.push(['g',rk]);
   if(lvUps) b.push(['g','Level up! Lv '+S.lvl+' · +'+lvUps+' skill point']); bdone.forEach(()=>b.push(['g','Bounty ready'])); if(setNow) b.push(['g',LOCS[locIdx(sp.loc)].name+' complete: +'+fmt(setNow)]);
   showCard({draw:c=>fishCanvas(c,sp,true,f.shiny,f.pv), shiny:!!f.shiny, rar:(f.shiny===2?PRISM[f.pv].n+' prismatic ':f.shiny?'Shiny ':'')+(f.hy?'hybrid ':'')+RAR[sp.r].k, rarCol:f.shiny===2?PRISM[f.pv].c:f.shiny?'var(--gold)':RAR[sp.r].c, name:sp.name,
@@ -2256,7 +2258,7 @@ function rollFish(sp,ctx){ const b=BAIT[S.baitSel], wx=weather(), dm=ctx.dist||{
      fish its size, in coins and in aquarium income */
   const hx = hy && kg>=sp.min && kg<=sp.max ? HYBRID_IN_RANGE[sp.r]*pathMul('hx') : 0;
   let value = Math.max(1,Math.round(sp.base*(hy&&!hx?clamp(Math.pow(R,.85)*(1+.6*Math.abs(Math.log(R))),.3,25):Math.pow(R,.85)*(hx||1))));
-  value=Math.round(value*RAR[sp.r].val*(1+(spec('collector')?.15:.1)*mastery(sp.id))*specLocValue(sp.loc)); if(trophy) value=Math.round(value*(spec('trophyking')?2:1.5));
+  value=Math.round(value*RAR[sp.r].val*(1+masteryK()*mastery(sp.id))*specLocValue(sp.loc)); { const bb=BAIT[S.baitSel]; if(pr('gourmet')&&bb&&bb.food&&typeof FISH_FAV!=='undefined'&&FISH_FAV[sp.id]===bb.id) value=Math.round(value*(1+.06*pr('gourmet'))); } /* Gourmet: caught on its favourite food, it sells for 6% more a rank (director, 2026-11-23) */ if(trophy) value=Math.round(value*(spec('trophyking')?2:1.5));
   if(shiny===1) value*=4; else if(shiny===2) value*=PRISM_VALUE;
   const ab=rollAqBuff(sp,kg), ab2=hy?rollAqBuff(SPI[hy],kg,true):null;
   const f={kind:'fish', sp, kg, rel:clamp(rel,0,1), str, th:sp.th, beh:sp.beh, aggr:sp.aggr, value, shiny, pv, hy, hx, ab, ab2, trophy, storm: wx.k==='Storm', hot:G.inHot, prey:null};
@@ -2376,7 +2378,7 @@ const FF_AVG = {};
 function ffAvg(loc){ if(FF_AVG[loc]) return FF_AVG[loc]; const ps=SP.filter(s=>s.loc===loc); const n=Math.max(1,ps.length);
   const str=ps.reduce((a,s)=>a+(s.str||1),0)/n, kg=ps.reduce((a,s)=>a+((s.min||0)+(s.max||0))/2,0)/n; return FF_AVG[loc]={str:Math.max(.5,str), kg:Math.max(.05,kg)}; }
 // how many tries a bite gives before it's gone (Cam's list #10): one to start; Quick Reflexes at ranks 5 and 10 and a full Water Reader add one each
-const hookTries = () => 1 + (pr('reflex')>=5?1:0) + (pr('reflex')>=10?1:0) + (maxed('reader')?1:0);
+const hookTries = () => 1 + (pr('reflex')>=5?1:0) + (pr('reflex')>=10?1:0) + Math.floor(pr('secondbite')/3); /* Second Bite ranks 3, 6 and 9 (director, 2026-11-23; was Water Reader's full rank) */
 // a fresh fight on the new rules (called by hookIt)
 function ffInit(){ const f=G.fish; G.surge3=null;
   G.d0=G.d=Math.max(3, FF.FAR_M*clamp(G.lastCast,0,1)); G.dd=0; G.maxOut=FF.SPOOL_M+rodSpool();
@@ -2386,7 +2388,7 @@ function ffInit(){ const f=G.fish; G.surge3=null;
   else if(f&&f.kind==='fish'&&fishRank(f)>=2&&G.d0<25){ G.ffOpen=true; G.ffRest=.35; }
   G.swim=null; G.swimT=rnd(FF.SWIM_EVERY[0],FF.SWIM_EVERY[1]); G.swStep=0; G.swNext=0; G.swN=0;
   if(G.perfect){ G.ffOpen=false; G.ffRest=Math.max(FF.PERFECT_REST,G.ffRest); } /* Cam: a perfect hook holds the fish still for 1.5 s */
-  G.combo=0; G.pops=[]; G.ppw=0; G.tell=null; G.prevRin=0; G.dartNext=false; G.dartLeft=0; G.grooveT=0; G.reelHold=0; G.restHold=0; G.flashT=FEEL.juice&&f&&f.kind==='fish'?.18:0; G.ffMin=0; G.lastK=null; if(G.perfect) feelPop('Perfect hook!'); /* Feel lab */ }
+  G.combo=0; G.pops=[]; G.ppw=0; G.tell=null; G.prevRin=0; G.dartNext=false; G.dartLeft=0; G.grooveT=0; G.reelHold=0; G.restHold=0; G.flashT=FEEL.juice&&f&&f.kind==='fish'?.18:0; G.ffMin=0; G.lastK=null; G.dQ=0; if(G.perfect) feelPop('Perfect hook!'); /* Feel lab */ }
 // how often the fish acts, from its temper: 1x calm, up to FF.TEMPER_RATE x at full temper (Cam: full temper = rapid moves)
 const ffRate = () => 1+(FF.TEMPER_RATE-1)*clamp((G.temper||0)/3,0,1);
 function ffWeightClass(f){ const lb=(f.kg||0)/FF.LB; return lb<1.5?0:lb<3?1:lb<5?2:3; }
@@ -2453,7 +2455,7 @@ function fightNew(dt){
       A.inZT=inZ?(A.inZT||0)+dt:0; if(A.inZT>=FF.DIVE_HOLD||A.got>=A.max-1e-6) A.t=A.dur; } /* Cam: holding the band for 1.5 s stops the dive at once */
     /* Feel lab, the right reaction pays: ease off in a run, a shake or a jump away; reel into a jump toward you; hold the dive band */
     if(A.k==='run'&&A.style==='long'){ const press=rin>0&&!(G.prevRin>0); A.holdT=rin>0?(A.holdT||0)+dt:0; /* a long run: short pulls in rhythm pay; holding on strains the line */
-      if(press){ const gap=A.t-A.lastPress; if(gap>.18&&gap<.9){ A.taps++; G.sta=Math.max(0,G.sta-.012*Math.max(.5,FEEL.counter||0)); G.d=Math.max(.5,G.d-.25); A.dur=Math.max(A.t+.2,A.dur-.3); if(A.taps===2) feelPop('Steady!'); if(A.taps%5===0) feelCombo(1); } /* each good pull shortens the run; +1 combo per 5 (director, 2026-11-23) */ A.lastPress=A.t; }
+      if(press){ const gap=A.t-A.lastPress; if(gap>.18&&gap<.9){ A.taps++; G.sta=Math.max(0,G.sta-.012*Math.max(.5,FEEL.counter||0)); G.dQ=(G.dQ||0)+.25; A.dur=Math.max(A.t+.2,A.dur-.3); if(A.taps===2) feelPop('Steady!'); if(A.taps%5===0) feelCombo(1); } /* each good pull shortens the run; +1 combo per 5 (director, 2026-11-23) */ A.lastPress=A.t; }
       if(A.holdT>1.1&&!A.bad){ A.bad=1; feelCombo(-1); } }
     else if(FEEL.counter>0){ const live=!(A.k==='jump'&&A.t<JUMP_WINDUP), good=!live?false:A.k==='dive'?!!A.inZ:(A.k==='jump'&&!A.away)?rin>.6:rin<.25;
       if(good){ A.good=(A.good||0)+dt; G.sta=Math.max(0,G.sta-dt*.035*FEEL.counter*(A.style==='dart'?1.5:1)); if(!A.paid&&A.good>=.4){ A.paid=1; feelPop(A.k==='dive'?'Held it!':(A.k==='jump'&&!A.away)?'Reeled in!':A.style==='dart'?'Let it dart!':'Nice!'); feelCombo(1); } } /* letting a dart go tires the fish faster */
@@ -2487,9 +2489,10 @@ function fightNew(dt){
   // a predator that swallowed your catch strips line (n_play.js), as before
   if(G.strip){ const P=G.strip; P.t+=dt; const k=Math.min(1,P.t/P.dur), e=1-Math.pow(1-k,2); G.d=Math.max(G.d,P.from+(P.to-P.from)*e); G.run=true; if(rin>0) G.ten+=EAT_STRIP_TEN*rin*dt*tensionMult(); if(k>=1){ G.strip=null; if(!G.ffA) G.run=false; } }
   /* Feel lab: the perfect pull (press reel inside the glowing window as a move ends), the hook flash, pop-ups, a mistake at the snap line */
-  { const press=rin>0&&!(G.prevRin>0); if(G.ppw>0){ G.ppw-=dt; if(press&&G.sta>0){ G.ppw=0; G.sta=Math.max(0,G.sta-.1*FEEL.pull); G.d=Math.max(.5,G.d-1.2*FEEL.pull); feelPop('Perfect pull!'); feelCombo(1); try{ tone(880,.08,'triangle',.06); }catch(e){} } }
+  { const press=rin>0&&!(G.prevRin>0); if(G.ppw>0){ G.ppw-=dt; if(press&&G.sta>0){ G.ppw=0; G.sta=Math.max(0,G.sta-.1*FEEL.pull); G.dQ=(G.dQ||0)+1.2*FEEL.pull; feelPop('Perfect pull!'); feelCombo(1); try{ tone(880,.08,'triangle',.06); }catch(e){} } }
     G.prevRin=rin; if(G.flashT>0) G.flashT=Math.max(0,G.flashT-dt); if(G.pops){ for(const p of G.pops) p.t+=dt; G.pops=G.pops.filter(p=>p.t<1.1); }
     if(G.ten>92&&rin>0&&(G.combo||0)>0&&!G.ffA) feelCombo(-1); }
+  if(G.dQ>0){ const st=Math.min(G.dQ,Math.max(.05,G.dQ*dt*8)); G.d=Math.max(.5,G.d-st); G.dQ-=st; } /* line won back by a reward comes in over a moment, so the float glides instead of jumping (bug: "landing a combo reaction, the game jumps", director 2026-11-23) */
   G.noReelT=rin>0?0:(G.noReelT||0)+dt;
   const frac=clamp((G.d-(G.dd||0))/G.d0,0,1.6), x0=W*.24, x1=castX(G.lastCast);
   G.bob.x=x0+(x1-x0)*Math.min(frac,1.25)+(G.run?Math.sin(performance.now()/90)*3:0)+(G.ffA&&G.ffA.style==='dart'?G.ffA.dir*Math.sin(Math.min(1,G.ffA.t/G.ffA.dur)*Math.PI)*W*.025:0) /* a dart zigzags */+(G.ev==='shake'?Math.sin(performance.now()/30)*3:0)+(G.tell?Math.sin(performance.now()/22)*2:0); G.bob.x=clamp(G.bob.x,W*.2,W*.93); /* the fight never leaves the screen (director, 2026-11-22: "fish fights keep escaping the viewable screen") */ G.bob.y=waterY(G.bob.x);
@@ -3026,7 +3029,9 @@ const bestLoot = () => Math.max(...S.unlocked.filter(id=>{ const L=LOCS[locIdx(i
 
 // ---------- mastery & angler rank ----------
 const MASTERY = [3,10,30,100];
-function mastery(id){ const j=S.journal[id]; if(!j) return 0; let n=0; for(const t of MASTERY) if(j.n>=t) n++; return n; }
+function masteryT(){ return maxed('naturalist')?[2,10,30,100]:MASTERY; } /* Naturalist at full rank: the first star at 2 catches (director, 2026-11-23) */
+const masteryK = () => (spec('collector')?.15:.1)+.01*pr('naturalist'); /* value per mastery star; Naturalist adds 1% a rank */
+function mastery(id){ const j=S.journal[id]; if(!j) return 0; let n=0; for(const t of masteryT()) if(j.n>=t) n++; return n; }
 function totalStars(){ let s=0; for(const id in S.journal) s+=mastery(id); return s; }
 function anglerRank(){ return Math.floor(totalStars()/8); }
 function checkRank(){ const r=anglerRank(); if(r<=S.rankClaimed) return ''; let coins=0, sm=0, bg=0, lg=0;
@@ -3199,7 +3204,7 @@ function renderSettings(P){ const s=S.settings; const sl=(k,label)=>`<div class=
    ${V3ON?`<div class="tile"><h4>Controls</h4><h5>Casting</h5><div class="chips"><button class="chipb" data-act="castmode" data-k="meter" aria-pressed="${s.castMode!=='aim'}">Power meter</button><button class="chipb" data-act="castmode" data-k="aim" aria-pressed="${s.castMode==='aim'}">${PLAT.touch()?"Tap":"Click"} to aim</button></div><div class="meta" style="margin-top:6px">${s.castMode==='aim'?'Tap the spot on the water you want. The line lands close to it, never quite perfect.':'Hold to fill the meter, let go at the right moment.'}</div>${tg('vibrate','Vibration','Phones buzz on a bite, when the line is close to snapping, and on a catch.')}<div class="meta" style="margin-top:6px">Reel by <b>holding</b>, by <b>drawing circles</b> on the water like a crank, or with the <b>mouse wheel</b>. Controllers work too: <b>A</b> casts and reels, the <b>right trigger</b> reels with pressure.</div></div>`:''}
    <div class="tile"><h4>Display</h4>${tg('effects','Weather effects','Rain, snow, lightning flashes and sparkles.')}${tg('boostsOnScreen','Boost timers on screen','Show active boosts in the corner of the water.')}${tg('hints','Hints','The help line under the water.')}<h5>Weights</h5><div class="chips"><button class="chipb" data-act="units" data-k="kg" aria-pressed="${s.units!=='lb'}">Kilograms (kg)</button><button class="chipb" data-act="units" data-k="lb" aria-pressed="${s.units==='lb'}">Pounds (lb)</button></div><h5>Distances and depths</h5><div class="chips"><button class="chipb" data-act="dist" data-k="m" aria-pressed="${s.dist!=='ft'}">Metres (m)</button><button class="chipb" data-act="dist" data-k="ft" aria-pressed="${s.dist==='ft'}">Feet (ft)</button></div><h5>Rod hand</h5><div class="chips"><button class="chipb" data-act="hand" data-k="r" aria-pressed="${s.hand!=='l'}">Right-handed</button><button class="chipb" data-act="hand" data-k="l" aria-pressed="${s.hand==='l'}">Left-handed</button></div>${tg('showFps','Frame rate','Shows how many frames per second the game draws, in the corner of the water.')}
      <div class="toggle"><div><b>Full screen</b><div class="meta">Fill the whole screen with the game.</div></div><button class="btn alt sm" data-act="fullscreen">Toggle</button></div></div>
-   <div class="tile"><h4>Gameplay</h4>${tg('protectRare','Protect rare fish','“Sell all” keeps Epic, Legendary and shiny fish in your cooler.')}${tg('minigames','Mini-games','Now and then a mini-game pops up between catches. Turn this off and they never will.')}
+   <div class="tile"><h4>Gameplay</h4>${tg('protectRare','Protect rare fish','“Sell all” keeps Epic, Legendary and shiny fish, unless you choose otherwise in the cooler’s Sell choices.')}${tg('minigames','Mini-games','Now and then a mini-game pops up between catches. Turn this off and they never will.')}
      </div>
    <div class="tile"><h4>Patch notes</h4><div class="meta">You’re on Driftline ${GAME_VERSION}.</div>${allPatchesHTML()}</div>
   </div>${dangerHTML()}`; }
@@ -4237,6 +4242,7 @@ const MASTERY_FX = {
   caster:'Bullseye: a full-power cast makes its own little hotspot.',
   trophy:'Trophy-size fish give double Scales.',
   reader:'Hotspots last twice as long.',
+  secondbite:'Missing a hotspot bite never breaks your streak.',
   scavenger:'Junk pays 50% more coins.',
   haggler:'The fishmonger’s wanted fish pays ×3 instead of ×2.',
   keeper:'The aquarium keeps earning for 16 hours while you’re away, not 8.',
@@ -4556,7 +4562,7 @@ function specLocValue(loc){ return spec('elemental') ? (['ember','starfall','fro
 // ---------- new skills' mastery effects ----------
 Object.assign(MASTERY_FX,{
   weatherwise:'Clear skies count too: the bite bonus works in every weather.',
-  naturalist:'Every new species also gives 5 Scales.',
+  naturalist:'The first mastery star comes at 2 catches instead of 3.',
   aquarist:'Shiny fish in the aquarium give triple boosts instead of double.',
   derbypro:'Derbies last 5 minutes instead of 4.',
   tidewalker:'Every 10th Tide Pass level gives an extra big Mystery Crate.',
@@ -10785,7 +10791,7 @@ applySections = function(){ _applySections_0(); const P=$('panel'); if(!P) retur
     more.addEventListener('click',e=>{ e.stopPropagation(); featsAll=true; apply(); }); grid.after(more); P.querySelector('.sect-nav')&&P.querySelector('.sect-nav').addEventListener('click',()=>setTimeout(apply,0)); apply(); } };
 document.head.insertAdjacentHTML('beforeend',`<style>.tint-dot{display:inline-block;width:11px;height:11px;border-radius:50%;margin-right:6px;vertical-align:-1px;box-shadow:inset 0 0 0 1px #0004}</style>`);
 // ---------- Skills in sections, Save tidied into sections, one Settings entry (the button at the top) ----------
-const PERK_GROUPS=[['Catching',['patience','caster','reader','nightowl','weatherwise']],['Rare finds',['lucky','trophy','hybrid','scavenger','gourmet']],['Fighting',['steady','strong','softtouch','reflex','grappler','snagwise']],['Coins & XP',['haggler','streaker','naturalist','tidewalker','derbypro']],['Aquarium & pets',['keeper','aquarist','petpal','dozer','nibbler','prismkeeper']]];
+const PERK_GROUPS=[['Catching',['patience','caster','reader','secondbite','nightowl','weatherwise']],['Rare finds',['lucky','trophy','hybrid','scavenger','gourmet']],['Fighting',['steady','strong','softtouch','reflex','grappler','snagwise']],['Coins & XP',['haggler','streaker','naturalist','tidewalker','derbypro']],['Aquarium & pets',['keeper','aquarist','petpal','dozer','nibbler','prismkeeper']]];
 const _applySections_1 = applySections;
 applySections = function(){ _applySections_1(); const P=$('panel'); if(!P) return;
   if(S.tab==='skills'){ const grid=[...P.children].find(c=>c.classList.contains('grid')); if(!grid) return; const T=[...grid.children]; const idOf=t=>{ const b=t.querySelector('[data-act="perk"]'); return b?b.dataset.k:''; };
@@ -11422,9 +11428,14 @@ function sellFilterOn(){ const s=S.settings; return (s.sellR&&s.sellR!=='all')||
 // shinies: the "Sell shinies too" box decides on its own (it starts as before: off while Protect rare fish is on)
 function sellShinyOn(){ const s=S.settings; return s.sellShiny!=null ? !!s.sellShiny : !s.protectRare; }
 function sellHybridOn(){ const s=S.settings; return s.sellHybrid!=null ? !!s.sellHybrid : !s.protectRare; } /* batch 2: the Hybrid switch beside Shinies starts the same way */
-function sellKeep(f){ const s=S.settings, sp=SPI[f.id]; if(!sp) return true; if(f.hy && !sellHybridOn()) return true; if(f.sh) { if(!sellShinyOn()) return true; } else if(isProtected(f)) return true;
-  if(f.sh && s.protectRare && sp.r>=3) return true;
-  if(s.sellR&&s.sellR!=='all'&&sp.r>+s.sellR) return true; if(+s.sellP>0&&salePrice(f)>=+s.sellP) return true; return false; }
+/* what Sell all keeps (bug fix, director 2026-11-23: "filters just don't work, same with the sell toggles"): the cooler's own choices win.
+   A rarity picked in the dropdown sells up to that rarity even with Protect rare fish on; "Sell shinies too" and "Sell hybrids too" sell
+   them whatever their rarity; Protect rare fish keeps Epic and up only while the dropdown says Any rarity */
+function sellKeep(f){ const s=S.settings, sp=SPI[f.id]; if(!sp) return true;
+  if(f.hy && !sellHybridOn()) return true; if(f.sh && !sellShinyOn()) return true;
+  const pick=s.sellR&&s.sellR!=='all', chosen=(f.sh&&sellShinyOn())||(f.hy&&sellHybridOn());
+  if(pick){ if(sp.r>+s.sellR) return true; } else if(s.protectRare && sp.r>=3 && !chosen) return true;
+  if(+s.sellP>0&&salePrice(f)>=+s.sellP) return true; return false; }
 const _renderCooler_034 = renderCooler;
 renderCooler = function(P){ _renderCooler_034(P); const btn=P.querySelector('[data-act="sellall"]'); if(!btn) return; const s=S.settings;
   const sel=(k,list,cur)=>`<select data-sf="${k}">${list.map(([v,n])=>`<option value="${v}" ${String(cur)===String(v)?'selected':''}>${n}</option>`).join('')}</select>`;
@@ -15244,9 +15255,10 @@ const NIB_WORD = n => n+' Nibble'+(n===1?'':'s');
 let NIB_ANIM=null;
 /* one fish: removes it and returns the Nibbles it gave (0 on a miss); shared by Scrap and Scrap all */
 function nibScrapOne(f){ const sp=SPI[f.id], ok=Math.random()<nibOdds(f); S.stats.scrapped=(S.stats.scrapped||0)+1;
-  if(!ok) return 0; const n=nibAmount(f)+(maxed('nibbler')?1:0)+Math.round(pathAdd('nibplus')); nibAdd(sp.id,n); return n; }
+  if(!ok) return 0; const n=nibAmount(f)+(maxed('nibbler')?1:0)+Math.round(pathAdd('nibplus')); NIB_UP=null; const up=sp.r<5&&Math.random()<.01*pr('nibbler')?SP.find(s=>s.r===sp.r+1):null; if(up) NIB_UP=up.id; nibAdd(up?up.id:sp.id,n); return n; } /* Candy Maker: 1% a rank that the Nibbles are a rarity higher (director, 2026-11-23) */
+let NIB_UP=null;
 function nibScrap(i){ const f=S.cooler[i]; if(!f||!SPI[f.id]) return 'skip'; const sp=SPI[f.id]; S.cooler.splice(i,1); const n=nibScrapOne(f);
-  if(n){ sfx.coin(); toast('+'+nibTierWord(sp.id,n)+' for your Aquarium.'); } else toast('Scrapped. No Nibbles this time.'); /* Cam's list #1: the message names the Nibble tier, not the fish */
+  if(n){ sfx.coin(); toast('+'+nibTierWord(NIB_UP||sp.id,n)+(NIB_UP?' (a rarity higher!)':'')+' for your Aquarium.'); } else toast('Scrapped. No Nibbles this time.'); /* Cam's list #1: the message names the Nibble tier, not the fish */
   return 'render'; }
 /* C11 (director + Cam, 2026-11-20): Scrap all, like Sell all and with the same filters (what Sell all would sell gets scrapped) */
 function nibScrapAll(){ const go=S.cooler.filter(f=>!sellKeep(f)&&SPI[f.id]); if(!go.length) return 'skip'; S.cooler=S.cooler.filter(f=>!go.includes(f)); let got=0; const by={}; for(const f of go){ const n=nibScrapOne(f); if(n){ got+=n; const r=SPI[f.id].r; by[r]=(by[r]||0)+n; } }
@@ -21127,6 +21139,16 @@ PATCHES.unshift({v:'0.4.9', name:'Work in progress', items:phoneNotes([
 // text changes. Released notes live in notes_release.js.
 const TEST_NOTES={v:'test', label:'Test build · '+(window.DL_BUILD==='ios'?'iPhone':'Android'), name:'0.4.9 test build (newest first)', items:[
   '## New in this build',
+  'New skill, Second Bite: one more try per bite at ranks 3, 6 and 9, better rare odds on every try after a miss, and at full rank a missed hotspot bite doesn’t break your streak. Water Reader no longer gives the extra try.',
+  'Gourmet: fish caught on their favourite food also sell for more (6% a rank).',
+  'Naturalist is now a mastery skill: each mastery star adds a little more value, and at full rank the first star comes at 2 catches.',
+  'Candy Maker goes up to rank 10, and each rank gives a small chance that the Nibbles from scrapping are a rarity higher.',
+  'Snag Sense says what it does: better at avoiding snags.',
+  'End-game waters open one voyage sooner: Animal Farm after your first voyage, and one more after each voyage.',
+  'Loading a save code takes you back to the fishing screen to confirm the load.',
+  'Fixed: the cooler’s Sell choices now always decide (the rarity menu, Sell shinies too and Sell hybrids too were overruled by Protect rare fish); the rarity menu no longer closes by itself.',
+  'Fixed: landing a reward in a fight no longer makes the float jump; the line it wins back comes in smoothly.',
+  '## Test build 2026.11.23-0259',
   'Fishing feel: runs come a little less often, short darting runs are more common than long ones, and a fish rests at least a moment after a run instead of chaining runs back to back.',
   'Long runs: each good short pull ends the run sooner, and the combo grows every 5 good pulls. Darting runs have fewer darts in a row (a few more for the rarest fish).',
   'Fish have a little more fight, and a tired fish gets its second wind a bit sooner.',
@@ -21598,7 +21620,7 @@ ui(){ QA.sys='UI';
   T('C27 Nibbles belong to a rarity: old per-species saves fold in, loading keeps them, scrapping one common fish feeds another common fish',()=>{ const e=[], sv=save, ts=toast; save=()=>{}; toast=()=>{}; const keep=snap(); try{
       const commons=SP.filter(s=>s.r===0&&!s.meme), a=commons[0], b=commons.find(s=>s.id!==a.id); if(!a||!b) return {ok:true,detail:'not enough common fish'};
       const m=migrate(Object.assign(JSON.parse(snap()),{nib:{[a.id]:3,[b.id]:4,r2:5}})); if(m.nib.r0!==7||m.nib.r2!==5||m.nib[a.id]) e.push('loading: '+JSON.stringify(m.nib));
-      S.nib={}; const rnd0=Math.random; Math.random=()=>0; try{ nibScrapOne({id:a.id,kg:1,value:10,sh:0,tr:0}); } finally{ Math.random=rnd0; } if(!(nibOf(b.id)>0)) e.push('scrapping '+a.name+' gave no Nibbles for '+b.name);
+      S.nib={}; const rnd0=Math.random, nk0=S.perks.nibbler; S.perks.nibbler=0; Math.random=()=>0; try{ nibScrapOne({id:a.id,kg:1,value:10,sh:0,tr:0}); } finally{ Math.random=rnd0; S.perks.nibbler=nk0; } /* no Candy Maker rarity-up while checking the tier */ if(!(nibOf(b.id)>0)) e.push('scrapping '+a.name+' gave no Nibbles for '+b.name);
       S.tank=[{id:b.id,kg:1,value:10,sh:0,tr:0}]; const n0=nibOf(b.id); nibFeed(0); if(nibOf(b.id)!==n0-1||!S.tank[0].fed) e.push('feeding '+b.name+' did not use a common Nibble');
       if(nibOf(SP.find(s=>s.r===3).id)!==0) e.push('common Nibbles also count for epic fish');
     } finally{ restore(keep); save=sv; toast=ts; } return e.length?{ok:false,detail:e.join(' | ')}:{ok:true,detail:'ok'}; });
@@ -21706,11 +21728,11 @@ ui(){ QA.sys='UI';
     for(const Wd of WATERS_NEW){ const a=SP.filter(s=>s.loc===Wd.id), by=[0,0,0,0,0,0]; a.forEach(s=>by[s.r]++); if(a.length!==52||by.join('/')!=='15/14/12/6/4/1') e.push(Wd.id+' '+a.length+' '+by.join('/'));
       if(!a.some(s=>s.time==='night')||!a.some(s=>s.time==='day')) e.push(Wd.id+' day/night'); const b=Object.values(BAIT).find(x=>x.loc===Wd.id); if(!b) e.push(Wd.id+' no bait'); if(!V3PAL[Wd.id]||!V3SCENES[Wd.id]) e.push(Wd.id+' no scene');
       try{ const c=document.createElement('canvas'); c.width=W; c.height=H; const P=v3palette(Wd.id,.3,.2,0); V3SCENES[Wd.id].land(c.getContext('2d'),P,H*.4,c); V3SCENES[Wd.id].live(P,3,H*.4,{x:W*.5,y:H*.2,up:true,vis:1}); if(V3SCENES[Wd.id].fore) V3SCENES[Wd.id].fore(P,3); if(V3SCENES[Wd.id].sky) V3SCENES[Wd.id].sky(P,3,H*.4); }catch(er){ e.push(Wd.id+' scene threw: '+er.message); } }
-    { /* Cam's list #12: uncharted until the voyage, then bought for coins, then open for good */ S.tides=3; S.unlocked=['pond','river']; S.egPaid=[]; egOpenAdd(S); if(S.unlocked.some(isEgLoc)) e.push('an end-game water opened for free: '+S.unlocked.join(','));
+    { /* Cam's list #12: uncharted until the voyage, then bought for coins, then open for good */ S.tides=2; S.unlocked=['pond','river']; S.egPaid=[]; egOpenAdd(S); if(S.unlocked.some(isEgLoc)) e.push('an end-game water opened for free: '+S.unlocked.join(','));
       const iF=locIdx('farm'), iB=locIdx('buffet'), iC=locIdx('corporate'); if(!unlockMet(iF)||!unlockMet(iB)||unlockMet(iC)) e.push('voyage requirement wrong');
       if(LOCS[iC].name!=='Uncharted Waters'||LOCS[iF].name==='Uncharted Waters') e.push('names: '+LOCS[iF].name+' / '+LOCS[iC].name); if(!(locCost(LOCS[iF])>0)) e.push('Animal Farm is free');
       S.money=locCost(LOCS[iF]); act('unlock',{k:'farm'}); if(!S.unlocked.includes('farm')||S.money!==0) e.push('paying did not open Animal Farm'); S.unlocked=['pond']; egOpenAdd(S); if(!S.unlocked.includes('farm')) e.push('a paid water closed after a voyage');
-      const o=JSON.parse(JSON.stringify(S)); o.egPaid=undefined; o.unlocked=['pond','buffet']; const m=migrate(o); if(!(m.egPaid||[]).includes('buffet')) e.push('an open end-game water on an old save was not kept'); S.unlocked=['pond','river']; S.egPaid=[]; S.tides=1; }
+      const o=JSON.parse(JSON.stringify(S)); o.egPaid=undefined; o.unlocked=['pond','buffet']; const m=migrate(o); if(!(m.egPaid||[]).includes('buffet')) e.push('an open end-game water on an old save was not kept'); S.unlocked=['pond','river']; S.egPaid=[]; S.tides=0; } /* end-game waters open one voyage sooner (director, 2026-11-23): Animal Farm after voyage 1 */
     const fi=locIdx('farm'); if(unlockMet(fi)&&!S.unlocked.includes('farm')) e.push('farm unlockable by catches'); if(!/voyage/.test(unlockLine(locIdx('olympus')))) e.push('end-game unlock text');
     if(bestLoot()!==LOCS[locIdx('river')].loot) e.push('end-game water raised bestLoot to '+bestLoot());
     const sp=SP.find(s=>s.loc==='farm'&&s.r===2), k=egScale(); S.loc='farm'; const f=Array.from({length:20},()=>rollFish(sp,{noHybrid:true,noPrey:true})).filter(x=>!x.shiny).sort((a,b)=>a.value-b.value)[0]||rollFish(sp,{noHybrid:true,noPrey:true}); /* #127: a random shiny (x4) broke the limit now and then; compare a plain fish */ if(!(f.value<sp.base*3*k.v+5)) e.push('farm fish not scaled: '+f.value); if(Math.abs(k.v-1.25*LOCS[locIdx('river')].loot/33000)>1e-9) e.push('scale '+k.v);
@@ -21802,7 +21824,7 @@ ui(){ QA.sys='UI';
       { const a=diveRun(false), b=diveRun(true); if(a.got>a.max+.01) e.push('a dive went '+a.got.toFixed(1)+' m, over its '+a.max+' m'); if(!(b.got<a.got*.6)) e.push('holding the band did not shorten the dive ('+b.got.toFixed(1)+' vs '+a.got.toFixed(1)+')'); }
       S.loc='pond'; start(sp,.3,1); G.ffRest=0; for(let i=0;i<4000&&G.st==='reeling';i++){ G.sta=1; G.d=30; G.ten=10; reelInput=()=>0; G.hold=false; G.noReelT=0; fight(1/60); if(G.ffA&&G.ffA.k==='dive'){ e.push('a dive at Willow Pond'); break; } if(G.chainOn){ e.push('a common chained moves'); break; } }
       G.st='idle'; G.fish=null;
-      /* hook tries */ S.perks={}; if(hookTries()!==1) e.push('hook tries start at '+hookTries()); S.perks={reflex:10,reader:PERKS.reader.max}; if(hookTries()!==4) e.push('maxed hook tries '+hookTries());
+      /* hook tries */ S.perks={}; if(hookTries()!==1) e.push('hook tries start at '+hookTries()); S.perks={reflex:10,secondbite:PERKS.secondbite.max}; if(hookTries()!==6) e.push('maxed hook tries '+hookTries()); S.perks={reader:PERKS.reader.max}; if(hookTries()!==1) e.push('Water Reader still adds a try');
       S.perks={}; const keepB=S.baitSel, keepN=Object.assign({},S.bait), keepSt=S.streak; const bk=Object.keys(BAIT).find(b=>b!=='worm'&&!BAIT[b].junk)||'worm'; S.baitSel=bk; S.bait[bk]=5; S.streak=6; const ps=pathSave; pathSave=()=>false;
       try{ G.st='bite'; G.inHot=true; G.waitT=1; G.biteEnd=.5; G.missN=0; update(1/60); if(S.streak!==0) e.push('a missed hotspot bite kept the streak'); if(S.bait[bk]!==4) e.push('a missed hotspot bite kept the bait');
         S.streak=6; S.bait[bk]=5; G.st='bite'; G.inHot=false; G.waitT=1; G.biteEnd=.5; G.missN=0; update(1/60); if(S.streak!==6) e.push('a missed bite away from a hotspot ended the streak'); if(S.bait[bk]!==5) e.push('a missed bite away from a hotspot took the bait'); }
@@ -21847,7 +21869,7 @@ ui(){ QA.sys='UI';
       S.perks=Object.assign({},S.perks,{gourmet:5,nibbler:5}); if(!(catchW(sp,[sp],0,BAIT[fav])>w0*1.29)) e.push('Gourmet'); if(!(nibOdds({id:sp.id})>=Math.min(1,n0+.19))) e.push('Candy Maker'); const ep=SP.find(s=>s.r>=3); if(!foodKnown(ep,{n:1})) e.push('Gourmet max does not show favourites');
       S.tank=Array(10).fill(0).map(()=>({id:sp.id,kg:sp.min,value:1,sh:2,pv:'ancient'})); S.perks.prismkeeper=5; if(Math.abs(titleAura()-(TITLE_AURA_CAP+.1))>1e-9) e.push('Prism Keeper cap '+titleAura());
     } finally{ rodBonus=rb; }
-    for(const k of ['grappler','snagwise','gourmet','nibbler','prismkeeper']){ if(!PERKS[k]) e.push('no skill '+k); if(!MASTERY_FX[k]) e.push(k+' has no max-rank effect'); if(!PERK_GROUPS.some(g=>g[1].includes(k))) e.push(k+' in no group'); }
+    for(const k of ['grappler','snagwise','gourmet','nibbler','prismkeeper','secondbite','naturalist']){ if(!PERKS[k]) e.push('no skill '+k); if(!MASTERY_FX[k]) e.push(k+' has no max-rank effect'); if(!PERK_GROUPS.some(g=>g[1].includes(k))) e.push(k+' in no group'); }
     for(const [k] of Object.entries(PERKS)) if(!PERK_GROUPS.some(g=>g[1].includes(k))) e.push('skill '+k+' missing from the Skills tabs');
     const keep=S.journal; S.journal={}; const p0=ptsTotal(); const L=LOCS[0], all=SP.filter(s=>s.loc===L.id); all.forEach(s=>S.journal[s.id]={n:1,best:1}); const gain=ptsTotal()-p0, want=Math.floor(all.length/25)+2; S.journal=keep; if(gain!==want) e.push('Fish Log points '+gain+', want '+want);
     return e.length?{ok:false,detail:e.join(' | ')}:{ok:true,detail:'5 attachments, 5 skills, Fish Log points'}; });
@@ -22298,7 +22320,7 @@ let last=performance.now();
 function frame(now){ const dt=Math.min(.05,(now-last)/1000); last=now; try{ update(dt); draw(now); if(S.tab==='aquarium') drawTank(now); }catch(e){ if(!frame.err){ frame.err=1; console.error(e); } } hud(); requestAnimationFrame(frame); } /* 0.4.8.9.1: one failing frame never stops the game loop */
 let lastBuffN=-1, lastShopSlot=Math.floor(Date.now()/1000/SHOP_LEN);
 setInterval(()=>{ accrue(); const el=$('tankbank'); if(el){ const t=fmtShort(S.tankBank); if(el.textContent!==t){ el.textContent=t; el.title=fmt(S.tankBank)+' coins'; } } /* short form like the top bar, so big numbers never overflow (2026-11-19) */ const cb=$('collectbtn'); if(cb) cb.disabled=S.tankBank<1;
-  const dl=$('dmleft'); if(dl){ dl.textContent=mmss(wxLeft()); if(wxLeft()>=WX_LEN-1 && S.tab==='cooler') renderPanel(); }
+  const dl=$('dmleft'); if(dl){ dl.textContent=mmss(wxLeft()); if(wxLeft()>=WX_LEN-1 && S.tab==='cooler' && !(document.activeElement&&document.activeElement.tagName==='SELECT')) renderPanel(); } /* never redraw under an open menu (bug: the Sell rarity menu closed by itself, director 2026-11-23) */
   const t=Date.now(); const ended=S.buffs.filter(b=>b.until<=t); if(ended.length){ S.buffs=S.buffs.filter(b=>b.until>t); toast('Boost ended: '+ended.map(b=>b.src).join(', ')); save(); }
   const bn=activeBuffs().length; if(bn!==lastBuffN){ lastBuffN=bn; lastHud=''; }
   const sl=$('shopleft'); const slot=Math.floor(t/1000/SHOP_LEN); if(sl) sl.textContent=mmss(Math.ceil(SHOP_LEN-(t/1000%SHOP_LEN))); if(slot!==lastShopSlot){ lastShopSlot=slot; if(S.tab==='style') renderPanel(); } }, 1000);
@@ -22386,7 +22408,7 @@ function renderPanel(){ const P=$('panel'); rpRelease(); rpOld=[...P.getElements
 const tags = f => (f.sh===2?' <span class="sh" style="color:'+PRISM[f.pv||'rainbow'].c+'">✦✦ '+PRISM[f.pv||'rainbow'].n+' prismatic</span>':f.sh?' <span class="sh">✦ Shiny</span>':'')+(f.hy?' · <span class="sh">Hybrid</span>':'')+(f.tr?' · Trophy':'');
 const aqTxt = f => { const L=aqNet(f), sp=SPI[f.id]; return L.length ? L.map(e=>fmtB(e.k,e.v)+(sp&&e.t!==sp.r?' ('+RAR[e.t].k+' boost)':'')).join(' + ') : 'no special effect'; };
 
-const isProtected = f => S.settings.protectRare && (f.sh || SPI[f.id].r>=3);
+/* (isProtected went into sellKeep, src/au_fix034.js: the cooler's choices win over Protect rare fish) */
 /* C14 (director + Cam, 2026-11-20): sort the cooler by most/least recent, sell value, aquarium bonus or species. Most recent after
    every restart (kept in memory only), otherwise it remembers the last choice. Rows keep their real cooler index for the buttons. */
 let coolSort='recent'; const COOL_SORTS=[['recent','Newest'],['old','Oldest'],['rarity','Rarity'],['value','Sell value'],['aq','Aquarium bonus'],['species','Species']]; /* Rarity: Cam's list #8 */
@@ -22399,7 +22421,7 @@ document.head.insertAdjacentHTML('beforeend','<style>.cool-empty{display:flex;fl
   P.innerHTML=`<div class="row spread"><div><h2>Cooler</h2><p class="sub">${S.cooler.length} of ${gv('cooler')} slots. Your bonuses add +${Math.round((sellMult()-1)*100)}% to every sale. Fish in the aquarium earn coins and give stacking boosts.</p></div>
   <button class="btn" data-act="sellall" ${total?'':'disabled'}>Sell ${sellFilterOn()?"matching":"all"}${S.cooler.some(sellKeep)?" (keeping "+S.cooler.filter(sellKeep).length+")":""} for <span class="coin">${fmt(total)}</span></button></div>
   <div class="tile" style="margin-top:10px;flex-direction:row;align-items:center;gap:12px"><canvas width="128" height="64" data-fish="${dm.id}" style="width:64px;height:32px"></canvas>
-  <div style="min-width:0"><b>The fishmonger wants ${dm.name}</b> <span class="meta">(${LOCS[locIdx(dm.loc)].name})</span><div class="meta">Pays double for it until the weather changes (<span id="dmleft">${mmss(wxLeft())}</span>).</div></div></div>`+
+  <div style="min-width:0"><b>The fishmonger wants ${dm.name}</b> <span class="meta">(${LOCS[locIdx(dm.loc)].name})</span><div class="meta">Pays double for it until the weather changes (<span id="dmleft" style="font-variant-numeric:tabular-nums;display:inline-block;min-width:2.6em">${mmss(wxLeft())}</span>).</div></div></div>`+
   (S.cooler.length ? coolSortBar()+'<div class="list">'+coolOrder().map(({f,i})=>{ const sp=SPI[f.id]; return `<div class="fishrow"><canvas width="128" height="64" data-fish="${f.id}" data-sh="${f.sh||0}" data-pv="${f.pv||''}"></canvas>
    <div class="nm"><span style="color:${RAR[sp.r].c}">${sp.name}</span><small>${RAR[sp.r].k} · ${kgStr(f.kg)}${tags(f)} · <span class="aq">Aquarium: ${aqTxt(f)}</span></small></div>
    <div class="val coin" ${dm.id===f.id?'style="color:var(--gold)" title="Fishmonger pays double"':''}>${fmt(salePrice(f))}${dm.id===f.id?' ×2':''}</div><div class="acts"><button class="btn alt sm" data-act="totank" data-i="${i}" ${tankFree?'':'disabled'} title="${tankFree?'Earns '+fmt(fishRate(f)*60)+' coins per hour':'Aquarium is full'}">To aquarium</button><button class="btn alt sm" data-act="sell" data-i="${i}">Sell</button>${nibScrapBtn(f,i)}</div></div>`; }).join('')+'</div>'
@@ -22459,7 +22481,7 @@ function renderJournal(P){
       <h2>${j?sel.name:'Not caught yet'}</h2><p class="sub">${j?sel.note:'Keep fishing '+L.name+(sel.time!=='any'?' at '+(sel.time==='night'?'night':'day'):'')+'.'}</p>
       <div class="kv" style="margin-top:8px">${j?`<div><span>Nibbles (${nibRarName(sel.id)})</span> ${nibOf(sel.id)}</div>`:''}${foodLine(sel,j)}<div><span>Heaviest</span> ${j&&j.best?kgStr(j.best):'—'}</div><div><span>Smallest</span> ${j&&j.min!=null?kgStr(j.min):'—'}</div>${j&&j.hb!=null?`<div><span>Hybrid heaviest</span> <span class="sh">${kgStr(j.hb)}</span></div><div><span>Hybrid lightest</span> <span class="sh">${kgStr(j.hs)}</span></div>`:''}<div><span>Best sale value</span> ${j&&j.bv?'<span class="coin">'+fmt(j.bv)+'</span>':'—'}</div><div><span>Times caught</span> ${j?fmt(j.n):0}</div>
       <div><span>Size range</span> ${kgStr(sel.min)}–${kgStr(sel.max)}</div><div><span>Active</span> ${sel.time==='any'?'Day and night':sel.time==='night'?'Night only':'Day only'}</div><div><span>Strength</span> ${strTxt(fishPull(sel))}${fishPull(sel)>anglerStr()?' · heavy for you':''}</div>
-      <div><span>Mastery</span> <span class="sh">${starStr(mastery(sel.id))}</span> +${mastery(sel.id)*10}%${mastery(sel.id)<4?` · next at ${MASTERY[mastery(sel.id)]}`:''}</div>
+      <div><span>Mastery</span> <span class="sh">${starStr(mastery(sel.id))}</span> +${Math.round(mastery(sel.id)*masteryK()*100)}%${mastery(sel.id)<4?` · next at ${masteryT()[mastery(sel.id)]}`:''}</div>
       <div><span>Fights like a</span> ${B.n.toLowerCase()}</div><div><span>Temper</span> ${'●'.repeat(Math.round(sel.aggr*5))+'○'.repeat(5-Math.round(sel.aggr*5))}</div><div><span>In the aquarium</span> ${ae?fmtB(ae.k,ae.v):'—'}</div>
       ${j&&j.first?`<div><span>First caught</span> ${new Date(j.first).toLocaleDateString()}</div>`:''}</div><p class="sub" style="margin-top:6px">${B.d}</p></div></div>`; }
     body=`<div class="row spread" style="margin-top:6px"><span class="sub">${got} / ${list.length} found${S.setDone[L.id]?' · complete':` · find them all for <span class="coin">${fmt(L.bonus)}</span>`}${open?'':' · water locked'}</span><span class="sub">${PLAT.touch()?'Tap':'Click'} a fish for its records</span></div>
@@ -22481,7 +22503,7 @@ function renderMap(P){
   P.innerHTML=`<h2>Waters</h2><p class="sub">${LOCS.every(L=>S.unlocked.includes(L.id))?`All ${LOCS.length} waters are open. Every one has`:`Open a new water with coins after catching ${unlockNeed()} fish at the water before it. Each voyage adds 10 more, up to 50. Every water has`} ${spAt("pond").length} fish of its own, its own junk and treasure${LOCS.every(L=>S.unlocked.includes(L.id))?"":", and is a little tougher than the last"}.</p><div class="grid">`+
   LOCS.map((L,i)=>{ const open=S.unlocked.includes(L.id), here=S.loc===L.id; const prev=i?LOCS[i-1]:null; const met=unlockMet(i); const sps=spAt(L.id);
     const btn = here ? '<button class="btn alt" disabled>Fishing here</button>' : open ? `<button class="btn" data-act="goto" data-k="${L.id}" ${G.st==='idle'||G.st==='rest'?'':'disabled title="Reel in your line first"'}>Travel here</button>`
-      : L.eg&&!egCharted(L) ? `<button class="btn" disabled>Complete voyage ${L.eg} to unlock</button>` /* Cam's list #12 */
+      : L.eg&&!egCharted(L) ? `<button class="btn" disabled>Complete voyage ${egVoy(L)} to unlock</button>` /* Cam's list #12 */
       : `<button class="btn" data-act="unlock" data-k="${L.id}" ${met&&S.money>=locCost(L)&&locPrevOk(i)?'':'disabled'}>Unlock · <span class="coin">${fmt(locCost(L))}</span></button>`;
     const egHead=L.eg&&!(prev&&prev.eg)?`<div class="eg-head"><h3>End-game waters</h3><span class="meta">These open after later voyages (see Set sail again). Their fish are much tougher and worth much more.</span></div>`:"";
     return egHead+`<div class="tile loc ${here?"here":""}"><div class="sw2" style="background:linear-gradient(${L.sky[0]},${L.sky[1]} 48%,${L.water[0]} 52%,${L.water[1]})"></div>
@@ -22519,6 +22541,12 @@ function renderPets(P){ const pp=PETI[S.pet];
 
 // ---------- save codes ----------
 let pendingLoad=null;
+/* a valid save code takes you back to the fishing screen, where you confirm the load (director, 2026-11-23) */
+function showLoadAsk(){ const old=$('loadask'); if(old) old.remove(); if(!pendingLoad) return; const o=pendingLoad, d=document.createElement('div'); d.id='loadask'; d.setAttribute('role','dialog'); d.setAttribute('aria-modal','true');
+  d.style.cssText='position:fixed;inset:0;z-index:9000;display:flex;align-items:center;justify-content:center;background:rgba(4,10,18,.55);padding:16px';
+  d.innerHTML=`<div style="max-width:420px;width:100%;background:#0f2233;color:#eef6fa;border-radius:16px;padding:18px 18px 14px;box-shadow:0 10px 40px #0008;border:1px solid #ffffff1f"><h3 style="margin:0 0 8px">Load this save?</h3><p style="margin:0 0 14px;line-height:1.45">It replaces this device’s progress with level ${o.lvl}, ${fmt(o.money||0)} coins and ${Object.keys(o.journal||{}).length} species.</p><div style="display:flex;gap:10px;justify-content:flex-end"><button type="button" class="btn alt" data-la="no">Cancel</button><button type="button" class="btn" data-la="yes">Load save</button></div></div>`;
+  d.addEventListener('click',e=>{ const b=e.target.closest('[data-la]'); if(!b&&e.target!==d) return; if(b&&b.dataset.la==='yes'&&pendingLoad){ S=migrate(pendingLoad); pendingLoad=null; G.st='idle'; $('card').hidden=true; offlineIncome(); fillBounties(); save(); renderPanel(); toast('Progress loaded. Welcome back!'); } else pendingLoad=null; d.remove(); });
+  document.body.appendChild(d); const y=d.querySelector('[data-la="yes"]'); if(y) y.focus(); }
 async function makeCode(){ const json=JSON.stringify(S);
   try{ if(window.CompressionStream){ const st=new Blob([json]).stream().pipeThrough(new CompressionStream('deflate-raw')); const buf=new Uint8Array(await new Response(st).arrayBuffer()); let bin=''; for(let i=0;i<buf.length;i+=0x8000) bin+=String.fromCharCode.apply(null,buf.subarray(i,i+0x8000)); return 'DL1:'+btoa(bin); } }catch(e){}
   return 'DL0:'+btoa(unescape(encodeURIComponent(json))); }
@@ -22542,7 +22570,7 @@ function renderSave(P){ const isApp=window.matchMedia && matchMedia('(display-mo
 $('panel').addEventListener('click',e=>{ const b=e.target.closest('[data-act]'); if(!b||b.disabled) return; const k=b.dataset.k, i=+b.dataset.i;
   switch(b.dataset.act){
     case 'copysave': { const t=$('savecode'); if(!t||!t.value.startsWith('DL')) return; (navigator.clipboard?navigator.clipboard.writeText(t.value):Promise.reject()).then(()=>toast('Save code copied')).catch(()=>{ t.focus(); t.select(); toast('Press Ctrl+C (or long-press, Copy) to copy the code'); }); return; }
-    case 'loadsave': { const v=codeFromAny(($('loadcode')||{}).value||''); readCode(v).then(o=>{ if(!o||typeof o!=='object'||!o.journal) throw 0; pendingLoad=o; renderPanel(); }).catch(()=>toast('That code didn’t work. Copy the whole thing and try again.')); return; }
+    case 'loadsave': { const v=codeFromAny(($('loadcode')||{}).value||''); readCode(v).then(o=>{ if(!o||typeof o!=='object'||!o.journal) throw 0; pendingLoad=o; closeMenu(); showLoadAsk(); }).catch(()=>toast('That code didn’t work. Copy the whole thing and try again.')); return; }
     case 'loadok': { if(!pendingLoad) return; S=migrate(pendingLoad); pendingLoad=null; G.st='idle'; $('card').hidden=true; S.tab='save'; offlineIncome(); fillBounties(); toast('Progress loaded. Welcome back!'); break; }
     case 'install': { const ip=window.__dlInstallPrompt; if(!ip) return; ip.prompt(); ip.userChoice.finally(()=>{ window.__dlInstallPrompt=null; renderPanel(); }); return; }
     case "sellall": { const sell=S.cooler.filter(f=>!sellKeep(f)); if(!sell.length) return; const tot=earn(sell.reduce((a,f)=>a+salePrice(f),0)); S.cooler=S.cooler.filter(f=>sellKeep(f)); sfx.coin(); toast('Sold '+sell.length+' fish for '+fmt(tot)+' coins'+(S.cooler.length?' (rare fish kept)':'')+'. '+quip('sell')); break; }
