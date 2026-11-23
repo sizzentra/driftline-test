@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="DL Test iPhone">
 <script>
-window.DL_BUILD='ios'; window.DL_PREVIEW=true; if(/[?&]sweep\b/.test(location.search)){ window.__bootErr=[]; addEventListener("error",function(e){ __bootErr.push(String(e.message||e)+(e.lineno?" (line "+e.lineno+")":"")); }); addEventListener("unhandledrejection",function(e){ __bootErr.push("promise: "+String(e.reason&&e.reason.message||e.reason)); }); window.requestAnimationFrame=function(f){ return setTimeout(function(){ f(performance.now()); },16); }; window.cancelAnimationFrame=function(i){ clearTimeout(i); }; } try{ window.__tOff=/[?&](test|sweep|frozen)\b/.test(location.search)?0:(+(localStorage.getItem("dl-test-toff")||0)||0); }catch(e){ window.__tOff=0; } (function(){ var rn=Date.now.bind(Date); Date.now=function(){ return rn()+window.__tOff; }; })(); if(/[?&]frozen\b/.test(location.search)){ var __fz=20261122; Math.random=function(){ __fz|=0; __fz=__fz+0x6D2B79F5|0; var t=Math.imul(__fz^__fz>>>15,1|__fz); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; var __fc=0, __pn=performance.now.bind(performance); performance.now=function(){ __fc+=0.01; return 100000+__fc; }; Date.now=function(){ return 1795300000000+Math.floor(__fc); }; window.__frozenClock=function(){ return __fc; }; window.requestAnimationFrame=function(){ return 0; }; window.cancelAnimationFrame=function(){}; } window.DL_VERSION='2026.11.23-0418';
+window.DL_BUILD='ios'; window.DL_PREVIEW=true; if(/[?&]sweep\b/.test(location.search)){ window.__bootErr=[]; addEventListener("error",function(e){ __bootErr.push(String(e.message||e)+(e.lineno?" (line "+e.lineno+")":"")); }); addEventListener("unhandledrejection",function(e){ __bootErr.push("promise: "+String(e.reason&&e.reason.message||e.reason)); }); window.requestAnimationFrame=function(f){ return setTimeout(function(){ f(performance.now()); },16); }; window.cancelAnimationFrame=function(i){ clearTimeout(i); }; } try{ window.__tOff=/[?&](test|sweep|frozen)\b/.test(location.search)?0:(+(localStorage.getItem("dl-test-toff")||0)||0); }catch(e){ window.__tOff=0; } (function(){ var rn=Date.now.bind(Date); Date.now=function(){ return rn()+window.__tOff; }; })(); if(/[?&]frozen\b/.test(location.search)){ var __fz=20261122; Math.random=function(){ __fz|=0; __fz=__fz+0x6D2B79F5|0; var t=Math.imul(__fz^__fz>>>15,1|__fz); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; var __fc=0, __pn=performance.now.bind(performance); performance.now=function(){ __fc+=0.01; return 100000+__fc; }; Date.now=function(){ return 1795300000000+Math.floor(__fc); }; window.__frozenClock=function(){ return __fc; }; window.requestAnimationFrame=function(){ return 0; }; window.cancelAnimationFrame=function(){}; } window.DL_VERSION='2026.11.23-0440';
 window.addEventListener('beforeinstallprompt',function(e){ e.preventDefault(); window.__dlInstallPrompt=e; });
 </script>
 </head>
@@ -6330,6 +6330,12 @@ V3SCENES.pond = {
     x.fillStyle=v3rgba(P.wTop,.35); for(let i=0;i<9;i++){ const y=hz+3+i*i*1.6; x.fillRect(0,y,W,1); }
     // the waterline: a thin bright edge where shore meets water
     x.fillStyle=v3rgba(P.rim,.28+P.d*.2); x.fillRect(0,hz,W,1.2);
+    /* the cabin's own little jetty with its rowboat tied up (overnight, 2026-11-23: Willow Pond's own expansion): weathered planks on posts
+       out over the water, a mooring line, an old wooden rowboat with its oars shipped */
+    { const cx=W*.265, jx=cx+H*.04, jw=H*.07, jy=hz+H*.004, nk=P.night*.6, wood=mix(mix('#8a6a4a',P.cabin,.4),'#0a1020',nk), woodD=mix(wood,'#000000',.3);
+      x.fillStyle=woodD; for(let i=0;i<=3;i++) x.fillRect(jx+jw*i/3-1,jy,2,H*.012); x.fillStyle=wood; x.fillRect(jx-1,jy-H*.003,jw+2,H*.003); x.fillStyle=v3rgba('#000000',.25); x.fillRect(jx,jy,jw,1);
+      const bx=jx+jw*.6, by=jy+H*.012, L=H*.03; x.fillStyle=mix(mix('#6a4a32',P.cabin,.3),'#0a1020',nk); x.beginPath(); x.moveTo(bx-L,by-H*.004); x.quadraticCurveTo(bx-L*.2,by+H*.005,bx+L,by-H*.005); x.lineTo(bx+L*.85,by-H*.007); x.quadraticCurveTo(bx,by-H*.002,bx-L,by-H*.004); x.fill(); x.fillStyle=v3rgba('#ffffff',.18*(1-P.night)); x.fillRect(bx-L*.8,by-H*.005,L*1.6,1);
+      x.strokeStyle=mix('#c8a878',P.cabin,.3); x.lineWidth=1; x.beginPath(); x.moveTo(bx+L*.9,by-H*.006); x.quadraticCurveTo(bx+L*1.1,by-H*.002,jx+jw,jy-H*.002); x.stroke(); x.strokeStyle=woodD; x.beginPath(); x.moveTo(bx-L*.5,by-H*.008); x.lineTo(bx+L*.4,by-H*.004); x.stroke(); }
   },
 
   // living parts, every frame
@@ -6357,6 +6363,7 @@ V3SCENES.pond = {
     for(let r0=0;r0<9;r0++){ const y=hz+H*.03+Math.pow(r0/9,1.5)*(H-hz)*.95; const sp=W*(.08+r0*.02), len=W*(.012+r0*.004); g.beginPath(); for(let X=-((t*(5+r0*2)+r0*53)%sp);X<W;X+=sp){ const yy=y+Math.sin(X*.02+t+r0)*1; g.moveTo(X,yy); g.quadraticCurveTo(X+len/2,yy-1.2,X+len,yy); } g.stroke(); }
     // the willow: trunk on the bank, drooping strands swaying in the breeze
     this.willow(P,t,hz);
+    { const ax=W*.872, ay=hz-H*.16, L=H*.13, sw=Math.sin(t*.9)*.05, ex=ax+Math.sin(sw)*L, ey=ay+Math.cos(sw)*L, nk=P.night*.6; g.strokeStyle=mix('#c8a878','#1a2030',nk); g.lineWidth=Math.max(1,H*.0016); g.beginPath(); g.moveTo(ax-H*.006,ay); g.lineTo(ex-H*.007,ey); g.moveTo(ax+H*.006,ay); g.lineTo(ex+H*.007,ey); g.stroke(); g.fillStyle=mix('#8a6a4a','#141a28',nk); g.fillRect(ex-H*.011,ey-H*.002,H*.022,H*.004); } /* a rope swing under the willow, stirring in the breeze (overnight, 2026-11-23: Willow Pond's own expansion) */
     // ducks gliding across, leaving a wake
     { const k=((t/70)%1), dx=W*(1.05-k*1.15), dy=hz+H*.045; for(let i=0;i<2;i++){ const px=dx+i*W*.03, py=dy+i*H*.006, s=H*.012;
         pondWake(px+s*.2,py,s,t,P,i);
@@ -17266,7 +17273,7 @@ const BH = {
     else if(kind==='arched'){ HK.rect(o,dx,y-dh*.8,dw,dh*.8,c); HK.ell(o,dx+dw/2,y-dh*.8,dw/2,dh*.2,c); HK.line(o,[dx+dw/2,y-dh,dx+dw/2,y],dk,1); HK.circ(o,dx+dw*.84,y-dh*.45,1.7,'#c8a050'); }
     else if(kind==='round'){ HK.circ(o,dx+dw/2,y-dh*.45,dw*.62,HK.dk(c,.2)); HK.circ(o,dx+dw/2,y-dh*.45,dw*.52,c); HK.circ(o,dx+dw*.8,y-dh*.42,1.7,'#c8a050'); } },
   /* two windows: between the seat and the angler, and past the angler; the second goes in o.lights, the first is returned */
-  windows(o,C,kind,c){ const y=o.dockY, wy=C.wallTop+(y-C.wallTop)*.22, wh=(y-C.wallTop)*.3, wA=W*.084, wB=C.x1-W*.026, ww=W*.016, q=o.x;
+  windows(o,C,kind,c){ const y=o.dockY, wy=C.wallTop+(y-C.wallTop)*.22, wh=(y-C.wallTop)*.3, wA=C.winA||W*.084, wB=C.winB||C.x1-W*.026, ww=W*.016, q=o.x;
     const win=(wx,shape)=>{ if(shape==='round'||shape==='porthole'){ const cx=wx+ww/2, cy=wy+wh/2, rr=Math.min(ww,wh)*.6; HK.circ(o,cx,cy,rr+3,shape==='porthole'?'#b08a4a':c); HK.circ(o,cx,cy,rr,'#2a3440'); if(shape==='porthole') for(let a=0;a<6;a++) HK.circ(o,cx+Math.cos(a)*(rr+1.5),cy+Math.sin(a)*(rr+1.5),.9,'#5a4020'); return {x:cx,y:cy,r:.1,a:.5,small:1,win:[rr*1.6,rr*1.6]}; }
       if(shape==='shoji'){ HK.rect(o,wx-3,wy-3,ww*1.3+6,wh+6,HK.dk(c,.3)); HK.rect(o,wx,wy,ww*1.3,wh,mix('#f4ecd8',c,.1)); for(let i=1;i<3;i++) HK.line(o,[wx+ww*1.3*i/3,wy,wx+ww*1.3*i/3,wy+wh],HK.dk(c,.3),1); for(let k=1;k<4;k++) HK.line(o,[wx,wy+wh*k/4,wx+ww*1.3,wy+wh*k/4],HK.dk(c,.3),1); return {x:wx+ww*.65,y:wy+wh/2,r:.1,a:.45,small:1,win:[ww*1.3,wh]}; }
       if(shape==='arched'){ HK.rect(o,wx-3,wy,ww+6,wh+3,c); HK.ell(o,wx+ww/2,wy,ww/2+3,wh*.3,c); HK.rect(o,wx,wy,ww,wh,'#2a3440'); HK.ell(o,wx+ww/2,wy,ww/2,wh*.26,'#2a3440'); HK.rect(o,wx+ww/2-.6,wy-wh*.26,1.2,wh*1.26,c); return {x:wx+ww/2,y:wy+wh/2,r:.1,a:.5,small:1,win:[ww,wh]}; }
@@ -17331,6 +17338,50 @@ const BH = {
   smoke(night,t,pt,k){ if(!S.settings.effects||!pt) return; const c=mix('#dfe4ea','#5a6478',night*.6); k=k||1; for(let i=0;i<7;i++){ const q=((t*.12+i/7)%1), r=H*(.005+q*.018)*k; g.fillStyle=v3rgba(c,.32*(1-q)*(q<.08?q/.08:1)); g.beginPath(); g.arc(pt[0]+q*H*.05+Math.sin(t*.8+i)*H*.004,pt[1]-q*H*.11,r,0,7); g.fill(); } }
 };
 // =====================================================================
+// WILLOW POND: THE BOATHOUSE (overnight, 2026-11-23; director: "the Rockies is a reference for quality, not a layout to copy").
+// Willow Pond's own building, not the Rockies box: a tall gable-end boathouse standing over the water, its boat bay open at the
+// waterline with a canoe inside, a hay-loft style window in the gable, a cupola with a weathervane on the ridge, and a lower lean-to
+// porch along its side that shades the angler. Parts: walls, roof, cupola, boat bay, windows, lantern, seat.
+// =====================================================================
+const PH = {
+  /* the boathouse's geometry: the gable block at the screen's left (narrow on phones), the lean-to from it to the deck's end */
+  geo(o){ const C=BH.cab(o,{h:1.1}), wh=C.wh, xa=Math.max(HF.x0(),0)-W*.006, gw=Math.min(wh*1.35,W*.085), xb=xa+gw, eave=o.dockY-wh*1.35, ridge=eave-gw*.62, lt=o.dockY-wh*1.08, lo=o.dockY-wh*.9;
+    return {C,wh,xa,xb,gw,eave,ridge,lt,lo,x1:C.x1}; },
+  /* fill a shape with a wall material by clipping a rectangle of it */
+  mat(o,path,kind,c,x0,x1,top,bot){ const q=o.x; q.save(); path(); q.clip(); BH.walls(o,{x0,x1,wallTop:top,vx:x0},kind,c); q.restore(); },
+  /* the lean-to: its back wall and roof, posts at its open front */
+  leanTo(o,g,wallK,wc,roofK,rc){ const q=o.x, y=o.dockY, lit=HK.lit(o);
+    PH.mat(o,()=>{ q.beginPath(); q.rect(g.xb,g.lt,g.x1-g.xb,y-g.lt); },wallK,wc,g.xb,g.x1,g.lt,y);
+    const sh=q.createLinearGradient(0,g.lt,0,g.lt+H*.04); sh.addColorStop(0,'rgba(10,8,6,.4)'); sh.addColorStop(1,'rgba(10,8,6,0)'); q.fillStyle=sh; q.fillRect(g.xb,g.lt,g.x1-g.xb,H*.04); /* the roof's shadow on the back wall */
+    for(const px of [g.xb+W*.006,(g.xb+g.x1)/2+W*.01,g.x1-W*.004]){ HK.rect(o,px-2.5,g.lo,5,y-g.lo,'#4a3426'); HK.rect(o,px-1.5,g.lo,1.2,y-g.lo,v3rgba('#d8b080',.4*lit+.1)); HK.rect(o,px-3.5,y-H*.004,7,H*.004,'#2e2016'); }
+    const ov=W*.012, R0=g.x1+ov; q.fillStyle=HK.n(o,rc); q.beginPath(); q.moveTo(g.xb,g.lt-H*.012); q.lineTo(R0,g.lo-H*.012); q.lineTo(R0,g.lo); q.lineTo(g.xb,g.lt); q.closePath(); q.fill();
+    q.strokeStyle=HK.n(o,HK.dk(rc,.3)); q.lineWidth=1; q.beginPath(); if(roofK==='tin'){ for(let X=g.xb+W*.006;X<R0;X+=W*.007){ const t=(X-g.xb)/(R0-g.xb), yt=g.lt-H*.012+(g.lo-g.lt)*t; q.moveTo(X,yt); q.lineTo(X,yt+H*.012); } } else { for(let X=g.xb+W*.005;X<R0;X+=W*.006){ const t=(X-g.xb)/(R0-g.xb), yt=g.lt-H*.012+(g.lo-g.lt)*t; q.moveTo(X,yt+H*.004); q.lineTo(X,yt+H*.012); } } q.stroke();
+    HK.line(o,[g.xb,g.lt-H*.012,R0,g.lo-H*.012],v3rgba(o.P.rim||'#fff0d0',.35*lit),1); HK.rect(o,g.xb,g.lt-H*.012,W*.003,H*.016,HK.dk(rc,.4)); /* flashing against the gable block */
+    o.low=Math.max(o.low==null?-1e9:o.low,g.lo-H*.012); },
+  /* the gable block: walls down to the water, the gable end, the rakes of the roof, the boat bay */
+  block(o,g,wallK,wc,roofK,rc,bay,bc){ const q=o.x, y=o.dockY, wl=o.wl, lit=HK.lit(o), mid=(g.xa+g.xb)/2;
+    PH.mat(o,()=>{ q.beginPath(); q.moveTo(g.xa,wl); q.lineTo(g.xa,g.eave); q.lineTo(mid,g.ridge); q.lineTo(g.xb,g.eave); q.lineTo(g.xb,wl); q.closePath(); },wallK,wc,g.xa,g.xb,g.ridge,wl);
+    HK.rect(o,g.xa,g.eave,g.xb-g.xa,H*.005,HK.dk(wc,.3)); HK.rect(o,g.xa,y-H*.004,g.xb-g.xa,H*.006,HK.dk(wc,.35)); /* a band at the eave and one at the deck's level */
+    HK.rect(o,g.xb-W*.004,g.eave,W*.004,wl-g.eave,HK.lt(wc,.06)); HK.rect(o,g.xa,g.eave,W*.004,wl-g.eave,HK.lt(wc,.06)); /* corner boards */
+    const ww=g.gw*.26, wy=g.eave+(g.ridge-g.eave)*.05; HK.rect(o,mid-ww/2-3,wy-ww*.9-3,ww+6,ww*.9+6,HK.dk(wc,.35)); HK.rect(o,mid-ww/2,wy-ww*.9,ww,ww*.9,'#2a3440'); HK.line(o,[mid,wy-ww*.9,mid,wy],HK.dk(wc,.35),1.2); HK.line(o,[mid-ww/2,wy-ww*.45,mid+ww/2,wy-ww*.45],HK.dk(wc,.35),1.2); o.lights.push({x:mid,y:wy-ww*.45,r:.08,a:.45,small:1,win:[ww,ww*.9]}); /* the loft window in the gable */
+    /* the boat bay at the waterline: open with a canoe inside, two doors closed, or a sliding door half open */
+    const bw=g.gw*.68, bx=mid-bw/2, bt=y+HK.fh()+H*.004, bh=wl-bt+H*.02;
+    HK.rect(o,bx-4,bt-4,bw+8,4,HK.dk(bc,.3)); HK.rect(o,bx-4,bt-4,4,bh+4,HK.dk(bc,.3)); HK.rect(o,bx+bw,bt-4,4,bh+4,HK.dk(bc,.3));
+    if(bay===0||bay===2){ const ig=q.createLinearGradient(0,bt,0,bt+bh); ig.addColorStop(0,HK.n(o,'#1a1410')); ig.addColorStop(1,HK.n(o,'#22323a')); q.fillStyle=ig; q.fillRect(bx,bt,bw,bh); /* the dark boathouse inside, water at the bottom */
+      HK.rect(o,bx,wl-1,bw,1.5,v3rgba('#e8f4f0',.25*lit+.05)); const cx=mid, cy=wl-H*.003, L=bw*.42; q.fillStyle=HK.n(o,mix('#3a6a4a',bc,.15)); q.beginPath(); q.moveTo(cx-L,cy-H*.008); q.quadraticCurveTo(cx,cy+H*.01,cx+L,cy-H*.008); q.quadraticCurveTo(cx,cy-H*.002,cx-L,cy-H*.008); q.fill(); HK.rect(o,cx-L*.7,cy-H*.006,L*1.4,1.5,'#c8a070'); /* a canoe at its mooring */
+      if(bay===2){ HK.rect(o,bx,bt,bw*.55,bh-H*.02,bc); for(let i=1;i<4;i++) HK.line(o,[bx+bw*.55*i/4,bt,bx+bw*.55*i/4,bt+bh-H*.02],HK.dk(bc,.3),.8); HK.rect(o,bx-2,bt-H*.008,bw+4,H*.004,'#3a3a40'); } } /* a sliding door on its rail */
+    else { for(const [x0,w0] of [[bx,bw/2],[bx+bw/2,bw/2]]){ HK.rect(o,x0+.5,bt,w0-1,bh-H*.02,bc); for(let i=1;i<3;i++) HK.line(o,[x0+w0*i/3,bt,x0+w0*i/3,bt+bh-H*.02],HK.dk(bc,.3),.8); HK.line(o,[x0+1,bt+bh-H*.022,x0+w0-1,bt+1],HK.lt(bc,.1),Math.max(2,H*.003)); } }
+    /* the roof seen end-on: two rakes with an overhang, the ridge */
+    const ov=W*.008, rt=Math.max(4,H*.012); q.fillStyle=HK.n(o,rc); q.beginPath(); q.moveTo(g.xa-ov,g.eave+H*.006); q.lineTo(mid,g.ridge-rt); q.lineTo(g.xb+ov,g.eave+H*.006); q.lineTo(g.xb+ov-W*.003,g.eave+H*.006+rt*.7); q.lineTo(mid,g.ridge); q.lineTo(g.xa-ov+W*.003,g.eave+H*.006+rt*.7); q.closePath(); q.fill();
+    q.strokeStyle=HK.n(o,HK.dk(rc,.35)); q.lineWidth=1; q.beginPath(); q.moveTo(g.xa-ov+W*.003,g.eave+H*.006+rt*.7); q.lineTo(mid,g.ridge); q.lineTo(g.xb+ov-W*.003,g.eave+H*.006+rt*.7); q.stroke(); HK.line(o,[g.xa-ov,g.eave+H*.006,mid,g.ridge-rt,g.xb+ov,g.eave+H*.006],v3rgba(o.P.rim||'#fff0d0',.4*lit),1); /* bargeboards */
+    o.top=Math.min(o.top==null?y-H*.23:o.top,g.ridge-H*.06); },
+  /* on the ridge: a cupola with a fish weathervane, a rooster weathervane on a post, or a little bell under a hood */
+  cupola(o,g,s,c){ const mid=(g.xa+g.xb)/2, y0=g.ridge-H*.004, q=o.x;
+    if(s===0){ const w=g.gw*.24, h=H*.03; HK.rect(o,mid-w/2,y0-h,w,h,c); HK.rect(o,mid-w*.32,y0-h*.85,w*.64,h*.5,'#2a3440'); for(let i=1;i<3;i++) HK.line(o,[mid-w*.32+w*.64*i/3,y0-h*.85,mid-w*.32+w*.64*i/3,y0-h*.35],HK.lt(c,.2),1); HK.poly(o,[mid-w*.65,y0-h,mid+w*.65,y0-h,mid,y0-h-w*.55],HK.dk(c,.35)); HK.line(o,[mid,y0-h-w*.55,mid,y0-h-w*.55-H*.022],'#2a2a2e',1.2); const vy=y0-h-w*.55-H*.018; q.fillStyle=HK.n(o,'#c8a050'); q.beginPath(); q.ellipse(mid,vy,W*.006,H*.0035,0,0,7); q.fill(); HK.poly(o,[mid+W*.006,vy,mid+W*.009,vy-H*.004,mid+W*.009,vy+H*.004],'#c8a050'); }
+    if(s===1){ HK.line(o,[mid,y0,mid,y0-H*.04],'#2a2a2e',1.4); for(const [dx,lab] of [[-1,'W'],[1,'E']]) HK.line(o,[mid,y0-H*.028,mid+dx*W*.006,y0-H*.028],'#2a2a2e',1); const vy=y0-H*.04; HK.poly(o,[mid-W*.007,vy,mid+W*.004,vy,mid+W*.006,vy-H*.008,mid+W*.002,vy-H*.012,mid-W*.002,vy-H*.006],c); HK.poly(o,[mid-W*.007,vy,mid-W*.011,vy-H*.008,mid-W*.004,vy-H*.004],c); }
+    if(s===2){ const w=g.gw*.2; HK.rect(o,mid-w/2,y0-H*.026,2,H*.026,c); HK.rect(o,mid+w/2-2,y0-H*.026,2,H*.026,c); HK.poly(o,[mid-w*.75,y0-H*.026,mid+w*.75,y0-H*.026,mid,y0-H*.042],HK.dk(c,.3)); q.fillStyle=HK.n(o,'#c8a050'); q.beginPath(); q.moveTo(mid-w*.25,y0-H*.006); q.quadraticCurveTo(mid,y0-H*.03,mid+w*.25,y0-H*.006); q.closePath(); q.fill(); } }
+};
+// =====================================================================
 // Every water's home (batch 5, 2026-11-22; designs in docs/HOME_DESIGNS.md, colours in docs/MAP_THEMES.md). Willow Pond (the
 // approved pilot) is in cv_homefmt.js; these 19 are built from the home kit (cw_homekit.js). Each home: the seat plus 5 features
 // made for that water, 3 styles each ("none" first where a feature can be left out), one list of 16 colours for every feature.
@@ -17342,29 +17393,27 @@ function hfMake(id,d){ d.seatH=d.seat.map(k=>HK.seatH(k));
     for(const [e,fn] of d.order){ o.elCol=col(e); /* lights read their feature's colour (a stove's body, director 2026-11-22: colours did nothing) */ const r=e==='seat'?HK.seat(o,d.seat[hfStyle(id,'seat')],col('seat')):fn(o,hfStyle(id,e),col(e),col); if(r&&r.x!=null) o.lights.push(r); } };
   HOMEF[id]=d; }
 const C16=s=>s.split(';').map(p=>{ const [n,h]=p.split('='); return [n.trim(),h.trim()]; });
-/* 1. Willow Pond: the pine boathouse (the Rockies standard, overnight batch 4, 2026-11-23): one base building, the little boathouse the
-   pond sits behind (MAP_THEMES › Willow Pond: pine shores, a boathouse, warm cabin light). Its walls, roof, lantern, shade, door,
-   windows and seat change aspects of it; a pine bank behind it, round piles under the deck */
-{ const PW=C16('Honey pine=#b98a5a;Weathered pine=#8a6a4a;Dark stain=#5a4030;Driftwood=#9a9488;Moss=#5f8a6c;Pine green=#2c4a3e;Sage=#9ab08a;Willow=#7fae5c;Lake teal=#3f827b;Sky blue=#86bcd9;Canvas=#f3e4ca;Warm white=#f4efe6;Barn red=#a8483a;Lantern gold=#e8b04a;Dusk rose=#c97a8a;Lilac=#8a7aa8'), P1=()=>BH.cab({pw:HF.pw(),dockY:HF.dockY()});
-  hfMake('pond',{ name:'Boathouse', hname:'boathouse', glow:'255,210,140', seatX:()=>HF.pw()-W*.028, colors:PW,
-    front:(n,cx)=>{ if(hfStyle('pond','shade')===3) BH.rail(n,cx,'slat',hfColor('pond','shade'),P1()); }, smoke:null,
-    els:[{id:'walls',label:'Walls',styles:['Board and batten','Shiplap','Cedar shingles'],def:[0,0],pal:[0,1,2,3,4,5,6,8,10,11,12]},
+/* 1. Willow Pond: the boathouse (overnight, 2026-11-23; its own design, src/cw_pondhouse.js): a gable-end boathouse over the water with its
+   boat bay at the waterline, a cupola on the ridge and a lean-to porch along its side; a pine bank behind it, round piles under the deck */
+{ const PW=C16('Honey pine=#b98a5a;Weathered pine=#8a6a4a;Dark stain=#5a4030;Driftwood=#9a9488;Moss=#5f8a6c;Pine green=#2c4a3e;Sage=#9ab08a;Willow=#7fae5c;Lake teal=#3f827b;Sky blue=#86bcd9;Canvas=#f3e4ca;Warm white=#f4efe6;Barn red=#a8483a;Lantern gold=#e8b04a;Dusk rose=#c97a8a;Lilac=#8a7aa8');
+  const G1=()=>PH.geo({pw:HF.pw(),dockY:HF.dockY()}), LT=()=>{ const g=G1(); return {x0:g.xb,x1:g.x1,vx:g.xb,wallTop:g.lt,winA:g.xb+W*.014,winB:g.x1-W*.03}; };
+  hfMake('pond',{ name:'Boathouse', hname:'boathouse', glow:'255,210,140', seatX:()=>HF.pw()-W*.028, colors:PW, front:null, smoke:null,
+    els:[{id:'walls',label:'Walls',styles:['Board and batten','Shiplap','Cedar shingles'],def:[0,12],pal:[0,1,2,3,4,5,6,8,10,11,12]},
          {id:'roof',label:'Roof',styles:['Asphalt shingles','Cedar shakes','Tin roof'],def:[1,1],palS:[[2,3,4,5,12],[0,1,2,3],[3,4,5,8,9,11,12]]},
-         {id:'light',label:'Lantern',light:true,styles:['Hurricane lantern','Lamp post','String lights'],def:[0,13],pal:[2,3,5,12,13]},
-         {id:'shade',label:'Shade',none:true,styles:['Open sky','Patio umbrella','Canvas awning','Covered porch with rail'],def:[1,10],pal:[0,1,2,4,8,9,10,11,12,14,15]},
-         {id:'door',label:'Door',styles:['Barn door','Plank door','Door with a glass pane'],def:[0,12],pal:[0,1,2,4,5,8,9,10,11,12]},
-         {id:'windows',label:'Windows',styles:['Four-pane windows','Windows with flower boxes','Shuttered windows'],def:[0,11],pal:[0,1,2,4,5,8,9,10,11,12]}],
+         {id:'cupola',label:'Cupola',styles:['Cupola with a fish vane','Rooster weathervane','Little bell'],def:[0,11],pal:[0,1,2,4,5,10,11,12]},
+         {id:'bay',label:'Boat bay',styles:['Open, canoe inside','Swing doors','Sliding door'],def:[0,11],pal:[0,1,2,4,5,8,10,11,12]},
+         {id:'windows',label:'Windows',styles:['Four-pane windows','Windows with flower boxes','Shuttered windows'],def:[0,11],pal:[0,1,2,4,5,8,9,10,11,12]},
+         {id:'light',label:'Lantern',light:true,styles:['Hurricane lantern','Lamp post','String lights'],def:[0,13],pal:[2,3,5,12,13]}],
     seat:['deckchair','logbench','campchair'], seatNames:['Wooden folding chair','Log bench','Camp chair'], seatDef:[0,0], seatPal:[0,1,2,4,5,8,9,10,12,13],
     order:[
       ['base',(o)=>{ BH.bank(o,{trees:'pine',g1:'#3a5a3c',g2:'#24382a',grass:'#5f8a4e',rock:'#8a8680',t1:'#456f5c',t2:'#2c4a3e'}); BH.piles(o,'log','#8a6a4a'); HK.deck(o,'#b98a5a','planks'); }],
-      ['walls',(o,s,c)=>BH.walls(o,P1(),['batten','shiplap','shingles'][s],c)],
-      ['door',(o,s,c)=>BH.door(o,P1(),['barn','plank','glass'][s],c)],
-      ['windows',(o,s,c)=>BH.windows(o,P1(),['four','boxes','shutters'][s],c)],
-      ['roof',(o,s,c)=>BH.roof(o,P1(),['shingles','shakes','tin'][s],c)],
-      ['light',(o,s,c)=>BH.lantern(o,P1(),['hurricane','lamppost','string'][s],c)],
-      ['shade',(o,s,c)=>BH.shade(o,P1(),[null,'umbrella','awning','porch'][s],c,hfColor('pond','roof'))],
+      ['walls',(o,s,c)=>{ const g=PH.geo(o), K=['batten','shiplap','shingles'][s]; PH.leanTo(o,g,K,c,['shingles','shakes','tin'][hfStyle('pond','roof')],hfColor('pond','roof')); }],
+      ['windows',(o,s,c)=>BH.windows(o,LT(),['four','boxes','shutters'][s],c)],
+      ['bay',(o,s,c)=>{ const g=PH.geo(o); PH.block(o,g,['batten','shiplap','shingles'][hfStyle('pond','walls')],hfColor('pond','walls'),['shingles','shakes','tin'][hfStyle('pond','roof')],hfColor('pond','roof'),s,c); }],
+      ['roof',()=>{}],
+      ['cupola',(o,s,c)=>PH.cupola(o,PH.geo(o),s,c)],
+      ['light',(o,s,c)=>BH.lantern(o,LT(),['hurricane','lamppost','string'][s],c)],
       ['seat']] }); }
-
 /* 2. Stonebrook River: the stone mill shed (the Rockies standard, overnight batch 5, 2026-11-23): one base building, the miller's little
    fishing shed on fieldstone piers beside the mill (MAP_THEMES › Stonebrook: stacked fieldstone, river-worn timber, slate). Its walls,
    roof, chimney, lantern, door, windows and seat change aspects of it; autumn woods on the bank behind it */
@@ -21227,6 +21276,9 @@ PATCHES.unshift({v:'0.4.9', name:'Work in progress', items:phoneNotes([
 // text changes. Released notes live in notes_release.js.
 const TEST_NOTES={v:'test', label:'Test build · '+(window.DL_BUILD==='ios'?'iPhone':'Android'), name:'0.4.9 test build (newest first)', items:[
   '## New in this build',
+  'Willow Pond, redone in its own style: your home is a tall red boathouse over the water with a cupola and weathervane, its boat bay at the waterline (a canoe inside, swing doors or a sliding door) and a lean-to porch beside it; choose its walls, roof, cupola, boat bay, windows, lantern and seat.',
+  'Willow Pond: the far cabin has its own little jetty with a rowboat tied up, and a rope swing hangs under the willow.',
+  '## Test build 2026.11.23-0418',
   'Cherry Blossom Lake: your home is now a tea house on red-lacquered posts you customise: walls (shoji, plaster and timber, bamboo), roof (curved clay tiles, cypress bark, copper), lantern (paper, stone, a string of lanterns), shade (veranda roof, wisteria trellis, paper parasol), door (sliding shoji, plank, noren curtain), windows and seat, with cherry trees in blossom behind it.',
   '## Test build 2026.11.23-0403',
   'Stonebrook River: your home is now a stone mill shed on fieldstone piers you customise: walls, roof (slate, shakes or thatch), chimney with smoke, lantern, door, windows and seat, with autumn woods on the bank behind it.',
