@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="DL Test Android">
 <script>
-window.DL_BUILD='android'; window.DL_PREVIEW=true; if(/[?&]sweep\b/.test(location.search)){ window.__bootErr=[]; addEventListener("error",function(e){ __bootErr.push(String(e.message||e)+(e.lineno?" (line "+e.lineno+")":"")); }); addEventListener("unhandledrejection",function(e){ __bootErr.push("promise: "+String(e.reason&&e.reason.message||e.reason)); }); window.requestAnimationFrame=function(f){ return setTimeout(function(){ f(performance.now()); },16); }; window.cancelAnimationFrame=function(i){ clearTimeout(i); }; } try{ window.__tOff=/[?&](test|sweep|frozen)\b/.test(location.search)?0:(+(localStorage.getItem("dl-test-toff")||0)||0); }catch(e){ window.__tOff=0; } (function(){ var rn=Date.now.bind(Date); Date.now=function(){ return rn()+window.__tOff; }; })(); if(/[?&]frozen\b/.test(location.search)){ var __fz=20261122; Math.random=function(){ __fz|=0; __fz=__fz+0x6D2B79F5|0; var t=Math.imul(__fz^__fz>>>15,1|__fz); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; var __fc=0, __pn=performance.now.bind(performance); performance.now=function(){ __fc+=0.01; return 100000+__fc; }; Date.now=function(){ return 1795300000000+Math.floor(__fc); }; window.__frozenClock=function(){ return __fc; }; window.requestAnimationFrame=function(){ return 0; }; window.cancelAnimationFrame=function(){}; } window.DL_VERSION='2026.11.22-2306';
+window.DL_BUILD='android'; window.DL_PREVIEW=true; if(/[?&]sweep\b/.test(location.search)){ window.__bootErr=[]; addEventListener("error",function(e){ __bootErr.push(String(e.message||e)+(e.lineno?" (line "+e.lineno+")":"")); }); addEventListener("unhandledrejection",function(e){ __bootErr.push("promise: "+String(e.reason&&e.reason.message||e.reason)); }); window.requestAnimationFrame=function(f){ return setTimeout(function(){ f(performance.now()); },16); }; window.cancelAnimationFrame=function(i){ clearTimeout(i); }; } try{ window.__tOff=/[?&](test|sweep|frozen)\b/.test(location.search)?0:(+(localStorage.getItem("dl-test-toff")||0)||0); }catch(e){ window.__tOff=0; } (function(){ var rn=Date.now.bind(Date); Date.now=function(){ return rn()+window.__tOff; }; })(); if(/[?&]frozen\b/.test(location.search)){ var __fz=20261122; Math.random=function(){ __fz|=0; __fz=__fz+0x6D2B79F5|0; var t=Math.imul(__fz^__fz>>>15,1|__fz); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; var __fc=0, __pn=performance.now.bind(performance); performance.now=function(){ __fc+=0.01; return 100000+__fc; }; Date.now=function(){ return 1795300000000+Math.floor(__fc); }; window.__frozenClock=function(){ return __fc; }; window.requestAnimationFrame=function(){ return 0; }; window.cancelAnimationFrame=function(){}; } window.DL_VERSION='2026.11.22-2336';
 window.addEventListener('beforeinstallprompt',function(e){ e.preventDefault(); window.__dlInstallPrompt=e; });
 </script>
 </head>
@@ -2172,7 +2172,7 @@ function fight(dt){ if(fishNew()){ fightNew(dt); return; } /* Cam's fight feel (
      strains the line, which can break), and it never takes more than its rank allows (all of it only for mythics) */
   if(G.strip){ const P=G.strip; P.t+=dt; const k=Math.min(1,P.t/P.dur), e=1-Math.pow(1-k,2); G.d=Math.max(G.d, P.from+(P.to-P.from)*e); G.run=true; G.runT=Math.max(G.runT,.2); if(rin>0) G.ten+=EAT_STRIP_TEN*rin*dt*tensionMult(); if(k>=1) G.strip=null; }
   const frac = clamp(G.d/G.d0,0,1.6); const x0=W*.24, x1=castX(G.lastCast);
-  G.bob.x = x0 + (x1-x0)*Math.min(frac,1.25) + (G.run ? Math.sin(performance.now()/90)*3 : 0) + (G.ev==='shake'?Math.sin(performance.now()/30)*3:0); G.bob.y = waterY(G.bob.x);
+  G.bob.x = x0 + (x1-x0)*Math.min(frac,1.25) + (G.run ? Math.sin(performance.now()/90)*3 : 0) + (G.ev==='shake'?Math.sin(performance.now()/30)*3:0); G.bob.x = clamp(G.bob.x,W*.2,W*.93); G.bob.y = waterY(G.bob.x); /* never off screen */
   if(G.ten>=100 && maxed('steady') && !G.saved){ G.saved=true; G.ten=65; G.hold=false; toast('Second wind! Your line held.'); tone(700,.15,'triangle',.07); }
   if(G.ten>=100) endFight('snap'); else if(G.d>=G.maxOut) endFight('spool'); else if(G.d<=0) endFight('caught');
 }
@@ -2471,7 +2471,7 @@ function fightNew(dt){
     if(G.ten>92&&rin>0&&(G.combo||0)>0&&!G.ffA) feelCombo(-1); }
   G.noReelT=rin>0?0:(G.noReelT||0)+dt;
   const frac=clamp((G.d-(G.dd||0))/G.d0,0,1.6), x0=W*.24, x1=castX(G.lastCast);
-  G.bob.x=x0+(x1-x0)*Math.min(frac,1.25)+(G.run?Math.sin(performance.now()/90)*3:0)+(G.ev==='shake'?Math.sin(performance.now()/30)*3:0)+(G.tell?Math.sin(performance.now()/22)*2:0); G.bob.y=waterY(G.bob.x);
+  G.bob.x=x0+(x1-x0)*Math.min(frac,1.25)+(G.run?Math.sin(performance.now()/90)*3:0)+(G.ev==='shake'?Math.sin(performance.now()/30)*3:0)+(G.tell?Math.sin(performance.now()/22)*2:0); G.bob.x=clamp(G.bob.x,W*.2,W*.93); /* the fight never leaves the screen (director, 2026-11-22: "fish fights keep escaping the viewable screen") */ G.bob.y=waterY(G.bob.x);
   if(G.ten>=100){ G.ten=100; G.fullT=rin>0?(G.fullT||0)+dt:0; } else G.fullT=0;
   if(G.fullT>0 && maxed('steady') && !G.saved){ G.saved=true; G.ten=65; G.fullT=0; G.hold=false; toast('Second wind! Your line held.'); tone(700,.15,'triangle',.07); }
   if(G.fullT>=FF.SNAP_HOLD) endFight('snap'); /* Cam: the line goes after about half a second of reeling at 100% */
@@ -2866,7 +2866,7 @@ function draw(now){
   if(G.st==='reeling' && G.fish){ const f=G.fish; const len = f.kind!=='fish' ? 26 : 30 + Math.min(60, Math.sqrt(f.kg||1)*8);
     /* C21: one arc out of the water and back: it travels toward its nose (left, toward you), nose up on the way out and nose down on the
        way in (it used to tilt the other way round) */
-    if(G.ev==='jump' && f.kind==='fish'){ const k=1-G.evDur/.85, aw=fishNew()&&G.jumpAway, sd=aw?-1:1; /* Cam: a jump can go away from you too */ const jx=G.bob.x+sd*(len*.2-k*30), jy=G.bob.y-Math.sin(k*Math.PI)*H*.13; g.save(); g.translate(jx,jy); if(aw) g.scale(-1,1); g.rotate(Math.cos(k*Math.PI)*.9); drawCreature(g,f.sp,0,0,len,{shiny:f.shiny,pv:f.pv,wag:t*20,flip:true}); g.restore(); }
+    if(G.ev==='jump' && f.kind==='fish'){ const k=1-G.evDur/.85, aw=fishNew()&&G.jumpAway, sd=aw?-1:1; /* Cam: a jump can go away from you too */ const jx=clamp(G.bob.x+sd*(len*.2-k*30),len*.7,W-len*.7), jy=G.bob.y-Math.sin(k*Math.PI)*H*.13; g.save(); g.translate(jx,jy); if(aw) g.scale(-1,1); g.rotate(Math.cos(k*Math.PI)*.9); drawCreature(g,f.sp,0,0,len,{shiny:f.shiny,pv:f.pv,wag:t*20,flip:true}); g.restore(); }
     else { g.globalAlpha=.35; if(f.kind!=='fish'){ drawHookedOdd(f, G.bob.x+(G.ev==='snag'?0:Math.sin(t*1.6)*3), G.bob.y+4); } else {
       /* C20 (Cam, 2026-11-20): a running fish turns to swim away, a calm one turns back toward you; the turn is smooth (the body narrows
          through the turn) and the line stays at its mouth. Fish only: oddities and objects never turn. */
@@ -2894,6 +2894,7 @@ function draw(now){
   if(V3ON){ v3Rod(g,hand,{x:tx,y:ty},(hand.x+tx)/2,(hand.y+ty)/2 - 6 + (G.st==='reeling'?G.ten*.08:0),ROD_I[S.rods.eq],night,t,G.st==='reeling'&&(G.hold||G.crank>0||G.padReel>0)); if(hp&&hp.fingers) hp.fingers(); } else { g.strokeStyle=mix(ROD_I[S.rods.eq]?ROD_I[S.rods.eq].col:'#d9c7a0','#2a2620',night*.4); g.lineWidth=2.5; g.beginPath(); g.moveTo(hand.x,hand.y); g.quadraticCurveTo((hand.x+tx)/2, (hand.y+ty)/2 - 6 + (G.st==='reeling'?G.ten*.08:0), tx, ty); g.stroke(); }
   if(!V3ON){ g.fillStyle='#2a2a2a'; g.beginPath(); g.arc(hand.x+3,hand.y-2,3,0,7); g.fill(); }
   drawPetScene(pax,pay,sc,t,night);
+  if(L.id==='rockies'&&HOMEF.rockies) rkFront(night); /* a home's front edge in front of the angler (the cabin's porch rail) */
   if(fishNew()) feelDraw(t); /* Feel lab: hook flash, perfect-pull ring, pop-ups, combo (c2_fightfeel.js) */
   if(HOMEF[L.id]) HF_LAST={ax,ay,sc,hx,hy,t,rodA,night,sit:RP?RP.sit:null,rim:PV?PV.rim:null,glow:PV?PV.glow:null,tx,ty,pax,pay,ten:G.st==='reeling'?G.ten:0}; /* where the angler, rod and pets were drawn: the Home close-up redraws them sharp */
   let lp=null;
@@ -16091,16 +16092,16 @@ function rkRange(x,R,base,o){ const ys=R.ys, N=ys.length;
   x.fillStyle=o.rock; rkPath(x,R,base); x.fill(); x.save(); rkPath(x,R,base); x.clip();
 if(o.snow){ const sn=v3noise(o.seed+5), bot=ys.map((y,i)=>{ const line=o.snowLine+H*.02*sn(i*.05); if(y>=line) return y; const dep=(line-y)*(.5+.5*sn(i*.11+3)); return y+dep+(i%9<2?dep*.6*sn(i*.4+7):0); }); /* fingers of snow run down the couloirs */    x.fillStyle=o.snow; x.beginPath(); x.moveTo(R.at(0),ys[0]); for(let i=1;i<N;i++) x.lineTo(R.at(i),ys[i]); for(let i=N-1;i>=0;i--) x.lineTo(R.at(i),bot[i]); x.closePath(); x.fill(); }
   /* shade: under every stretch where the ridge falls to the right, a face reaching down and back toward the summit */
-  x.fillStyle=o.shade; x.beginPath(); for(let i=1;i<N;i++){ if(!(ys[i]>ys[i-1])) continue; let j=i; while(j+1<N&&ys[j+1]>=ys[j]) j++; const pk=i-1, vy=ys[j], dx=(R.at(j)-R.at(pk));
-      x.moveTo(R.at(pk),ys[pk]); for(let k=pk;k<=j;k++) x.lineTo(R.at(k),ys[k]); x.lineTo(R.at(j)-dx*.15,base); x.lineTo(R.at(pk)+dx*.28,base); x.closePath(); i=j; } x.fill();
+  const sTop=Math.min(...ys), sg=x.createLinearGradient(0,sTop,0,base); sg.addColorStop(0,o.shade); sg.addColorStop(.6,o.shade); sg.addColorStop(1,'rgba(24,34,74,.06)'); /* the shade fades toward the foot, so its edges never run as lines to the bottom */
+  x.fillStyle=sg; x.beginPath(); for(let i=1;i<N;i++){ if(!(ys[i]>ys[i-1])) continue; let j=i; while(j+1<N&&ys[j+1]>=ys[j]) j++; const pk=i-1, vy=ys[j], dx=(R.at(j)-R.at(pk)); if(vy-ys[pk]<H*.012||dx<W*.008){ i=j; continue; } /* only real faces cast shade: tiny steps made hair-thin shadows that ran down as lines (director) */
+      x.moveTo(R.at(pk),ys[pk]); for(let k=pk;k<=j;k++) x.lineTo(R.at(k),ys[k]); x.quadraticCurveTo(R.at(j)+dx*.08,(vy+base)/2,R.at(j)-dx*.15,base); x.lineTo(R.at(pk)+dx*.28,base); x.quadraticCurveTo(R.at(pk)+dx*.05,(ys[pk]+base)/2,R.at(pk),ys[pk]); x.closePath(); i=j; } x.fill();
   /* the Rockies' limestone layering: short broken bed lines tilted a little, faint, never stripes across the whole mountain */
-  { const rr=v3rng(o.seed+11), top=Math.min(...ys); x.strokeStyle=o.line; x.lineWidth=1; x.globalAlpha=.45; x.beginPath(); for(let y=top+H*.012;y<base;y+=H*(.009+rr()*.006)){ let X=rr()*W*.05; while(X<W){ const L=W*(.01+rr()*.04); if(rr()<.55){ x.moveTo(X,y); x.lineTo(X+L,y-L*.12); } X+=L+W*(.005+rr()*.03); } } x.stroke(); x.globalAlpha=1; }
+  { const rr=v3rng(o.seed+11), top=Math.min(...ys); x.strokeStyle=o.line; x.lineWidth=1; x.globalAlpha=.22; x.beginPath(); for(let y=top+H*.012;y<base;y+=H*(.009+rr()*.006)){ let X=rr()*W*.05; while(X<W){ const L=W*(.01+rr()*.04); if(rr()<.55){ x.moveTo(X,y); x.lineTo(X+L,y-L*.12); } X+=L+W*(.005+rr()*.03); } } x.stroke(); x.globalAlpha=1; }
   if(o.glacier){ const G2=o.glacier, i0=Math.round((W*G2[0]-R.at(0))/R.step), i1=Math.round((W*G2[1]-R.at(0))/R.step), tongue=base-H*G2[2], ice=o.ice, blue=o.iceBlue; /* a glacier filling the saddle, its top the ridge itself, flowing down to a blue ice front */
     x.fillStyle=ice; x.beginPath(); x.moveTo(R.at(i0),ys[i0]); for(let i=i0;i<=i1;i++) x.lineTo(R.at(i),ys[i]+1); const mx=(R.at(i0)+R.at(i1))/2, hw=(R.at(i1)-R.at(i0))/2; x.quadraticCurveTo(mx+hw*.5,tongue-H*.03,mx+hw*.18,tongue); x.quadraticCurveTo(mx,tongue+H*.008,mx-hw*.2,tongue); x.quadraticCurveTo(mx-hw*.55,tongue-H*.04,R.at(i0),ys[i0]); x.closePath(); x.fill();
     x.fillStyle=blue; x.beginPath(); x.moveTo(mx-hw*.2,tongue); x.quadraticCurveTo(mx,tongue+H*.008,mx+hw*.18,tongue); x.lineTo(mx+hw*.17,tongue+H*.012); x.quadraticCurveTo(mx,tongue+H*.02,mx-hw*.19,tongue+H*.012); x.closePath(); x.fill();
     x.strokeStyle=v3rgba(blue,.55); x.lineWidth=1; for(let k=1;k<6;k++){ const yy=tongue-(tongue-Math.max(ys[i0],ys[i1]))*k/6, ww=hw*(.25+.12*k); x.beginPath(); x.moveTo(mx-ww,yy); x.quadraticCurveTo(mx,yy+H*.008,mx+ww,yy); x.stroke(); } }
-  /* spurs and couloirs: thin dark lines falling from the notches, lit edges along the big ridges */
-  x.strokeStyle=o.line; x.lineWidth=Math.max(1,H*.0016); x.beginPath(); for(let i=2;i<N-2;i++){ if(ys[i]>ys[i-2]&&ys[i]>ys[i+2]&&(i%9===0)){ const X=R.at(i), y=ys[i], L=(base-y)*(.18+.18*((i*37)%10)/10); x.moveTo(X,y); x.quadraticCurveTo(X+L*.08,y+L*.5,X-L*.05,y+L); } } x.stroke();
+  /* (the thin gully strokes are gone: they read as cracks or wires, director 2026-11-22) lit edges along the big ridges */
   x.strokeStyle=o.rim; x.lineWidth=Math.max(1,H*.0018); x.beginPath(); for(let i=1;i<N;i++){ if(ys[i]<ys[i-1]){ x.moveTo(R.at(i-1),ys[i-1]+.5); x.lineTo(R.at(i),ys[i]+.5); } } x.stroke();
   const hg=x.createLinearGradient(0,base-(base-Math.min(...ys))*.55,0,base); hg.addColorStop(0,v3rgba(o.haze,0)); hg.addColorStop(1,v3rgba(o.haze,o.hazeA)); x.fillStyle=hg; x.fillRect(0,base-H*.4,W,H*.4+1);
   x.restore(); }
@@ -16111,7 +16112,8 @@ function rkShoulder(x,P,hz,side,nk){ const L=side<0, w=W*.36, top=H*.25, R=v3rng
   x.fillStyle=rock; path(); x.fill(); x.save(); path(); x.clip();
   const tl=(X)=>hz-H*(.12+.025*Math.sin(X*.013+(L?0:2))); /* the tree line */
   x.fillStyle=forest; x.beginPath(); x.moveTo(L?-2:W+2,hz+1); for(let X=L?-2:W+2;L?X<=w:X>=W-w;X+=L?6:-6) x.lineTo(X,tl(X)); x.lineTo(L?w:W-w,hz+1); x.closePath(); x.fill();
-  x.fillStyle=v3rgba(mix(mix('#e8eef8',P.farHaze,.2),'#2a3450',nk),.85); for(let i=0;i<6;i++){ const X=L?w*(.05+i*.07+R()*.03):W-w*(.05+i*.07+R()*.03), Y0=tl(X)-H*(.035+R()*.05), len=H*(.025+R()*.03), wd=W*(.004+R()*.004), bend=(R()-.5)*wd*1.5; x.beginPath(); x.moveTo(X-wd,Y0); x.quadraticCurveTo(X-wd*.4+bend,Y0+len*.5,X+bend*.5,Y0+len); x.quadraticCurveTo(X+wd*.4+bend,Y0+len*.5,X+wd,Y0); x.quadraticCurveTo(X,Y0-H*.003,X-wd,Y0); x.fill(); } /* snow lying in the gullies above the trees: soft tapering streaks down the slope (ovals, then zigzags, read wrong) */
+  { const sc2=mix(mix('#e8eef8',P.farHaze,.2),'#2a3450',nk), pk=pts.filter(q=>q[1]<tl(q[0])-H*.03); for(let i=0;i<5&&pk.length;i++){ const q=pk[Math.floor((i+.5)/5*pk.length)], X=q[0], Y=q[1]+H*.006, Yb=Y+(tl(X)-Y)*(.55+R()*.3), lean=(L?1:-1)*W*(.004+R()*.008), wd=W*(.0025+R()*.0025);
+      for(const [k,al] of [[1.9,.18],[1,.6]]){ x.fillStyle=v3rgba(sc2,al); x.beginPath(); x.moveTo(X-wd*k,Y); x.quadraticCurveTo(X+lean*.5-wd*k*.8,(Y+Yb)/2,X+lean,Yb); x.quadraticCurveTo(X+lean*.5+wd*k*.8,(Y+Yb)/2,X+wd*k,Y); x.closePath(); x.fill(); } } } /* old snow in the gullies above the trees: long streaks tapering down the slope from the ridge (round drifts read as pebbles, wedges as teeth: director) */
   for(let k=0;k<3;k++){ const X=L?w*(.2+k*.22):W-w*(.2+k*.22), Y=tl(X); x.fillStyle=mix(forestL,'#8aa870',.35); x.beginPath(); x.moveTo(X-W*.003,Y); x.lineTo(X+W*.003,Y); x.lineTo(X+W*.014*side*-.2+W*.01,hz); x.lineTo(X-W*.01,hz); x.closePath(); x.fill(); } /* avalanche paths */
   for(let row=0;row<26;row++){ const v=row/26; for(let i=0;i<34;i++){ const X=L?R()*w:W-R()*w, Y=tl(X)+(hz-tl(X))*(v+R()*.04), s=H*(.006+v*.012)*(.7+R()*.6); x.fillStyle=R()<.5?forest:forestL; x.beginPath(); x.moveTo(X,Y-s*2.2); x.lineTo(X+s*.8,Y); x.lineTo(X-s*.8,Y); x.closePath(); x.fill(); } } /* the spruce canopy, bigger toward the shore */
   for(let i=0;i<9;i++){ const X=L?w*(.15+R()*.6):W-w*(.15+R()*.6), Y=tl(X)+(hz-tl(X))*(.2+R()*.5); x.fillStyle=mix(mix('#c89a3a',P.back,.25),'#141a10',nk); x.beginPath(); x.moveTo(X,Y-H*.016); x.lineTo(X+H*.005,Y); x.lineTo(X-H*.005,Y); x.closePath(); x.fill(); } /* larches near the top of the forest */
@@ -16152,7 +16154,7 @@ V3SCENES.rockies={
     for(const [px,hh] of [[.26,.06],[.31,.05],[.55,.065],[.68,.055],[.93,.06]]) waBirch(x,W*px,hz-H*.006,H*hh,P,Math.round(px*1000));
     // fireweed along the shore
     { const r=v3rng(12); for(let i=0;i<30;i++){ const px=W*(.2+r()*.75), hh=H*(.008+r()*.01); if(px>W*.76&&px<W*.88) continue; x.strokeStyle=mix('#4a6a3a',P.front,P.night*.5); x.lineWidth=1; x.beginPath(); x.moveTo(px,hz); x.lineTo(px,hz-hh); x.stroke(); x.fillStyle=mix('#d8508a',P.front,.15+P.night*.55); x.fillRect(px-1,hz-hh,2,hh*.55); } }
-    waCabin(x,W*.04,hz-H*.004,H*.0058,P);
+    waCabin(x,W*.3,hz-H*.004,H*.0058,P); /* out on the far shore in full view (behind the lodge it was hidden, director) */
 /* the canoe dock (Moraine Lake): a short timber dock on posts with red canoes tied along it, one green */    { const dx=W*.555, dw=W*.06, dy=hz+H*.006, nk=P.night*.55, wood=mix('#6a5040',P.front,nk), woodL=mix('#8a6a50',P.front,nk); x.fillStyle=wood; for(let i=0;i<=4;i++) x.fillRect(dx+dw*i/4-1,dy,2.2,H*.012); x.fillStyle=woodL; x.fillRect(dx-W*.004,dy-H*.004,dw+W*.008,H*.004); x.fillStyle=v3rgba('#000000',.25); x.fillRect(dx-W*.004,dy,dw+W*.008,1);      for(const [k,col] of [[0,'#c83a2a'],[1,'#c83a2a'],[2,'#3a6a4a'],[3,'#c83a2a']]){ const cx=dx+W*.004+k*W*.015, cy=dy+H*(.009+(k%2)*.004), L=W*.013, hc=mix(col,P.front,nk); x.fillStyle=hc; x.beginPath(); x.moveTo(cx-L*.5,cy-H*.004); x.quadraticCurveTo(cx,cy+H*.005,cx+L*.5,cy-H*.004); x.quadraticCurveTo(cx,cy-H*.001,cx-L*.5,cy-H*.004); x.fill(); x.fillStyle=v3rgba('#ffffff',.25*(1-nk)); x.fillRect(cx-L*.35,cy-H*.003,L*.7,1); } }
     v3water(x,P,hz,cnv,.42);
     // crystal-clear water: rocks and weeds on the bottom, clearer toward you
@@ -16168,12 +16170,12 @@ V3SCENES.rockies={
     if(FX){ g.strokeStyle='rgba(255,255,255,.75)'; g.lineWidth=1; for(let i=0;i<6;i++){ const xx=fx-W*.005+i*W*.002, q=((t*1.4+i*.37)%1), y=ft+q*(hz-ft); g.beginPath(); g.moveTo(xx,y); g.lineTo(xx,y+H*.015); g.stroke(); }
       for(let i=0;i<5;i++){ const q=((t*.4+i*.2)%1); g.fillStyle='rgba(240,250,255,'+(.3*(1-q))+')'; g.beginPath(); g.arc(fx+(i-2)*W*.006,hz-q*H*.025,H*(.006+q*.012),0,7); g.fill(); } }
     // chimney smoke
-    if(FX) for(let i=0;i<5;i++){ const q=((t*.15+i*.2)%1), sx=W*.04+H*.0058*12*.74+H*.0058*.8+q*H*.03, sy=hz-H*.06-q*H*.08; g.fillStyle='rgba(220,226,234,'+(.25*(1-q))+')'; g.beginPath(); g.arc(sx,sy,H*(.006+q*.012),0,7); g.fill(); }
-    waFlag(W*.135,hz-H*.006-H*.0105*4.6,H*.0105,P,t);
+    if(FX) for(let i=0;i<5;i++){ const q=((t*.15+i*.2)%1), sx=W*.3+H*.0058*12*.74+H*.0058*.8+q*H*.03, sy=hz-H*.06-q*H*.08; g.fillStyle='rgba(220,226,234,'+(.25*(1-q))+')'; g.beginPath(); g.arc(sx,sy,H*(.006+q*.012),0,7); g.fill(); }
+    waFlag(W*.37,hz-H*.006-H*.0105*4.6,H*.0105,P,t);
     // beavers: one swims out from the lodge and slaps its tail before diving; one gnaws on the dam
-    { const per=26, q=(t%per)/per; if(q<.62){ const e=q/.62, bx=W*(WA_FALL.x+.05)-e*W*.22, by=hz+H*.035, s=H*.0045, oc=mix('#5a3a22',P.wMid,.15+P.night*.5);
+    { const per=26, q=(t%per)/per; if(q<.62){ const e=q/.62, bx=W*(WA_FALL.x+.05)-e*W*.22, by=hz+H*.035, s=H*.0045, oc=mix('#5a3a22',P.wMid,.15+P.night*.5), rise=Math.min(1,e/.08); /* it surfaces from under the water by the lodge with a ripple, never popping into view (director) */ if(rise<1){ g.strokeStyle=v3rgba(mix(P.wTop,'#ffffff',.6),.5*(1-rise)); g.lineWidth=1; g.beginPath(); g.ellipse(bx,by,s*(2+rise*4),s*(.5+rise),0,0,7); g.stroke(); } g.save(); g.beginPath(); g.rect(0,0,W,by+s*.2); g.clip(); g.translate(0,(1-rise)*s*2.6);
         g.fillStyle=oc; g.beginPath(); g.ellipse(bx,by,s*2.2,s*.9,0,Math.PI,0); g.fill(); g.beginPath(); g.ellipse(bx-s*1.8,by-s*.5,s*1,s*.8,0,0,7); g.fill(); m33dot(g,bx-s*2.2,by-s*.7,s*.18,'#140c08');
-        g.strokeStyle=v3rgba(mix(P.wTop,'#ffffff',.6),.5); g.lineWidth=1; g.beginPath(); g.moveTo(bx+s*2,by); g.lineTo(bx+s*7,by-s*1.2); g.moveTo(bx+s*2,by+s*.3); g.lineTo(bx+s*7,by+s*1.6); g.stroke(); }
+        g.strokeStyle=v3rgba(mix(P.wTop,'#ffffff',.6),.5); g.lineWidth=1; g.beginPath(); g.moveTo(bx+s*2,by); g.lineTo(bx+s*7,by-s*1.2); g.moveTo(bx+s*2,by+s*.3); g.lineTo(bx+s*7,by+s*1.6); g.stroke(); g.restore(); }
       else if(q<.7){ const k=(q-.62)/.08, bx=W*(WA_FALL.x+.05)-W*.22, by=hz+H*.035, s=H*.0045; if(k<.3){ g.fillStyle=mix('#3a2614',P.wMid,P.night*.5); g.beginPath(); g.ellipse(bx+s,by-s*k*6,s*1.6,s*.6,-.4,0,7); g.fill(); }
         g.strokeStyle='rgba(255,255,255,'+(1-k)+')'; g.lineWidth=1.3; g.beginPath(); g.ellipse(bx,by,s*(2+k*8),s*(.6+k*2),0,0,7); g.stroke(); if(FX) for(let i=0;i<5;i++){ g.fillStyle='rgba(255,255,255,'+(.8*(1-k))+')'; g.fillRect(bx+(i-2)*s*1.4,by-s*(2+Math.sin(i*1.7)*1.5)*Math.sin(k*Math.PI)*3,1.6,1.6); } } }
     { const bx=W*(WA_FALL.x+.012), by=hz-H*.008, s=H*.004, ch=Math.sin(t*9)*.25*(Math.sin(t*.7)>0?1:0), oc=mix('#5a3a22',P.front,P.night*.5); g.fillStyle=oc; g.beginPath(); g.ellipse(bx,by,s*1.8,s*1.4,0,0,7); g.fill(); g.beginPath(); g.ellipse(bx+s*1.6,by-s*.6+ch*s,s*.9,s*.75,.2,0,7); g.fill(); g.fillStyle=mix('#3a2614',P.front,P.night*.5); g.beginPath(); g.ellipse(bx-s*2.2,by+s*.9,s*1.3,s*.4,.3,0,7); g.fill(); m33dot(g,bx+s*1.9,by-s*.9+ch*s,s*.16,'#140c08'); }
@@ -16532,10 +16534,10 @@ WA_MORE.olympus={
 const HOMEF={};
 /* the format, in the scene's own units (W, H): the same for every format home */
 const HF = { pw:()=>W*.19, x0:()=>-4 /* the deck starts at the left edge (no bank: director, 2026-11-21) */, dockY:()=>H*.6, wl:dockY=>dockY+H*.075, top:dockY=>dockY-H*.42 /* the stored picture reaches high enough for a lifted cover (HK.roof) */, lightX:()=>W*.19-W*.012,
-  seatX:()=>W*.064 /* the seat: behind the angler (who stands at W*.12), under the canopy; resting sits the angler in it */, sc:()=>clamp(H/420,.7,1.25) /* the angler's scale */ };
+  seatX:()=>{ const sp=typeof HOMEF!=='undefined'&&S&&HOMEF[S.loc]; return W*(sp&&sp.seatX||.064); } /* a home can place its seat (the Rockies cabin: nearer the front of the dock, director) */ /* the seat: behind the angler (who stands at W*.12), under the canopy; resting sits the angler in it */, sc:()=>clamp(H/420,.7,1.25) /* the angler's scale */ };
 const hfSpec = id => HOMEF[id]||null;
 function hfChoice(id,el){ const sp=hfSpec(id), e=sp&&sp.els.find(x=>x.id===el); if(!e) return [0,0]; const src=(S.dockAt===id||!S.dockAt)?S.dock:(S.docks&&S.docks[id]), c=src&&src.el&&src.el[el]; /* each water's own choices: the map pictures of other waters showed the current water's (2026-11-22) */
-  return [Array.isArray(c)&&c[0]>=0&&c[0]<e.styles.length?c[0]|0:(e.def?e.def[0]:0), Array.isArray(c)&&c[1]>=0&&c[1]<sp.colors.length?c[1]|0:(e.def?e.def[1]:0)]; }
+  return [Array.isArray(c)&&c[0]>=0&&c[0]<e.styles.length?c[0]|0:(e.def?e.def[0]:0), Array.isArray(c)&&c[1]>=0&&c[1]<sp.colors.length&&(!e.pal||e.pal.includes(c[1]|0))?c[1]|0:(e.def?e.def[1]:0)]; } /* a feature may offer only the colours real ones come in (e.pal: indices into the home's list) */
 function hfColor(id,el){ const sp=hfSpec(id); return sp.colors[hfChoice(id,el)[1]][1]; }
 /* the light's glow colour: the chosen colour, lifted toward white so even a deep shade still reads as light */
 function hfGlow(id){ const sp=hfSpec(id); if(sp&&sp.glow) return sp.glow; /* a home whose light is a window glows warm whatever the door's colour */ const e=sp&&sp.els.find(x=>x.light||x.id==='light'); const v=hex2rgb(mix(hfColor(id,e?e.id:'light'),'#ffffff',.3)); return v.join(','); } /* the feature that carries the home's light (batch 5: not always called "light") */
@@ -16579,7 +16581,7 @@ function hfCloseup(c,f){ const L=LOCS[locIdx(S.loc)], P=v3palette.v, A=HF_LAST; 
   x.setTransform(k,0,0,k,-f.sx*k,-f.sy*k); const hc=hfPaintCache(L,P,night,dockY,k,':close'); hfRings(x,hc,t,night,dockY); x.drawImage(hc.cv,hc.x,hc.y,hc.w,hc.h); hfLights(x,L,hc,t,night,dockY,0,P,false);
   try{ const hp=drawAngler(x,A.ax,A.ay,A.sc,S.look,{night:night*.8,hx:A.hx,hy:A.hy,t:A.t,rodA:A.rodA,sit:A.sit,rim:A.rim,glow:A.glow}); const hand=hp&&hp.x!=null?{x:hp.x,y:hp.y}:{x:A.ax+A.hx*A.sc,y:A.ay+A.hy*A.sc};
     if(V3ON){ v3Rod(x,hand,{x:A.tx,y:A.ty},(hand.x+A.tx)/2,(hand.y+A.ty)/2-6+A.ten*.08,ROD_I[S.rods.eq],night,t,false); if(hp&&hp.fingers) hp.fingers(); }
-    drawPetScene(A.pax,A.pay,A.sc,A.t,night,x); }catch(e){}
+    drawPetScene(A.pax,A.pay,A.sc,A.t,night,x); if(S.loc==='rockies') rkFront(night,x); /* the porch rail in front, as in the scene */ }catch(e){}
   x.setTransform(1,0,0,1,0,0); return true; }
 
 /* ---------- shared pieces for format homes (draw into the stored picture) ---------- */
@@ -16701,7 +16703,7 @@ function renderHomeF(P){ const sp=hfSpec(S.loc), L=LOCS[locIdx(S.loc)];
    <div class="tile" style="margin-top:10px;padding:0;overflow:hidden"><canvas id="homecv" width="900" height="360" style="width:100%;height:auto;cursor:default"></canvas></div>`+
    sp.els.map(e=>{ const [s,c]=hfChoice(S.loc,e.id);
      return `<h5 data-hel="${e.id}">Style</h5><div class="chips" data-hel="${e.id}">${e.styles.map((n,i)=>`<button type="button" class="chipb" data-act="hfel" data-k="${e.id}" data-v="${i}" aria-pressed="${i===s}">${esc(n)}</button>`).join('')}</div>`+
-       `<h5 data-hel="${e.id}">Color</h5><div class="chips" data-hel="${e.id}">${sp.colors.map((col,i)=>sw(e,col,i,i===c)).join('')}</div>`; }).join('');
+       `<h5 data-hel="${e.id}">Color</h5><div class="chips" data-hel="${e.id}">${sp.colors.map((col,i)=>(!e.pal||e.pal.includes(i))?sw(e,col,i,i===c):'').join('')}</div>`; }).join('');
   paintHome(); }
 /* the 6 features become the page's tabs */
 function hfSections(P){ const sp=hfSpec(S.loc); if(!sp) return false; sectionize(P,'home',sp.els.map(e=>({name:e.label,nodes:[...P.querySelectorAll(':scope > [data-hel="'+e.id+'"]')]}))); return true; }
@@ -16712,7 +16714,7 @@ function hfFrame(c,top){ const pw=HF.pw(), dy=HF.dockY(), ft=dy-H*.255*Math.max(
   let y=h>=want.h?Math.min(want.y+want.h/2,dy-H*.03)-h/2:dy-H*.205; y=Math.max(top||0,Math.min(H-h,y)); return {sx:0,sy:y,sw:Math.min(W,w),sh:h}; }
 /* a choice: the element's style or color (saved with this water's home) */
 function hfAct(b){ const a=b.dataset.act; if(a!=='hfel'&&a!=='hfcol') return undefined; const sp=hfSpec(S.loc), e=sp&&sp.els.find(x=>x.id===b.dataset.k), v=+b.dataset.v; if(!e) return 'skip';
-  const cur=hfChoice(S.loc,e.id); if(a==='hfel'){ if(!(v>=0&&v<e.styles.length)) return 'skip'; cur[0]=v; } else { if(!(v>=0&&v<sp.colors.length)) return 'skip'; cur[1]=v; }
+  const cur=hfChoice(S.loc,e.id); if(a==='hfel'){ if(!(v>=0&&v<e.styles.length)) return 'skip'; cur[0]=v; } else { if(!(v>=0&&v<sp.colors.length)||(e.pal&&!e.pal.includes(v))) return 'skip'; cur[1]=v; }
   S.dock.el=hfClean(S.dock.el); S.dock.el[e.id]=cur; try{ V3THUMB[S.loc]=undefined; }catch(er){} /* its map picture is painted again */ try{ sfx.coin(); }catch(er){} save(); return 'render'; }
 // =====================================================================
 // The home kit (batch 5, 2026-11-22): side-view parts every format home is built from (docs/HOME_DESIGNS.md). Each home in
@@ -17184,14 +17186,14 @@ hfMake('frost',{ name:'Ice camp', hname:'ice camp', ice:true,
     ['stove',(o,s)=>HK.light(o,['stove','potbelly','firering'][s],HK.at(o,.6))]] });
 
 /* 6. Canadian Rockies: the lodge ledge */
-hfMake('rockies',{ name:'Log cabin', hname:'log cabin', glow:'255,205,130',
+hfMake('rockies',{ name:'Log cabin', hname:'log cabin', glow:'255,205,130', seatX:.092,
   colors:C16('Cedar log=#9a6a42;Spruce log=#7a5a3e;Dark log=#4a3426;Granite=#9a948a;Dark granite=#5a5650;Glacier turquoise=#2a9aa8;Ice teal=#7ad8d8;Deep lake=#0a4858;Spruce green=#2e5040;Moss=#5a7a4a;Snow=#f4f8fc;Flannel red=#b8322a;Flannel black=#2a2626;Maple orange=#d8702a;Birch cream=#ece2cc;Canoe green=#3a6a4a'),
   /* the log cabin (director, 2026-11-22 night: "the Canadian place doesn't have a log cabin to customise… customise aspects of a log cabin
-     instead of some of the garbage choices"): a cabin seen gable-end on at the back of a log deck on granite boulders; its walls, roof,
+     instead of some of the garbage choices"): a wide log lodge seen from its long side at the back of a log deck on a granite ledge; its walls, roof,
      chimney, porch and door and windows are the choices; the windows glow at night; a covered porch reaches over the angler */
-  els:[{id:'walls',label:'Log walls',styles:['Round logs','Squared timbers','Whitewashed chinking'],def:[0,0]},{id:'roof',label:'Cabin roof',styles:['Cedar shakes','Green tin','Sod roof'],def:[0,4]},
-       {id:'chimney',label:'Chimney',styles:['Fieldstone','Stovepipe','Brick'],def:[0,3]},{id:'porch',label:'Porch',styles:['Open deck','Covered porch','Porch with log rail'],def:[1,1]},
-       {id:'door',label:'Door and windows',light:true,styles:['Plank door','Dutch door and window box','Shuttered windows'],def:[0,11]}],
+  els:[{id:'walls',label:'Log walls',styles:['Round logs','Squared timbers','Whitewashed chinking'],def:[0,0],pal:[0,1,2,3,11,12]},{id:'roof',label:'Cabin roof',styles:['Cedar shakes','Green tin','Sod roof'],def:[0,4],pal:[0,2,3,4,8,9,11,12,15]},
+       {id:'chimney',label:'Chimney',styles:['Fieldstone','Stovepipe','Brick'],def:[0,3],pal:[2,3,4,11,14]},{id:'porch',label:'Porch',styles:['Open deck','Covered porch','Porch with log rail'],def:[1,1],pal:[0,1,2,8,12]},
+       {id:'door',label:'Door and windows',light:true,styles:['Plank door','Dutch door and window box','Shuttered windows'],def:[0,11],pal:[0,1,2,5,7,8,11,12,13,15]}],
   seat:['muskoka','stumpblanket','rocker'], seatNames:['Muskoka chair','Stump and blanket','Log rocker'], seatDef:[0,11],
   order:[
     ['base',(o)=>{ rkShore(o); rkLedge(o); HK.deck(o,'#8a6040','logs'); }],
@@ -17201,17 +17203,17 @@ hfMake('rockies',{ name:'Log cabin', hname:'log cabin', glow:'255,205,130',
       if(s===2){ HK.rect(o,x,top,w,y-top,mix('#a8483a',c,.25)); o.x.strokeStyle=HK.n(o,'#e0d0c0'); o.x.lineWidth=.6; o.x.beginPath(); for(let yy=top,row=0;yy<y;yy+=H*.006,row++){ o.x.moveTo(x,yy); o.x.lineTo(x+w,yy); for(let xx=x+(row%2)*w/4;xx<x+w;xx+=w/2){ o.x.moveTo(xx,yy); o.x.lineTo(xx,yy+H*.006); } } o.x.stroke(); HK.rect(o,x-W*.002,top-H*.004,w+W*.004,H*.005,mix('#7a3428',c,.2)); } }],
     ['walls',(o,s,c)=>{ const C=rkCab(o), x0=C.x0, x1=C.x1, top=C.wallTop, y=o.dockY, n=9, lh=(y-top)/n;
       for(let k=0;k<n;k++){ const ly=top+k*lh;
-        if(s===0){ HK.rect(o,x0,ly,x1-x0,lh-.5,k%2?c:HK.lt(c,.07)); HK.rect(o,x0,ly+lh*.7,x1-x0,lh*.3,HK.dk(c,.2)); for(const ex of [x0-W*.003,x1+W*.003]){ HK.circ(o,ex,ly+lh/2,lh*.5,HK.lt(c,.18)); HK.circ(o,ex,ly+lh/2,lh*.22,HK.dk(c,.15)); } }
+        if(s===0){ HK.rect(o,x0-W*.003,ly,x1-x0+W*.006,lh-.5,k%2?c:HK.lt(c,.07)); HK.rect(o,x0-W*.003,ly+lh*.7,x1-x0+W*.006,lh*.3,HK.dk(c,.2)); /* the logs run right out to their rounded ends: no gap at the corners */ for(const ex of [x0-W*.003,x1+W*.003]){ HK.circ(o,ex,ly+lh/2,lh*.5,HK.lt(c,.18)); HK.circ(o,ex,ly+lh/2,lh*.22,HK.dk(c,.15)); } }
         if(s===1){ HK.rect(o,x0,ly,x1-x0,lh-1,k%2?c:HK.dk(c,.06)); HK.rect(o,k%2?x0-W*.004:x0,ly,W*.004,lh-1,HK.dk(c,.2)); HK.rect(o,k%2?x1:x1-W*.004,ly,W*.004,lh-1,HK.dk(c,.2)); }
-        if(s===2){ HK.rect(o,x0,ly,x1-x0,lh*.72,HK.dk(c,.12)); HK.rect(o,x0,ly+lh*.72,x1-x0,lh*.28,'#f0ece2'); for(const ex of [x0-W*.003,x1+W*.003]) HK.circ(o,ex,ly+lh*.36,lh*.38,HK.lt(c,.12)); } }
+        if(s===2){ HK.rect(o,x0-W*.003,ly,x1-x0+W*.006,lh*.72,HK.dk(c,.12)); HK.rect(o,x0-W*.003,ly+lh*.72,x1-x0+W*.006,lh*.28,'#f0ece2'); for(const ex of [x0-W*.003,x1+W*.003]) HK.circ(o,ex,ly+lh*.36,lh*.38,HK.lt(c,.12)); } }
       HK.rect(o,x0,top,x1-x0,H*.005,HK.dk(c,.35)); }],
-    ['door',(o,s,c)=>{ const C=rkCab(o), y=o.dockY, dw=W*.018, dh=(y-C.wallTop)*.7, dx=C.x0+W*.012, wy=C.wallTop+(y-C.wallTop)*.22, wh=(y-C.wallTop)*.3;
+    ['door',(o,s,c)=>{ const C=rkCab(o), y=o.dockY, dw=W*.018, dh=(y-C.wallTop)*.7, dx=C.vx+W*.012, wy=C.wallTop+(y-C.wallTop)*.22, wh=(y-C.wallTop)*.3;
       const win=(wx,ww)=>{ HK.rect(o,wx-2,wy-2,ww+4,wh+4,HK.dk(c,.35)); HK.rect(o,wx,wy,ww,wh,'#2a3440'); HK.rect(o,wx+ww/2-.5,wy,1,wh,HK.dk(c,.35)); HK.rect(o,wx,wy+wh/2-.5,ww,1,HK.dk(c,.35)); return {x:wx+ww/2,y:wy+wh/2,r:.1,a:.5,small:1,win:[ww,wh]}; };
       const door=(split)=>{ HK.rect(o,dx-2,y-dh-2,dw+4,dh+2,HK.dk(c,.38)); HK.rect(o,dx,y-dh,dw,dh,HK.dk(c,.28)); for(let i=1;i<4;i++) HK.line(o,[dx+dw*i/4,y-dh,dx+dw*i/4,y],HK.dk(c,.45),.8); if(split) HK.line(o,[dx,y-dh*.5,dx+dw,y-dh*.5],HK.dk(c,.5),1.2); HK.circ(o,dx+dw*.82,y-dh*.48,1.6,'#c8a050'); };
       const wA=W*.084, wB=C.x1-W*.026; /* the windows sit between the chair and the angler, and past the angler, so neither hides them */
       if(s===0){ door(false); const L=win(wA,W*.018); o.lights.push(win(wB,W*.016)); return L; }
-      if(s===1){ door(true); const L=win(wA,W*.02); HK.rect(o,wA-W*.002,wy+wh+2,W*.024,H*.006,'#6a4a32'); for(let i=0;i<6;i++) HK.circ(o,wA+W*(.001+i*.0036),wy+wh+1,H*.003,['#d8508a','#f0c040','#ffffff','#d8508a','#8a6ad8','#f0c040'][i]); return L; }
-      door(false); const L1=win(wA,W*.014), L2=win(wB,W*.014); for(const sx of [wA-W*.005,wA+W*.014,wB-W*.005,wB+W*.014]) HK.rect(o,sx,wy-1,W*.005,wh+2,mix('#3a6a4a',c,.3)); o.lights.push(L2); return L1; }],
+      if(s===1){ door(true); const L=win(wA,W*.02); o.lights.push(win(wB,W*.018)); for(const bx of [wA,wB]){ HK.rect(o,bx-W*.002,wy+wh+2,W*.024,H*.006,'#6a4a32'); for(let i=0;i<6;i++) HK.circ(o,bx+W*(.001+i*.0036),wy+wh+1,H*.003,['#d8508a','#f0c040','#ffffff','#d8508a','#8a6ad8','#f0c040'][i]); } return L; } /* both windows keep their flower boxes */
+      door(false); const L1=win(wA,W*.014), L2=win(wB,W*.014), sw=W*.0065; for(const sx of [wA-sw-2,wA+W*.014+2,wB-sw-2,wB+W*.014+2]){ HK.rect(o,sx-1,wy-3,sw+2,wh+6,HK.dk(c,.45)); HK.rect(o,sx,wy-2,sw,wh+4,c); for(let k=1;k<6;k++) HK.rect(o,sx+1,wy-2+(wh+4)*k/6,sw-2,1,HK.dk(c,.3)); } /* board shutters in the door's colour, louvred, outlined so they stand off the logs */ o.lights.push(L2); return L1; }],
     ['roof',(o,s,c)=>{ const C=rkCab(o), x=o.x, ov=W*.01, L0=C.x0-ov, R0=C.x1+ov, bt=C.wallTop+H*.004, tp=C.roofTop, rc=s===1?mix('#3a6a4a',c,.3):s===2?mix('#5a4a32',c,.2):c;
       /* seen from the long side: the near roof slope as a band above the wall, eaves overhanging both ends, a ridge cap along the top */
       x.fillStyle=HK.n(o,rc); x.beginPath(); x.moveTo(L0,bt); x.lineTo(C.x0+ov*.2,tp); x.lineTo(C.x1-ov*.2,tp); x.lineTo(R0,bt); x.closePath(); x.fill();
@@ -17222,13 +17224,23 @@ hfMake('rockies',{ name:'Log cabin', hname:'log cabin', glow:'255,205,130',
       o.top=Math.min(o.top==null?o.dockY-H*.23:o.top,tp-H*.04); o.low=Math.max(o.low==null?-1e9:o.low,C.wallTop+H*.01); /* the resting rod stays under the eaves, never across the roof */ }],
     ['porch',(o,s,c)=>{ if(!s) return; const C=rkCab(o), y=o.dockY, sc=HF.sc(), lo=y-84*sc*1.06, th=Math.max(4,H*.012), a=C.x0-W*.004, b=C.x1+W*.01, x=o.x;
       /* a porch roof across the cabin's front, lower than the cabin roof, on log posts standing on the deck; the angler fishes under it */
-      for(const px of [C.x0+W*.004,(C.x0+C.x1)/2+W*.02,C.x1+W*.004]){ HK.rect(o,px-2,lo,4,y-lo,'#5a3e2a'); HK.rect(o,px-3,lo,6,H*.004,'#4a3426'); }
-      x.fillStyle=HK.n(o,mix('#6a5040',c,.35)); x.fillRect(a,lo-th,b-a,th); x.fillStyle=HK.n(o,HK.dk(mix('#6a5040',c,.35),.25)); x.fillRect(a,lo-H*.003,b-a,H*.003); HK.line(o,[a,lo-th,b,lo-th],v3rgba(o.P.rim||'#fff0d0',.4*HK.lit(o)),1);
-      if(s===2){ const rh=H*.034; for(let i=0;i<=6;i++){ const px=C.x0+W*.004+(C.x1-C.x0)*i/6; HK.rect(o,px-1.5,y-rh,3,rh,'#5a3e2a'); } HK.rect(o,C.x0,y-rh,C.x1-C.x0+W*.004,Math.max(3,H*.005),mix('#8a6040',c,.3)); HK.rect(o,C.x0,y-rh*.5,C.x1-C.x0+W*.004,Math.max(2,H*.004),mix('#8a6040',c,.3)); } /* a log rail along the porch front */
+      /* the porch roof is a shed roof in the cabin roof's own material, sloping from the wall down to a fascia on the posts; it shades the wall
+         under it, so it reads as a roof and not as one more log (it vanished into the logs before: the all-options check, 2026-11-22 night) */
+      const rs=hfStyle('rockies','roof'), rc0=hfColor('rockies','roof'), rc=rs===1?mix('#3a6a4a',rc0,.3):rs===2?mix('#5a4a32',rc0,.2):rc0, bk=Math.max(C.wallTop+H*.008,lo-th-H*.026);
+      const sh=x.createLinearGradient(0,lo,0,lo+H*.03); sh.addColorStop(0,'rgba(10,8,6,.42)'); sh.addColorStop(1,'rgba(10,8,6,0)'); x.fillStyle=sh; x.fillRect(C.x0-W*.003,lo,C.x1-C.x0+W*.006,H*.03); /* its shadow on the wall */
+      for(const px of [C.vx+W*.006,(C.vx+C.x1)/2+W*.02,C.x1-W*.006]){ HK.rect(o,px-3,lo,6,y-lo,'#3e2a1c'); HK.rect(o,px-1.5,lo,1.5,y-lo,v3rgba('#c89a6a',.5*HK.lit(o)+.15)); HK.rect(o,px-4,lo,8,H*.004,'#2e2016'); HK.rect(o,px-4,y-H*.004,8,H*.004,'#2e2016'); } /* posts stand on the deck in front of the wall, inside its ends */
+      x.fillStyle=HK.n(o,rc); x.beginPath(); x.moveTo(a+W*.004,bk); x.lineTo(b-W*.004,bk); x.lineTo(b,lo-th); x.lineTo(a,lo-th); x.closePath(); x.fill();
+      x.strokeStyle=HK.n(o,HK.dk(rc,.3)); x.lineWidth=1; x.beginPath(); if(rs===1){ for(let xx=a+W*.006;xx<b;xx+=W*.007){ x.moveTo(xx,bk+1); x.lineTo(xx,lo-th-1); } } else { for(let k=1;k<3;k++){ const yy=bk+(lo-th-bk)*k/3; x.moveTo(a,yy); x.lineTo(b,yy); } } x.stroke(); /* tin seams, or shake courses (sod roofs keep shakes on the porch) */
+      HK.rect(o,a,bk-H*.002,b-a,H*.003,HK.dk(rc,.35)); /* the flashing where it meets the wall */
+      x.fillStyle=HK.n(o,mix('#6a5040',c,.35)); x.fillRect(a,lo-th,b-a,th); x.fillStyle=HK.n(o,HK.dk(mix('#6a5040',c,.35),.25)); x.fillRect(a,lo-H*.003,b-a,H*.003); HK.line(o,[a,lo-th,b,lo-th],v3rgba(o.P.rim||'#fff0d0',.4*HK.lit(o)),1); /* the fascia, in the porch's colour */
+      /* (the porch's log rail is drawn in front of the angler and the chair: rkFront, called after them by the scene) */
       o.low=Math.max(o.low==null?-1e9:o.low,lo-th); }],
     ['seat']] });
-/* the cabin's frame, shared by its parts: gable-end on at the back of the deck, the walls a little taller than the angler */
-function rkCab(o){ const sc=HF.sc(), x0=Math.max(HF.x0(),0)+Math.max(W*.006,5*sc), x1=o.pw-W*.016, wallTop=o.dockY-84*sc*1.3; return {x0,x1,wallTop,roofTop:wallTop-Math.max(H*.05,(x1-x0)*.14)}; } /* a long, low lodge seen from its long side, nearly the deck's full width behind the porch (director: "make sure the lodge is actually wide") */ /* it fills the space from the screen edge to just behind the angler, on every screen (it was too narrow on phones) */
+/* the cabin's frame, shared by its parts: seen from its long side at the back of the deck, the walls a little taller than the angler */
+/* the porch rail runs along the deck's front edge, nearest to you, so it is drawn after the angler, the chair and the pets (director: "ordering issues") */
+function rkFront(night,cx){ const q=cx||g; if(hfStyle('rockies','porch')!==2) return; const y=HF.dockY(), C=rkCab({pw:HF.pw(),dockY:y}), x0=C.x0, x1=C.x1, rh=H*.034, c=hfColor('rockies','porch'), N=c0=>mix(c0,'#0a1020',night*.55), wood=N(mix('#8a6040',c,.3)), post=N('#5a3e2a');
+  q.fillStyle=post; for(let i=0;i<=6;i++){ const px=x0+W*.004+(x1-x0)*i/6; q.fillRect(px-1.5,y-rh,3,rh); } q.fillStyle=wood; q.fillRect(x0,y-rh,x1-x0+W*.004,Math.max(3,H*.005)); q.fillRect(x0,y-rh*.5,x1-x0+W*.004,Math.max(2,H*.004)); q.fillStyle=v3rgba('#ffffff',.15*(1-night)); q.fillRect(x0,y-rh,x1-x0+W*.004,1); }
+function rkCab(o){ const sc=HF.sc(), vx=Math.max(HF.x0(),0)+Math.max(W*.006,5*sc), x1=o.pw-W*.016, wallTop=o.dockY-84*sc*1.15, wh=o.dockY-wallTop, x0=Math.min(vx,x1-wh*2.9); return {x0,vx,x1,wallTop,roofTop:wallTop-Math.max(H*.05,(x1-vx)*.14)}; } /* a long, low lodge seen from its long side, nearly the deck's full width behind the porch (director: "make sure the lodge is actually wide") */ /* always at least 2.9 times as wide as its walls are tall: where the screen is too narrow (phones) the lodge runs on past the left edge instead of being squeezed (director, 2026-11-22 night: "on mobile… very stretched out"); vx is its visible left end, for the door and the porch posts */
 /* the lakeshore the cabin is built on (director, 2026-11-22 night: "this shouldn't just look like a random cabin in the middle of a lake, it
    needs to connect properly"): a forested bank behind the cabin, rising off the left edge and sloping down to meet the water just past the
    deck's end; spruces on it stand above the roof; granite, shrubs and a strip of wet shingle where the bank meets the water. Drawn first,
@@ -17237,7 +17249,7 @@ function rkShore(o){ const x=o.x, y=o.dockY, wl=o.wl, x0=HF.x0(), xe=o.pw+W*.022
   const top0=y-H*.27, topY=X=>{ const u=clamp((X-x0)/(xe-x0),0,1); return wl-(wl-top0)*Math.pow(1-u,1.1)+H*.004*Math.sin(X*.05)*(1-u); }; /* reaches the water line smoothly at its end: no edge */
   x.fillStyle=N('#24382a'); x.beginPath(); x.moveTo(x0,wl); for(let X=x0;X<=xe;X+=4) x.lineTo(X,Math.min(wl,topY(X))); x.lineTo(xe,wl); x.closePath(); x.fill();
   x.fillStyle=N('#2e4a34'); x.beginPath(); x.moveTo(x0,wl); for(let X=x0;X<=xe;X+=4) x.lineTo(X,Math.min(wl,topY(X)+H*.02)); x.lineTo(xe,wl); x.closePath(); x.fill(); /* the bank's lit near slope */
-  for(let i=0;i<9;i++){ const X=x0+(xe-x0)*(.04+i*.105)+(r()-.5)*W*.006, base=Math.min(wl,topY(X))+H*.004, h=H*(.09+r()*.07)*(1-i*.05); v3pine(x,X,base,h,N(i%3===1?'#3a5e40':'#1e3a2a'),o.P.rim,.25*lit); } /* spruces on the bank */
+  for(let i=0;i<7;i++){ const X=x0+(xe-x0)*(.04+i*.105)+(r()-.5)*W*.006, /* none at the bank's foot by the deck's end, where one seemed to stand on the deck */ base=Math.min(wl,topY(X))+H*.004, h=H*(.09+r()*.07)*(1-i*.05); v3pine(x,X,base,h,N(i%3===1?'#3a5e40':'#1e3a2a'),o.P.rim,.25*lit); } /* spruces on the bank */
   x.fillStyle=N('#7a7468'); x.beginPath(); x.moveTo(o.pw-W*.04,wl); x.quadraticCurveTo(o.pw-W*.01,wl-H*.009,xe+W*.006,wl); x.closePath(); x.fill(); /* wet shingle at the water's edge, tapering out */
   for(const [fx,s] of [[.86,1],[.97,1.3],[1.06,.8]]){ const X=x0+(o.pw-x0)*fx, rs=H*.012*s; x.fillStyle=N('#8a8680'); x.beginPath(); x.ellipse(X,wl-rs*.35,rs*1.4,rs*.8,0,Math.PI,0); x.fill(); x.fillStyle=v3rgba('#ffffff',.15*lit); x.beginPath(); x.ellipse(X-rs*.3,wl-rs*.7,rs*.5,rs*.18,0,0,7); x.fill(); } /* granite boulders at the foot of the bank */
   x.fillStyle=N('#3e6040'); for(let i=0;i<10;i++){ const X=o.pw-W*.035+r()*W*.05, Y=wl-H*(.004+r()*.012); x.beginPath(); x.ellipse(X,Y,W*.004,H*.005,0,Math.PI,0); x.fill(); } } /* shrubs */
@@ -17264,14 +17276,20 @@ function rkLedge(o){ const x=o.x, y=o.dockY, yu=y+HK.fh(), wl=o.wl, at=f=>HK.at(
   const bt=yu, bh=0, wood=N('#6a4a32'), woodL=N('#8a6448'), woodD=N('#3a281c'); /* no separate beam: the posts and braces meet the deck's own underside, so the platform reads as one deck (director: "all things need to line up correctly on the base platform") */
   /* posts: on the ledge where it is high enough, else on a submerged boulder footing */
   const surf=X=>{ for(let i=1;i<top.length;i++){ const [X0,Y0]=top[i-1], [X1,Y1]=top[i]; if(X>=X0&&X<=X1) return Y0+(Y1-Y0)*(X-X0)/(X1-X0); } return wl+H*.07; };
-  for(const f of [.5,.7,.92]){ const px=Math.min(o.pw-W*.006,at(f)), pw2=Math.max(5,W*.0075), foot=surf(px), sub=foot>wl;
-    if(sub){ x.fillStyle=N('#4a4844'); x.beginPath(); x.ellipse(px,foot,pw2*1.3,H*.006,0,0,7); x.fill(); }
-    const pg=x.createLinearGradient(px-pw2/2,0,px+pw2/2,0); pg.addColorStop(0,woodL); pg.addColorStop(.45,wood); pg.addColorStop(1,woodD); x.fillStyle=pg; x.fillRect(px-pw2/2,bt+bh,pw2,foot-bt-bh);
-    x.strokeStyle=v3rgba('#2a1c12',.45); x.lineWidth=.8; x.beginPath(); for(let k=0;k<4;k++){ const yy=bt+bh+(foot-bt-bh)*(k+.5)/4; x.moveTo(px-pw2/2,yy); x.lineTo(px-pw2*.1,yy+H*.003); } x.stroke(); /* bark checks */
-    x.fillStyle=N('#3a3a40'); x.fillRect(px-pw2/2-.5,bt+bh+H*.006,pw2+1,Math.max(1.5,H*.003)); /* an iron strap where it meets the beam */
-    if(foot>wl-H*.02){ const w2=x.createLinearGradient(0,wl-H*.02,0,wl); w2.addColorStop(0,'rgba(18,24,20,0)'); w2.addColorStop(1,'rgba(18,24,20,.6)'); x.fillStyle=w2; x.fillRect(px-pw2/2,wl-H*.02,pw2,H*.02); x.fillStyle=N('#3f5a2c'); for(let k=0;k<3;k++) x.fillRect(px-pw2/2+pw2*k/3,wl-H*.006,pw2/3,H*(.004+.003*(k%2))); }
-    x.strokeStyle=wood; x.lineWidth=Math.max(2,pw2*.5); x.lineCap='round'; x.beginPath(); x.moveTo(px,bt+bh+H*.03); x.lineTo(px-W*.012,bt+bh); if(f<.9){ x.moveTo(px,bt+bh+H*.03); x.lineTo(px+W*.012,bt+bh); } x.stroke(); x.lineCap='butt'; /* knee braces up to the beam */
-    if(foot>wl){ const uw=x.createLinearGradient(0,wl,0,foot+H*.01); uw.addColorStop(0,v3rgba(o.P.wBot||'#0a3040',.35)); uw.addColorStop(1,v3rgba(o.P.wBot||'#0a3040',.8)); x.fillStyle=uw; x.fillRect(px-pw2/2,wl,pw2,foot-wl); x.beginPath(); x.ellipse(px,foot,pw2*1.6,H*.008,0,0,7); x.fill(); /* murky, only over the post and its footing */ o.posts.push({x:px,w:pw2}); } } } /* below the surface the post and its footing take the water's colour */
+  /* piles (director, 2026-11-22 night: "the support beams going into the water look bad, not natural at all"): above the water a peeled log
+     with bark checks, an iron strap and knee braces up to the deck; at the surface a dark wet band, weed and a ripple; below it the pile is
+     seen through the water: shifted a little by refraction, darker, and fading into the depth on its way to the lake bed, never ending on a disc */
+  for(const f of [.5,.7,.92]){ const px=Math.min(o.pw-W*.006,at(f)), pw2=Math.max(5,W*.0075), foot=surf(px), sub=foot>wl, end=sub?wl:foot;
+    const pg=x.createLinearGradient(px-pw2/2,0,px+pw2/2,0); pg.addColorStop(0,woodL); pg.addColorStop(.45,wood); pg.addColorStop(1,woodD); x.fillStyle=pg; x.fillRect(px-pw2/2,bt,pw2,end-bt);
+    x.strokeStyle=v3rgba('#2a1c12',.45); x.lineWidth=.8; x.beginPath(); for(let k=0;k<4;k++){ const yy=bt+(end-bt)*(k+.5)/4; x.moveTo(px-pw2/2,yy); x.lineTo(px-pw2*.1,yy+H*.003); } x.stroke();
+    x.fillStyle=N('#3a3a40'); x.fillRect(px-pw2/2-.5,bt+H*.006,pw2+1,Math.max(1.5,H*.003));
+    x.strokeStyle=wood; x.lineWidth=Math.max(2,pw2*.5); x.lineCap='round'; x.beginPath(); x.moveTo(px,bt+H*.03); x.lineTo(px-W*.012,bt); if(f<.9){ x.moveTo(px,bt+H*.03); x.lineTo(px+W*.012,bt); } x.stroke(); x.lineCap='butt';
+    if(!sub) continue;
+    const w2=x.createLinearGradient(0,wl-H*.022,0,wl); w2.addColorStop(0,'rgba(18,24,20,0)'); w2.addColorStop(1,'rgba(18,24,20,.6)'); x.fillStyle=w2; x.fillRect(px-pw2/2,wl-H*.022,pw2,H*.022);
+    x.fillStyle=N('#3f5a2c'); for(let k=0;k<4;k++){ const wx=px-pw2/2+pw2*k/4, wh=H*(.004+.004*((k*7)%3)/2); x.beginPath(); x.moveTo(wx,wl); x.quadraticCurveTo(wx+pw2*.2,wl-wh*.6,wx+pw2*.1,wl-wh); x.lineTo(wx+pw2*.25,wl); x.fill(); }
+    const deep=o.P.wBot||'#0a3040', uc=mix(mix('#4a3424',deep,.55),'#000000',.1), dx=Math.max(1,pw2*.18), depth=H*.1; /* under the surface */
+    for(let k=0;k<10;k++){ const y0=wl+depth*k/10, a=.75*(1-k/10)*(1-k/10); x.fillStyle=v3rgba(uc,a); x.fillRect(px-pw2/2+dx,y0,pw2*.96,depth/10+.5); x.fillStyle=v3rgba(mix(uc,'#8ab8a0',.25),a*.5); x.fillRect(px-pw2/2+dx,y0,pw2*.22,depth/10+.5); }
+    o.posts.push({x:px,w:pw2}); } }
 
 /* 7. Coral Shallows: the beach hut on stilts */
 hfMake('reef',{ name:'Beach hut', hname:'beach hut',
@@ -20872,6 +20890,12 @@ PATCHES.unshift({v:'0.4.9', name:'Work in progress', items:phoneNotes([
 // text changes. Released notes live in notes_release.js.
 const TEST_NOTES={v:'test', label:'Test build · '+(window.DL_BUILD==='ios'?'iPhone':'Android'), name:'0.4.9 test build (newest first)', items:[
   '## New in this build',
+  'Canadian Rockies cabin, checked in every combination: the covered porch now has a real shed roof in the cabin roof’s own material, with a shadow on the wall, so you can see it.',
+  'The porch’s log rail now runs in front of you, your chair and your pet, instead of behind them.',
+  'Dutch door and window box now gives both windows a flower box; shuttered windows have louvred shutters in the door’s color that stand out from the logs.',
+  'Each cabin part offers only colors a real cabin would have (no turquoise logs or snow-white roofs).',
+  'The old snow on the forested mountainsides now lies in long streaks down the gullies instead of round patches.',
+  '## Test build 2026.11.22-2306',
   'Canadian Rockies, rebuilt by itself with full care: a jagged row of snowy peaks with a glacier, forested mountainsides with larches and avalanche paths, rose snow at dusk and a dim navy night, a canoe dock with red canoes, fireweed and granite on the near shore.',
   'Your home at the Rockies is now a log cabin you customise: log walls, roof (cedar shakes, green tin, sod with wildflowers), chimney, porch (open, covered, or with a log rail), door and windows (they glow at night), and seat.',
   'The cabin stands on a granite ledge and braced log posts that sit on the rock and on boulders under the water.',
@@ -21971,6 +21995,18 @@ if(/[?&]test\b/.test(location.search)) window.__feelSim=(preset,n=3,stopAt=0)=>{
       if(G.st!=='reeling'){ landed++; tot+=t; } combo=Math.max(combo,mx); pops+=np; G.st='idle'; G.hold=false; }
     out.ranks.push({r, s:landed?+(tot/landed).toFixed(1):null, landed:landed+'/'+n, combo, pops}); }
   FEEL=JSON.parse(keepF); feelSave(); setFishOld(keepOld); G.fish=null; G.st='idle'; return out; };
+// test builds: __hfAll(id,name,pairs) every combination of the features that touch each other (pairs of feature ids, every style of one with
+// every style of the other), then every colour of every feature, resting and fishing (director, 2026-11-22: "check all options as well")
+if(/[?&]test\b/.test(location.search)) window.__hfAll=async(id,name,pairs,big)=>{ __go(id); dockSync(); const sp=hfSpec(id); if(!sp) return 'no home'; const keep=JSON.stringify(S.dock.el||{}), d=cv.width/W, sy=H*.2*d, sw=W*.34*d, sh=H*.72*d, cw=big?300:150, ch=Math.round(cw*sh/sw), cells=[];
+  const E=k=>sp.els.find(e=>e.id===k); for(const [a,b] of pairs){ const A=E(a), B=E(b); if(!A||!B) continue; A.styles.forEach((na,i)=>B.styles.forEach((nb,j)=>{ for(const rest of [0,1]) cells.push({lab:na+' + '+nb+(rest?' (rest)':''),set:{[a]:i,[b]:j},rest}); })); }
+  if(!big) for(const e of sp.els) sp.colors.forEach((col,ci)=>{ if(!e.pal||e.pal.includes(ci)) cells.push({lab:e.label+': '+col[0],col:{[e.id]:ci},rest:1}); });
+  const cols=big?6:12, o=document.createElement('canvas'); o.width=cols*cw; o.height=Math.ceil(cells.length/cols)*(ch+14); const x=o.getContext('2d'); x.fillStyle='#0b1622'; x.fillRect(0,0,o.width,o.height); x.font='10px sans-serif';
+  cells.forEach((c,n)=>{ S.dock.el=JSON.parse(keep); for(const k in (c.set||{})) S.dock.el[k]=[c.set[k],hfChoice(id,k)[1]]; for(const k in (c.col||{})) S.dock.el[k]=[hfChoice(id,k)[0],c.col[k]]; V3CACHE=null; G.st=c.rest?'rest':'idle'; if(c.rest) restCast(); draw(performance.now()); draw(performance.now()+16);
+    const X=(n%cols)*cw, Y=Math.floor(n/cols)*(ch+14); x.drawImage(cv,0,sy,sw,sh,X,Y+14,cw,ch); x.fillStyle='#fff'; x.fillText(c.lab.slice(0,30),X+2,Y+11); });
+  S.dock.el=JSON.parse(keep); G.st='idle'; draw(performance.now()); return (await fetch('/shot/'+name,{method:'POST',body:o.toDataURL('image/jpeg',.8)})).status+' '+cells.length+' cells'; };
+// test builds: __hfOne(id,name,set,rest,night) one home combination at full size (set = {feature:style}), the home's area only, to judge details the sheets are too small for
+if(/[?&]test\b/.test(location.search)) window.__hfOne=async(id,name,set,rest,night)=>{ __go(id); dockSync(); if(night!=null) await __setPhase(night); const keep=JSON.stringify(S.dock.el||{}), d=cv.width/W; for(const k in (set||{})) S.dock.el[k]=[set[k],hfChoice(id,k)[1]]; V3CACHE=null; G.st=rest?'rest':'idle'; if(rest) restCast(); draw(performance.now()); draw(performance.now()+16);
+  const o=document.createElement('canvas'); o.width=Math.round(W*.4*d); o.height=Math.round(H*.5*d); o.getContext('2d').drawImage(cv,0,H*.25*d,o.width,o.height,0,0,o.width,o.height); S.dock.el=JSON.parse(keep); V3CACHE=null; return (await fetch('/shot/'+name,{method:'POST',body:o.toDataURL('image/jpeg',.92)})).status; };
 // test builds: __cropShot(name,id,x,y,w,h,rest) saves part of the frame (fractions of the screen); __mkSheet(name,id,[[label,setup,rest],…]) a 2-wide sheet of whole frames
 if(/[?&]test\b/.test(location.search)){ window.__cropShot=async(name,id,rx,ry,rw,rh,rest)=>{ await __shot('tmp',id,!!rest,true); const o=document.createElement('canvas'); o.width=Math.round(cv.width*rw); o.height=Math.round(cv.height*rh); o.getContext('2d').drawImage(cv,cv.width*rx,cv.height*ry,o.width,o.height,0,0,o.width,o.height); return (await fetch('/shot/'+name,{method:'POST',body:o.toDataURL('image/jpeg',.9)})).status; };
   window.__mkSheet=async(name,id,list)=>{ const cw=960, ch=Math.round(cw*cv.height/cv.width), o=document.createElement('canvas'); o.width=cw*2; o.height=Math.ceil(list.length/2)*ch; const x=o.getContext('2d'); x.font='22px sans-serif';
