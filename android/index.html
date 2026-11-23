@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="DL Test Android">
 <script>
-window.DL_BUILD='android'; window.DL_PREVIEW=true; if(/[?&]sweep\b/.test(location.search)){ window.__bootErr=[]; addEventListener("error",function(e){ __bootErr.push(String(e.message||e)+(e.lineno?" (line "+e.lineno+")":"")); }); addEventListener("unhandledrejection",function(e){ __bootErr.push("promise: "+String(e.reason&&e.reason.message||e.reason)); }); window.requestAnimationFrame=function(f){ return setTimeout(function(){ f(performance.now()); },16); }; window.cancelAnimationFrame=function(i){ clearTimeout(i); }; } try{ window.__tOff=/[?&](test|sweep|frozen)\b/.test(location.search)?0:(+(localStorage.getItem("dl-test-toff")||0)||0); }catch(e){ window.__tOff=0; } (function(){ var rn=Date.now.bind(Date); Date.now=function(){ return rn()+window.__tOff; }; })(); if(/[?&]frozen\b/.test(location.search)){ var __fz=20261122; Math.random=function(){ __fz|=0; __fz=__fz+0x6D2B79F5|0; var t=Math.imul(__fz^__fz>>>15,1|__fz); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; var __fc=0, __pn=performance.now.bind(performance); performance.now=function(){ __fc+=0.01; return 100000+__fc; }; Date.now=function(){ return 1795300000000+Math.floor(__fc); }; window.__frozenClock=function(){ return __fc; }; window.requestAnimationFrame=function(){ return 0; }; window.cancelAnimationFrame=function(){}; } window.DL_VERSION='2026.11.23-0124';
+window.DL_BUILD='android'; window.DL_PREVIEW=true; if(/[?&]sweep\b/.test(location.search)){ window.__bootErr=[]; addEventListener("error",function(e){ __bootErr.push(String(e.message||e)+(e.lineno?" (line "+e.lineno+")":"")); }); addEventListener("unhandledrejection",function(e){ __bootErr.push("promise: "+String(e.reason&&e.reason.message||e.reason)); }); window.requestAnimationFrame=function(f){ return setTimeout(function(){ f(performance.now()); },16); }; window.cancelAnimationFrame=function(i){ clearTimeout(i); }; } try{ window.__tOff=/[?&](test|sweep|frozen)\b/.test(location.search)?0:(+(localStorage.getItem("dl-test-toff")||0)||0); }catch(e){ window.__tOff=0; } (function(){ var rn=Date.now.bind(Date); Date.now=function(){ return rn()+window.__tOff; }; })(); if(/[?&]frozen\b/.test(location.search)){ var __fz=20261122; Math.random=function(){ __fz|=0; __fz=__fz+0x6D2B79F5|0; var t=Math.imul(__fz^__fz>>>15,1|__fz); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; var __fc=0, __pn=performance.now.bind(performance); performance.now=function(){ __fc+=0.01; return 100000+__fc; }; Date.now=function(){ return 1795300000000+Math.floor(__fc); }; window.__frozenClock=function(){ return __fc; }; window.requestAnimationFrame=function(){ return 0; }; window.cancelAnimationFrame=function(){}; } window.DL_VERSION='2026.11.23-0259';
 window.addEventListener('beforeinstallprompt',function(e){ e.preventDefault(); window.__dlInstallPrompt=e; });
 </script>
 </head>
@@ -2326,7 +2326,7 @@ const FF = { FAR_M:40, SPOOL_M:200, LB:.4536,
   PERFECT_REST:1.5,                 /* Cam: after a perfect hook the fish doesn't fight for 1.5 s */
   RESIST:[.15,.55,.75,.86,.9,.92],   /* maths: how hard a fresh fish of each rank holds against your reel (C U R E L M) */
   TIRE_T:[12,12,13,15,18,19],       /* seconds of reeling a fish needs to tire with the best gear (Cam 2026-11-21: "speed up fishing" to about half the speed of the old fight with great gear; was 15-24) */
-  SHARE:{shake:35,run:45,jump:20},  /* Cam: rough share of each move */
+  SHARE:{shake:35,run:40,jump:20},  /* Cam: rough share of each move (runs 45 to 40: director, 2026-11-23, so runs don't crowd out the rest) */
   CHAIN:[1,1,2,3,4,5],              /* Cam: moves in a row, by rank (common and uncommon never chain) */
   DIVE_N:[1,2,3,4,5,6], DIVE_M:[3,5,10,15,20,20], DEEP_M:100, /* Cam: dives per fight and metres if the band is missed; deep = 100 m+ (director) */
   SHORT_T:[3,6,10,15,20,30],        /* Cam: shortest landing time from the far edge by rank; a fish that still has fight never comes in faster */
@@ -2347,7 +2347,7 @@ function setFishOld(on){ FISH_OLD=!!on && !!window.DL_PREVIEW; try{ if(FISH_OLD)
 // =====================================================================
 const FEEL_KNOBS=[['len','Fight length',.5,1.5,.1],['tx','Temper curve',0,1.5,.25],['runs','Darting and long runs',0,1,1],['groove','Groove bonus',0,1.5,.25],['rest','Pause between moves',.3,1.2,.1],['tell','Warning before a move (s)',0,.8,.1],['counter','Right-reaction reward',0,2,.25],['pull','Perfect pull',0,2,.25],['combo','Combo boost',0,2,.25],['sw','Second-wind waits',.3,1,.1],['read','Show when it swims in',0,1,1],['juice','Flash and pop-ups',0,1,1]];
 const FEEL_PRESETS={ current:{len:1,rest:1,tell:0,counter:0,pull:0,combo:0,sw:1,read:0,juice:0,tx:0,runs:0,groove:0},
-  middle:{len:.8,rest:.8,tell:.3,counter:.75,pull:.75,combo:.75,sw:.6,read:1,juice:1,tx:1,runs:1,groove:1}, /* Cam, 2026-11-23: "middle is the one for sure": the feel for everyone; a slightly shorter Reel hard window (sw .7 to .6), Cam's temper curve, darting and long runs, the groove */
+  middle:{len:.88,rest:.8,tell:.3,counter:.75,pull:.75,combo:.75,sw:.5,read:1,juice:1,tx:1,runs:1,groove:1}, /* Cam, 2026-11-23: "middle is the one for sure": the feel for everyone; a slightly shorter Reel hard window (sw .7 to .6), Cam's temper curve, darting and long runs, the groove */
   arcade:{len:.65,rest:.6,tell:.45,counter:1.25,pull:1.25,combo:1.25,sw:.5,read:1,juice:1,tx:1.25,runs:1,groove:1.25} };
 let FEEL=(()=>{ const testPage=/[?&](test|sweep|frozen)\b/.test(location.search); let s=null; try{ if(window.DL_PREVIEW&&!testPage) s=JSON.parse(localStorage.getItem('dl-feel2')||'null'); }catch(e){}
   const base=Object.assign({},FEEL_PRESETS[testPage?'current':'middle']); /* Middle is the game's feel (Cam, 2026-11-23); test pages fight on Current so the checks stay steady */ return Object.assign(base,s&&typeof s==='object'?s:{}); })();
@@ -2378,24 +2378,25 @@ function ffAvg(loc){ if(FF_AVG[loc]) return FF_AVG[loc]; const ps=SP.filter(s=>s
 // how many tries a bite gives before it's gone (Cam's list #10): one to start; Quick Reflexes at ranks 5 and 10 and a full Water Reader add one each
 const hookTries = () => 1 + (pr('reflex')>=5?1:0) + (pr('reflex')>=10?1:0) + (maxed('reader')?1:0);
 // a fresh fight on the new rules (called by hookIt)
-function ffInit(){ const f=G.fish;
+function ffInit(){ const f=G.fish; G.surge3=null;
   G.d0=G.d=Math.max(3, FF.FAR_M*clamp(G.lastCast,0,1)); G.dd=0; G.maxOut=FF.SPOOL_M+rodSpool();
   G.ffA=null; G.ffRest=rnd(.7,1.4); G.chainOn=false; G.chainN=0; G.chainCD=0; G.diveN=0; G.tiredT=0; G.swUsed=false; G.noReelT=0; G.fullT=0; G.jumpAway=false; G.dive=null; G.ffOpen=false;
   /* Cam (section 2): a rare fish hooked close in runs first to gain some ground */
-  if(f&&f.kind==='fish'&&fishRank(f)>=2&&G.d0<25){ G.ffOpen=true; G.ffRest=.35; }
+  if(f&&f.kind==='fish'&&fishRank(f)>=2&&FEEL.runs){ if(G.lastCast<=.4&&!G.perfect){ G.surge3={t:0,m:[0,0,2.5,4,5.5,7][fishRank(f)]}; G.ffRest=3.4; } } /* director, 2026-11-23: a rare-or-better fish hooked at 40% of a cast or closer surges for 3 s, more line the rarer it is (replaces the old run-first rule) */
+  else if(f&&f.kind==='fish'&&fishRank(f)>=2&&G.d0<25){ G.ffOpen=true; G.ffRest=.35; }
   G.swim=null; G.swimT=rnd(FF.SWIM_EVERY[0],FF.SWIM_EVERY[1]); G.swStep=0; G.swNext=0; G.swN=0;
   if(G.perfect){ G.ffOpen=false; G.ffRest=Math.max(FF.PERFECT_REST,G.ffRest); } /* Cam: a perfect hook holds the fish still for 1.5 s */
-  G.combo=0; G.pops=[]; G.ppw=0; G.tell=null; G.prevRin=0; G.dartNext=false; G.dartLeft=0; G.grooveT=0; G.reelHold=0; G.restHold=0; G.flashT=FEEL.juice?.18:0; if(G.perfect) feelPop('Perfect hook!'); /* Feel lab */ }
+  G.combo=0; G.pops=[]; G.ppw=0; G.tell=null; G.prevRin=0; G.dartNext=false; G.dartLeft=0; G.grooveT=0; G.reelHold=0; G.restHold=0; G.flashT=FEEL.juice&&f&&f.kind==='fish'?.18:0; G.ffMin=0; G.lastK=null; if(G.perfect) feelPop('Perfect hook!'); /* Feel lab */ }
 // how often the fish acts, from its temper: 1x calm, up to FF.TEMPER_RATE x at full temper (Cam: full temper = rapid moves)
 const ffRate = () => 1+(FF.TEMPER_RATE-1)*clamp((G.temper||0)/3,0,1);
 function ffWeightClass(f){ const lb=(f.kg||0)/FF.LB; return lb<1.5?0:lb<3?1:lb<5?2:3; }
-function ffPick(f,rk,deep){ if(G.ffOpen){ G.ffOpen=false; return 'run'; } const b=f.beh, w={shake:FF.SHARE.shake*(b==='thrash'?2.2:b==='sulk'?1.3:1), run:FF.SHARE.run*(b==='run'?1.8:b==='dart'?1.3:1), jump:FF.SHARE.jump*(b==='jump'?2.2:1)};
+function ffPick(f,rk,deep){ if(G.ffOpen){ G.ffOpen=false; return 'run'; } const b=f.beh, w={shake:FF.SHARE.shake*(b==='thrash'?2.2:b==='sulk'?1.3:1), run:FF.SHARE.run*(b==='run'?1.8:b==='dart'?1.3:1)*(FEEL.runs&&G.lastK==='run'?.5:1), jump:FF.SHARE.jump*(b==='jump'?2.2:1)};
   let x=Math.random()*Object.values(w).reduce((a,c)=>a+c,0), k='shake'; for(const q in w){ x-=w[q]; if(x<=0){ k=q; break; } }
   if(k==='run' && deep && (G.diveN||0)<FF.DIVE_N[rk] && Math.random()<FF.DIVE_SHARE*(b==='dive'?1.6:1)) k='dive'; /* Cam: in waters with dives, a third of runs are dives */
   return k; }
-function ffStart(f,rk,tk,I,lively,kk,st,cont){ const k=kk||ffPick(f,rk,waterDeep(S.loc)), A={k,t:0};
+function ffStart(f,rk,tk,I,lively,kk,st,cont){ const k=kk||ffPick(f,rk,waterDeep(S.loc)), A={k,t:0}; if(!cont) G.lastK=k; /* a second run in a row is half as likely */
   if(k==='shake'){ A.dur=rnd(.5,.9); G.ev='shake'; sfx.warn(); }
-  else if(k==='run'&&st==='dart'){ A.style='dart'; A.dur=rnd(.55,1.1)*(1+.08*tk); A.dir=G.dartDir=-(G.dartDir||1); if(!cont) G.dartLeft=Math.round(rnd(1,2+tk*.5)); G.run=true; splash(G.bob.x,G.bob.y,8+tk*4); } /* Cam, 2026-11-23: a darting run, short sharp bursts one after another, zigzagging: let it go and it tires itself */
+  else if(k==='run'&&st==='dart'){ A.style='dart'; A.dur=rnd(.55,1.1)*(1+.08*tk); A.dir=G.dartDir=-(G.dartDir||1); if(!cont) G.dartLeft=1+Math.floor(Math.random()*(tk>=4?3:2)); /* 1-2 extra darts, up to 3 for legendary and mythic (director, 2026-11-23) */ G.run=true; splash(G.bob.x,G.bob.y,8+tk*4); } /* Cam, 2026-11-23: a darting run, short sharp bursts one after another, zigzagging: let it go and it tires itself */
   else if(k==='run'&&st==='long'){ A.style='long'; A.dur=rnd(4,6.5)*(1+.05*tk); A.taps=0; A.lastPress=-9; A.holdT=0; G.run=true; splash(G.bob.x,G.bob.y,6+tk*3); } /* a long, steady run: short pulls in rhythm keep it coming and build the combo */
   else if(k==='run'){ A.dur=clamp(FF.RUN_T[0]+(FF.RUN_T[1]-FF.RUN_T[0])*(.25*lively+.35*(G.temper/3)+.4*tk/5)*rnd(.7,1.15),FF.RUN_T[0],FF.RUN_T[1]); G.run=true; splash(G.bob.x,G.bob.y,6+tk*4); }
   else if(k==='jump'){ A.dur=JUMP_WINDUP+.85; A.away=Math.random()<.5; G.ev='windup'; G.evDur=JUMP_WINDUP; G.jumpAway=A.away; }
@@ -2404,17 +2405,17 @@ function ffStart(f,rk,tk,I,lively,kk,st,cont){ const k=kk||ffPick(f,rk,waterDeep
   G.ffA=A; }
 /* which kind of run (Cam, 2026-11-23: "some runs more darty and intense, others more prolonged and consistent"; Feel lab "Darting and long
    runs"): darting fish (dart, thrash) mostly dart, runners and sulkers mostly run long, the rest either */
-function ffRunStyle(f){ if(!FEEL.runs) return null; const b=f.beh, p=b==='dart'||b==='thrash'?.75:b==='run'||b==='sulk'?.25:.5; return Math.random()<p?'dart':'long'; }
+function ffRunStyle(f){ if(!FEEL.runs) return null; const b=f.beh, p=b==='dart'||b==='thrash'?.85:b==='run'||b==='sulk'?.4:.65; return Math.random()<p?'dart':'long'; } /* short runs more common than long ones (director, 2026-11-23) */
 function ffEnd(f,tk,lively){ const was=G.ffA; G.ffA=null; G.ev=null; G.run=false; G.dive=null;
   if(was&&was.style==='dart'&&G.dartLeft>0){ G.dartLeft--; G.dartNext=true; G.ffRest=rnd(.12,.3); return; } /* the next dart follows almost at once, the other way */
   if(FEEL.pull>0) G.ppw=.45; /* Feel lab: the perfect-pull window opens as a move ends */
   const rest=(FF.REST_T[0]+(FF.REST_T[1]-FF.REST_T[0])*(1-lively))*FEEL.rest; /* Cam: 1 s for the liveliest fish, 5 s for the laziest */
-  if(G.chainOn){ if(G.chainN<FF.CHAIN[tk] && Math.random()<.5){ G.chainN++; G.ffRest=rnd(.5,1)*FEEL.rest; return; } G.chainOn=false; G.chainCD=5; } /* Cam: a coin flip for every chained move after the first */
-  else if(FF.CHAIN[tk]>=2 && G.chainCD<=0 && G.sta>0 && Math.random()<.2){ G.chainOn=true; G.chainN=2; G.ffRest=rnd(.5,1)*FEEL.rest; return; } /* Cam: about 1 move in 5 starts a chain */
-  G.ffRest=rest*rnd(.8,1.2); }
+  if(G.chainOn){ if(G.chainN<FF.CHAIN[tk] && Math.random()<.5){ G.chainN++; G.ffRest=rnd(.5,1)*FEEL.rest; if(FEEL.runs) G.ffMin=.6; return; } G.chainOn=false; G.chainCD=5; } /* Cam: a coin flip for every chained move after the first */
+  else if(FF.CHAIN[tk]>=2 && G.chainCD<=0 && G.sta>0 && Math.random()<.2){ G.chainOn=true; G.chainN=2; G.ffRest=rnd(.5,1)*FEEL.rest; if(FEEL.runs) G.ffMin=.6; return; } /* Cam: about 1 move in 5 starts a chain */
+  G.ffRest=rest*rnd(.8,1.2); if(FEEL.runs) G.ffMin=was&&was.k==='run'?1.2:.6; } /* real-time floors: 1.2 s after a run, 0.6 s after anything, however hot the fish (director, 2026-11-23: runs mustn't crowd out the rest) */
 function fightNew(dt){
   if(!G.fish){ G.st='idle'; return; }
-  const f=G.fish; if(f.kind!=='fish'){ snagFight(dt); return; }
+  const f=G.fish; if(f.kind!=='fish'){ G.flashT=0; snagFight(dt); return; } /* no hook flash in an oddity's fight: it never faded there and left the screen white (bug, director 2026-11-23) */
   maybeEatEvent(dt); eatTick(dt);
   if(f.shiny===2){ G.behT=(G.behT||0)-dt; if(G.behT<=0){ G.behT=rnd(2.2,3.6); const ks=Object.keys(BEH); f.beh=ks[Math.floor(Math.random()*ks.length)]; } }
   const rk=fishRank(f), tk=Math.min(5,rk+(f.shiny===2?1:0)) /* Cam: titled shinies fight much harder */, B=BEH[f.beh]||BEH.calm, wc=ffWeightClass(f), kg=f.kg||.1;
@@ -2435,12 +2436,12 @@ function fightNew(dt){
   // the fish's next move: rests run down faster the higher its temper (Cam: full temper = rapid moves)
   if(G.tell){ G.tell.t-=dt; if(G.tell.t<=0){ const k=G.tell.k, st=G.tell.st; G.tell=null; if(G.ev==='tell') G.ev=null; ffStart(f,rk,tk,I,lively,k,st); } } /* Feel lab: the warning runs out, the move starts */
   else if(!G.ffA&&G.dartNext){ G.ffRest-=dt; if(G.ffRest<=0){ G.dartNext=false; ffStart(f,rk,tk,I,lively,'run','dart',true); } } /* the next dart of a darting run */
-  else if(!G.ffA){ G.ffRest-=dt*ffRate(); if(G.ffRest<=0){ if(G.sta<=0&&Math.random()>.12) G.ffRest=rnd(2,4); /* Cam: a tired fish rarely moves */ else { G.swim=null; const k=ffPick(f,rk,waterDeep(S.loc)), st=k==='run'?ffRunStyle(f):null; if(FEEL.tell>0&&k!=='jump'){ G.tell={k,st,t:FEEL.tell}; G.ev='tell'; sfx.warn(); } else ffStart(f,rk,tk,I,lively,k,st); } } }
+  else if(!G.ffA){ G.ffRest-=dt*ffRate(); G.ffMin=Math.max(0,(G.ffMin||0)-dt); if(G.ffRest<=0&&G.ffMin<=0){ if(G.sta<=0&&Math.random()>.12) G.ffRest=rnd(2,4); /* Cam: a tired fish rarely moves */ else { G.swim=null; const k=ffPick(f,rk,waterDeep(S.loc)), st=k==='run'?ffRunStyle(f):null; if(FEEL.tell>0&&k!=='jump'){ G.tell={k,st,t:FEEL.tell}; G.ev='tell'; sfx.warn(); } else ffStart(f,rk,tk,I,lively,k,st); } } }
   // between moves: still, or swimming toward you (Cam: unannounced; 0.25-3 s; rarer fish less often and for shorter)
   if(!G.ffA && G.sta>0){ if(G.swim){ G.swim.t-=dt; if(G.swim.t<=0) G.swim=null; }
     G.swimT-=dt; if(G.swimT<=0){ G.swimT=rnd(FF.SWIM_EVERY[0],FF.SWIM_EVERY[1]); if(!G.swim && Math.random()<FF.SWIM_P[tk]) G.swim={t:clamp(rnd(FF.SWIM_T[0],FF.SWIM_T[1])*(1-.1*tk),FF.SWIM_T[0],FF.SWIM_T[1]), k:rnd(FF.SWIM_K[0],FF.SWIM_K[1])}; } }
   else if(G.ffA) G.swim=null;
-  let gainK=G.swim?G.swim.k:1, outV=0, tenRate=0; const A=G.ffA; const runV=(.8+1.0*rel)*(1+.06*tk)*(1+.2*Math.log10(1+kg))*(.5+.5*G.sta)*I*gearK*(1-rodBonus('grip'))*(1-.04*pr('grappler'));
+  let gainK=G.surge3?0:(G.swim?G.swim.k:1), outV=0, tenRate=0; const A=G.ffA; const runV=(.8+1.0*rel)*(1+.06*tk)*(1+.2*Math.log10(1+kg))*(.5+.5*G.sta)*I*gearK*(1-rodBonus('grip'))*(1-.04*pr('grappler'));
   if(A){ A.t+=dt;
     if(A.k==='shake'){ if(wc>=1) gainK=.45; tenRate=70*wtK*I; }
     else if(A.k==='run'){ const sk=A.style==='dart'?1.6:A.style==='long'?.55:1, tq=A.style==='dart'?1.5:A.style==='long'?.45:1; gainK=A.style==='long'?(wc>=2?.35:wc===1?.6:1):(wc===1?.4:wc>=2?0:1); if(wc===3) outV=runV*sk; if(wc>=1) tenRate=(70+20*rel)*wtK*I*tq; G.run=true; } /* a dart strips line fast and strains it hard; a long run pulls gently and lets short pulls win some back */
@@ -2452,7 +2453,7 @@ function fightNew(dt){
       A.inZT=inZ?(A.inZT||0)+dt:0; if(A.inZT>=FF.DIVE_HOLD||A.got>=A.max-1e-6) A.t=A.dur; } /* Cam: holding the band for 1.5 s stops the dive at once */
     /* Feel lab, the right reaction pays: ease off in a run, a shake or a jump away; reel into a jump toward you; hold the dive band */
     if(A.k==='run'&&A.style==='long'){ const press=rin>0&&!(G.prevRin>0); A.holdT=rin>0?(A.holdT||0)+dt:0; /* a long run: short pulls in rhythm pay; holding on strains the line */
-      if(press){ const gap=A.t-A.lastPress; if(gap>.18&&gap<.9){ A.taps++; G.sta=Math.max(0,G.sta-.012*Math.max(.5,FEEL.counter||0)); G.d=Math.max(.5,G.d-.25); if(A.taps===2) feelPop('Steady!'); if(A.taps%3===0) feelCombo(1); } A.lastPress=A.t; }
+      if(press){ const gap=A.t-A.lastPress; if(gap>.18&&gap<.9){ A.taps++; G.sta=Math.max(0,G.sta-.012*Math.max(.5,FEEL.counter||0)); G.d=Math.max(.5,G.d-.25); A.dur=Math.max(A.t+.2,A.dur-.3); if(A.taps===2) feelPop('Steady!'); if(A.taps%5===0) feelCombo(1); } /* each good pull shortens the run; +1 combo per 5 (director, 2026-11-23) */ A.lastPress=A.t; }
       if(A.holdT>1.1&&!A.bad){ A.bad=1; feelCombo(-1); } }
     else if(FEEL.counter>0){ const live=!(A.k==='jump'&&A.t<JUMP_WINDUP), good=!live?false:A.k==='dive'?!!A.inZ:(A.k==='jump'&&!A.away)?rin>.6:rin<.25;
       if(good){ A.good=(A.good||0)+dt; G.sta=Math.max(0,G.sta-dt*.035*FEEL.counter*(A.style==='dart'?1.5:1)); if(!A.paid&&A.good>=.4){ A.paid=1; feelPop(A.k==='dive'?'Held it!':(A.k==='jump'&&!A.away)?'Reeled in!':A.style==='dart'?'Let it dart!':'Nice!'); feelCombo(1); } } /* letting a dart go tires the fish faster */
@@ -2481,6 +2482,8 @@ function fightNew(dt){
   else G.tiredT=0;
   if(G.swT) G.swT=Math.max(0,G.swT-dt);
   if(G.ten>75 && rin>0){ G.warnT-=dt; if(G.warnT<=0){ G.warnT=.25; sfx.warn(); if(V3ON) vib(15); } }
+  /* the opening surge of a close-hooked rare fish: it takes line for 3 s whatever its weight; reeling against it only builds tension */
+  if(G.surge3){ const P3=G.surge3; P3.t+=dt; if(P3.t<3){ G.d+=P3.m/3*dt; G.run=true; if(rin>0) G.ten+=45*rin*dt*tensionMult(); } else { G.surge3=null; if(!G.ffA) G.run=false; } }
   // a predator that swallowed your catch strips line (n_play.js), as before
   if(G.strip){ const P=G.strip; P.t+=dt; const k=Math.min(1,P.t/P.dur), e=1-Math.pow(1-k,2); G.d=Math.max(G.d,P.from+(P.to-P.from)*e); G.run=true; if(rin>0) G.ten+=EAT_STRIP_TEN*rin*dt*tensionMult(); if(k>=1){ G.strip=null; if(!G.ffA) G.run=false; } }
   /* Feel lab: the perfect pull (press reel inside the glowing window as a move ends), the hook flash, pop-ups, a mistake at the snap line */
@@ -21124,6 +21127,12 @@ PATCHES.unshift({v:'0.4.9', name:'Work in progress', items:phoneNotes([
 // text changes. Released notes live in notes_release.js.
 const TEST_NOTES={v:'test', label:'Test build · '+(window.DL_BUILD==='ios'?'iPhone':'Android'), name:'0.4.9 test build (newest first)', items:[
   '## New in this build',
+  'Fishing feel: runs come a little less often, short darting runs are more common than long ones, and a fish rests at least a moment after a run instead of chaining runs back to back.',
+  'Long runs: each good short pull ends the run sooner, and the combo grows every 5 good pulls. Darting runs have fewer darts in a row (a few more for the rarest fish).',
+  'Fish have a little more fight, and a tired fish gets its second wind a bit sooner.',
+  'A rare or rarer fish hooked close to you (within 40% of a cast) surges and takes line for its first 3 seconds, more the rarer it is.',
+  'Fixed: the screen no longer turns white while you reel in junk and oddities.',
+  '## Test build 2026.11.23-0124',
   'Canadian Rockies, from your latest notes: the lake floor now shows only in the shallows near you and drops away into deep water, so fights happen out over the deep.',
   'The otter’s head joins its body when it sits on the rock, and it swims in above the boulder and the log instead of through them.',
   'The rocks, the log and the reeds in the near corners sit in the water: their underwater parts take the water’s color and a bright line rings them at the surface.',
