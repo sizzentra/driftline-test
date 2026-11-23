@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="DL Test Android">
 <script>
-window.DL_BUILD='android'; window.DL_PREVIEW=true; if(/[?&]sweep\b/.test(location.search)){ window.__bootErr=[]; addEventListener("error",function(e){ __bootErr.push(String(e.message||e)+(e.lineno?" (line "+e.lineno+")":"")); }); addEventListener("unhandledrejection",function(e){ __bootErr.push("promise: "+String(e.reason&&e.reason.message||e.reason)); }); window.requestAnimationFrame=function(f){ return setTimeout(function(){ f(performance.now()); },16); }; window.cancelAnimationFrame=function(i){ clearTimeout(i); }; } try{ window.__tOff=/[?&](test|sweep|frozen)\b/.test(location.search)?0:(+(localStorage.getItem("dl-test-toff")||0)||0); }catch(e){ window.__tOff=0; } (function(){ var rn=Date.now.bind(Date); Date.now=function(){ return rn()+window.__tOff; }; })(); if(/[?&]frozen\b/.test(location.search)){ var __fz=20261122; Math.random=function(){ __fz|=0; __fz=__fz+0x6D2B79F5|0; var t=Math.imul(__fz^__fz>>>15,1|__fz); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; var __fc=0, __pn=performance.now.bind(performance); performance.now=function(){ __fc+=0.01; return 100000+__fc; }; Date.now=function(){ return 1795300000000+Math.floor(__fc); }; window.__frozenClock=function(){ return __fc; }; window.requestAnimationFrame=function(){ return 0; }; window.cancelAnimationFrame=function(){}; } window.DL_VERSION='2026.11.23-0655';
+window.DL_BUILD='android'; window.DL_PREVIEW=true; if(/[?&]sweep\b/.test(location.search)){ window.__bootErr=[]; addEventListener("error",function(e){ __bootErr.push(String(e.message||e)+(e.lineno?" (line "+e.lineno+")":"")); }); addEventListener("unhandledrejection",function(e){ __bootErr.push("promise: "+String(e.reason&&e.reason.message||e.reason)); }); window.requestAnimationFrame=function(f){ return setTimeout(function(){ f(performance.now()); },16); }; window.cancelAnimationFrame=function(i){ clearTimeout(i); }; } try{ window.__tOff=/[?&](test|sweep|frozen)\b/.test(location.search)?0:(+(localStorage.getItem("dl-test-toff")||0)||0); }catch(e){ window.__tOff=0; } (function(){ var rn=Date.now.bind(Date); Date.now=function(){ return rn()+window.__tOff; }; })(); if(/[?&]frozen\b/.test(location.search)){ var __fz=20261122; Math.random=function(){ __fz|=0; __fz=__fz+0x6D2B79F5|0; var t=Math.imul(__fz^__fz>>>15,1|__fz); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; var __fc=0, __pn=performance.now.bind(performance); performance.now=function(){ __fc+=0.01; return 100000+__fc; }; Date.now=function(){ return 1795300000000+Math.floor(__fc); }; window.__frozenClock=function(){ return __fc; }; window.requestAnimationFrame=function(){ return 0; }; window.cancelAnimationFrame=function(){}; } window.DL_VERSION='2026.11.23-0706';
 window.addEventListener('beforeinstallprompt',function(e){ e.preventDefault(); window.__dlInstallPrompt=e; });
 </script>
 </head>
@@ -17729,6 +17729,32 @@ const MT = {
     o.top=Math.min(o.top==null?g.y-H*.23:o.top,top-H*.05); }
 };
 // =====================================================================
+// HOLLOW TRENCH: THE CASTAWAY RAFT (overnight, 2026-11-23; its own design, MAP_THEMES › Hollow Trench: castaway rafts, wreck salvage,
+// bioluminescence). A raft of tarred barrels and salvaged planks lashed with frayed rope, floating over the abyss; its shelter the wrecked
+// lifeboat of a lost ship turned upside down on props (clinker strakes, a keel, a half-worn name), or a sailcloth tent over an oar, or a
+// crooked plank shack with a ship's porthole; glowing growth on the barrels below the waterline.
+// Parts: raft, shelter, mast, salvage, lantern, seat. Raft, mast, salvage and lantern keep the old ids; the shelter is a new id.
+// =====================================================================
+const TR = {
+  geo(o){ const x0=Math.max(HF.x0(),0)+W*.004, xe=o.pw+W*.006, y=o.dockY, wl=o.wl; return {x0,xe,y,wl,len:xe-x0}; },
+  /* the raft: barrels under the deck, half sunk, with bands and glowing growth; planks or a door on top, rope lashings */
+  raft(o,kind,c){ const q=o.x, g=TR.geo(o), y=g.y, wl=g.wl, th=HK.th(), lit=HK.lit(o);
+    const nb=Math.max(3,Math.round(g.len/(W*.04))); for(let i=0;i<nb;i++){ const bx=g.x0+g.len*(i+.5)/nb, br=Math.min(W*.016,H*.03); for(let cy=wl;cy>y+th;cy-=br*1.7){ q.fillStyle=HK.n(o,cy===wl?'#4a3a2a':'#5a4632'); q.beginPath(); q.ellipse(bx,cy,br,br*.9,0,0,7); q.fill(); for(const k of [-.55,.55]) HK.rect(o,bx+br*k-1,cy-br*.9,2.5,br*1.8,'#5a5a5a'); } /* barrels stacked from the deck down into the water */ q.fillStyle=v3rgba('#5afff0',.35+.25*(1-lit)); for(let m=0;m<4;m++){ q.beginPath(); q.arc(bx+(m-1.5)*br*.4,wl+br*.5,H*.0025,0,7); q.fill(); } }
+    q.fillStyle=v3rgba(o.P.wMid||'#123a44',.6); q.fillRect(g.x0-W*.01,wl+H*.002,g.len+W*.02,H*.03); /* the barrels' lower halves seen through the black water */
+    if(kind===2){ HK.rect(o,g.x0,y-th*.2,g.len,th*1.2,c); HK.rect(o,g.x0+g.len*.15,y+th*.1,g.len*.25,th*.4,HK.dk(c,.3)); HK.rect(o,g.x0+g.len*.6,y+th*.1,g.len*.25,th*.4,HK.dk(c,.3)); HK.circ(o,g.x0+g.len*.08,y+th*.4,H*.003,'#a8884a'); } /* an old cabin door, its panels and knob */
+    else { const pw=kind===1?W*.02:W*.012; for(let X=g.x0,i=0;X<g.xe;X+=pw,i++) HK.rect(o,X,y-th*.2+(i%3)*1,pw-1.5,th*1.2,i%2?c:HK.dk(c,.12)); }
+    for(let X=g.x0+W*.03;X<g.xe;X+=W*.06){ HK.line(o,[X,y-th*.3,X+W*.004,wl-H*.004],'#9a8868',1.4); } HK.rect(o,g.x0,y-th*.3,g.len,1.2,v3rgba('#ffffff',.1*lit)); /* rope lashings */
+    o.low=Math.max(o.low==null?-1e9:o.low,y-H*.004); },
+  /* the shelter */
+  shelter(o,s,c){ const q=o.x, g=TR.geo(o), y=g.y, a=g.x0+W*.004, w=Math.min(g.len*.5,W*.11), b=a+w, top=y-H*.09;
+    if(s===0){ for(const px of [a+w*.12,a+w*.88]) HK.rect(o,px-1.5,top+H*.02,3,y-top-H*.02,'#3a3028'); q.fillStyle=HK.n(o,'#1a1410'); q.fillRect(a+w*.1,top+H*.03,w*.8,y-top-H*.03);
+      q.fillStyle=HK.n(o,c); q.beginPath(); q.moveTo(a-W*.008,top+H*.035); q.quadraticCurveTo(a-W*.004,top-H*.01,a+w*.2,top-H*.016); q.lineTo(b-w*.15,top-H*.016); q.quadraticCurveTo(b+W*.012,top-H*.012,b+W*.014,top+H*.035); q.closePath(); q.fill(); /* the upturned lifeboat */
+      q.strokeStyle=HK.n(o,HK.dk(c,.3)); q.lineWidth=1; q.beginPath(); for(let k=1;k<4;k++){ const yy=top-H*.016+k*H*.012; q.moveTo(a-W*.004+k*W*.001,yy); q.lineTo(b+W*.01-k*W*.001,yy); } q.stroke(); HK.rect(o,a+w*.15,top-H*.022,w*.75,H*.006,'#3a3028'); /* clinker strakes and the keel */
+      q.fillStyle=HK.n(o,v3rgba('#f0e8d8',.5)); q.font='bold '+Math.round(H*.009)+'px sans-serif'; q.fillText('..ANTIS',a+w*.35,top+H*.024); o.top=Math.min(o.top==null?y-H*.23:o.top,top-H*.04); }
+    if(s===1){ const ox=a+w*.5, ot=y-H*.11; HK.line(o,[ox,y,ox,ot],'#6a5a48',2); q.fillStyle=HK.n(o,c); q.beginPath(); q.moveTo(a-W*.004,y); q.lineTo(ox,ot+H*.004); q.lineTo(b+W*.004,y); q.closePath(); q.fill(); q.strokeStyle=HK.n(o,HK.dk(c,.25)); q.lineWidth=1; q.beginPath(); q.moveTo(a+w*.3,y-H*.02); q.lineTo(a+w*.4,y-H*.06); q.moveTo(b-w*.25,y-H*.01); q.lineTo(b-w*.32,y-H*.05); q.stroke(); HK.poly(o,[ox-W*.006,y,ox,y-H*.05,ox+W*.006,y],'#1a1410'); HK.rect(o,ox-W*.004,ot-H*.012,W*.008,H*.012,'#6a5a48'); } /* sailcloth over an oar, patched seams, the oar's blade up top */
+    if(s===2){ q.save(); for(let k=0;k<5;k++){ const px=a+k*w/5; HK.rect(o,px,top+(k%2)*H*.004,w/5-1,y-top-(k%2)*H*.004,k%2?c:HK.dk(c,.15)); } q.restore(); HK.poly(o,[a-W*.006,top+H*.006,b+W*.008,top-H*.006,b+W*.008,top+H*.002,a-W*.006,top+H*.014],'#3a3028'); HK.circ(o,a+w*.62,top+H*.04,H*.012,'#a8884a'); HK.circ(o,a+w*.62,top+H*.04,H*.008,'#1a2a30'); HK.rect(o,a+w*.15,top+H*.03,w*.2,y-top-H*.03,'#1a1410'); } /* a crooked plank shack with a ship's porthole */ }
+};
+// =====================================================================
 // Every water's home (batch 5, 2026-11-22; designs in docs/HOME_DESIGNS.md, colours in docs/MAP_THEMES.md). Willow Pond (the
 // approved pilot) is in cv_homefmt.js; these 19 are built from the home kit (cw_homekit.js). Each home: the seat plus 5 features
 // made for that water, 3 styles each ("none" first where a feature can be left out), one list of 16 colours for every feature.
@@ -18123,16 +18149,17 @@ hfMake('deep',{ name:'Trawler', hname:'trawler', floats:true, seatX:()=>HF.pw()-
     ['seat'],
     ['light',(o,s)=>HK.light(o,['floodpole','workcage','hook'][s])]] });
 
-/* 12. Hollow Trench: the salvage raft (floats) */
-hfMake('trench',{ name:'Salvage raft', hname:'raft', floats:true,
+/* 12. Hollow Trench: the castaway raft (overnight, 2026-11-23; its own design, src/cw_castaway.js; floats): barrels and salvaged planks lashed with
+   rope, glowing growth below; the shelter an upturned lifeboat on props, a sailcloth tent over an oar, or a plank shack with a porthole */
+hfMake('trench',{ name:'Castaway raft', hname:'raft', floats:true, glow:'255,180,90', seatX:()=>HF.pw()-W*.03, front:null, smoke:null,
   colors:C16('Salvage plank=#6a5a48;Dark plank=#3a3028;Tarred barrel=#4a3a2a;Barrel band=#5a5a5a;Rope=#9a8868;Old brass=#a8884a;Lantern amber=#f0b050;Sail scrap=#c8bca0;Abyss black=#020e14;Deep teal=#123a44;Trench teal=#3a6a70;Bio cyan=#5afff0;Bio violet=#a080ff;Pale glow=#b8e8dc;Wet rock=#2a3e46;Bone=#e0dccc'),
   els:[{id:'raft',label:'Raft',styles:['Barrel raft','Plank raft','Door raft'],def:[0,2]},{id:'mast',label:'Mast',styles:['Scrap sail','Crow’s nest','Oar flag'],def:[0,7]},
-       {id:'salvage',label:'Salvage',styles:['Sea chest','Anchor','Ship’s wheel'],def:[0,5]},{id:'shelter',label:'Shelter',none:true,styles:['No shelter','Sailcloth tent','Plank lean-to','Upturned boat'],def:[1,7]},
+       {id:'salvage',label:'Salvage',styles:['Sea chest','Anchor','Ship’s wheel'],def:[0,5]},{id:'cabin',label:'Shelter',styles:['Upturned lifeboat','Sailcloth tent','Plank shack'],def:[0,2],palS:[[2,0,4,7],[7,4],[0,1,2]]},
        {id:'light',label:'Lantern',light:true,styles:['Pole lantern','Jellyfish jar','Wreck lamp'],def:[0,6]}],
   seat:['barrel','seachest','crate'], seatNames:['Barrel','Sea chest','Broken crate'], seatDef:[0,2],
   order:[
-    ['raft',(o,s,c)=>HK.hull(o,c,['barrels','planks','door'][s])],
-    ['shelter',(o,s,c)=>{ if(s===1) HK.roof(o,c,'tent',.02,.36); if(s===2) HK.roof(o,c,'leanto',.02,.36); if(s===3){ const a=HK.at(o,.02), b=HK.at(o,.38), y=o.dockY-H*.09; HK.rect(o,a+W*.004,y,2,o.dockY-y,'#3a3028'); HK.rect(o,b-W*.004,y,2,o.dockY-y,'#3a3028'); o.x.fillStyle=HK.n(o,c); o.x.beginPath(); o.x.moveTo(a-W*.01,y); o.x.quadraticCurveTo((a+b)/2,y-H*.05,b+W*.012,y); o.x.lineTo(a-W*.01,y); o.x.fill(); } }],
+    ['raft',(o,s,c)=>TR.raft(o,s,c)],
+    ['cabin',(o,s,c)=>TR.shelter(o,s,c)],
     ['mast',(o,s,c)=>{ const x=HK.at(o,.5), top=o.dockY-H*.2; HK.rect(o,x,top,2.4,H*.2,'#3a3028'); if(s===0) HK.poly(o,[x+2,top+H*.01,x+W*.035,top+H*.03,x+W*.03,top+H*.1,x+2,top+H*.12],c); if(s===1) HK.poly(o,[x-W*.008,top,x+W*.01,top,x+W*.008,top+H*.02,x-W*.006,top+H*.02],c); if(s===2) HK.poly(o,[x+2,top,x+W*.02,top+H*.006,x+W*.016,top+H*.03,x+2,top+H*.024],c); }],
     ['salvage',(o,s,c)=>{ const x=HK.at(o,.78), y=o.dockY; if(s===0){ HK.block(o,x,y-H*.024,W*.026,H*.024,'#4a3a2a'); HK.rect(o,x,y-H*.016,W*.026,1.6,c); } if(s===1){ HK.line(o,[x+W*.01,y,x+W*.01,y-H*.04],c,2.4); HK.curve(o,x,y-H*.012,x+W*.01,y+H*.004,x+W*.02,y-H*.012,c,2.4); HK.rect(o,x+W*.004,y-H*.036,W*.012,2,c); } if(s===2){ o.x.strokeStyle=HK.n(o,c); o.x.lineWidth=2; o.x.beginPath(); o.x.arc(x+W*.012,y-H*.03,H*.022,0,7); o.x.stroke(); for(let k=0;k<8;k++){ const a=k*Math.PI/4; HK.line(o,[x+W*.012,y-H*.03,x+W*.012+Math.cos(a)*H*.03,y-H*.03+Math.sin(a)*H*.03],c,1.4); } } }],
     ['seat'],
@@ -21647,6 +21674,8 @@ PATCHES.unshift({v:'0.4.9', name:'Work in progress', items:phoneNotes([
 // text changes. Released notes live in notes_release.js.
 const TEST_NOTES={v:'test', label:'Test build · '+(window.DL_BUILD==='ios'?'iPhone':'Android'), name:'0.4.9 test build (newest first)', items:[
   '## New in this build',
+  'Hollow Trench, redone in its own style: your home is a castaway raft of tarred barrels and salvaged planks lashed with rope, glowing growth on the barrels below the water. Its shelter is the wrecked lifeboat of a lost ship turned upside down on props (or a sailcloth tent over an oar, or a crooked plank shack with a ship’s porthole). Your raft, mast, salvage and lantern choices carry over.',
+  '## Test build 2026.11.23-0655',
   'Midnight Deep: your trawler is rebuilt as a working steel stern trawler: a deep hull with a high bulwark, freeing ports with rust streaks below them, old tyres hung as fenders, her name and number, a towering wheelhouse forward, and a net drum wound with net and orange floats (or a stern gantry with a trawl door, or stacked crab pots). Your saved choices carry over.',
   '## Test build 2026.11.23-0645',
   'Amazon Rainforest, redone in its own style: your home is a palafito, a stilt house high on vine-lashed poles with a very steep thatched roof hanging low over its walls. Pick the walls, roof, door, river gear, lamp and seat in Your home.',
