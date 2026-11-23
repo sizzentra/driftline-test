@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="DL Test iPhone">
 <script>
-window.DL_BUILD='ios'; window.DL_PREVIEW=true; if(/[?&]sweep\b/.test(location.search)){ window.__bootErr=[]; addEventListener("error",function(e){ __bootErr.push(String(e.message||e)+(e.lineno?" (line "+e.lineno+")":"")); }); addEventListener("unhandledrejection",function(e){ __bootErr.push("promise: "+String(e.reason&&e.reason.message||e.reason)); }); window.requestAnimationFrame=function(f){ return setTimeout(function(){ f(performance.now()); },16); }; window.cancelAnimationFrame=function(i){ clearTimeout(i); }; } try{ window.__tOff=/[?&](test|sweep|frozen)\b/.test(location.search)?0:(+(localStorage.getItem("dl-test-toff")||0)||0); }catch(e){ window.__tOff=0; } (function(){ var rn=Date.now.bind(Date); Date.now=function(){ return rn()+window.__tOff; }; })(); if(/[?&]frozen\b/.test(location.search)){ var __fz=20261122; Math.random=function(){ __fz|=0; __fz=__fz+0x6D2B79F5|0; var t=Math.imul(__fz^__fz>>>15,1|__fz); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; var __fc=0, __pn=performance.now.bind(performance); performance.now=function(){ __fc+=0.01; return 100000+__fc; }; Date.now=function(){ return 1795300000000+Math.floor(__fc); }; window.__frozenClock=function(){ return __fc; }; window.requestAnimationFrame=function(){ return 0; }; window.cancelAnimationFrame=function(){}; } window.DL_VERSION='2026.11.23-0800';
+window.DL_BUILD='ios'; window.DL_PREVIEW=true; if(/[?&]sweep\b/.test(location.search)){ window.__bootErr=[]; addEventListener("error",function(e){ __bootErr.push(String(e.message||e)+(e.lineno?" (line "+e.lineno+")":"")); }); addEventListener("unhandledrejection",function(e){ __bootErr.push("promise: "+String(e.reason&&e.reason.message||e.reason)); }); window.requestAnimationFrame=function(f){ return setTimeout(function(){ f(performance.now()); },16); }; window.cancelAnimationFrame=function(i){ clearTimeout(i); }; } try{ window.__tOff=/[?&](test|sweep|frozen)\b/.test(location.search)?0:(+(localStorage.getItem("dl-test-toff")||0)||0); }catch(e){ window.__tOff=0; } (function(){ var rn=Date.now.bind(Date); Date.now=function(){ return rn()+window.__tOff; }; })(); if(/[?&]frozen\b/.test(location.search)){ var __fz=20261122; Math.random=function(){ __fz|=0; __fz=__fz+0x6D2B79F5|0; var t=Math.imul(__fz^__fz>>>15,1|__fz); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; var __fc=0, __pn=performance.now.bind(performance); performance.now=function(){ __fc+=0.01; return 100000+__fc; }; Date.now=function(){ return 1795300000000+Math.floor(__fc); }; window.__frozenClock=function(){ return __fc; }; window.requestAnimationFrame=function(){ return 0; }; window.cancelAnimationFrame=function(){}; } window.DL_VERSION='2026.11.23-0815';
 window.addEventListener('beforeinstallprompt',function(e){ e.preventDefault(); window.__dlInstallPrompt=e; });
 </script>
 </head>
@@ -17981,6 +17981,88 @@ const CO = {
     HK.rect(o,o.pw-W*.012,y-H*.012,W*.006,H*.012,'#f4f6f8'); HK.rect(o,o.pw-W*.012,y-H*.009,W*.006,H*.004,'#8a5a3a'); /* a coffee cup */ }
 };
 // =====================================================================
+// THE NILE: THE REED BOAT (overnight, 2026-11-23; its own design, MAP_THEMES › The Nile: tomb paintings of papyrus boats, feluccas, the sun
+// barque). A boat floating on the river, seen from the side as in Egyptian paintings: a crescent hull of papyrus bundles whose ends sweep up
+// high and finish in papyrus flower heads, rope lashings every few hands, a steering oar hung at the stern; a wooden felucca with a low hull,
+// or a gilded barque with lotus finials and a painted eye. Its sail, cabin, cargo and lamp keep their old ids, so saved choices still fit.
+// =====================================================================
+const NB = {
+  geo(o){ const x0=Math.max(HF.x0(),0)+W*.03, xb=o.pw+W*.02, y=o.dockY, wl=o.wl; return {x0,xb,y,wl,len:xb-x0}; },
+  hull(o,kind,c){ const q=o.x, g=NB.geo(o), y=g.y, wl=g.wl, lit=HK.lit(o), bot=wl+H*.012, up=kind===1?H*.03:H*.03, col=kind===2?'#d8a830':c;
+    const top=X=>{ const u=(X-g.x0)/g.len, e=Math.min(u,1-u); return y-up*Math.pow(Math.max(0,1-e/.18),2.2)*(u<.5?1.15:1); };
+    q.save(); q.beginPath(); q.moveTo(g.x0-W*.012,top(g.x0)); for(let X=g.x0;X<=g.xb;X+=4) q.lineTo(X,top(X)); q.lineTo(g.xb+W*.012,top(g.xb)); q.quadraticCurveTo(g.xb,bot,g.xb-g.len*.2,bot); q.lineTo(g.x0+g.len*.2,bot); q.quadraticCurveTo(g.x0,bot,g.x0-W*.012,top(g.x0)); q.closePath();
+    const hg=q.createLinearGradient(0,y-up,0,bot); hg.addColorStop(0,HK.n(o,HK.lt(col,.12))); hg.addColorStop(1,HK.n(o,HK.dk(col,.25))); q.fillStyle=hg; q.fill(); q.clip();
+    if(kind===1){ q.strokeStyle=HK.n(o,HK.dk(col,.3)); q.lineWidth=1; q.beginPath(); for(let Y=y;Y<bot;Y+=H*.01){ q.moveTo(g.x0-W*.02,Y); q.lineTo(g.xb+W*.02,Y); } q.stroke(); } /* felucca planks */
+    else { q.strokeStyle=HK.n(o,HK.dk(col,.2)); q.lineWidth=1; for(let k=1;k<6;k++){ q.beginPath(); for(let X=g.x0-W*.012;X<=g.xb+W*.012;X+=4){ const t=top(Math.min(Math.max(X,g.x0),g.xb)); q.lineTo(X,t+(bot-t)*k/6); } q.stroke(); } /* the reed bundles */
+      q.fillStyle=HK.n(o,kind===2?'#2a5aa8':'#8a6a3a'); for(let X=g.x0+W*.01;X<g.xb;X+=W*.022) q.fillRect(X,y-up,W*.003,bot-y+up); } /* rope lashings, or lapis bands on the barque */
+    q.fillStyle=v3rgba(o.P.wMid||'#2a7a80',.55); q.fillRect(g.x0-W*.03,wl,g.len+W*.06,H*.03); q.restore();
+    if(kind!==1){ for(const [bx,d] of [[g.x0+W*.004,-1],[g.xb-W*.004,1]]){ const by=top(d<0?g.x0:g.xb)+H*.01, tx=bx+d*W*.03, ty=y-H*.11, wb=H*.03; q.fillStyle=HK.n(o,col); q.beginPath(); q.moveTo(bx-d*wb*.3,by+wb*.6); q.quadraticCurveTo(bx+d*W*.02,by+wb*.2,tx,ty); q.quadraticCurveTo(bx+d*W*.004,by-wb*.6,bx-d*wb*.6,by-wb*.2); q.closePath(); q.fill(); q.strokeStyle=HK.n(o,HK.dk(col,.25)); q.lineWidth=1; q.stroke(); for(let k=1;k<4;k++){ const u=k/4; HK.line(o,[bx+(tx-bx)*u-W*.004,by+(ty-by)*u*.9+H*.004,bx+(tx-bx)*u+W*.004,by+(ty-by)*u*.9-H*.002],kind===2?'#2a5aa8':'#8a6a3a',2); }
+      q.fillStyle=HK.n(o,kind===2?'#f0c84a':'#6a9a4a'); q.beginPath(); q.moveTo(tx,ty); for(let k=0;k<=6;k++){ const a=-Math.PI/2+d*(-.9+k*.3); q.lineTo(tx+Math.cos(a)*H*.02+d*H*.004,ty+Math.sin(a)*H*.02); } q.closePath(); q.fill(); } } /* slim upswept horns, lashed, ending in papyrus flower heads (gold lotus on the barque) */
+    if(kind===2){ const ex=g.xb-g.len*.12, ey=top(ex)+H*.025; HK.ell(o,ex,ey,W*.008,H*.006,'#f0e8d4'); HK.circ(o,ex,ey,H*.004,'#1a1410'); HK.line(o,[ex-W*.008,ey-H*.008,ex+W*.008,ey-H*.008],'#1a1410',1.5); HK.line(o,[ex-W*.002,ey+H*.006,ex-W*.004,ey+H*.016],'#1a1410',1.5); } /* the painted eye on the barque's bow */
+    const sx=g.x0+W*.01; HK.line(o,[sx,y-H*.05,sx-W*.03,wl+H*.03],'#5a3a22',Math.max(2.5,H*.005)); HK.poly(o,[sx-W*.026,wl,sx-W*.036,wl+H*.035,sx-W*.03,wl+H*.04,sx-W*.022,wl+H*.008],'#7a5a3a'); HK.line(o,[sx,y-H*.05,sx,y],'#5a3a22',2); /* the steering oar at the stern */
+    o.top=Math.min(o.top==null?y-H*.23:o.top,y-H*.15); o.low=Math.max(o.low==null?-1e9:o.low,y-H*.004); },
+  /* the cabin: a linen awning on two lotus columns, a little temple pylon, or a striped tent */
+  cabin(o,s,c){ const g=NB.geo(o), y=g.y, a=g.x0+g.len*.18, b=a+g.len*.3, top=y-H*.1, q=o.x; if(!s) return;
+    if(s===1){ for(const px of [a+W*.004,b-W*.004]){ HK.rect(o,px-W*.003,top,W*.006,y-top,'#ece0c4'); HK.poly(o,[px-W*.008,top,px+W*.008,top,px+W*.004,top+H*.014,px-W*.004,top+H*.014],'#6a9a4a'); for(let k=0;k<3;k++) HK.rect(o,px-W*.003,top+H*(.03+k*.015),W*.006,H*.003,'#2a5aa8'); } HK.rect(o,a-W*.006,top-H*.008,b-a+W*.012,H*.01,c); for(let X=a;X<b;X+=W*.01) HK.poly(o,[X,top+H*.002,X+W*.005,top+H*.012,X+W*.01,top+H*.002],c); o.low=Math.max(o.low==null?-1e9:o.low,top); } /* a linen awning on lotus columns with lapis bands, scalloped edge */
+    if(s===2){ HK.poly(o,[a,y,a+W*.004,top-H*.02,b-W*.004,top-H*.02,b,y],c); HK.rect(o,a-W*.002,top-H*.028,b-a+W*.004,H*.008,HK.dk(c,.2)); HK.rect(o,(a+b)/2-W*.008,y-H*.05,W*.016,H*.05,'#1a1410'); HK.circ(o,(a+b)/2,top-H*.008,H*.008,'#f0c84a'); for(let k=0;k<4;k++) HK.rect(o,a+W*.006,top+k*H*.018,W*.004,H*.008,'#2a5aa8'); } /* a little temple pylon with a sun disc */
+    if(s===3){ q.fillStyle=HK.n(o,c); q.beginPath(); q.moveTo(a,y); q.lineTo((a+b)/2,top-H*.01); q.lineTo(b,y); q.closePath(); q.fill(); q.save(); q.clip(); for(let X=a,k=0;X<b;X+=W*.008,k++) if(k%2) HK.rect(o,X,top-H*.02,W*.008,y-top+H*.02,'#2a5aa8'); q.restore(); } /* a striped tent */ }
+};
+// =====================================================================
+// CIRCUIT LAKE: THE CAPSULE POD (overnight, 2026-11-23; its own design, MAP_THEMES › Circuit Lake: Tokyo and Hong Kong neon streets, retro-
+// future art, vending machines, friendly robots). A rounded capsule home hovering on its pad over the neon lake, seen from the side: a pill-
+// shaped shell with a big round window glowing from inside, a neon sign on the roof, an antenna with a blinking tip, cables looping down to the
+// thrusters, a glowing vending machine beside it; or a noodle stall with a cloth curtain and paper lanterns, or an arcade booth with a screen.
+// The pad, thrusters, trim and light keep their ids; the pod and sign are new (the old canopy id is retired).
+// =====================================================================
+const CP = {
+  geo(o){ const C=BH.cab(o,{h:1.05,ratio:1.6}), wh=C.wh, x0=Math.max(HF.x0(),0)+W*.008, w=Math.min(wh*1.7,o.pw*.44), x1=x0+w; return {x0,x1,w,wh,top:C.wallTop-H*.01,mid:(x0+x1)/2}; },
+  pod(o,s,c){ const q=o.x, g=CP.geo(o), y=o.dockY, lit=HK.lit(o), r=(y-g.top)*.48;
+    if(s===0){ const gr=q.createLinearGradient(0,g.top,0,y); gr.addColorStop(0,HK.n(o,HK.lt(c,.25))); gr.addColorStop(1,HK.n(o,HK.dk(c,.25))); q.fillStyle=gr; q.beginPath(); q.moveTo(g.x0+r,g.top); q.lineTo(g.x1-r,g.top); q.arc(g.x1-r,g.top+r,r,-Math.PI/2,Math.PI/2); q.lineTo(g.x0+r,y); q.arc(g.x0+r,g.top+r,r,Math.PI/2,Math.PI*1.5); q.closePath(); q.fill(); /* the pill-shaped shell */
+      q.strokeStyle=v3rgba('#3ae8ff',.8); q.lineWidth=2; q.beginPath(); q.moveTo(g.x0+r,y-H*.006); q.lineTo(g.x1-r,y-H*.006); q.stroke(); q.strokeStyle=v3rgba('#ffffff',.35*lit+.1); q.lineWidth=1.5; q.beginPath(); q.moveTo(g.x0+r,g.top+2); q.lineTo(g.x1-r,g.top+2); q.stroke(); /* an LED strip, a chrome highlight */
+      const wx=g.mid+g.w*.12, wy=g.top+r, wr=r*.62; HK.circ(o,wx,wy,wr+3,'#3a3e4a'); HK.circ(o,wx,wy,wr,'#2a1a4a'); o.lights.push({x:wx,y:wy,r:.1,a:.55,small:1,win:[wr*1.4,wr*1.4]}); HK.rect(o,g.x0+r*.4,g.top+r*.5,W*.014,y-g.top-r*.5-H*.008,'#1a1c22'); HK.rect(o,g.x0+r*.4+W*.002,g.top+r*.6,W*.01,H*.004,'#ff4ab8'); } /* a round window glowing from inside, a sliding door with a pink light */
+    if(s===1){ HK.rect(o,g.x0,g.top+H*.02,g.w,y-g.top-H*.02,'#2a1c22'); HK.rect(o,g.x0-W*.006,g.top,g.w+W*.012,H*.022,c); for(let X=g.x0,k=0;X<g.x1;X+=W*.012,k++) HK.rect(o,X,g.top+H*.022,W*.011,(y-g.top)*.45,k%2?'#e84a4a':'#f0e8d4'); for(let k=0;k<4;k++){ const lx=g.x0+g.w*(k+.5)/4; HK.ell(o,lx,g.top+H*.035,W*.005,H*.01,'#ff6a3a'); } HK.rect(o,g.x0,y-H*.03,g.w,H*.03,'#5a3a2a'); o.lights.push({x:g.mid,y:g.top+H*.04,r:.1,a:.5}); } /* a noodle stall: cloth curtain strips, red lanterns, a counter */
+    if(s===2){ HK.rect(o,g.x0,g.top,g.w,y-g.top,'#1a1c22'); HK.rect(o,g.x0+g.w*.15,g.top+H*.02,g.w*.7,(y-g.top)*.45,v3rgba(c,.85)); for(let k=0;k<5;k++) HK.rect(o,g.x0+g.w*(.2+k*.12),g.top+H*.03+(k%2)*H*.01,g.w*.06,H*.008,'#7aff4a'); HK.rect(o,g.x0+g.w*.2,y-H*.035,g.w*.6,H*.012,'#3a3e4a'); HK.circ(o,g.x0+g.w*.35,y-H*.04,H*.004,'#ff4ab8'); HK.circ(o,g.x0+g.w*.45,y-H*.04,H*.004,'#3ae8ff'); o.lights.push({x:g.mid,y:g.top+H*.05,r:.1,a:.5,win:[g.w*.7,(y-g.top)*.45]}); } /* an arcade booth with its screen and buttons */
+    HK.line(o,[g.x1-g.w*.2,g.top,g.x1-g.w*.2,g.top-H*.05],'#c8ccd8',1.5); HK.circ(o,g.x1-g.w*.2,g.top-H*.05,H*.004,'#ff4a4a'); /* an antenna (its tip blinks in front) */
+    const vx=g.x1+W*.008; HK.rect(o,vx,y-H*.07,W*.022,H*.07,'#c8ccd8'); HK.rect(o,vx+W*.002,y-H*.066,W*.018,H*.04,v3rgba('#3ae8ff',.7)); for(let k=0;k<6;k++) HK.rect(o,vx+W*.004+(k%3)*W*.005,y-H*.062+Math.floor(k/3)*H*.018,W*.003,H*.01,['#ff4ab8','#7aff4a','#f0c84a'][k%3]); HK.rect(o,vx+W*.004,y-H*.02,W*.014,H*.008,'#1a1c22'); o.lights.push({x:vx+W*.011,y:y-H*.046,r:.08,a:.45,small:1}); /* a glowing vending machine */
+    o.top=Math.min(o.top==null?y-H*.23:o.top,g.top-H*.08); },
+  /* the neon sign on the roof */
+  sign(o,s,c){ const q=o.x, g=CP.geo(o), sy=g.top-H*.035, txt=['NOODLES','OPEN 24/7','RAMEN ♥'][s]; HK.rect(o,g.x0+g.w*.1,sy-H*.004,g.w*.55,H*.03,'#1a1c22'); HK.line(o,[g.x0+g.w*.2,sy+H*.026,g.x0+g.w*.2,g.top],'#3a3e4a',1.5); HK.line(o,[g.x0+g.w*.55,sy+H*.026,g.x0+g.w*.55,g.top],'#3a3e4a',1.5);
+    q.fillStyle=HK.n(o,c); q.font='bold '+Math.round(H*.018)+'px sans-serif'; q.fillText(txt,g.x0+g.w*.13,sy+H*.02); o.lights.push({x:g.x0+g.w*.37,y:sy+H*.012,r:.12,a:.5,small:1}); }
+};
+// =====================================================================
+// MOUNT OLYMPUS: THE TEMPLE (overnight, 2026-11-23; its own design, MAP_THEMES › Mount Olympus: Greek temples and statues, laurel, gold, the
+// heavens). A small marble temple standing on a stepped base over the cloud-water, seen from the front: four columns (Doric, Ionic or
+// Corinthian capitals, fluted), an entablature with a frieze, a pediment with a gold relief or a painted scene and gold acroteria at its
+// corners, and inside the cella a statue of a god (Zeus with a thunderbolt, Athena with her owl, Poseidon with a trident); clouds drift around
+// the base. Parts: column order, pediment, statue, balustrade, brazier, seat (the old floor, columns and roof ids are retired).
+// =====================================================================
+const TP = {
+  geo(o){ const C=BH.cab(o,{h:1.2,ratio:1.4}), wh=C.wh, x0=Math.max(HF.x0(),0)+W*.008, w=Math.min(wh*1.45,o.pw*.44), x1=x0+w, et=C.wallTop; return {x0,x1,w,wh,et,ct:et+H*.022,pk:et-w*.2,mid:(x0+x1)/2}; },
+  base(o,g){ const y=o.dockY; for(let k=0;k<3;k++){ HK.rect(o,g.x0-W*.012+k*W*.004,y-H*.006*(3-k),g.w+W*.024-k*W*.008,H*.006,k%2?'#d8d4e4':'#f0ecf4'); HK.rect(o,g.x0-W*.012+k*W*.004,y-H*.006*(3-k),g.w+W*.024-k*W*.008,1,v3rgba('#ffffff',.5)); } }, /* the stepped base */
+  /* the cella's dark doorway with a god's statue inside, then the four columns in front */
+  statue(o,g,s,c){ const y=o.dockY-H*.018, a=g.x0+g.w*.25, b=g.x1-g.w*.25, sx=g.mid, sh=(y-g.ct)*.7, sy=y-sh; HK.rect(o,a,g.ct,b-a,y-g.ct,'#3a3448'); HK.rect(o,a,g.ct,b-a,H*.006,'#2a2438');
+    HK.rect(o,sx-W*.008,y-H*.012,W*.016,H*.012,'#d8d4e4'); HK.circ(o,sx,sy+sh*.12,sh*.09,c); HK.poly(o,[sx-sh*.12,sy+sh*.22,sx+sh*.12,sy+sh*.22,sx+sh*.16,y-H*.012,sx-sh*.16,y-H*.012],c); /* a robed figure on a plinth */
+    if(s===0){ HK.poly(o,[sx+sh*.14,sy+sh*.1,sx+sh*.24,sy+sh*.3,sx+sh*.18,sy+sh*.32,sx+sh*.28,sy+sh*.55,sx+sh*.16,sy+sh*.34,sx+sh*.22,sy+sh*.32],'#f4d060'); } /* Zeus holding a thunderbolt */
+    if(s===1){ HK.line(o,[sx-sh*.2,sy+sh*.05,sx-sh*.2,y-H*.012],'#a8743a',2); HK.ell(o,sx+sh*.2,sy+sh*.3,sh*.05,sh*.07,'#a8743a'); HK.circ(o,sx+sh*.19,sy+sh*.27,1.2,'#f4d060'); } /* Athena with a spear and her owl */
+    if(s===2){ HK.line(o,[sx+sh*.2,sy-sh*.05,sx+sh*.2,y-H*.012],'#f4d060',2); for(const d of [-1,0,1]) HK.line(o,[sx+sh*.2+d*sh*.05,sy-sh*.05,sx+sh*.2+d*sh*.05,sy+sh*.05],'#f4d060',1.5); HK.line(o,[sx+sh*.15,sy+sh*.05,sx+sh*.25,sy+sh*.05],'#f4d060',1.5); } /* Poseidon with his trident */
+    o.lights.push({x:sx,y:sy+sh*.4,r:.08,a:.35,small:1}); },
+  columns(o,g,s,c){ const y=o.dockY-H*.018, n=4, cw=g.w*.09;
+    for(let k=0;k<n;k++){ const cx=g.x0+g.w*(.08+k*.84/(n-1)); HK.rect(o,cx-cw/2,g.ct,cw,y-g.ct,c); for(let f=1;f<4;f++) HK.rect(o,cx-cw/2+cw*f/4,g.ct,1,y-g.ct,HK.dk(c,.12)); HK.rect(o,cx-cw/2,g.ct,cw*.25,y-g.ct,v3rgba('#ffffff',.25)); /* shaft with flutes */
+      if(s===0) HK.rect(o,cx-cw*.7,g.ct-H*.006,cw*1.4,H*.008,c); /* Doric: a plain slab */
+      if(s===1){ HK.rect(o,cx-cw*.65,g.ct-H*.004,cw*1.3,H*.006,c); HK.circ(o,cx-cw*.62,g.ct+H*.002,cw*.22,HK.dk(c,.08)); HK.circ(o,cx+cw*.62,g.ct+H*.002,cw*.22,HK.dk(c,.08)); } /* Ionic: scroll volutes */
+      if(s===2){ HK.poly(o,[cx-cw*.5,g.ct+H*.012,cx-cw*.8,g.ct-H*.006,cx+cw*.8,g.ct-H*.006,cx+cw*.5,g.ct+H*.012],c); for(let l=-1;l<=1;l++) HK.ell(o,cx+l*cw*.4,g.ct+H*.004,cw*.18,H*.006,'#6a8a4a'); } /* Corinthian: acanthus leaves */
+      HK.rect(o,cx-cw*.6,y-H*.004,cw*1.2,H*.004,c); } },
+  /* the entablature and pediment: a frieze band, the triangle with a gold relief, a painted scene, or plain marble; gold acroteria */
+  pediment(o,g,s,c){ const q=o.x, lit=HK.lit(o), L=g.x0-W*.008, R=g.x1+W*.008; HK.rect(o,L,g.et,R-L,g.ct-g.et,'#f0ecf4'); for(let X=L+W*.004;X<R;X+=W*.01) HK.rect(o,X,g.et+H*.004,W*.003,g.ct-g.et-H*.008,'#b8b4c8'); /* triglyphs */
+    HK.poly(o,[L,g.et,g.mid,g.pk,R,g.et],'#f0ecf4'); HK.poly(o,[L+W*.01,g.et-H*.004,g.mid,g.pk+H*.008,R-W*.01,g.et-H*.004],s===2?'#2a4aa8':'#d8d4e4'); HK.line(o,[L-W*.004,g.et,g.mid,g.pk-H*.004,R+W*.004,g.et],'#f0ecf4',Math.max(3,H*.006)); HK.line(o,[L-W*.004,g.et-1,g.mid,g.pk-H*.005],v3rgba('#ffffff',.6*lit),1);
+    if(s===0){ HK.circ(o,g.mid,g.et-(g.et-g.pk)*.4,(g.et-g.pk)*.25,c); for(let k=0;k<8;k++){ const a=k*Math.PI/4; HK.line(o,[g.mid,g.et-(g.et-g.pk)*.4,g.mid+Math.cos(a)*(g.et-g.pk)*.38,g.et-(g.et-g.pk)*.4+Math.sin(a)*(g.et-g.pk)*.32],c,1.2); } } /* a gold sun relief */
+    if(s===2) for(let k=0;k<5;k++){ const fx=L+(R-L)*(.25+k*.125), fh=(g.et-g.pk)*(.55-Math.abs(k-2)*.15); HK.rect(o,fx-1,g.et-fh,2.5,fh,'#f4d060'); HK.circ(o,fx,g.et-fh,2,'#f4d060'); } /* painted figures in gold on blue */
+    for(const [ax,ay] of [[L,g.et],[g.mid,g.pk],[R,g.et]]) HK.poly(o,[ax-W*.004,ay,ax,ay-H*.016,ax+W*.004,ay],'#d8a830'); /* gold acroteria */
+    o.top=Math.min(o.top==null?o.dockY-H*.23:o.top,g.pk-H*.04); o.low=Math.max(o.low==null?-1e9:o.low,g.ct); },
+  /* clouds drifting around the base and over the water at the posts */
+  clouds(o){ const q=o.x, y=o.dockY, N=c0=>HK.n(o,c0), x0=HF.x0(); for(let i=0;i<9;i++){ const cx=x0+(o.pw-x0)*(i/8), cy=y+HK.fh()+H*.03+(i%3)*H*.012; q.fillStyle=v3rgba(N('#fbf8ff'),.85); q.beginPath(); for(let k=0;k<4;k++) q.arc(cx+(k-1.5)*W*.008,cy-(k%2)*H*.008,H*.016,0,7); q.fill(); } }
+};
+// =====================================================================
 // Every water's home (batch 5, 2026-11-22; designs in docs/HOME_DESIGNS.md, colours in docs/MAP_THEMES.md). Willow Pond (the
 // approved pilot) is in cv_homefmt.js; these 19 are built from the home kit (cw_homekit.js). Each home: the seat plus 5 features
 // made for that water, 3 styles each ("none" first where a feature can be left out), one list of 16 colours for every feature.
@@ -18497,48 +18579,58 @@ hfMake('corporate',{ name:'Glass pavilion', hname:'glass pavilion', glow:'230,24
     ['seat'],
     ['light',(o,s)=>HK.light(o,['desk','floor','sign'][s])]] });
 
-/* 18. The Nile: the reed boat (floats) */
-hfMake('nile',{ name:'Reed boat', hname:'reed boat', floats:true,
+/* 18. The Nile: the reed boat (floats; its own drawing overnight 2026-11-23, src/cw_reedboat.js: a papyrus crescent hull with high ends and flower heads, lashings, a steering oar, a lotus-column cabin) */
+hfMake('nile',{ name:'Reed boat', hname:'reed boat', floats:true, seatX:()=>HF.pw()-W*.03, front:null, smoke:null,
   colors:C16('Sandstone=#d8b880;Dark sandstone=#a8844a;Limestone=#ece0c4;Papyrus reed=#c8b060;Papyrus green=#6a9a4a;Palm wood=#7a5a3a;Linen=#f0e8d4;Gold leaf=#d8a830;Bright gold=#f0c84a;Lapis blue=#2a4a9a;Turquoise=#3ab0a8;Nile teal=#2a7a80;Carnelian=#b8402e;Ochre=#c8803a;Kohl black=#2a2428;Lotus pink=#f0a8b8'),
   els:[{id:'hull',label:'Hull',styles:['Papyrus reeds','Wooden felucca','Gilded barque'],def:[0,3]},{id:'sail',label:'Sail',styles:['Lateen sail','Square sail','Painted eye sail'],def:[0,6]},
        {id:'cabin',label:'Cabin',none:true,styles:['No cabin','Linen awning','Temple pylon','Striped tent'],def:[1,6]},{id:'cargo',label:'Cargo',none:true,styles:['No cargo','Amphorae','Fish baskets','Scroll chest'],def:[1,13]},
        {id:'light',label:'Lamp',light:true,styles:['Lotus lamp','Bronze brazier','Sun-disc lantern'],def:[0,15]}],
   seat:['lionstool','xstool','throne'], seatNames:['Lion-foot stool','Folding X stool','Gilded throne'], seatDef:[0,5],
   order:[
-    ['hull',(o,s,c)=>HK.hull(o,c,['reed','felucca','barque'][s])],
+    ['hull',(o,s,c)=>NB.hull(o,s,c)], /* its own drawing (overnight 2026-11-23, src/cw_reedboat.js) */
     ['sail',(o,s,c)=>{ const x=HK.at(o,.6), y=o.dockY, top=y-H*.24; HK.rect(o,x,top,2.4,H*.24,'#7a5a3a'); if(s===0){ HK.line(o,[x-W*.04,y-H*.04,x+W*.02,top-H*.02],'#7a5a3a',1.6); HK.poly(o,[x-W*.036,y-H*.05,x+W*.018,top-H*.012,x+W*.03,y-H*.05],c); } else { HK.rect(o,x-W*.03,top+H*.02,W*.06,2,'#7a5a3a'); HK.poly(o,[x-W*.03,top+H*.022,x+W*.03,top+H*.022,x+W*.026,y-H*.06,x-W*.026,y-H*.06],c); if(s===2){ HK.ell(o,x,top+H*.09,W*.01,H*.008,'#f4f0e6'); HK.circ(o,x,top+H*.09,H*.006,'#2a4a9a'); HK.line(o,[x-W*.012,top+H*.09,x-W*.016,top+H*.1],'#2a2428',1.4); } } }],
-    ['cabin',(o,s,c)=>{ if(s===1) HK.roof(o,c,'flat',.04,.4); if(s===2) HK.roof(o,c,'pylon',.04,.4); if(s===3) HK.roof(o,c,'stripedtent',.04,.4); }],
+    ['cabin',(o,s,c)=>NB.cabin(o,s,c)],
     ['cargo',(o,s,c)=>{ if(!s) return; const x=HK.at(o,.78), y=o.dockY; if(s===1) for(let i=0;i<2;i++){ HK.ell(o,x+i*W*.012,y-H*.016,W*.005,H*.016,c); HK.rect(o,x+i*W*.012-W*.002,y-H*.036,W*.004,H*.006,c); } if(s===2) for(let i=0;i<2;i++){ HK.poly(o,[x+i*W*.014,y,x+i*W*.014+W*.012,y,x+i*W*.014+W*.014,y-H*.018,x+i*W*.014-W*.002,y-H*.018],c); HK.ell(o,x+i*W*.014+W*.006,y-H*.02,W*.006,H*.004,'#c0c8cc'); } if(s===3){ HK.block(o,x,y-H*.022,W*.024,H*.022,'#7a5a3a'); HK.rect(o,x+W*.004,y-H*.03,W*.016,H*.008,c); } }],
     ['seat'],
     ['light',(o,s)=>HK.light(o,['lotus','brazier','sundisclamp'][s])]] });
 
-/* 19. Circuit Lake: the hover pad (hovers above the water) */
-hfMake('circuit',{ name:'Hover pad', hname:'hover pad',
+/* 19. Circuit Lake: the capsule pod (overnight, 2026-11-23; its own design, src/cw_capsule.js; hovers above the water): a pill-shaped capsule
+   home with a glowing round window (or a noodle stall, or an arcade booth), a neon sign on the roof, an antenna and a vending machine beside it.
+   Pad, thrusters, trim and light keep their ids; the canopy id is retired */
+hfMake('circuit',{ name:'Capsule pod', hname:'capsule pod', glow:'255,120,220', seatX:()=>HF.pw()-W*.03, front:null, smoke:null,
   colors:C16('Chrome=#c8ccd8;Gunmetal=#3a3e4a;Carbon=#1a1c22;Hot pink=#ff4ab8;Neon magenta=#d83ad8;Electric cyan=#3ae8ff;Deep blue=#1a1a4a;Violet=#8a3a9a;Hologram lilac=#c8a0ff;Acid green=#7aff4a;Warning yellow=#ffe04a;LED white=#f4f8ff;Night purple=#2a1050;Cable black=#0e0e14;Sunset pink=#ff7ab8;Teal glow=#2ad8c8'),
-  els:[{id:'pad',label:'Pad',styles:['Chrome plate','Carbon deck','Circuit glass'],def:[0,0]},{id:'thrust',label:'Thrusters',styles:['Anti-gravity rings','Thruster jets','Magnetic coils'],def:[0,5]},
-       {id:'trim',label:'Trim',none:true,styles:['No trim','Neon strip','Hologram rail','Cable rail'],def:[1,3]},{id:'canopy',label:'Canopy',none:true,styles:['Open sky','Hologram canopy','Neon arch','Vending machine'],def:[1,8]},
+  els:[{id:'pod',label:'Home',styles:['Capsule pod','Noodle stall','Arcade booth'],def:[0,0],palS:[[0,7,3,5],[3,4,7],[5,3,9]]},
+       {id:'sign',label:'Neon sign',styles:['NOODLES','OPEN 24/7','RAMEN'],def:[0,3],pal:[3,4,5,9]},
+       {id:'pad',label:'Pad',styles:['Chrome plate','Carbon deck','Circuit glass'],def:[0,0]},{id:'thrust',label:'Thrusters',styles:['Anti-gravity rings','Thruster jets','Magnetic coils'],def:[0,5]},
+       {id:'trim',label:'Trim',none:true,styles:['No trim','Neon strip','Hologram rail','Cable rail'],def:[1,3]},
        {id:'light',label:'Neon light',light:true,styles:['Neon tube','Hologram','LED orb'],def:[0,3]}],
   seat:['gaming','orbseat','arcadestool'], seatNames:['Gaming chair','Orb seat','Arcade stool'], seatDef:[0,2],
   order:[
     ['thrust',(o,s,c)=>HK.supports(o,c,['rings','jets','coils'][s],4)],
     ['pad',(o,s,c)=>HK.deck(o,c,['chrome','carbon','glass'][s])],
     ['trim',(o,s,c)=>{ if(s) HK.rail(o,c,['','neon','holo','cable'][s]); }],
-    ['canopy',(o,s,c)=>{ if(s===1) HK.roof(o,c,'holo',.02,.44); if(s===2) HK.roof(o,c,'neonarch',.04,.44); if(s===3){ const a=HK.at(o,.02); HK.block(o,a,o.dockY-H*.13,W*.034,H*.13,c); HK.rect(o,a+W*.004,o.dockY-H*.12,W*.02,H*.06,'#3ae8ff'); for(let i=0;i<3;i++) HK.rect(o,a+W*.006,o.dockY-H*.115+i*H*.018,W*.016,H*.008,['#ff4ab8','#7aff4a','#ffe04a'][i]); } }],
+    ['pod',(o,s,c)=>CP.pod(o,s,c)],
+    ['sign',(o,s,c)=>CP.sign(o,s,c)],
     ['seat'],
     ['light',(o,s)=>HK.light(o,['neontube','hologram','orb'][s])]] });
 
-/* 20. Mount Olympus: the temple porch */
-hfMake('olympus',{ name:'Temple porch', hname:'temple porch',
+/* 20. Mount Olympus: the temple (overnight, 2026-11-23; its own design, src/cw_temple.js): a small marble temple on a stepped base over the
+   cloud-water, four columns (Doric, Ionic, Corinthian), a frieze and pediment with gold acroteria, a god's statue inside, clouds around the
+   posts. The old floor, columns and roof ids are retired; balustrade and brazier keep theirs */
+hfMake('olympus',{ name:'Marble temple', hname:'temple', glow:'255,220,140', seatX:()=>HF.pw()-W*.03, front:null, smoke:null,
   colors:C16('White marble=#f0ecf4;Veined marble=#d8d4e4;Shadow marble=#b8b4c8;Gold=#d8a830;Bright gold=#f4d060;Bronze=#a8743a;Laurel green=#6a8a4a;Olive=#8a9a5a;Royal blue=#2a4aa8;Cerulean=#4aa0d8;Sky blue=#a0c0f4;Cloud white=#ffffff;Storm violet=#5a4a9a;Lightning yellow=#fff07a;Tyrian purple=#7a2a6a;Terracotta=#c8683a'),
-  els:[{id:'floor',label:'Floor',styles:['White marble','Mosaic','Cloud floor'],def:[0,0]},{id:'columns',label:'Columns',styles:['Fluted columns','Cloud pillars','Yggdrasil roots'],def:[0,1]},
-       {id:'balustrade',label:'Balustrade',none:true,styles:['None','Marble balustrade','Laurel garland','Golden rail'],def:[0,0]},{id:'roof',label:'Roof',none:true,styles:['Open sky','Pediment','Winged sun disc','Rainbow arch'],def:[1,0]},
+  els:[{id:'colorder',label:'Columns',styles:['Doric','Ionic','Corinthian'],def:[0,0],pal:[0,1,3]},
+       {id:'pediment',label:'Pediment',styles:['Gold sun relief','Plain marble','Painted frieze'],def:[0,3],pal:[3,4,5]},
+       {id:'statue',label:'Statue',styles:['Zeus','Athena','Poseidon'],def:[0,0],pal:[0,1,3,5]},
+       {id:'balustrade',label:'Balustrade',none:true,styles:['None','Marble balustrade','Laurel garland','Golden rail'],def:[0,0]},
        {id:'light',label:'Brazier',light:true,styles:['Golden brazier','Lightning orb','Laurel torch'],def:[0,3]}],
   seat:['marblethrone','cloudbench','klismos'], seatNames:['Marble throne','Cloud bench','Klismos chair'], seatDef:[0,0],
   order:[
-    ['columns',(o,s,c)=>HK.supports(o,c,['column','cloud','mangrove'][s],5)],
-    ['floor',(o,s,c)=>HK.deck(o,c,['marble','mosaic','cloud'][s])],
+    ['base',(o)=>{ HK.supports(o,'#e8e4f0','column',5); HK.deck(o,'#f0ecf4','marble'); TP.clouds(o); TP.base(o,TP.geo(o)); }],
+    ['statue',(o,s,c)=>TP.statue(o,TP.geo(o),s,c)],
+    ['colorder',(o,s,c)=>TP.columns(o,TP.geo(o),s,c)],
+    ['pediment',(o,s,c)=>TP.pediment(o,TP.geo(o),s,c)],
     ['balustrade',(o,s,c)=>{ if(s) HK.rail(o,c,['','balustrade','garland','gold'][s]); }],
-    ['roof',(o,s,c)=>{ if(s) HK.roof(o,c,['','pediment','sundisc','rainbow'][s],.02,.44); }],
     ['seat'],
     ['light',(o,s)=>HK.light(o,['goldbrazier','lightning','laurel'][s])]] });
 // =====================================================================
@@ -21930,6 +22022,10 @@ PATCHES.unshift({v:'0.4.9', name:'Work in progress', items:phoneNotes([
 // text changes. Released notes live in notes_release.js.
 const TEST_NOTES={v:'test', label:'Test build · '+(window.DL_BUILD==='ios'?'iPhone':'Android'), name:'0.4.9 test build (newest first)', items:[
   '## New in this build',
+  'The Nile: your reed boat is redrawn the way Egyptian paintings show it: a crescent hull of papyrus bundles with rope lashings, slim horns at both ends rising to papyrus flower heads (gold lotus on the gilded barque, with a painted eye), a steering oar at the stern, and a cabin on lotus columns, a temple pylon or a striped tent. Your saved choices carry over.',
+  'Circuit Lake, redone in its own style: your home is a capsule pod hovering on its pad, with a glowing round window, a neon sign on the roof, an antenna and a vending machine beside it (or a noodle stall with red lanterns, or an arcade booth). Pick the home, the sign’s words, pad, thrusters, trim, light and seat in Your home.',
+  'Mount Olympus, redone in its own style: your home is a small marble temple on a stepped base over the clouds, with Doric, Ionic or Corinthian columns, a pediment with a gold sun relief, plain marble or a painted frieze, gold ornaments at its corners, and a statue of Zeus, Athena or Poseidon inside. Clouds drift around the posts.',
+  '## Test build 2026.11.23-0800',
   'Corporate Pond, redone in its own style: your home is a modernist glass pavilion on steel columns in the reflecting pool, with a thin roof slab and the company logo, steel frames, and the office visible inside (a desk and glowing monitor, a ficus and water cooler, or a whiteboard of charts). A concrete planter and a coffee cup sit on the deck. Your partition and lamp choices carry over.',
   '## Test build 2026.11.23-0757',
   'Cherry Blossom Lake, redrawn to the director’s picture: Fuji large and to the right, a big cherry tree painted in thousands of petals over the house, a grassy bank behind the house whose stone path climbs away to the red bridge with its fence and lantern posts getting smaller with distance, cherry trees on that bank, a little island past the bridge, a forested cliff with the waterfall and its pavilion, a row of cherries on the right shore, a larger torii on its rocks, and pink flowers in the bottom-left corner.',
