@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="DL Test Android">
 <script>
-window.DL_BUILD='android'; window.DL_PREVIEW=true; if(/[?&]sweep\b/.test(location.search)){ window.__bootErr=[]; addEventListener("error",function(e){ __bootErr.push(String(e.message||e)+(e.lineno?" (line "+e.lineno+")":"")); }); addEventListener("unhandledrejection",function(e){ __bootErr.push("promise: "+String(e.reason&&e.reason.message||e.reason)); }); window.requestAnimationFrame=function(f){ return setTimeout(function(){ f(performance.now()); },16); }; window.cancelAnimationFrame=function(i){ clearTimeout(i); }; } try{ window.__tOff=/[?&](test|sweep|frozen)\b/.test(location.search)?0:(+(localStorage.getItem("dl-test-toff")||0)||0); }catch(e){ window.__tOff=0; } (function(){ var rn=Date.now.bind(Date); Date.now=function(){ return rn()+window.__tOff; }; })(); if(/[?&]frozen\b/.test(location.search)){ var __fz=20261122; Math.random=function(){ __fz|=0; __fz=__fz+0x6D2B79F5|0; var t=Math.imul(__fz^__fz>>>15,1|__fz); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; var __fc=0, __pn=performance.now.bind(performance); performance.now=function(){ __fc+=0.01; return 100000+__fc; }; Date.now=function(){ return 1795300000000+Math.floor(__fc); }; window.__frozenClock=function(){ return __fc; }; window.requestAnimationFrame=function(){ return 0; }; window.cancelAnimationFrame=function(){}; } window.DL_VERSION='2026.11.23-0706';
+window.DL_BUILD='android'; window.DL_PREVIEW=true; if(/[?&]sweep\b/.test(location.search)){ window.__bootErr=[]; addEventListener("error",function(e){ __bootErr.push(String(e.message||e)+(e.lineno?" (line "+e.lineno+")":"")); }); addEventListener("unhandledrejection",function(e){ __bootErr.push("promise: "+String(e.reason&&e.reason.message||e.reason)); }); window.requestAnimationFrame=function(f){ return setTimeout(function(){ f(performance.now()); },16); }; window.cancelAnimationFrame=function(i){ clearTimeout(i); }; } try{ window.__tOff=/[?&](test|sweep|frozen)\b/.test(location.search)?0:(+(localStorage.getItem("dl-test-toff")||0)||0); }catch(e){ window.__tOff=0; } (function(){ var rn=Date.now.bind(Date); Date.now=function(){ return rn()+window.__tOff; }; })(); if(/[?&]frozen\b/.test(location.search)){ var __fz=20261122; Math.random=function(){ __fz|=0; __fz=__fz+0x6D2B79F5|0; var t=Math.imul(__fz^__fz>>>15,1|__fz); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; var __fc=0, __pn=performance.now.bind(performance); performance.now=function(){ __fc+=0.01; return 100000+__fc; }; Date.now=function(){ return 1795300000000+Math.floor(__fc); }; window.__frozenClock=function(){ return __fc; }; window.requestAnimationFrame=function(){ return 0; }; window.cancelAnimationFrame=function(){}; } window.DL_VERSION='2026.11.23-0716';
 window.addEventListener('beforeinstallprompt',function(e){ e.preventDefault(); window.__dlInstallPrompt=e; });
 </script>
 </head>
@@ -17755,6 +17755,38 @@ const TR = {
     if(s===2){ q.save(); for(let k=0;k<5;k++){ const px=a+k*w/5; HK.rect(o,px,top+(k%2)*H*.004,w/5-1,y-top-(k%2)*H*.004,k%2?c:HK.dk(c,.15)); } q.restore(); HK.poly(o,[a-W*.006,top+H*.006,b+W*.008,top-H*.006,b+W*.008,top+H*.002,a-W*.006,top+H*.014],'#3a3028'); HK.circ(o,a+w*.62,top+H*.04,H*.012,'#a8884a'); HK.circ(o,a+w*.62,top+H*.04,H*.008,'#1a2a30'); HK.rect(o,a+w*.15,top+H*.03,w*.2,y-top-H*.03,'#1a1410'); } /* a crooked plank shack with a ship's porthole */ }
 };
 // =====================================================================
+// EMBER SPRINGS: THE BASALT BATHHOUSE (overnight, 2026-11-23; its own design, MAP_THEMES › Ember Springs: Iceland's basalt and geothermal
+// baths, onsen stone, forge ironwork). A low bathhouse of dark basalt standing on a bed of hexagonal basalt columns rising out of the hot
+// water, seen from the side: a curved barrel-vault roof of corrugated iron (or copper, or slate), round windows that glow orange, a vent pipe
+// letting off steam, a heavy door; beside it the steaming pool. Parts: walls, roof (vault), door, hot pool, lantern, seat.
+// =====================================================================
+const EB = {
+  geo(o){ const C=BH.cab(o,{h:.95,ratio:2}), wh=C.wh, x0=Math.max(HF.x0(),0)+W*.006, w=Math.min(wh*2.2,o.pw*.5), x1=x0+w; return {x0,x1,vx:x0,w,wh,wallTop:C.wallTop,vt:C.wallTop-w*.36,mid:(x0+x1)/2}; },
+  walls(o,g,kind,c){ BH.walls(o,{x0:g.x0,x1:g.x1,vx:g.x0,wallTop:g.wallTop},['stone','plaster','batten'][kind],c); HK.rect(o,g.x0,g.wallTop,g.w,H*.006,'#3a3436'); for(const e of [g.x0,g.x1-W*.005]) HK.rect(o,e,g.wallTop,W*.005,o.dockY-g.wallTop,'#2a2024');
+    for(let k=0;k<2;k++){ const cx=g.x0+g.w*(.5+k*.25), cy=g.wallTop+(o.dockY-g.wallTop)*.4, r=H*.016; HK.circ(o,cx,cy,r+2,'#5a4a44'); HK.circ(o,cx,cy,r,'#2a1a18'); o.lights.push({x:cx,y:cy,r:.08,a:.5,small:1}); } /* round windows in iron rims, glowing at night */ },
+  /* the barrel vault: a half-round roof seen end-on along the long side, ribbed corrugations, an iron eave band */
+  roof(o,g,kind,c){ const q=o.x, lit=HK.lit(o), ov=W*.012, L=g.x0-ov, R=g.x1+ov, eb=g.wallTop+H*.004, col=kind===1?mix('#b8683a',c,.5):c;
+    q.fillStyle=HK.n(o,col); q.beginPath(); q.moveTo(L,eb); q.bezierCurveTo(L,g.vt-H*.01,R,g.vt-H*.01,R,eb); q.closePath(); q.fill(); q.save(); q.clip();
+    q.strokeStyle=HK.n(o,HK.dk(col,.3)); q.lineWidth=1; q.beginPath(); if(kind===2){ for(let Y=g.vt;Y<eb;Y+=H*.006){ q.moveTo(L,Y); q.lineTo(R,Y); } } else for(let X=L;X<R;X+=W*.004){ q.moveTo(X,g.vt-H*.02); q.lineTo(X,eb); } q.stroke();
+    if(kind===1){ q.fillStyle=v3rgba('#5ab8a0',.25); q.fillRect(L,g.vt,R-L,(eb-g.vt)*.4); } q.restore(); /* copper with a verdigris bloom on top */
+    q.strokeStyle=v3rgba(o.P.rim||'#ffd0a0',.4*lit); q.lineWidth=1.5; q.beginPath(); q.moveTo(L,eb); q.bezierCurveTo(L,g.vt-H*.01,(L+R)/2,g.vt-H*.012,(L+R)/2,g.vt+H*.004); q.stroke(); HK.rect(o,L,eb-H*.004,R-L,H*.006,'#2a2024');
+    const px=g.x1-g.w*.25, pt=g.vt-H*.03; HK.rect(o,px-W*.003,pt,W*.006,(g.vt+eb)/2-pt,'#5a4a44'); HK.rect(o,px-W*.0045,pt-H*.004,W*.009,H*.004,'#3a3436'); /* the steam vent */
+    o.top=Math.min(o.top==null?o.dockY-H*.23:o.top,pt-H*.08); o.low=Math.max(o.low==null?-1e9:o.low,eb); },
+  ventTop(g){ return [g.x1-g.w*.25,g.vt-H*.034]; },
+  /* the steaming pool beside the bathhouse: a stone bath, a cedar tub or a lava-rock ring, its water turquoise */
+  pool(o,g,s,c){ const x=g.x1+W*.012, y=o.dockY, w=W*.05, q=o.x;
+    if(s===0){ HK.block(o,x,y-H*.024,w,H*.024,'#4a3a3a'); for(let k=0;k<4;k++) HK.rect(o,x+k*w/4,y-H*.024,1,H*.024,'#2a2024'); }
+    if(s===1){ HK.poly(o,[x,y-H*.026,x+w,y-H*.026,x+w-W*.003,y,x+W*.003,y],'#9a6a42'); for(const yy of [y-H*.02,y-H*.008]) HK.rect(o,x+W*.001,yy,w-W*.002,H*.003,'#3a3436'); }
+    if(s===2) for(let k=0;k<6;k++) HK.ell(o,x+w*(k+.5)/6,y-H*.01-(k%2)*H*.004,w/10,H*.012,k%2?'#2a2024':'#4a3a3a');
+    HK.ell(o,x+w/2,y-H*.024,w*.42,H*.004,s===2?'#ffc04a':c); for(let i=0;i<4;i++) HK.circ(o,x+w*(.2+i*.2),y-H*.04-(i%2)*H*.012,H*.008,v3rgba('#f0e8e4',.2)); },
+  /* under it: hexagonal basalt columns rising from the hot water, stepped tops, a mineral crust at the waterline */
+  ground(o){ const y=o.dockY, wl=o.wl, q=o.x, N=c0=>HK.n(o,c0), x0=HF.x0(), xe=o.pw+W*.02, cw=W*.014, r=v3rng(29);
+    for(let X=x0,i=0;X<xe;X+=cw,i++){ const top=y+HK.fh()-(i%3)*H*.004; q.fillStyle=N(i%2?'#3a2e30':'#2a2024'); q.fillRect(X,top,cw-1,H-top); q.fillStyle=N('#4a3a3a'); q.fillRect(X,top,cw-1,H*.004); q.fillStyle=v3rgba('#000000',.25); q.fillRect(X+cw*.6,top,cw*.3,H-top); } /* the columns */
+    q.fillStyle=N('#c8b890'); for(let X=x0;X<xe;X+=W*.006) q.fillRect(X,wl-H*.004+r()*H*.003,W*.004,H*.003); /* mineral crust */
+    q.fillStyle=v3rgba(o.P.wMid||'#8a5a5a',.55); q.fillRect(x0,wl,xe-x0+W*.03,H-wl); /* the columns below the waterline seen through the water */
+    for(let k=0;k<3;k++){ const sx=xe-W*.01+k*W*.006; q.fillStyle=N('#2a2024'); q.fillRect(sx,y+HK.fh()+k*H*.02,W*.006,H-y); } /* columns stepping down past the deck's end */ }
+};
+// =====================================================================
 // Every water's home (batch 5, 2026-11-22; designs in docs/HOME_DESIGNS.md, colours in docs/MAP_THEMES.md). Willow Pond (the
 // approved pilot) is in cv_homefmt.js; these 19 are built from the home kit (cw_homekit.js). Each home: the seat plus 5 features
 // made for that water, 3 styles each ("none" first where a feature can be left out), one list of 16 colours for every feature.
@@ -18165,21 +18197,27 @@ hfMake('trench',{ name:'Castaway raft', hname:'raft', floats:true, glow:'255,180
     ['seat'],
     ['light',(o,s)=>HK.light(o,['hook','jellyjar','wreck'][s])]] });
 
-/* 13. Ember Springs: the bathhouse */
-hfMake('ember',{ name:'Hot-spring bathhouse', hname:'bathhouse',
+/* 13. Ember Springs: the basalt bathhouse (overnight, 2026-11-23; its own design, src/cw_bathhouse.js): a low basalt bathhouse on hexagonal basalt
+   columns with a curved iron barrel-vault roof, round glowing windows and a steam vent; the steaming pool beside it. The old base, floor and roof
+   choices became this one building; the pool and lantern keep their ids */
+{ const G13=()=>EB.geo({pw:HF.pw(),dockY:HF.dockY()});
+hfMake('ember',{ name:'Basalt bathhouse', hname:'bathhouse', glow:'255,150,80', seatX:()=>HF.pw()-W*.03, front:null, smoke:(n,t)=>BH.smoke(n,t,EB.ventTop(G13()),.9),
   colors:C16('Basalt=#4a3a3a;Black basalt=#2a2024;Obsidian=#1a1418;Ash grey=#7a6e6a;Volcanic earth=#7a6258;Iron=#3a3436;Forged iron=#5a4a44;Copper=#b8683a;Ember orange=#ff7a2a;Lava gold=#ffc04a;Crimson=#a83030;Spring turquoise=#7ad8d0;Steam white=#f0e8e4;Onsen cedar=#a87a52;Tile red=#b8483a;Amber sky=#f0c8a0'),
-  els:[{id:'base',label:'Basalt base',styles:['Basalt columns','Stone blocks','Iron pillars'],def:[0,0]},{id:'floor',label:'Floor',styles:['Basalt slabs','Tiled floor','Onsen cedar'],def:[0,1]},
-       {id:'pool',label:'Hot pool',styles:['Stone bath','Cedar tub','Lava-rock ring'],def:[0,11]},{id:'roof',label:'Roof',none:true,styles:['Open sky','Iron frame','Copper hood','Obsidian slab'],def:[2,13]},
+  els:[{id:'walls',label:'Walls',styles:['Basalt stone','Ash render','Charred cedar'],def:[0,0],palS:[[0,1,3,4],[3,4,0],[2,1,5]]},
+       {id:'vault',label:'Roof',styles:['Corrugated iron','Copper vault','Slate vault'],def:[0,5],palS:[[5,6,3],[7,6],[1,2,3]]},
+       {id:'door',label:'Door',styles:['Iron-strapped door','Dutch door','Arched door'],def:[0,6],pal:[5,6,7,2,1]},
+       {id:'pool',label:'Hot pool',styles:['Stone bath','Cedar tub','Lava-rock ring'],def:[0,11]},
        {id:'light',label:'Lantern',light:true,styles:['Iron lantern','Lava bowl','Steam lamp'],def:[0,8]}],
   seat:['steelbench','bathstool','warmrock'], seatNames:['Stone bench','Bath stool','Warm rock'], seatDef:[0,3],
   order:[
-    ['base',(o,s,c)=>HK.supports(o,c,['hex','stone','iron'][s],5)],
-    ['floor',(o,s,c)=>HK.deck(o,c,['stone','tile','walnut'][s])],
-    ['roof',(o,s,c)=>{ if(s===1) HK.roof(o,c,'iron',.02,.38); if(s===2) HK.roof(o,c,'copper',.02,.38); if(s===3) HK.roof(o,c,'slab',.02,.38); }],
-    ['pool',(o,s,c)=>{ const x=HK.at(o,.4), y=o.dockY, w=W*.04, g=s===2?'#ffc04a':c; if(s===0) HK.block(o,x,y-H*.022,w,H*.022,'#5a4a44'); if(s===1){ HK.poly(o,[x,y-H*.024,x+w,y-H*.024,x+w-W*.003,y,x+W*.003,y],'#a87a52'); HK.rect(o,x,y-H*.018,w,1.5,'#3a3436'); HK.rect(o,x,y-H*.008,w,1.5,'#3a3436'); } if(s===2) for(let i=0;i<6;i++) HK.ell(o,x+i*w/5,y-H*.006,W*.004,H*.006,i%2?'#4a3a3a':'#2a2024');
-      HK.ell(o,x+w/2,y-H*.022,w*.42,H*.004,g); for(let i=0;i<3;i++) HK.circ(o,x+w*(.3+i*.2),y-H*.035-i*H*.01,H*.007,v3rgba('#f0e8e4',.25)); }],
+    ['base',(o)=>EB.ground(o)],
+    ['deck',(o)=>HK.deck(o,'#4a3a3a','stone')],
+    ['walls',(o,s,c)=>EB.walls(o,EB.geo(o),s,c)],
+    ['door',(o,s,c)=>BH.door(o,EB.geo(o),['plank','dutch','arched'][s],c)],
+    ['vault',(o,s,c)=>EB.roof(o,EB.geo(o),s,c)],
+    ['pool',(o,s,c)=>EB.pool(o,EB.geo(o),s,c)],
     ['seat'],
-    ['light',(o,s)=>HK.light(o,['chain','lavabowl','steam'][s])]] });
+    ['light',(o,s)=>HK.light(o,['chain','lavabowl','steam'][s])]] }); }
 
 /* 14. Starfall Lake: the floating crystal platform (floats) */
 hfMake('starfall',{ name:'Crystal platform', hname:'crystal platform', floats:true,
@@ -21674,6 +21712,8 @@ PATCHES.unshift({v:'0.4.9', name:'Work in progress', items:phoneNotes([
 // text changes. Released notes live in notes_release.js.
 const TEST_NOTES={v:'test', label:'Test build · '+(window.DL_BUILD==='ios'?'iPhone':'Android'), name:'0.4.9 test build (newest first)', items:[
   '## New in this build',
+  'Ember Springs, redone in its own style: your home is a basalt bathhouse on hexagonal basalt columns rising from the hot water, with a curved iron barrel roof, round windows that glow at night, a vent that lets off steam, and the steaming pool beside it. Pick the walls, roof, door, hot pool, lantern and seat in Your home.',
+  '## Test build 2026.11.23-0706',
   'Hollow Trench, redone in its own style: your home is a castaway raft of tarred barrels and salvaged planks lashed with rope, glowing growth on the barrels below the water. Its shelter is the wrecked lifeboat of a lost ship turned upside down on props (or a sailcloth tent over an oar, or a crooked plank shack with a ship’s porthole). Your raft, mast, salvage and lantern choices carry over.',
   '## Test build 2026.11.23-0655',
   'Midnight Deep: your trawler is rebuilt as a working steel stern trawler: a deep hull with a high bulwark, freeing ports with rust streaks below them, old tyres hung as fenders, her name and number, a towering wheelhouse forward, and a net drum wound with net and orange floats (or a stern gantry with a trawl door, or stacked crab pots). Your saved choices carry over.',
