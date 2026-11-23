@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="DL Test Android">
 <script>
-window.DL_BUILD='android'; window.DL_PREVIEW=true; if(/[?&]sweep\b/.test(location.search)){ window.__bootErr=[]; addEventListener("error",function(e){ __bootErr.push(String(e.message||e)+(e.lineno?" (line "+e.lineno+")":"")); }); addEventListener("unhandledrejection",function(e){ __bootErr.push("promise: "+String(e.reason&&e.reason.message||e.reason)); }); window.requestAnimationFrame=function(f){ return setTimeout(function(){ f(performance.now()); },16); }; window.cancelAnimationFrame=function(i){ clearTimeout(i); }; } try{ window.__tOff=/[?&](test|sweep|frozen)\b/.test(location.search)?0:(+(localStorage.getItem("dl-test-toff")||0)||0); }catch(e){ window.__tOff=0; } (function(){ var rn=Date.now.bind(Date); Date.now=function(){ return rn()+window.__tOff; }; })(); if(/[?&]frozen\b/.test(location.search)){ var __fz=20261122; Math.random=function(){ __fz|=0; __fz=__fz+0x6D2B79F5|0; var t=Math.imul(__fz^__fz>>>15,1|__fz); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; var __fc=0, __pn=performance.now.bind(performance); performance.now=function(){ __fc+=0.01; return 100000+__fc; }; Date.now=function(){ return 1795300000000+Math.floor(__fc); }; window.__frozenClock=function(){ return __fc; }; window.requestAnimationFrame=function(){ return 0; }; window.cancelAnimationFrame=function(){}; } window.DL_VERSION='2026.11.23-0534';
+window.DL_BUILD='android'; window.DL_PREVIEW=true; if(/[?&]sweep\b/.test(location.search)){ window.__bootErr=[]; addEventListener("error",function(e){ __bootErr.push(String(e.message||e)+(e.lineno?" (line "+e.lineno+")":"")); }); addEventListener("unhandledrejection",function(e){ __bootErr.push("promise: "+String(e.reason&&e.reason.message||e.reason)); }); window.requestAnimationFrame=function(f){ return setTimeout(function(){ f(performance.now()); },16); }; window.cancelAnimationFrame=function(i){ clearTimeout(i); }; } try{ window.__tOff=/[?&](test|sweep|frozen)\b/.test(location.search)?0:(+(localStorage.getItem("dl-test-toff")||0)||0); }catch(e){ window.__tOff=0; } (function(){ var rn=Date.now.bind(Date); Date.now=function(){ return rn()+window.__tOff; }; })(); if(/[?&]frozen\b/.test(location.search)){ var __fz=20261122; Math.random=function(){ __fz|=0; __fz=__fz+0x6D2B79F5|0; var t=Math.imul(__fz^__fz>>>15,1|__fz); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; var __fc=0, __pn=performance.now.bind(performance); performance.now=function(){ __fc+=0.01; return 100000+__fc; }; Date.now=function(){ return 1795300000000+Math.floor(__fc); }; window.__frozenClock=function(){ return __fc; }; window.requestAnimationFrame=function(){ return 0; }; window.cancelAnimationFrame=function(){}; } window.DL_VERSION='2026.11.23-0547';
 window.addEventListener('beforeinstallprompt',function(e){ e.preventDefault(); window.__dlInstallPrompt=e; });
 </script>
 </head>
@@ -6669,6 +6669,12 @@ V3SCENES.coast = {
     if(night<.7){ for(let i=0;i<3;i++){ const per=24+i*7, k=((t+i*9)%per)/per, gx=W*(1.1-k*1.3), gy=hz*(.35+i*.14)+Math.sin(t*.8+i)*hz*.03, s=H*(.006+i*.0015), fl=Math.sin(t*(3+i)+i)*.7;
         g.strokeStyle=v3rgba(mix('#ffffff',P.top,night*.8),.9); g.lineWidth=Math.max(1,s*.5); g.beginPath(); g.moveTo(gx-s*2.2,gy-s*fl*.8); g.quadraticCurveTo(gx-s,gy-s*(.4+fl*.6),gx,gy); g.quadraticCurveTo(gx+s,gy-s*(.4+fl*.6),gx+s*2.2,gy-s*fl*.8); g.stroke(); } }
     v3fishRing(P,t,hz,7.3,.42,.85);
+    // a bell buoy offshore (overnight 2026-11-23, MAP_THEMES: "a far-off bell buoy"): a red float with a little tower and bell, rocking on the swell; its light blinks at night
+    { const bx=W*.4, by=hz+H*.04, s=H*.011, a=Math.sin(t*1.1)*.18, N=c0=>mix(c0,P.wMid,night*.55); g.save(); g.translate(bx,by+Math.sin(t*1.1+1)*s*.15); g.rotate(a);
+      g.fillStyle=N('#c8483a'); g.beginPath(); g.moveTo(-s*1.1,0); g.lineTo(s*1.1,0); g.lineTo(s*.8,s*.55); g.lineTo(-s*.8,s*.55); g.closePath(); g.fill(); g.fillStyle=N('#f4f0e6'); g.fillRect(-s*1.1,-s*.12,s*2.2,s*.18);
+      g.strokeStyle=N('#3a3a40'); g.lineWidth=Math.max(1,s*.12); g.beginPath(); g.moveTo(-s*.6,0); g.lineTo(-s*.2,-s*2); g.lineTo(s*.2,-s*2); g.lineTo(s*.6,0); g.moveTo(-s*.4,-s); g.lineTo(s*.4,-s); g.stroke(); g.fillStyle=N('#b8902a'); g.beginPath(); g.arc(0,-s*1.35,s*.32,Math.PI,0); g.fill();
+      if(night>.3&&(t%3)<.5) v3glow(g,0,-s*2.2,s*2.5,'rgba(255,90,70,.9)',night); g.restore();
+      g.fillStyle=v3rgba('#ffffff',.25*(1-night*.5)); g.fillRect(bx-s*1.4,by+s*.5,s*2.8,1.2); }
     // the moment, every 42 s (map standard, 2026-11-21): a pod of porpoises rolls past out on the far water, backs and fins arcing up
     // and under, each a little apart; the pod is three or four strong and takes its own line each time
     { const per=42, q=t%per, n=Math.floor(t/per); if(q<9){ const r=v3rng(n*53+9), np=3+(r()<.5?1:0), yy=hz+H*(.022+r()*.012) /* far out, beyond the seal's rock, so nothing pops up beside it (director) */, col=mix('#3a4652',P.wMid,.25+night*.5), s=H*.011*(1+(yy-hz)/H*2);
@@ -17477,6 +17483,45 @@ const TH = {
     HK.rect(o,o.pw-W*.03,wl-1,xe-o.pw+W*.03,1.5,v3rgba('#e8f4f0',.3*lit+.05)); }
 };
 // =====================================================================
+// SALTMARSH COAST: THE LOBSTER SHACK (overnight, 2026-11-23; its own design, MAP_THEMES › Saltmarsh: Maine and Cornwall lobster shacks).
+// A tall, narrow saltbox shack at the end of a long weathered pier, seen from its gable end: a short steep slope on the sea side and a long
+// slope running down toward the shore, a stovepipe, a lantern on a bracket; buoys hung on its wall, lobster pots stacked on the deck or a
+// net drying on a pole. Around it the pier itself: tall tarred pilings with cross bracing, barnacles and weed at the tide line, a ladder
+// down to the water with a dory tied to it, and a tall mooring piling at the pier's end where a gull stands.
+// Parts: siding, roof, door, windows, gear, lamp, seat.
+// =====================================================================
+const SS = {
+  geo(o){ const C=BH.cab(o,{h:1.45,ratio:1.3}), wh=C.wh, x0=Math.max(HF.x0(),0)-W*.004, w=Math.min(wh*1.9,o.pw*.46), x1=x0+w, rx=x0+w*.7, ry=C.wallTop-w*.34, lt=C.wallTop+wh*.3;
+    return {x0,x1,vx:Math.max(x0,0),wallTop:C.wallTop,rx,ry,lt,wh,w}; },
+  /* the gable-end wall up to the roof line (a saltbox: the shore-side wall is lower) */
+  walls(o,g,kind,c){ const q=o.x, y=o.dockY; q.save(); q.beginPath(); q.moveTo(g.x0,y); q.lineTo(g.x0,g.lt); q.lineTo(g.rx,g.ry); q.lineTo(g.x1,g.wallTop); q.lineTo(g.x1,y); q.closePath(); q.clip(); BH.walls(o,{x0:g.x0,x1:g.x1,vx:g.x0,wallTop:g.ry},kind,c); q.restore();
+    HK.rect(o,g.x1-W*.003,g.wallTop,W*.003,y-g.wallTop,HK.dk(c,.3)); HK.rect(o,g.x0,y-H*.006,g.w,H*.006,HK.dk(c,.35)); /* corner board and sill */ },
+  /* the roof: two slopes with overhang, its material along them; a stovepipe through the long slope */
+  roof(o,g,kind,c){ const q=o.x, lit=HK.lit(o), ov=W*.012, th=Math.max(5,H*.012), L=[g.x0-ov,g.lt+ov*(g.lt-g.ry)/(g.rx-g.x0)], R=[g.x1+ov*.8,g.wallTop+ov*.8*(g.wallTop-g.ry)/(g.x1-g.rx)], col=kind===2?mix('#8a9aa0',c,.6):c;
+    const px=g.x0+(g.rx-g.x0)*.35, py=g.lt+(g.ry-g.lt)*.35; HK.rect(o,px-W*.003,py-H*.06,W*.006,H*.07,'#2a2a2e'); HK.rect(o,px-W*.0045,py-H*.064,W*.009,H*.006,'#3a3a40'); /* the stovepipe */
+    q.fillStyle=HK.n(o,col); q.beginPath(); q.moveTo(L[0],L[1]); q.lineTo(g.rx,g.ry-th*.6); q.lineTo(R[0],R[1]); q.lineTo(R[0],R[1]+th); q.lineTo(g.rx,g.ry+th*.6); q.lineTo(L[0],L[1]+th); q.closePath(); q.fill();
+    q.save(); q.clip(); q.strokeStyle=HK.n(o,HK.dk(col,.3)); q.lineWidth=1; q.beginPath();
+    if(kind===2){ for(let X=L[0];X<R[0];X+=W*.006){ q.moveTo(X,g.ry-th*2); q.lineTo(X,g.lt+th*3); } } /* tin: standing seams */
+    else { const st=kind===1?W*.004:W*.007; for(let X=L[0];X<R[0];X+=st){ q.moveTo(X,g.ry-th*2); q.lineTo(X+st*.3,g.lt+th*3); } } q.stroke(); q.restore(); /* asphalt tabs or cedar shakes */
+    HK.line(o,[L[0],L[1],g.rx,g.ry-th*.6,R[0],R[1]],v3rgba(o.P.rim||'#fff0d0',.45*lit),1.2); HK.line(o,[L[0],L[1]+th,g.rx,g.ry+th*.6,R[0],R[1]+th],v3rgba('#000000',.3),1);
+    o.top=Math.min(o.top==null?o.dockY-H*.23:o.top,g.ry-H*.08); o.low=Math.max(o.low==null?-1e9:o.low,g.wallTop); },
+  /* fishing gear: buoys hung on the wall, lobster pots stacked on the deck, or a net drying on a pole */
+  gear(o,g,s,c){ const y=o.dockY, q=o.x;
+    if(s===0){ const cols=[c,'#e8c04a','#f4f0e6','#c8483a','#3aa0a8','#e8c04a']; for(let i=0;i<6;i++){ const bx=g.x1-g.w*(.05+(i%3)*.055), by=g.wallTop+(y-g.wallTop)*(.16+Math.floor(i/3)*.22); HK.line(o,[bx,by-H*.012,bx,by-H*.004],'#c8a878',1); HK.ell(o,bx,by+H*.006,W*.0045,H*.011,cols[i]); HK.rect(o,bx-W*.0045,by+H*.004,W*.009,H*.003,'#f4f0e6'); } }
+    if(s===1){ const bx=g.x1+W*.006; for(let r=0;r<3;r++) for(let k=0;k<3-r;k++){ const px=bx+k*W*.02+r*W*.01, py=y-(r+1)*H*.022, pw=W*.019, ph=H*.021; HK.rect(o,px,py,pw,ph,HK.dk(c,.05)); q.strokeStyle=HK.n(o,'#2e2a28'); q.lineWidth=1; q.beginPath(); for(let m=1;m<5;m++){ q.moveTo(px+pw*m/5,py); q.lineTo(px+pw*m/5,py+ph); } q.moveTo(px,py+ph/2); q.lineTo(px+pw,py+ph/2); q.stroke(); HK.rect(o,px,py,pw,1.5,HK.lt(c,.2)); } } /* wooden lobster pots, stacked */
+    if(s===2){ const nx=g.x1+W*.03, top=y-H*.13; HK.rect(o,nx-1.5,top,3,y-top,'#6a5440'); HK.rect(o,nx-W*.012,top,W*.024,2,'#6a5440'); q.fillStyle=v3rgba(c,.55); q.beginPath(); q.moveTo(nx-W*.012,top); q.quadraticCurveTo(nx-W*.016,top+H*.06,nx-W*.006,y-H*.012); q.lineTo(nx+W*.006,y-H*.012); q.quadraticCurveTo(nx+W*.016,top+H*.06,nx+W*.012,top); q.closePath(); q.fill(); q.strokeStyle=HK.n(o,HK.dk(c,.3)); q.lineWidth=.6; q.beginPath(); for(let k=1;k<6;k++){ q.moveTo(nx-W*.012+k*W*.004,top); q.lineTo(nx-W*.008+k*W*.0025,y-H*.012); } q.stroke(); HK.ell(o,nx-W*.009,top+H*.05,W*.003,H*.004,'#e8c04a'); HK.ell(o,nx+W*.009,top+H*.07,W*.003,H*.004,'#e8c04a'); } /* a net drying on its pole, with floats */ },
+  /* the pier around the home: tall tarred pilings with cross bracing, barnacles and weed at the tide line, a ladder to the water with a dory
+     tied to it, a tall mooring piling at the end with a gull on top */
+  ground(o){ const x=o.x, y=o.dockY, wl=o.wl, x0=HF.x0(), N=c0=>HK.n(o,c0), lit=HK.lit(o), under=y+HK.fh(), n=6, xs=[...Array(n+1)].map((_,i)=>x0+(o.pw-x0)*(.02+.96*i/n)), pw=Math.max(6,W*.009);
+    for(let i=0;i<n;i++){ const a=xs[i], b=xs[i+1]; x.strokeStyle=N('#3a3230'); x.lineWidth=Math.max(2,H*.004); x.beginPath(); x.moveTo(a,under+H*.004); x.lineTo(b,wl-H*.01); x.moveTo(b,under+H*.004); x.lineTo(a,wl-H*.01); x.stroke(); } /* cross bracing */
+    for(const px of xs){ const g2=x.createLinearGradient(px-pw/2,0,px+pw/2,0); g2.addColorStop(0,N('#2a2422')); g2.addColorStop(.4,N('#4a403a')); g2.addColorStop(1,N('#1e1a18')); x.fillStyle=g2; x.fillRect(px-pw/2,under,pw,H-under);
+      x.fillStyle=N('#d8d4c8'); for(let k=0;k<6;k++) x.fillRect(px-pw/2+(k%3)*pw/3,wl-H*.012+Math.floor(k/3)*H*.005,pw/4,H*.003); /* barnacles */
+      x.fillStyle=N('#3a5a2a'); x.fillRect(px-pw/2,wl-H*.004,pw,H*.01); x.beginPath(); x.moveTo(px-pw/2,wl+H*.006); x.lineTo(px-pw/2-2,wl+H*.02); x.lineTo(px,wl+H*.008); x.lineTo(px+pw/2+2,wl+H*.022); x.lineTo(px+pw/2,wl+H*.006); x.closePath(); x.fill(); } /* weed at the tide line */
+    const lx=o.pw-W*.012; x.strokeStyle=N('#6a5a4a'); x.lineWidth=2; x.beginPath(); x.moveTo(lx-W*.004,y); x.lineTo(lx-W*.004,wl+H*.01); x.moveTo(lx+W*.004,y); x.lineTo(lx+W*.004,wl+H*.01); for(let yy=y+H*.012;yy<wl;yy+=H*.014){ x.moveTo(lx-W*.004,yy); x.lineTo(lx+W*.004,yy); } x.stroke(); /* the ladder */
+    const dx=o.pw+W*.01, dy=wl+H*.006, dw=W*.07; x.fillStyle=N('#3a6a7a'); x.beginPath(); x.moveTo(dx,dy-H*.014); x.lineTo(dx+dw,dy-H*.026); x.quadraticCurveTo(dx+dw*.92,dy+H*.01,dx+dw*.72,dy+H*.012); x.lineTo(dx+dw*.14,dy+H*.012); x.closePath(); x.fill(); x.fillStyle=N('#e8e0d0'); x.fillRect(dx,dy-H*.016,dw*.98,H*.004); x.strokeStyle=N('#c8a878'); x.lineWidth=1; x.beginPath(); x.moveTo(lx,y+H*.03); x.quadraticCurveTo(dx-W*.004,dy-H*.004,dx+W*.002,dy-H*.014); x.stroke(); /* a dory tied to the ladder */
+    const mx=o.pw+W*.002, mt=y-H*.07; x.fillStyle=N('#3a3230'); x.fillRect(mx-pw*.6,mt,pw*1.2,y-mt); x.fillStyle=v3rgba('#ffffff',.12*lit); x.fillRect(mx-pw*.6,mt,2,y-mt); HK.ell(o,mx,mt-H*.008,W*.006,H*.006,'#f4f4f0'); HK.ell(o,mx+W*.005,mt-H*.012,W*.003,H*.003,'#f4f4f0'); HK.line(o,[mx+W*.007,mt-H*.012,mx+W*.01,mt-H*.011],'#e8a040',1.5); HK.line(o,[mx-W*.004,mt-H*.007,mx-W*.009,mt-H*.005],'#8a8a90',1.5); HK.line(o,[mx-W*.001,mt-H*.003,mx-W*.001,mt],'#e8a040',1); /* a tall mooring piling with a gull on top */ }
+};
+// =====================================================================
 // Every water's home (batch 5, 2026-11-22; designs in docs/HOME_DESIGNS.md, colours in docs/MAP_THEMES.md). Willow Pond (the
 // approved pilot) is in cv_homefmt.js; these 19 are built from the home kit (cw_homekit.js). Each home: the seat plus 5 features
 // made for that water, 3 styles each ("none" first where a feature can be left out), one list of 16 colours for every feature.
@@ -17556,27 +17601,29 @@ const C16=s=>s.split(';').map(p=>{ const [n,h]=p.split('='); return [n.trim(),h.
       ['light',(o,s,c)=>TH.lanterns(o,TH.geo(o),s,c)],
       ['rail',()=>{}],
       ['seat']] }); }
-/* 4. Saltmarsh Coast: the pier end */
-hfMake('coast',{ name:'Saltmarsh pier end', hname:'pier',
+/* 4. Saltmarsh Coast: the lobster shack (overnight, 2026-11-23; its own design, src/cw_saltshack.js): a tall saltbox shack at the end of a long
+   weathered pier, seen from its gable end, with a stovepipe; buoys on its wall, lobster pots or a drying net; the pier's tarred pilings with
+   bracing, barnacles and weed, a ladder with a dory tied to it and a gull on the mooring piling */
+{ const G4=()=>SS.geo({pw:HF.pw(),dockY:HF.dockY()}), WN=()=>{ const g=G4(); return {x0:g.x0,x1:g.x1,vx:g.vx,wallTop:g.wallTop,winA:g.x0+g.w*.36,winB:g.x0+g.w*.6}; };
+  hfMake('coast',{ name:'Lobster shack', hname:'lobster shack', glow:'255,210,150', seatX:()=>HF.pw()-W*.03,
   colors:C16('Driftwood=#a8a090;Silver-grey=#8a8a84;Tar black=#2e2a28;Weathered blue=#5a7a8a;Sea glass=#9adcd8;Sea teal=#3aa0a8;Deep sea=#145a6a;Sand=#e8d6a4;Dune grass=#8aa85a;Rope tan=#c8a878;Buoy red=#c8483a;Buoy yellow=#e8c04a;Lighthouse white=#f4f0e6;Shingle brown=#6a5440;Gull grey=#c8ccd0;Oilskin yellow=#d8b030'),
-  els:[{id:'pilings',label:'Pilings',styles:['Tarred pilings','Braced pilings','Rock jetty'],def:[0,2]},{id:'deck',label:'Pier deck',styles:['Salt-grey boards','Tarred planks','Steel grating'],def:[0,0]},
-       {id:'shack',label:'Bait shack',none:true,styles:['No shack','Shingle shack','Boathouse','Sail awning'],def:[1,3]},{id:'gear',label:'Fishing gear',none:true,styles:['No gear','Lobster pots','Drying net','Buoys'],def:[3,10]},
-       {id:'light',label:'Lamp',light:true,styles:['Ship’s lantern','Harbour lamp','Buoy light'],def:[0,13]}],
+  front:null, smoke:null,
+  els:[{id:'siding',label:'Siding',styles:['Cedar shingles','Clapboard','Board and batten'],def:[0,1],palS:[[0,1,13,14],[3,10,12,6,14],[0,1,3,10,12]]},
+       {id:'roof',label:'Roof',styles:['Asphalt shingles','Cedar shakes','Tin roof'],def:[0,2],palS:[[2,1,6,13],[13,0,1],[1,14,10,3]]},
+       {id:'door',label:'Door',styles:['Plank door','Dutch door','Arched door'],def:[0,10],pal:[2,3,5,6,10,11,12,15]},
+       {id:'windows',label:'Windows',light:true,styles:['Four-pane windows','Porthole windows','Shuttered windows'],def:[0,12],pal:[2,3,5,6,10,12,15]},
+       {id:'tackle',label:'Fishing gear',styles:['Buoys on the wall','Lobster pots','Drying net'],def:[0,10],palS:[[10,11,12,5,15],[13,0,3,10],[5,8,9,6]]},
+       {id:'light',label:'Lamp',styles:['Ship’s lantern','Harbour lamp','Buoy light'],def:[0,13]}],
   seat:['crate','bucket','driftbench'], seatNames:['Fish crate','Upturned bucket','Driftwood bench'], seatDef:[0,0],
   order:[
-    ['pilings',(o,s,c)=>HK.supports(o,c,['tarred','braced','jetty'][s],5)],
-    ['deck',(o,s,c)=>HK.deck(o,c,['boards','planks','grate'][s])],
-    /* map redo (director, 2026-11-22: "no real variety", options recycled from other homes, buoys floating beside the angler): a shingle
-       shack, a boathouse with a board wall and a porthole, a boat's sail rigged as an awning; the buoys hang from a line between two posts */
-    ['shack',(o,s,c)=>{ const y=o.dockY, sc=HF.sc(); if(s===1){ HK.roof(o,c,'shackbox',.02,.3); for(let i=1;i<6;i++) HK.line(o,[HK.at(o,.02),y-H*.13+i*H*.004,HK.at(o,.3),y-H*.13-H*.03*(i/6)+i*H*.004],HK.dk(c,.35),.8); }
-      if(s===2){ const a=HK.at(o,.0), b=HK.at(o,.12), top=y-H*.12; HK.block(o,a,top,b-a,y-top,HK.dk(c,.1)); for(let i=1;i<6;i++) HK.line(o,[a+(b-a)*i/6,top,a+(b-a)*i/6,y],HK.dk(c,.35),.8); HK.circ(o,(a+b)/2,top+H*.035,H*.008,'#3a3a40'); HK.circ(o,(a+b)/2,top+H*.035,H*.0055,v3rgba('#9adcd8',.7)); HK.roof(o,c,'gable',.0,.34); }
-      if(s===3) HK.roof(o,c,'sailawning',.02,.36); }],
-    ['gear',(o,s,c)=>{ const x=HK.at(o,.55), y=o.dockY; if(s===1) for(let i=0;i<2;i++){ HK.block(o,x,y-H*.02*(i+1),W*.024,H*.02,HK.dk(c,.1)); for(let k=0;k<4;k++) HK.line(o,[x+k*W*.006,y-H*.02*(i+1),x+k*W*.006,y-H*.02*i],'#2e2a28'); }
-      if(s===2){ HK.rect(o,x+W*.01,y-H*.13,2,H*.13,'#6a5440'); o.x.fillStyle=v3rgba(c,.5); o.x.beginPath(); o.x.moveTo(x+W*.011,y-H*.13); o.x.quadraticCurveTo(x-W*.01,y-H*.08,x,y-H*.02); o.x.lineTo(x+W*.011,y-H*.04); o.x.fill(); }
-      if(s===3){ const a=x-W*.012, b=x+W*.034, ty=y-H*.085; HK.rect(o,a-1,ty,2.2,y-ty,'#6a5440'); HK.rect(o,b-1,ty,2.2,y-ty,'#6a5440'); HK.curve(o,a,ty,(a+b)/2,ty+H*.016,b,ty,'#c8a878',1.2);
-        for(let i=0;i<4;i++){ const u=(i+1)/5, px=a+(b-a)*u, py=ty+H*.032*u*(1-u); HK.line(o,[px,py,px,py+H*.008],'#c8a878',.8); HK.ell(o,px,py+H*.016,H*.006,H*.009,[c,'#e8c04a','#f4f0e6','#c8483a'][i]); } } }],
+    ['base',(o)=>{ SS.ground(o); HK.deck(o,'#a8a090','boards'); }],
+    ['siding',(o,s,c)=>SS.walls(o,SS.geo(o),['shingles','clapboard','batten'][s],c)],
+    ['door',(o,s,c)=>BH.door(o,SS.geo(o),['plank','dutch','arched'][s],c)],
+    ['windows',(o,s,c)=>BH.windows(o,WN(),['four','porthole','shutters'][s],c)],
+    ['roof',(o,s,c)=>SS.roof(o,SS.geo(o),s,c)],
+    ['tackle',(o,s,c)=>SS.gear(o,SS.geo(o),s,c)],
     ['seat'],
-    ['light',(o,s)=>HK.light(o,['hook','lighthouse','buoy'][s])]] });
+    ['light',(o,s)=>HK.light(o,['hook','lighthouse','buoy'][s])]] }); }
 
 /* 5. Frostbite Lake: the ice camp (stands on the ice) */
 hfMake('frost',{ name:'Ice camp', hname:'ice camp', ice:true,
@@ -21372,6 +21419,9 @@ PATCHES.unshift({v:'0.4.9', name:'Work in progress', items:phoneNotes([
 // text changes. Released notes live in notes_release.js.
 const TEST_NOTES={v:'test', label:'Test build · '+(window.DL_BUILD==='ios'?'iPhone':'Android'), name:'0.4.9 test build (newest first)', items:[
   '## New in this build',
+  'Saltmarsh Coast, redone in its own style: your home is a tall saltbox lobster shack at the end of the pier, with a stovepipe, buoys on its wall (or stacked lobster pots, or a net drying on a pole). Pick the siding, roof, door, windows, gear, lamp and seat in Your home.',
+  'Saltmarsh Coast: the pier stands on tall tarred pilings with cross bracing, barnacles and weed at the tide line; a ladder goes down to a dory tied at the end, and a gull stands on the mooring post. A bell buoy rocks offshore (its light blinks at night).',
+  '## Test build 2026.11.23-0534',
   'Cherry Blossom Lake, redone in its own style: your home is a tea house raised on red-lacquered posts, with a layered roof whose eaves curve up at the tips, shoji walls between dark posts, paper lanterns under the eaves and a rope railing along the veranda. Pick the walls, roof, lanterns, railing, door, windows and seat in Your home.',
   'Cherry Blossom Lake: a big cherry tree frames the corner over your roof, and a mossy bank with a stone path, bamboo fence and azaleas runs behind the tea house down to the water.',
   'Cherry Blossom Lake: a mossy stone corner in the bottom right with steps down into the water, a stone lantern that glows at night, a rope fence and pink lotus flowers on their stems.',
