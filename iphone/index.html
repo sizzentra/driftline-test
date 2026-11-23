@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="DL Test iPhone">
 <script>
-window.DL_BUILD='ios'; window.DL_PREVIEW=true; if(/[?&]sweep\b/.test(location.search)){ window.__bootErr=[]; addEventListener("error",function(e){ __bootErr.push(String(e.message||e)+(e.lineno?" (line "+e.lineno+")":"")); }); addEventListener("unhandledrejection",function(e){ __bootErr.push("promise: "+String(e.reason&&e.reason.message||e.reason)); }); window.requestAnimationFrame=function(f){ return setTimeout(function(){ f(performance.now()); },16); }; window.cancelAnimationFrame=function(i){ clearTimeout(i); }; } try{ window.__tOff=/[?&](test|sweep|frozen)\b/.test(location.search)?0:(+(localStorage.getItem("dl-test-toff")||0)||0); }catch(e){ window.__tOff=0; } (function(){ var rn=Date.now.bind(Date); Date.now=function(){ return rn()+window.__tOff; }; })(); if(/[?&]frozen\b/.test(location.search)){ var __fz=20261122; Math.random=function(){ __fz|=0; __fz=__fz+0x6D2B79F5|0; var t=Math.imul(__fz^__fz>>>15,1|__fz); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; var __fc=0, __pn=performance.now.bind(performance); performance.now=function(){ __fc+=0.01; return 100000+__fc; }; Date.now=function(){ return 1795300000000+Math.floor(__fc); }; window.__frozenClock=function(){ return __fc; }; window.requestAnimationFrame=function(){ return 0; }; window.cancelAnimationFrame=function(){}; } window.DL_VERSION='2026.11.23-0507';
+window.DL_BUILD='ios'; window.DL_PREVIEW=true; if(/[?&]sweep\b/.test(location.search)){ window.__bootErr=[]; addEventListener("error",function(e){ __bootErr.push(String(e.message||e)+(e.lineno?" (line "+e.lineno+")":"")); }); addEventListener("unhandledrejection",function(e){ __bootErr.push("promise: "+String(e.reason&&e.reason.message||e.reason)); }); window.requestAnimationFrame=function(f){ return setTimeout(function(){ f(performance.now()); },16); }; window.cancelAnimationFrame=function(i){ clearTimeout(i); }; } try{ window.__tOff=/[?&](test|sweep|frozen)\b/.test(location.search)?0:(+(localStorage.getItem("dl-test-toff")||0)||0); }catch(e){ window.__tOff=0; } (function(){ var rn=Date.now.bind(Date); Date.now=function(){ return rn()+window.__tOff; }; })(); if(/[?&]frozen\b/.test(location.search)){ var __fz=20261122; Math.random=function(){ __fz|=0; __fz=__fz+0x6D2B79F5|0; var t=Math.imul(__fz^__fz>>>15,1|__fz); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; var __fc=0, __pn=performance.now.bind(performance); performance.now=function(){ __fc+=0.01; return 100000+__fc; }; Date.now=function(){ return 1795300000000+Math.floor(__fc); }; window.__frozenClock=function(){ return __fc; }; window.requestAnimationFrame=function(){ return 0; }; window.cancelAnimationFrame=function(){}; } window.DL_VERSION='2026.11.23-0522';
 window.addEventListener('beforeinstallprompt',function(e){ e.preventDefault(); window.__dlInstallPrompt=e; });
 </script>
 </head>
@@ -17444,6 +17444,53 @@ const MH = {
     HK.rect(o,x0,wl-1,xe-x0,1.5,v3rgba('#e8f4f0',.3*lit+.05)); }
 };
 // =====================================================================
+// CHERRY BLOSSOM LAKE: THE TEA HOUSE (overnight, 2026-11-23; its own design, inspired by the director's reference picture
+// docs/reference/blossom_director_ref.png). A tea house raised over the water on lacquered posts: a layered hip-and-gable (irimoya) roof
+// with eaves that curve up at the tips and a ridge with curled ends, shoji walls that glow at night between dark posts, paper lanterns
+// under the eaves, a veranda deck with a thick rope railing in front; around it a mossy bank with a bamboo fence, a stone lantern and
+// azaleas, and a big cherry tree framing the top-left corner over the roof. Parts: walls, roof, lanterns, rail, door, windows, seat.
+// =====================================================================
+const TH = {
+  geo(o){ const C=BH.cab(o,{h:1.12,ratio:2.4}); return Object.assign({},C,{roofTop:C.wallTop-C.wh*.62}); },
+  /* the layered roof: a wide lower skirt with upturned tips, an upper gable, a heavy ridge with curled ends */
+  roof(o,g,kind,c){ const q=o.x, lit=HK.lit(o), ov=W*.022, L=g.x0-ov, R=g.x1+ov, eb=g.wallTop+H*.006, my=g.wallTop-g.wh*.38, gx0=g.x0+(g.x1-g.x0)*.22, gx1=g.x1-(g.x1-g.x0)*.22, ry=g.roofTop, col=kind===2?mix('#5a9a8a',c,.5):c;
+    q.fillStyle=HK.n(o,col); q.beginPath(); q.moveTo(L-W*.006,eb-H*.026); q.quadraticCurveTo(L+ov*.4,eb+H*.004,g.x0+ov*.6,eb-H*.002); q.lineTo(gx0-W*.006,my); q.lineTo(gx1+W*.006,my); q.lineTo(g.x1-ov*.6,eb-H*.002); q.quadraticCurveTo(R-ov*.4,eb+H*.004,R+W*.006,eb-H*.026); q.lineTo(R-ov*.2,eb-H*.012); q.quadraticCurveTo(R-ov,eb-H*.012,g.x1,my+H*.01); q.lineTo(g.x0,my+H*.01); q.quadraticCurveTo(L+ov,eb-H*.012,L+ov*.2,eb-H*.012); q.closePath(); q.fill(); /* the lower skirt */
+    q.beginPath(); q.moveTo(gx0,my+H*.004); q.lineTo(gx0+W*.006,ry+H*.012); q.lineTo(gx1-W*.006,ry+H*.012); q.lineTo(gx1,my+H*.004); q.closePath(); q.fill(); /* the upper roof */
+    HK.poly(o,[(gx0+gx1)/2-(gx1-gx0)*.1,my,(gx0+gx1)/2,ry+H*.016,(gx0+gx1)/2+(gx1-gx0)*.1,my],HK.lt(mix('#c8a060',col,.5),.05)); HK.line(o,[(gx0+gx1)/2-(gx1-gx0)*.1,my,(gx0+gx1)/2,ry+H*.016,(gx0+gx1)/2+(gx1-gx0)*.1,my],HK.dk(col,.3),1.2); /* the gable's decorated triangle */
+    q.save(); q.beginPath(); q.moveTo(L,eb); q.lineTo(gx0,my); q.lineTo(gx1,my); q.lineTo(R,eb); q.closePath(); q.moveTo(gx0,my); q.lineTo(gx0,ry); q.lineTo(gx1,ry); q.lineTo(gx1,my); q.closePath(); q.clip();
+    if(kind===0){ q.strokeStyle=HK.n(o,HK.dk(col,.35)); q.lineWidth=1; q.beginPath(); for(let X=L;X<R;X+=W*.0045){ q.moveTo(X,ry); q.lineTo(X,eb); } q.stroke(); q.strokeStyle=v3rgba('#ffffff',.14*lit); q.beginPath(); for(let X=L+2;X<R;X+=W*.0045){ q.moveTo(X,ry); q.lineTo(X,eb); } q.stroke(); } /* rows of round tiles */
+    if(kind===1){ q.strokeStyle=HK.n(o,HK.lt(col,.12)); q.lineWidth=1; q.beginPath(); for(let yy=ry;yy<eb;yy+=H*.005){ q.moveTo(L,yy); q.lineTo(R,yy); } q.stroke(); } /* thin layers of cypress bark */
+    if(kind===2){ q.strokeStyle=HK.n(o,HK.lt(col,.2)); q.lineWidth=1.2; q.beginPath(); for(let X=L;X<R;X+=W*.008){ q.moveTo(X,ry); q.lineTo(X,eb); } q.stroke(); } q.restore(); /* copper seams, green with age */
+    HK.rect(o,gx0-W*.004,ry,gx1-gx0+W*.008,H*.01,HK.dk(col,.25)); for(const [ex,d] of [[gx0-W*.004,-1],[gx1+W*.004,1]]){ q.strokeStyle=HK.n(o,HK.dk(col,.25)); q.lineWidth=Math.max(3,H*.008); q.lineCap='round'; q.beginPath(); q.moveTo(ex,ry+H*.005); q.quadraticCurveTo(ex+d*W*.006,ry+H*.004,ex+d*W*.006,ry-H*.01); q.stroke(); q.lineCap='butt'; } /* the ridge and its curled ends */
+    HK.line(o,[L-W*.006,eb-H*.026,L+ov*.4,eb+H*.002,g.x0+ov*.6,eb-H*.004],v3rgba(o.P.rim||'#fff0d0',.4*lit),1); HK.rect(o,g.x0,g.wallTop,g.x1-g.x0,H*.008,HK.dk(col,.4)); /* lit eave edge and the shadow under it */
+    o.top=Math.min(o.top==null?o.dockY-H*.23:o.top,ry-H*.04); o.low=Math.max(o.low==null?-1e9:o.low,g.wallTop+H*.01); },
+  /* the walls between dark posts */
+  walls(o,g,kind,c,postC){ BH.walls(o,g,['shoji','plaster','bamboo'][kind],c); const n=Math.max(3,Math.round((g.x1-g.x0)/(W*.04))); for(let i=0;i<=n;i++){ const px=g.x0+(g.x1-g.x0)*i/n; HK.rect(o,px-W*.002,g.wallTop,W*.004,o.dockY-g.wallTop,postC); } HK.rect(o,g.x0,o.dockY-H*.008,g.x1-g.x0,H*.008,postC); },
+  /* paper lanterns hung under the eaves, a row of small ones, or a stone lantern on the deck */
+  lanterns(o,g,s,c){ const q=o.x, y=g.wallTop+H*.012;
+    if(s===0||s===1){ const xs=s===0?[g.vx+W*.03,g.x1-W*.012]:[...Array(7)].map((_,i)=>Math.max(g.x0,0)+(g.x1-Math.max(g.x0,0))*(i+.5)/7), r=s===0?1:.6; let L=null; for(const lx of xs){ HK.line(o,[lx,g.wallTop+H*.004,lx,y],'#2a2024',1); HK.ell(o,lx,y+H*.014*r,W*.006*r,H*.014*r,v3rgba(mix('#fff0d0',c,.5),.92)); for(let k=-1;k<=1;k++) HK.line(o,[lx-W*.006*r,y+H*.014*r+k*H*.005*r,lx+W*.006*r,y+H*.014*r+k*H*.005*r],v3rgba(HK.dk(c,.3),.4),.6); HK.rect(o,lx-W*.003*r,y-1,W*.006*r,2,'#2a2024'); HK.rect(o,lx-W*.003*r,y+H*.027*r,W*.006*r,2,'#2a2024'); L={x:lx,y:y+H*.014*r,r:.13*r,a:.75}; } return L; }
+    return BH.lantern(o,g,'stone',c); },
+  /* the rope railing along the veranda's front (front layer, in front of the angler): posts with thick rope swags, a bamboo rail, or none */
+  rail(night,cx,s,c){ if(s===2) return; const q=cx||g, y=HF.dockY(), C=TH.geo({pw:HF.pw(),dockY:y}), x0=Math.max(C.x0,-W*.01), x1=HF.pw()-W*.006, rh=H*.036, N=c0=>mix(c0,'#0a1020',night*.55), n=6, xs=[...Array(n+1)].map((_,i)=>x0+(x1-x0)*i/n);
+    q.fillStyle=N(mix('#6a4a32',c,.4)); for(const px of xs){ q.fillRect(px-2.5,y-rh,5,rh); q.fillStyle=N(HK.lt(mix('#6a4a32',c,.4),.15)); q.fillRect(px-3,y-rh-2,6,3); q.fillStyle=N(mix('#6a4a32',c,.4)); }
+    if(s===0){ q.strokeStyle=N('#d8c08a'); q.lineWidth=Math.max(2.5,H*.005); q.beginPath(); for(let i=0;i<n;i++){ q.moveTo(xs[i],y-rh*.82); q.quadraticCurveTo((xs[i]+xs[i+1])/2,y-rh*.4,xs[i+1],y-rh*.82); } q.stroke(); q.strokeStyle=N('#a8905a'); q.lineWidth=1; q.stroke(); }
+    else { q.fillStyle=N(mix('#b8b06a',c,.3)); q.fillRect(x0,y-rh*.86,x1-x0,Math.max(3,H*.005)); q.fillRect(x0,y-rh*.46,x1-x0,Math.max(3,H*.005)); q.fillStyle=N('#7a7a4a'); for(let X=x0;X<x1;X+=W*.03){ q.fillRect(X,y-rh*.86,1.2,Math.max(3,H*.005)); q.fillRect(X+W*.015,y-rh*.46,1.2,Math.max(3,H*.005)); } } },
+  /* the big cherry tree framing the corner over the roof (front layer): a dark gnarled limb from the top-left with clouds of blossom */
+  tree(night,cx){ const q=cx||g, C=TH.geo({pw:HF.pw(),dockY:HF.dockY()}), N=c0=>mix(c0,'#141a30',night*.5), x0=Math.max(HF.x0(),0)-W*.01, ty=C.roofTop-H*.05, r=v3rng(83);
+    q.fillStyle=N('#3a2a28'); q.beginPath(); q.moveTo(x0-W*.004,HF.dockY()+H*.04); q.quadraticCurveTo(x0+W*.02,C.wallTop,x0+W*.012,ty-H*.1); q.lineTo(x0-W*.006,ty-H*.13); q.quadraticCurveTo(x0+W*.004,C.wallTop,x0-W*.016,HF.dockY()+H*.04); q.closePath(); q.fill(); q.strokeStyle=N('#5a4440'); q.lineWidth=1; q.beginPath(); for(let k=0;k<4;k++){ const yy=C.wallTop+k*H*.04; q.moveTo(x0-W*.002,yy); q.lineTo(x0+W*.008,yy+H*.006); } q.stroke(); /* the trunk rising at the left edge, so the canopy grows from somewhere */
+    q.strokeStyle=N('#3a2a28'); q.lineCap='round'; q.lineWidth=H*.016; q.beginPath(); q.moveTo(x0,ty-H*.12); q.quadraticCurveTo(x0+W*.04,ty-H*.06,x0+W*.09,ty-H*.02); q.stroke(); q.lineWidth=H*.007; q.beginPath(); q.moveTo(x0+W*.05,ty-H*.06); q.quadraticCurveTo(x0+W*.07,ty-H*.1,x0+W*.11,ty-H*.11); q.moveTo(x0+W*.08,ty-H*.025); q.quadraticCurveTo(x0+W*.11,ty-H*.01,x0+W*.13,ty-H*.03); q.stroke(); q.lineCap='butt';
+    for(let i=0;i<46;i++){ const u=r(), X=x0+W*(.005+u*.13), Y=ty-H*(.13-u*.06)+(r()-.5)*H*.06, s=H*(.012+r()*.014); q.fillStyle=N(['#f4a8c4','#f8c0d4','#ffd8e6','#e88ab0'][Math.floor(r()*4)]); q.beginPath(); q.arc(X,Y,s,0,7); q.fill(); }
+    q.fillStyle=v3rgba('#ffffff',.25*(1-night)); for(let i=0;i<20;i++){ const X=x0+W*(.01+r()*.12), Y=ty-H*(.12-r()*.08); q.beginPath(); q.arc(X,Y,H*.004,0,7); q.fill(); } },
+  /* the ground: a mossy bank behind with a bamboo fence along a stone path, a stone lantern, azalea bushes, mossy rocks at the water */
+  ground(o){ const x=o.x, y=o.dockY, wl=o.wl, x0=HF.x0(), N=c0=>HK.n(o,c0), lit=HK.lit(o), r=v3rng(61), xe=o.pw+W*.03, top=X=>Math.min(y-H*.13+(X-x0)/(xe-x0)*H*.1,y-H*.03); /* the bank stops at the deck: the tea house stands over the water */
+    x.fillStyle=N('#4a6a3a'); x.beginPath(); x.moveTo(x0,y); for(let X=x0;X<=xe;X+=4) x.lineTo(X,top(X)); x.lineTo(xe,wl); x.quadraticCurveTo(xe-W*.02,wl,o.pw-W*.03,y); x.closePath(); x.fill(); x.fillStyle=N('#5a7a42'); x.beginPath(); x.moveTo(x0,y); for(let X=x0;X<=xe;X+=4) x.lineTo(X,top(X)+H*.012); x.lineTo(xe,wl); x.quadraticCurveTo(xe-W*.02,wl,o.pw-W*.025,y); x.closePath(); x.fill(); /* the bank's end slopes down into the water past the deck */
+    const py=X=>top(X)+H*.02; x.strokeStyle=N('#a8a090'); x.lineWidth=H*.008; x.beginPath(); x.moveTo(x0,py(x0)); x.lineTo(xe,py(xe)); x.stroke(); for(let X=x0;X<xe;X+=W*.012) HK.ell(o,X,py(X),W*.005,H*.003,'#bab2a2'); /* the stone path */
+    x.strokeStyle=N('#a89a5a'); x.lineWidth=Math.max(1.5,H*.0026); for(let X=x0;X<xe;X+=W*.004){ x.beginPath(); x.moveTo(X,py(X)-H*.004); x.lineTo(X,py(X)-H*.026); x.stroke(); } x.strokeStyle=N('#6a5a3a'); x.lineWidth=2; x.beginPath(); for(const h of [.008,.02]){ x.moveTo(x0,py(x0)-H*h); x.lineTo(xe,py(xe)-H*h); } x.stroke(); /* a bamboo fence along it */
+    for(let i=0;i<6;i++){ const X=x0+(xe-x0)*(.1+i*.16), Y=top(X)+H*.024+r()*H*.004; x.fillStyle=N(i%2?'#d8487a':'#e86a98'); x.beginPath(); x.ellipse(X,Y,W*.012,H*.012,0,Math.PI,0); x.fill(); x.fillStyle=N('#4a6a3a'); x.beginPath(); x.ellipse(X,Y+H*.002,W*.012,H*.004,0,0,Math.PI); x.fill(); } /* azaleas in bloom */
+    for(const [f,s] of [[.94,1],[1,1.3]]){ const X=x0+(xe-x0)*f; HK.ell(o,X,wl-H*.006,W*.012*s,H*.012*s,'#8a8a84'); HK.ell(o,X-W*.002,wl-H*.015*s,W*.008*s,H*.003,'#5a7a3a'); } /* mossy rocks where the bank meets the water */
+    HK.rect(o,o.pw-W*.03,wl-1,xe-o.pw+W*.03,1.5,v3rgba('#e8f4f0',.3*lit+.05)); }
+};
+// =====================================================================
 // Every water's home (batch 5, 2026-11-22; designs in docs/HOME_DESIGNS.md, colours in docs/MAP_THEMES.md). Willow Pond (the
 // approved pilot) is in cv_homefmt.js; these 19 are built from the home kit (cw_homekit.js). Each home: the seat plus 5 features
 // made for that water, 3 styles each ("none" first where a feature can be left out), one list of 16 colours for every feature.
@@ -17499,28 +17546,29 @@ const C16=s=>s.split(';').map(p=>{ const [n,h]=p.split('='); return [n.trim(),h.
       ['roof',(o,s,c)=>MH.roof(o,MH.geo(o),['tiles','shakes','thatch'][s],c)],
       ['dormer',(o,s,c)=>{ const g=MH.geo(o), ws=hfStyle('river','walls'); MH.dormer(o,g,s,c,['stone','stone','plaster'][ws],ws===1?mix('#f6f2ea',hfColor('river','walls'),.1):hfColor('river','walls'),null,hfColor('river','roof')); HK.deck(o,'#7a5a3e','boards'); }],
       ['seat']] }); }
-/* 3. Cherry Blossom Lake: the tea house (the Rockies standard, overnight batch 6, 2026-11-23): one base building, a little tea house on
-   the water (MAP_THEMES › Cherry Blossom: red-lacquered posts, a curved tiled roof, paper lanterns). Its walls, roof, lantern, shade,
-   door, windows and seat change aspects of it; cherry trees in blossom on the bank behind it */
-{ const P3=()=>BH.cab({pw:HF.pw(),dockY:HF.dockY()});
+/* 3. Cherry Blossom Lake: the tea house (overnight, 2026-11-23; its own design, src/cw_teahouse.js, inspired by the director's reference
+   picture docs/reference/blossom_director_ref.png): a tea house raised on red-lacquered posts with a layered irimoya roof whose eaves curve
+   up at the tips, shoji walls between dark posts, paper lanterns under the eaves and a veranda deck with a thick rope railing; a mossy bank
+   with a stone path, bamboo fence and azaleas behind it, and a big cherry tree framing the top-left corner */
+{ const G3=()=>TH.geo({pw:HF.pw(),dockY:HF.dockY()}), WN=()=>{ const g=G3(); return Object.assign({},g,{winA:g.vx+W*.06,winB:g.x1-W*.03}); };
   hfMake('blossom',{ name:'Tea house', hname:'tea house', glow:'255,200,150', seatX:()=>HF.pw()-W*.028,
     colors:C16('Lacquer red=#b8322a;Vermilion=#d8503a;Cedar=#9a6a42;Dark cedar=#5a3a26;Black lacquer=#2a2426;Paper white=#f4ece0;Rice beige=#e0d0b0;Bamboo=#b8b06a;Moss=#6a8a52;Jade=#5a9a9a;Deep jade=#1e4a58;Blossom pink=#f4a8c4;Pale sakura=#ffe4ee;Wisteria=#a88ac8;Lantern amber=#f0a848;Stone grey=#9a948a'),
-    front:null, smoke:null,
+    front:(n,cx)=>{ TH.tree(n,cx); TH.rail(n,cx,hfStyle('blossom','rail'),hfColor('blossom','rail')); }, smoke:null,
     els:[{id:'walls',label:'Walls',styles:['Shoji screens','Plaster and timber','Bamboo'],def:[0,3],palS:[[2,3,4,0],[5,6],[7,2]]},
          {id:'roof',label:'Roof',styles:['Curved clay tiles','Cypress bark','Copper'],def:[0,4],palS:[[4,15,3,10],[2,3],[9,10,2]]},
-         {id:'light',label:'Lantern',light:true,styles:['Paper lantern','Stone lantern','String of lanterns'],def:[0,0],palS:[[0,1,5,11,14],[15,4],[0,1,5,11,14]]},
-         {id:'shade',label:'Shade',none:true,styles:['Open sky','Veranda roof','Wisteria trellis','Paper parasol'],def:[0,0],palS:[null,[4,15,3,10],[2,3,4,0],[0,1,5,11,12,13,9]]},
+         {id:'light',label:'Lanterns',light:true,styles:['Two paper lanterns','Row of small lanterns','Stone lantern'],def:[0,0],palS:[[0,1,5,11,14],[0,1,5,11,14],[15,4]]},
+         {id:'rail',label:'Railing',styles:['Rope railing','Bamboo railing','Open deck'],def:[0,2],pal:[0,2,3,4,7]},
          {id:'door',label:'Door',styles:['Sliding shoji','Plank door','Noren curtain'],def:[2,10],palS:[[2,3,4,0],[2,3,4,0],[0,10,13,4,5,9]]},
-         {id:'windows',label:'Windows',styles:['Shoji windows','Round window','Four-pane windows'],def:[1,3],pal:[2,3,4,0]}],
+         {id:'windows',label:'Windows',styles:['Shoji windows','Round window','Lattice windows'],def:[1,3],pal:[2,3,4,0]}],
     seat:['cushion','lowbench','stool'], seatNames:['Zabuton cushion','Bamboo bench','Lacquer stool'], seatDef:[0,0], seatPal:[0,1,4,5,6,7,9,10,11,13],
     order:[
-      ['base',(o)=>{ BH.bank(o,{trees:'round',g1:'#4a6a42',g2:'#2c4228',grass:'#6a8a52',rock:'#9a948a',t1:'#f4a8c4',t2:'#ffd0e0',seed:47}); BH.piles(o,'square','#b8322a'); HK.deck(o,'#9a6a42','boards'); }],
-      ['walls',(o,s,c)=>BH.walls(o,P3(),['shoji','plaster','bamboo'][s],c)],
-      ['door',(o,s,c)=>BH.door(o,P3(),['shoji','plank','noren'][s],c)],
-      ['windows',(o,s,c)=>BH.windows(o,P3(),['shoji','round','four'][s],c)],
-      ['roof',(o,s,c)=>BH.roof(o,P3(),['curvetiles','shakes','copper'][s],c)],
-      ['light',(o,s,c)=>BH.lantern(o,P3(),['paper','stone','string'][s],c)],
-      ['shade',(o,s,c)=>BH.shade(o,P3(),[null,'porch','trellis','umbrella'][s],c,hfColor('blossom','roof'))],
+      ['base',(o)=>{ TH.ground(o); BH.piles(o,'square','#b8322a'); HK.deck(o,'#9a6a42','boards'); }],
+      ['walls',(o,s,c)=>TH.walls(o,TH.geo(o),s,c,'#3a2420')],
+      ['door',(o,s,c)=>BH.door(o,TH.geo(o),['shoji','plank','noren'][s],c)],
+      ['windows',(o,s,c)=>BH.windows(o,WN(),['shoji','round','four'][s],c)],
+      ['roof',(o,s,c)=>TH.roof(o,TH.geo(o),s,c)],
+      ['light',(o,s,c)=>TH.lanterns(o,TH.geo(o),s,c)],
+      ['rail',()=>{}],
       ['seat']] }); }
 /* 4. Saltmarsh Coast: the pier end */
 hfMake('coast',{ name:'Saltmarsh pier end', hname:'pier',
