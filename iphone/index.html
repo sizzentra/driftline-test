@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="DL Test iPhone">
 <script>
-window.DL_BUILD='ios'; window.DL_PREVIEW=true; if(/[?&]sweep\b/.test(location.search)){ window.__bootErr=[]; addEventListener("error",function(e){ __bootErr.push(String(e.message||e)+(e.lineno?" (line "+e.lineno+")":"")); }); addEventListener("unhandledrejection",function(e){ __bootErr.push("promise: "+String(e.reason&&e.reason.message||e.reason)); }); window.requestAnimationFrame=function(f){ return setTimeout(function(){ f(performance.now()); },16); }; window.cancelAnimationFrame=function(i){ clearTimeout(i); }; } try{ window.__tOff=/[?&](test|sweep|frozen)\b/.test(location.search)?0:(+(localStorage.getItem("dl-test-toff")||0)||0); }catch(e){ window.__tOff=0; } (function(){ var rn=Date.now.bind(Date); Date.now=function(){ return rn()+window.__tOff; }; })(); if(/[?&]frozen\b/.test(location.search)){ var __fz=20261122; Math.random=function(){ __fz|=0; __fz=__fz+0x6D2B79F5|0; var t=Math.imul(__fz^__fz>>>15,1|__fz); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; var __fc=0, __pn=performance.now.bind(performance); performance.now=function(){ __fc+=0.01; return 100000+__fc; }; Date.now=function(){ return 1795300000000+Math.floor(__fc); }; window.__frozenClock=function(){ return __fc; }; window.requestAnimationFrame=function(){ return 0; }; window.cancelAnimationFrame=function(){}; } window.DL_VERSION='2026.11.23-1223';
+window.DL_BUILD='ios'; window.DL_PREVIEW=true; if(/[?&]sweep\b/.test(location.search)){ window.__bootErr=[]; addEventListener("error",function(e){ __bootErr.push(String(e.message||e)+(e.lineno?" (line "+e.lineno+")":"")); }); addEventListener("unhandledrejection",function(e){ __bootErr.push("promise: "+String(e.reason&&e.reason.message||e.reason)); }); window.requestAnimationFrame=function(f){ return setTimeout(function(){ f(performance.now()); },16); }; window.cancelAnimationFrame=function(i){ clearTimeout(i); }; } try{ window.__tOff=/[?&](test|sweep|frozen)\b/.test(location.search)?0:(+(localStorage.getItem("dl-test-toff")||0)||0); }catch(e){ window.__tOff=0; } (function(){ var rn=Date.now.bind(Date); Date.now=function(){ return rn()+window.__tOff; }; })(); if(/[?&]frozen\b/.test(location.search)){ var __fz=20261122; Math.random=function(){ __fz|=0; __fz=__fz+0x6D2B79F5|0; var t=Math.imul(__fz^__fz>>>15,1|__fz); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; var __fc=0, __pn=performance.now.bind(performance); performance.now=function(){ __fc+=0.01; return 100000+__fc; }; Date.now=function(){ return 1795300000000+Math.floor(__fc); }; window.__frozenClock=function(){ return __fc; }; window.requestAnimationFrame=function(){ return 0; }; window.cancelAnimationFrame=function(){}; } window.DL_VERSION='2026.11.23-1252';
 window.addEventListener('beforeinstallprompt',function(e){ e.preventDefault(); window.__dlInstallPrompt=e; });
 </script>
 </head>
@@ -2257,7 +2257,7 @@ function rollFish(sp,ctx){ const b=BAIT[S.baitSel], wx=weather(), dm=ctx.dist||{
   /* [23] (director): a hybrid that still lands inside its own normal weight range is worth ×2 (common) to ×5 (mythic) of a normal
      fish its size, in coins and in aquarium income */
   const hx = hy && kg>=sp.min && kg<=sp.max ? HYBRID_IN_RANGE[sp.r]*pathMul('hx') : 0;
-  let value = Math.max(1,Math.round(sp.base*(hy&&!hx?clamp(Math.pow(R,.85)*(1+.6*Math.abs(Math.log(R))),.3,25):Math.pow(R,.85)*(hx||1))));
+  let value = Math.max(1,Math.round(sp.base*(hy&&!hx?clamp(hyWeightK(R)*(1+.6*Math.abs(Math.log(R))),.3,25):Math.pow(R,.85)*(hx||1))));
   value=Math.round(value*RAR[sp.r].val*(1+masteryK()*mastery(sp.id))*specLocValue(sp.loc)); { const bb=BAIT[S.baitSel]; if(pr('gourmet')&&bb&&bb.food&&typeof FISH_FAV!=='undefined'&&FISH_FAV[sp.id]===bb.id) value=Math.round(value*(1+.06*pr('gourmet'))); } /* Gourmet: caught on its favourite food, it sells for 6% more a rank (director, 2026-11-23) */ if(trophy) value=Math.round(value*(spec('trophyking')?2:1.5));
   if(shiny===1) value*=4; else if(shiny===2) value*=PRISM_VALUE;
   const ab=rollAqBuff(sp,kg), ab2=hy?rollAqBuff(SPI[hy],kg,true):null;
@@ -2284,7 +2284,7 @@ if(/[?&]test\b/.test(location.search)) window.__prismSheet=(ids)=>{ const o=docu
 // rising with rarity. So a full tank is a strong passive bonus, and fishing yourself always pays more per hour.
 const AQ_CAP_K=[.006,.008,.012,.02,.03,.045], WATER_EV={};
 function waterEV(loc){ if(WATER_EV[loc]==null){ const pool=SP.filter(s=>s.loc===loc); let a=0,t=0; for(let r=0;r<6;r++){ const L=pool.filter(s=>s.r===r); if(!L.length) continue; a+=RAR[r].w*L.reduce((x,s)=>x+s.base,0)/L.length*RAR[r].val; t+=RAR[r].w; } WATER_EV[loc]=t?a/t:1; } return WATER_EV[loc]; }
-function aqFishBase(f){ const sp=SPI[f.id]; if(!sp) return 0; const raw=(+f.value||0)*TANK_RATE*.75*RAR[sp.r].aq*(f.sh===2?1.6:1)*(f.hy?1.3:1), cap=waterEV(sp.loc)*4.6*AQ_CAP_K[sp.r]*aqWeightK(f,sp)*(f.sh===2?1.6:f.sh?1.25:1)*(f.hy?1.3:1)*(f.hx||1); return Math.min(raw,cap); } /* [23] in-range hybrids lift the cap by the same multiplier */
+function aqFishBase(f){ const sp=SPI[f.id]; if(!sp) return 0; const sm=hySmall(f,sp), raw=(+f.value||0)/(sm?hyWeightK(sm):1)*TANK_RATE*.75*RAR[sp.r].aq*(f.sh===2?1.6:1)*(f.hy?1.3:1), cap=waterEV(sp.loc)*4.6*AQ_CAP_K[sp.r]*(sm?aqWeightK({kg:(sp.min+sp.max)/2},sp):aqWeightK(f,sp))*(f.sh===2?1.6:f.sh?1.25:1)*(f.hy?1.3:1)*(f.hx||1); return Math.min(raw,cap); } /* [23] in-range hybrids lift the cap by the same multiplier */
 // 0.3.2: weight counts in the aquarium. A fish heavy for its kind earns more (its income cap grows from x0.75 for the
 // lightest to x1.7 for a record-breaker) and rolls stronger buffs, so your best prized catches belong on display.
 function aqRel(f,sp){ return sp&&sp.max>sp.min ? clamp(((+f.kg||0)-sp.min)/(sp.max-sp.min),0,1.5) : .5; }
@@ -2294,6 +2294,11 @@ aqBuffsOf = function(f){ const L=_aqBuffsOf_w(f), sp=SPI[f.id]; if(!sp) return L
   // fish rolled since 0.3 already carry a weight factor (0.75 to 1.25); this adds a bonus for the top end, and gives
   // older fish (which had none) the full weight effect
   const k=f.ab ? 1+.3*Math.max(0,r-.6) : .75+.5*Math.min(1.5,r); if(k!==1) for(const e of L) e.v*=k; return L; };
+/* small hybrids (Cam, 2026-11-23: "small hybrids lose only half of their sell value from the drop in weight rather than all, and don't lose any
+   from aquarium revenue"): a hybrid lighter than its own kind's usual weight loses half of what its weight would cost in coins (value
+   follows weight^0.85; half of that drop is given back), and in the aquarium it earns as if it weighed the usual amount */
+function hyWeightK(R){ const w=Math.pow(R,.85); return R<1?1-(1-w)/2:w; }
+function hySmall(f,sp){ if(!f||!f.hy||f.hx||!sp) return 0; const R=(+f.kg||0)/((sp.min+sp.max)/2); return R>0&&R<1?R:0; } /* its weight against the usual, when lighter (in-range hybrids are paid by their own rule) */
 // =====================================================================
 // FIGHT FEEL (Cam, 2026-11-21: docs/cam/FIGHT_FEEL.md, the answered questionnaire; it comes before every older note).
 // The new fish fight. The old one stays in c_logic.js `fight()` behind the test builds' "Fishing: New / Old" switch
@@ -2320,6 +2325,8 @@ const FF = { FAR_M:40, SPOOL_M:200, LB:.4536,
   TEN_RISE:[3,4],                   /* tension per second while you reel between moves: base + up to this much more for a strong fish (Feel call) */
   TEN_DROP:35, TEN_DROP_ACT:35/3,   /* Cam: easing up drops tension 35 a second, a third of that during a move */
   TEMPER_DROP:1, TEMPER_RATE:3,     /* Cam: temper empties in 3 s; full temper = moves up to 3 times as often (Feel call), each costing 1/3 */
+  DIVE_HALF:10.625,                 /* Cam, 2026-11-23: the band that stops a dive is 15% narrower than before (25% wide to 21.25%) */
+  TEMPER_TEN:1.5,                   /* Cam, 2026-11-23: "high temper needs to be more punishing": reeling between moves builds tension up to 1 + this times faster as the temper bar fills past half (2.5x when full; Feel call) */
   ACT_DRAIN:1.5,                    /* Cam: reeling into a move drains Fight 1.5 times as fast */
   SWIM_P:[.5,.45,.38,.32,.26,.2], SWIM_K:[1.25,1.5], SWIM_T:[.25,3], SWIM_EVERY:[1,2], /* Cam: still or swimming toward you between moves */
   TIRED_FAST:[.6,.45,.3,.25,.2,.1], /* Cam: a tired fish reels in this much faster, by rarity */
@@ -2423,7 +2430,7 @@ function fightNew(dt){
   const rk=fishRank(f), tk=Math.min(5,rk+(f.shiny===2?1:0)) /* Cam: titled shinies fight much harder */, B=BEH[f.beh]||BEH.calm, wc=ffWeightClass(f), kg=f.kg||.1;
   const AV=ffAvg(S.loc), rel=clamp(((f.str||1)/AV.str+kg/AV.kg)/2,.3,3), over=clamp(fishPull(f)/Math.max(.1,anglerStr()),.2,4), gearK=clamp(Math.sqrt(over),.6,1.6);
   const lively=clamp(.2+.3*(f.th||.4)+.25*(f.aggr||.3)+.05*tk,0,1); /* Cam: commons are lazier */
-  const I=(.6+.4*G.temper/3)*(1+.1*tk)*(tk>=4?1.25:1); /* Cam: temper sets how intense a move is; rarity too (legendary and mythic moves hit hardest) */
+  const fk=ffFightK(f), I=(.6+.4*G.temper/3)*(1+.1*tk)*(tk>=4?1.25:1)*fk; /* Cam: temper sets how intense a move is; rarity too (legendary and mythic moves hit hardest) */
   const wtK=clamp(.45+.55*(1-Math.exp(-kg/(AV.kg*1.2))),.45,1); /* Cam: tension from moves grows with weight, levelling off at both ends */
   /* the groove (Claude's idea, Feel lab "Groove bonus"): between moves, keeping the line between 50% and 80% while you reel brings the fish in 15% faster; it takes feathering the reel, so it rewards a steady hand */
   const inGroove=(FEEL.groove||0)>0&&!G.ffA&&!G.tell&&G.sta>0&&G.ten>=50&&G.ten<=80; G.grooveT=inGroove&&(V3ON?G.prevRin>0:G.hold)?(G.grooveT||0)+dt:0; if(G.grooveT>=1.2&&!G.groovePaid){ G.groovePaid=1; feelPop('In the groove!'); feelCombo(1); } if(!G.grooveT) G.groovePaid=0;
@@ -2451,7 +2458,7 @@ function fightNew(dt){
       else { if(G.ev!=='jump'){ G.ev='jump'; splash(G.bob.x,G.bob.y,14); sfx.jump(); } G.evDur=Math.max(0,A.dur-A.t);
         if(!A.away) gainK=1.6; /* Cam: a jump toward you is the time to reel */
         else { gainK=wc===1?.4:wc>=2?0:1; if(wc===3) outV=runV*1.2; if(wc>=1) tenRate=140*wtK*I; } } }
-    else if(A.k==='dive'){ gainK=0; const inZ=G.ten>=A.zone-12.5&&G.ten<=A.zone+12.5; A.inZ=inZ; const add=Math.min(A.max-A.got,(4+3*rel)*I*FF.DIVE_RATE*(inZ?.3:1)*dt); A.got+=add; G.d+=add; G.dd+=add; tenRate=48;
+    else if(A.k==='dive'){ gainK=0; const inZ=G.ten>=A.zone-FF.DIVE_HALF&&G.ten<=A.zone+FF.DIVE_HALF; A.inZ=inZ; const add=Math.min(A.max-A.got,(4+3*rel)*I*FF.DIVE_RATE*(inZ?.3:1)*dt); A.got+=add; G.d+=add; G.dd+=add; tenRate=48;
       A.inZT=inZ?(A.inZT||0)+dt:0; if(A.inZT>=FF.DIVE_HOLD||A.got>=A.max-1e-6) A.t=A.dur; } /* Cam: holding the band for 1.5 s stops the dive at once */
     /* Feel lab, the right reaction pays: ease off in a run, a shake or a jump away; reel into a jump toward you; hold the dive band */
     if(A.k==='run'&&A.style==='long'){ const press=rin>0&&!(G.prevRin>0); A.holdT=rin>0?(A.holdT||0)+dt:0; /* a long run: short pulls in rhythm pay; holding on strains the line */
@@ -2466,13 +2473,13 @@ function fightNew(dt){
   if(rin>0){ const tired=G.sta<=0, fast=tired?1+FF.TIRED_FAST[tk]:1, res=wc>=1?clamp(FF.RESIST[tk]*Math.pow(Math.max(0,G.sta),.6)*(B.heavy?1.1:1),0,.97):0, gain=Math.min(reel*rin*(1-res)*gainK*fast, FF.FAR_M*fast/(tired?3:FF.SHORT_T[tk]*FEEL.len))*dt; /* Cam: a tired fish comes in 10-60% faster by rarity */ /* Cam: never faster than its rarity's shortest time while it has fight; a tired fish comes in at full speed (about 3 s from the far edge at most) */
     if(G.dd>0){ const back=Math.min(G.dd,.75*gain); G.dd-=back; } G.d-=gain; /* Cam: dive distance comes back at a 75% rate */
     const intoMove=A&&!(A.k==='jump'&&!A.away&&A.t>=JUMP_WINDUP)?FF.ACT_DRAIN:1; /* Cam: reeling into a move (not a jump toward you) drains its Fight 1.5x */
-    G.sta=Math.max(0,G.sta-intoMove*rin*dt/(FF.TIRE_T[tk]*FEEL.len*clamp(Math.sqrt(over),1,2)*(B.heavy?1.15:1)*(1+.5*(fightVoy()-1)))*(1-.25*G.temper/3)); /* Cam: the temper keeps its Fight from draining */
+    G.sta=Math.max(0,G.sta-intoMove*rin*dt/(FF.TIRE_T[tk]*fk*FEEL.len*clamp(Math.sqrt(over),1,2)*(B.heavy?1.15:1)*(1+.5*(fightVoy()-1)))*(1-.25*G.temper/3)); /* Cam: the temper keeps its Fight from draining */
     G.tickT-=rin*dt; if(G.tickT<=0){ G.tickT=.07; sfx.tick(); } }
   if(rin<1 && outV>0) G.d+=outV*(1-rin)*dt; /* only a fish over 5 lb takes line, and only while you let it */
   // tension: moves strain the line while you reel into them; between moves it settles; letting go lets it fall (slower for heavy fish)
   const tm=Math.max(.7,tensionMult()), tgK=clamp(Math.pow(over,.25),.85,1.4); /* Cam: tension cuts never make the dive band impossible, and gear eases a move's strain but never removes it */
   if(rin>0){ if(tenRate>0) G.ten+=Math.min(75*(1+.35*(FEEL.tx||0)*clamp((G.temper||0)/3,0,1)),tenRate*tm*tgK)*rin*dt; /* never from 0 to a snap in an instant (a hot-tempered fish gets closer) */
-    else if(!(A&&A.k==='jump'&&!A.away&&A.t>=JUMP_WINDUP)) G.ten+=(FF.TEN_RISE[0]+FF.TEN_RISE[1]*Math.min(1,over)*(.3+.7*G.sta)*wtK)*tensionMult()*rin*dt; } /* Cam: reeling builds tension slightly, also between moves; it never falls while you reel */
+    else if(!(A&&A.k==='jump'&&!A.away&&A.t>=JUMP_WINDUP)) G.ten+=(FF.TEN_RISE[0]+FF.TEN_RISE[1]*Math.min(1,over)*(.3+.7*G.sta)*wtK)*tensionMult()*(1+FF.TEMPER_TEN*Math.pow(clamp(((G.temper||0)-1.5)/1.5,0,1),1.5))*rin*dt; } /* Cam: reeling builds tension slightly, also between moves; it never falls while you reel */
   if(rin<1) G.ten=Math.max(0,G.ten-(1-rin)*dt*(A&&!(A.k==='jump'&&!A.away)?FF.TEN_DROP_ACT:FF.TEN_DROP)); /* Cam: easing up drops it steadily, 35 a second, a third of that during a move */
   if(A&&A.k==='jump'&&!A.away&&A.t>=JUMP_WINDUP) G.ten=Math.max(0,G.ten-30*dt);
   // a tired fish: "Reel hard!"; left 10 s it gets one Second wind (back to half its Fight)
@@ -2505,11 +2512,19 @@ function fightNew(dt){
 // the fight's one-line instruction, shared by the PC panel (d_draw.js) and the phones' card (mobile/fight08.js)
 function fightMsg(danger,oddDanger){ const NF=fishNew(), odd=G.fish&&G.fish.kind!=='fish';
   if(odd) return G.ev==='snag'?'Snagged!':oddDanger?'Ease off!':'Dead Weight';
-  if(NF&&G.tell) return G.tell.k==='dive'?'It’s about to dive!':G.tell.k==='run'?(G.tell.st==='dart'?'It’s about to dart!':G.tell.st==='long'?'Long run coming!':'It’s about to run!'):'Head shake coming!'; /* Feel lab */
+  if(NF&&G.tell) return G.tell.k==='dive'?'It’s about to dive!':G.tell.k==='run'?(G.tell.st==='dart'?'It’s about to dart!':G.tell.st==='long'?'It’s about to run!':'It’s about to run!'):'Head shake coming!'; /* Feel lab */
   if(NF&&G.ppw>0&&!G.ffA) return 'Pull now!';
-  return G.swT>0?'Second wind!':G.ev==='windup'?'It’s jumping!':G.ev==='jump'?(NF&&!G.jumpAway?'Reel now!':'Let go!'):G.ev==='dive'?'It’s diving!':G.ev==='shake'?'Head shake!':G.run?(NF&&G.ffA&&G.ffA.style==='dart'?'It’s darting! Let it go!':NF&&G.ffA&&G.ffA.style==='long'?'Long run! Short pulls!':'It’s running!'):NF&&FEEL.read&&G.swim?'Swimming in, reel!':NF&&G.sta<=0?'Reel hard!':(NF?G.temper>2:G.temper>1.7)&&G.hold?'Careful!':danger?'Ease off!':G.hold?'Reeling…':'Hold to reel'; }
-// the dive's tension band (Cam: 25% wide; light magenta while the line is inside it)
-const fightZone = () => fishNew()&&G.dive&&G.ev==='dive' ? {lo:(G.dive.zone-12.5)/100, hi:(G.dive.zone+12.5)/100, inZ:!!G.dive.inZ} : null;
+  return G.swT>0?'Second wind!':G.ev==='windup'?'It’s jumping!':G.ev==='jump'?(NF&&!G.jumpAway?'Reel now!':'Let go!'):G.ev==='dive'?'It’s diving!':G.ev==='shake'?'Head shake!':G.run?(NF&&G.ffA&&G.ffA.style==='dart'?'It’s darting':NF&&G.ffA&&G.ffA.style==='long'?'It’s running!':'It’s running!'):NF&&FEEL.read&&G.swim?'Swimming in, reel!':NF&&G.sta<=0?'Reel hard!':(NF?G.temper>2:G.temper>1.7)&&G.hold?'Careful!':danger?'Ease off!':G.hold?'Reeling…':'Hold to reel'; }
+// the dive's tension band (Cam: 21.25% wide since 2026-11-23, was 25%; light magenta while the line is inside it)
+const fightZone = () => fishNew()&&G.dive&&G.ev==='dive' ? {lo:(G.dive.zone-FF.DIVE_HALF)/100, hi:(G.dive.zone+FF.DIVE_HALF)/100, inZ:!!G.dive.inZ} : null;
+/* special fish fight harder (Cam, 2026-11-23: "if the fish is a shiny, hybrid, titled, etc. they need to have noticeably more fight"): their
+   moves hit harder and their Fight lasts longer by this much. A shiny a little more; a titled (prismatic) one by its tier; a hybrid by its
+   size against its own kind's usual weight, bigger ones far more, small ones still a touch more (all Feel calls) */
+const FF_SPECIAL={shiny:1.12, titled:{rainbow:1.2,starry:1.3,spectral:1.4,ancient:1.55}, hybrid:[1.05,1.2,1.65]}; /* hybrid: smallest, usual size, largest */
+function ffFightK(f){ if(!f||f.kind!=='fish'||!f.sp) return 1; let k=1;
+  if(f.shiny===2) k*=FF_SPECIAL.titled[f.pv]||FF_SPECIAL.titled.rainbow; else if(f.shiny===1) k*=FF_SPECIAL.shiny;
+  if(f.hy){ const R=(f.kg||.1)/((f.sp.min+f.sp.max)/2), H=FF_SPECIAL.hybrid, u=clamp(Math.log(R)/Math.log(8),-1,1); k*=u<0?H[1]+(H[1]-H[0])*u:H[1]+(H[2]-H[1])*u; } /* 8x lighter or heavier is the end of the scale */
+  return k; }
 // =====================================================================
 // 0.3 CONTROLS: new ways to fish, all optional and all on top of the classic one-button controls.
 //  - Tap to aim (setting): tap the spot on the water you want; a little scatter keeps it honest.
@@ -22084,6 +22099,12 @@ PATCHES.unshift({v:'0.4.9', name:'Work in progress', items:phoneNotes([
 // text changes. Released notes live in notes_release.js.
 const TEST_NOTES={v:'test', label:'Test build · '+(window.DL_BUILD==='ios'?'iPhone':'Android'), name:'0.4.9 test build (newest first)', items:[
   '## New in this build',
+  'A fish with a full temper bar punishes reeling: tension builds faster and faster as the bar fills past half, up to 2.5 times as fast when it is full.',
+  'Special fish fight harder: a shiny a little harder, a titled fish by its kind (Rainbow, then Starry, Spectral, Ancient), and a hybrid by its size, big ones much harder.',
+  'Small hybrids keep more of their worth: they lose only half the sale value their low weight would cost, and earn in the aquarium as if they weighed the usual amount.',
+  'During runs the fight only says “It’s darting” or “It’s running!”.',
+  'The band that stops a dive is 15% narrower.',
+  '## Test build 2026.11.23-1223',
   'Cherry Blossom Lake comes alive: the lake’s reflections ripple, the painted waterfall flows with foam and mist at its foot, the big cherry tree sways and the shore flowers nod in the breeze.',
   'Life on the lake: koi glide through the clear shallows, birds cross the sky, butterflies flutter over the flowers, dragonflies dart and hover, a fish leaps now and then, sunlight glints on the water and fireflies come out at night.',
   'Your tea house now mirrors in the lake, its paper lanterns are proper chochin with ribs, caps and tassels that glow warm, and the lily pads float in front of its posts.',
@@ -22605,8 +22626,9 @@ ui(){ QA.sys='UI';
   T('[23] a hybrid inside its own size range is worth ×2 (common) to ×5 (mythic), coins and aquarium income',()=>{ const e=[]; const sc=shinyChance; shinyChance=()=>0; let inR=0,outR=0;
     try{ for(const sp of SP.filter((s,i)=>i%7===0)){ for(let i=0;i<6;i++){ const f=rollFish(sp,{noPrey:true,forceHybrid:true}); if(!f.hy) continue; const inside=f.kg>=sp.min&&f.kg<=sp.max; if(inside){ inR++; if(f.hx!==HYBRID_IN_RANGE[sp.r]) e.push(sp.id+' in range but ×'+f.hx); } else { outR++; if(f.hx) e.push(sp.id+' out of range but ×'+f.hx); } } } }
     finally{ shinyChance=sc; }
-    const sp=SP.find(s=>s.r===5)||SP[0], base={id:sp.id,kg:sp.min,value:1e12,sh:0,hy:SP[0].id}, a=aqFishBase(base), b=aqFishBase(Object.assign({},base,{hx:5})); if(!(b>a*4.9)) e.push('aquarium cap not lifted ('+Math.round(a)+' → '+Math.round(b)+')');
+    const sp=SP.find(s=>s.r===5)||SP[0], base={id:sp.id,kg:(sp.min+sp.max)/2,value:1e12,sh:0,hy:SP[0].id} /* at its usual weight, so the small-hybrid rule (Cam, 2026-11-23) does not touch it */, a=aqFishBase(base), b=aqFishBase(Object.assign({},base,{hx:5})); if(!(b>a*4.9)) e.push('aquarium cap not lifted ('+Math.round(a)+' → '+Math.round(b)+')');
     if(!inR) e.push('no in-range hybrid rolled to test'); return e.length?{ok:false,detail:[...new Set(e)].slice(0,5).join(' | ')}:{ok:true,detail:inR+' in range, '+outR+' outside'}; });
+T('Cam 2026-11-23: special fish fight harder, small hybrids keep value, narrower dive band',()=>{ const e=[], sp=SP.find(s=>s.r===2)||SP[0], fish=o=>Object.assign({kind:'fish',sp,kg:(sp.min+sp.max)/2},o);    if(!(ffFightK(fish({}))===1)) e.push('a plain fish is not 1x'); if(!(ffFightK(fish({shiny:1}))>1)) e.push('shiny not harder'); const t=['rainbow','starry','spectral','ancient'].map(pv=>ffFightK(fish({shiny:2,pv}))); for(let i=1;i<4;i++) if(!(t[i]>t[i-1])) e.push('titled tiers not rising');    const hs=ffFightK(fish({hy:'x',kg:sp.min/8})), hn=ffFightK(fish({hy:'x'})), hb=ffFightK(fish({hy:'x',kg:sp.max*8})); if(!(hs>1&&hn>hs&&hb>hn)) e.push('hybrid fight not by size ('+hs.toFixed(2)+', '+hn.toFixed(2)+', '+hb.toFixed(2)+')');    const R=.25, half=1-(1-Math.pow(R,.85))/2; if(Math.abs(hyWeightK(R)-half)>1e-9||hyWeightK(2)!==Math.pow(2,.85)) e.push('small hybrid value not half the weight loss');    const sm={id:sp.id,kg:(sp.min+sp.max)/2*R,value:1e12,sh:0,hy:'x'}, us={id:sp.id,kg:(sp.min+sp.max)/2,value:1e12,sh:0,hy:'x'}; if(!(Math.abs(aqFishBase(sm)-aqFishBase(us))<1e-6*aqFishBase(us))) e.push('small hybrid loses aquarium income ('+Math.round(aqFishBase(sm))+' vs '+Math.round(aqFishBase(us))+')');    if(!(Math.abs(FF.DIVE_HALF*2-21.25)<1e-9)) e.push('dive band not 21.25% wide'); return e.length?{ok:false,detail:e.join(' | ')}:true; });
   T('[24] shop rods cost Scales too, more for better rods',()=>{ const e=[]; const shop=RODS.filter(r=>r.src==='shop'); const sc=shop.map(rodScales); if(sc.some(v=>!(v>0))) e.push('a shop rod costs no Scales'); for(let i=1;i<sc.length;i++) if(shop[i].price>shop[i-1].price&&sc[i]<sc[i-1]) e.push(shop[i].id+' cheaper in Scales than '+shop[i-1].id);
     const r=shop[0]; S.rods.owned=S.rods.owned.filter(x=>x!==r.id); S.unlocked=uniq([...S.unlocked,r.need]); S.money=r.price; S.scales=rodScales(r)-1; act('rodbuy',{k:r.id}); if(S.rods.owned.includes(r.id)) e.push('bought without enough Scales');
     S.scales=rodScales(r)+3; act('rodbuy',{k:r.id}); if(!S.rods.owned.includes(r.id)) e.push('not bought with enough Scales'); else if(S.scales!==3) e.push('Scales not taken ('+S.scales+' left)');
