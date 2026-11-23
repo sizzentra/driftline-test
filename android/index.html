@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="DL Test Android">
 <script>
-window.DL_BUILD='android'; window.DL_PREVIEW=true; if(/[?&]sweep\b/.test(location.search)){ window.__bootErr=[]; addEventListener("error",function(e){ __bootErr.push(String(e.message||e)+(e.lineno?" (line "+e.lineno+")":"")); }); addEventListener("unhandledrejection",function(e){ __bootErr.push("promise: "+String(e.reason&&e.reason.message||e.reason)); }); window.requestAnimationFrame=function(f){ return setTimeout(function(){ f(performance.now()); },16); }; window.cancelAnimationFrame=function(i){ clearTimeout(i); }; } try{ window.__tOff=/[?&](test|sweep|frozen)\b/.test(location.search)?0:(+(localStorage.getItem("dl-test-toff")||0)||0); }catch(e){ window.__tOff=0; } (function(){ var rn=Date.now.bind(Date); Date.now=function(){ return rn()+window.__tOff; }; })(); if(/[?&]frozen\b/.test(location.search)){ var __fz=20261122; Math.random=function(){ __fz|=0; __fz=__fz+0x6D2B79F5|0; var t=Math.imul(__fz^__fz>>>15,1|__fz); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; var __fc=0, __pn=performance.now.bind(performance); performance.now=function(){ __fc+=0.01; return 100000+__fc; }; Date.now=function(){ return 1795300000000+Math.floor(__fc); }; window.__frozenClock=function(){ return __fc; }; window.requestAnimationFrame=function(){ return 0; }; window.cancelAnimationFrame=function(){}; } window.DL_VERSION='2026.11.23-0716';
+window.DL_BUILD='android'; window.DL_PREVIEW=true; if(/[?&]sweep\b/.test(location.search)){ window.__bootErr=[]; addEventListener("error",function(e){ __bootErr.push(String(e.message||e)+(e.lineno?" (line "+e.lineno+")":"")); }); addEventListener("unhandledrejection",function(e){ __bootErr.push("promise: "+String(e.reason&&e.reason.message||e.reason)); }); window.requestAnimationFrame=function(f){ return setTimeout(function(){ f(performance.now()); },16); }; window.cancelAnimationFrame=function(i){ clearTimeout(i); }; } try{ window.__tOff=/[?&](test|sweep|frozen)\b/.test(location.search)?0:(+(localStorage.getItem("dl-test-toff")||0)||0); }catch(e){ window.__tOff=0; } (function(){ var rn=Date.now.bind(Date); Date.now=function(){ return rn()+window.__tOff; }; })(); if(/[?&]frozen\b/.test(location.search)){ var __fz=20261122; Math.random=function(){ __fz|=0; __fz=__fz+0x6D2B79F5|0; var t=Math.imul(__fz^__fz>>>15,1|__fz); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; var __fc=0, __pn=performance.now.bind(performance); performance.now=function(){ __fc+=0.01; return 100000+__fc; }; Date.now=function(){ return 1795300000000+Math.floor(__fc); }; window.__frozenClock=function(){ return __fc; }; window.requestAnimationFrame=function(){ return 0; }; window.cancelAnimationFrame=function(){}; } window.DL_VERSION='2026.11.23-0727';
 window.addEventListener('beforeinstallprompt',function(e){ e.preventDefault(); window.__dlInstallPrompt=e; });
 </script>
 </head>
@@ -17787,6 +17787,40 @@ const EB = {
     for(let k=0;k<3;k++){ const sx=xe-W*.01+k*W*.006; q.fillStyle=N('#2a2024'); q.fillRect(sx,y+HK.fh()+k*H*.02,W*.006,H-y); } /* columns stepping down past the deck's end */ }
 };
 // =====================================================================
+// STARFALL LAKE: THE STAR OBSERVATORY (overnight, 2026-11-23; its own design, MAP_THEMES › Starfall: astrolabes, constellation maps, Art
+// Nouveau celestial posters, floating islands). A small round observatory of moonstone on a floating island of rock that drifts above the
+// starry water: a domed roof (a faceted crystal dome, a silver dome with its slit open, or a dome grown over with star-blossoms) with a
+// gold finial, a moon-shaped door, a frieze of tiny constellations; under the deck the island tapers to a point with crystals hanging from
+// it and glowing roots. Parts: walls, dome, door, telescope, star lantern, seat.
+// =====================================================================
+const SO = {
+  geo(o){ const C=BH.cab(o,{h:1,ratio:1.4}), wh=C.wh, x0=Math.max(HF.x0(),0)+W*.008, w=Math.min(wh*1.5,o.pw*.4), x1=x0+w; return {x0,x1,vx:x0,w,wh,wallTop:C.wallTop,mid:(x0+x1)/2,dt:C.wallTop-w*.48}; },
+  walls(o,g,kind,c){ const q=o.x, y=o.dockY; BH.walls(o,{x0:g.x0,x1:g.x1,vx:g.x0,wallTop:g.wallTop},['stone','plaster','glass'][kind],c);
+    HK.rect(o,g.x0,g.wallTop,g.w,H*.012,HK.dk(c,.15)); q.fillStyle=HK.n(o,'#f0d080'); for(let k=0;k<7;k++){ const sx=g.x0+g.w*(k+.5)/7, sy=g.wallTop+H*.006+((k*3)%2)*H*.002; q.beginPath(); q.arc(sx,sy,1.4,0,7); q.fill(); if(k<6){ q.strokeStyle=v3rgba('#f0d080',.5); q.lineWidth=.6; q.beginPath(); q.moveTo(sx,sy); q.lineTo(g.x0+g.w*(k+1.5)/7,g.wallTop+H*.006+(((k+1)*3)%2)*H*.002); q.stroke(); } } /* a frieze of tiny constellations */
+    for(const e of [g.x0,g.x1-W*.005]) HK.rect(o,e,g.wallTop,W*.005,y-g.wallTop,HK.lt(c,.15)); },
+  /* the dome: faceted crystal, silver with its slit open and the telescope tube showing, or grown over with star-blossoms; a gold finial */
+  dome(o,g,kind,c){ const q=o.x, lit=HK.lit(o), r=g.w*.5+W*.006, cx=g.mid, base=g.wallTop+H*.002;
+    q.fillStyle=HK.n(o,kind===0?v3rgba(c,.85):kind===2?mix('#4a7a5a',c,.25):c); q.beginPath(); q.ellipse(cx,base,r,base-g.dt,0,Math.PI,0); q.closePath(); q.fill(); q.save(); q.clip();
+    if(kind===0){ q.strokeStyle=v3rgba('#ffffff',.45); q.lineWidth=1; q.beginPath(); for(let k=1;k<6;k++){ const a=Math.PI*k/6; q.moveTo(cx,g.dt); q.lineTo(cx-Math.cos(a)*r,base); } q.moveTo(cx-r,base-(base-g.dt)*.45); q.lineTo(cx+r,base-(base-g.dt)*.45); q.stroke(); q.fillStyle=v3rgba('#ffffff',.25*lit+.1); q.beginPath(); q.ellipse(cx-r*.35,g.dt+(base-g.dt)*.35,r*.15,(base-g.dt)*.25,-.5,0,7); q.fill(); } /* crystal facets and a shine */
+    if(kind===1){ q.fillStyle=HK.n(o,'#1a1440'); q.fillRect(cx+r*.08,g.dt-2,r*.18,base-g.dt+2); q.strokeStyle=HK.n(o,HK.dk(c,.25)); q.lineWidth=1; q.beginPath(); for(let k=1;k<5;k++){ q.moveTo(cx-r+2*r*k/5,base); q.quadraticCurveTo(cx-r+2*r*k/5,g.dt+(base-g.dt)*.2,cx,g.dt); } q.stroke(); } /* silver ribs, the open slit */
+    if(kind===2){ for(let k=0;k<26;k++){ const a=Math.PI+Math.PI*((k*.381)%1), rr=r*(.4+((k*.618)%1)*.6), px=cx+Math.cos(a)*rr, py=base+Math.sin(a)*(base-g.dt)*rr/r; q.fillStyle=HK.n(o,k%3?'#f8c8e8':'#fff8ff'); for(let p=0;p<5;p++){ q.beginPath(); q.arc(px+Math.cos(p*1.256)*H*.004,py+Math.sin(p*1.256)*H*.004,H*.0028,0,7); q.fill(); } q.fillStyle=HK.n(o,'#f0d080'); q.beginPath(); q.arc(px,py,H*.0016,0,7); q.fill(); } } /* star-blossoms over it */
+    q.restore(); if(kind===1){ HK.line(o,[cx+r*.17,g.dt+(base-g.dt)*.3,cx+r*.62,g.dt-H*.02],'#c8c8d8',Math.max(3,H*.007)); } /* the telescope tube through the slit */
+    HK.line(o,[cx,g.dt,cx,g.dt-H*.022],'#f0d080',2); q.fillStyle=HK.n(o,'#f0d080'); q.beginPath(); for(let p=0;p<10;p++){ const a=-Math.PI/2+p*Math.PI/5, rr=p%2?H*.003:H*.007; q.lineTo(cx+Math.cos(a)*rr,g.dt-H*.026+Math.sin(a)*rr); } q.closePath(); q.fill(); /* a gold star finial */
+    HK.rect(o,g.x0-W*.004,base-H*.003,g.w+W*.008,H*.006,'#c8c8d8');
+    o.top=Math.min(o.top==null?o.dockY-H*.23:o.top,g.dt-H*.05); o.low=Math.max(o.low==null?-1e9:o.low,base); },
+  /* a moon-shaped door: an arched opening with a crescent window */
+  door(o,g,s,c){ const q=o.x, y=o.dockY, dx=g.x0+W*.012, dw=W*.02, dh=(y-g.wallTop)*.72, top=y-dh; q.fillStyle=HK.n(o,s===2?'#1a1440':c); q.beginPath(); q.moveTo(dx,y); q.lineTo(dx,top+dw/2); q.arc(dx+dw/2,top+dw/2,dw/2,Math.PI,0); q.lineTo(dx+dw,y); q.closePath(); q.fill();
+    if(s===0){ q.fillStyle=HK.n(o,'#f0d080'); q.beginPath(); q.arc(dx+dw/2,top+dw*.6,dw*.22,0,7); q.fill(); q.fillStyle=HK.n(o,c); q.beginPath(); q.arc(dx+dw/2+dw*.1,top+dw*.55,dw*.2,0,7); q.fill(); } /* a crescent window */
+    if(s===1) for(let k=0;k<3;k++) HK.circ(o,dx+dw/2,top+dw*.6+k*dh*.25,1.5,'#f0d080'); /* studded with stars */
+    if(s===2) for(let k=0;k<5;k++) HK.line(o,[dx+dw*(k+.5)/5,top+dw*.3,dx+dw*(k+.5)/5,y],v3rgba('#b88aff',.8),1); /* a curtain of crystal beads */ },
+  /* the floating island under the deck: a rock cone tapering to a point, crystals hanging, glowing roots, star-blossoms along its rim */
+  ground(o){ const y=o.dockY, q=o.x, N=c0=>HK.n(o,c0), x0=HF.x0(), xe=o.pw+W*.01, top=y+HK.fh(), tip=y+H*.2, mx=(x0+xe)/2+W*.01;
+    q.fillStyle=N('#4a3a5a'); q.beginPath(); q.moveTo(x0-W*.01,top); q.lineTo(xe,top); q.quadraticCurveTo(xe-W*.01,top+H*.06,mx+W*.04,tip-H*.03); q.lineTo(mx,tip); q.lineTo(mx-W*.05,tip-H*.05); q.quadraticCurveTo(x0,top+H*.07,x0-W*.01,top+H*.02); q.closePath(); q.fill();
+    q.fillStyle=N('#5a4a6e'); q.beginPath(); q.moveTo(x0-W*.01,top); q.lineTo(xe,top); q.quadraticCurveTo(xe-W*.02,top+H*.03,mx,top+H*.05); q.quadraticCurveTo(x0+W*.02,top+H*.04,x0-W*.01,top+H*.01); q.closePath(); q.fill(); /* the lit upper rock */
+    for(const [f,l] of [[.25,.05],[.45,.08],[.62,.06],[.8,.04]]){ const cx=x0+(xe-x0)*f, cy=top+H*.04; HK.poly(o,[cx-W*.005,cy,cx,cy+H*l,cx+W*.005,cy],v3rgba(f>.5?'#7ae0ff':'#b88aff',.85)); HK.line(o,[cx-W*.002,cy,cx,cy+H*l*.8],v3rgba('#ffffff',.5),1); } /* crystals hanging */
+    q.strokeStyle=v3rgba('#7ae0ff',.5); q.lineWidth=1; q.beginPath(); for(let k=0;k<5;k++){ const rx=mx-W*.04+k*W*.02; q.moveTo(rx,tip-H*.05+Math.abs(k-2)*H*.01); q.quadraticCurveTo(rx+W*.006,tip+H*.01,rx-W*.004,tip+H*.04); } q.stroke(); /* glowing roots trailing below */ }
+};
+// =====================================================================
 // Every water's home (batch 5, 2026-11-22; designs in docs/HOME_DESIGNS.md, colours in docs/MAP_THEMES.md). Willow Pond (the
 // approved pilot) is in cv_homefmt.js; these 19 are built from the home kit (cw_homekit.js). Each home: the seat plus 5 features
 // made for that water, 3 styles each ("none" first where a feature can be left out), one list of 16 colours for every feature.
@@ -18219,17 +18253,22 @@ hfMake('ember',{ name:'Basalt bathhouse', hname:'bathhouse', glow:'255,150,80', 
     ['seat'],
     ['light',(o,s)=>HK.light(o,['chain','lavabowl','steam'][s])]] }); }
 
-/* 14. Starfall Lake: the floating crystal platform (floats) */
-hfMake('starfall',{ name:'Crystal platform', hname:'crystal platform', floats:true,
+/* 14. Starfall Lake: the star observatory (overnight, 2026-11-23; its own design, src/cw_observatory.js; floats): a round moonstone observatory with a
+   crystal, silver or star-blossom dome and a gold star finial, a moon-shaped door, on a floating rock island with crystals hanging beneath. The old
+   platform, underglow and arch choices became this one building; telescope and star lantern keep their ids */
+hfMake('starfall',{ name:'Star observatory', hname:'observatory', floats:true, glow:'220,200,255', seatX:()=>HF.pw()-W*.03, front:null, smoke:null,
   colors:C16('Moonstone=#e8e0f4;Silver=#c8c8d8;Starlight=#fff8ff;Crystal violet=#b88aff;Crystal cyan=#7ae0ff;Deep violet=#6a5ab0;Night indigo=#2a1a5a;Lilac=#c8a0e8;Cloud lavender=#c8b8e0;Moon gold=#f0d080;Planet peach=#f0b890;Rose=#ff9ab0;Plum=#7a3a8a;Island moss=#5a8a6a;Twilight blue=#4a4aa8;Star ring=#e8d0ff'),
-  els:[{id:'platform',label:'Platform',styles:['Crystal disc','Moonstone slab','Cloud platform'],def:[0,3]},{id:'under',label:'Underglow',styles:['Crystal spires','Floating stones','Glowing roots'],def:[0,4]},
-       {id:'arch',label:'Arch',none:true,styles:['Open sky','Crescent moon','Planet ring','Star-blossom bower'],def:[1,9]},{id:'scope',label:'Telescope',none:true,styles:['None','Brass telescope','Astrolabe','Star chart'],def:[1,9]},
+  els:[{id:'walls',label:'Walls',styles:['Moonstone blocks','Silver plaster','Starlight glass'],def:[0,0],palS:[[0,1,8],[1,0,7],[4,3,2]]},
+       {id:'dome',label:'Dome',styles:['Crystal dome','Silver dome','Star-blossom dome'],def:[0,3],palS:[[3,4,7],[1,0],[7,8]]},
+       {id:'door',label:'Door',styles:['Crescent window door','Starry door','Crystal bead curtain'],def:[0,5],pal:[5,6,3,1]},
+       {id:'scope',label:'Telescope',none:true,styles:['None','Brass telescope','Astrolabe','Star chart'],def:[1,9]},
        {id:'light',label:'Star lantern',light:true,styles:['Star lantern','Moon orb','Constellation wisps'],def:[0,2]}],
   seat:['crescent','cloudcushion','crystalstool'], seatNames:['Crescent bench','Cloud cushion','Crystal stool'], seatDef:[0,0],
   order:[
-    ['under',(o,s,c)=>HK.supports(o,c,['spires','floatstones','glowroots'][s],5)],
-    ['platform',(o,s,c)=>HK.deck(o,c,['crystal','moonstone','cloud'][s])],
-    ['arch',(o,s,c)=>{ if(s) HK.roof(o,c,['','crescentgate','planet','bower'][s],.02,.46); }], /* map redo (director: "the home still gets fixed"): a crescent-moon sculpture behind the seat and a ringed planet on a pedestal instead of a ring and an arc hanging over the angler */
+    ['base',(o)=>{ SO.ground(o); HK.deck(o,'#e8e0f4','moonstone'); }],
+    ['walls',(o,s,c)=>SO.walls(o,SO.geo(o),s,c)],
+    ['door',(o,s,c)=>SO.door(o,SO.geo(o),s,c)],
+    ['dome',(o,s,c)=>SO.dome(o,SO.geo(o),s,c)],
     ['scope',(o,s,c)=>{ if(!s) return; const x=HK.at(o,.42), y=o.dockY; if(s===1){ HK.line(o,[x,y,x+W*.008,y-H*.04,x+W*.016,y],'#5a4030',1.2); HK.line(o,[x+W*.002,y-H*.042,x+W*.022,y-H*.062],c,3); } if(s===2){ HK.rect(o,x+W*.006,y-H*.03,2,H*.03,c); o.x.strokeStyle=HK.n(o,c); o.x.lineWidth=1.4; o.x.beginPath(); o.x.arc(x+W*.007,y-H*.045,H*.014,0,7); o.x.stroke(); HK.line(o,[x-W*.004,y-H*.045,x+W*.018,y-H*.045],c,1); } if(s===3){ HK.line(o,[x,y,x+W*.01,y-H*.06,x+W*.02,y],'#5a4030',1.2); HK.rect(o,x+W*.002,y-H*.07,W*.018,H*.03,'#2a1a5a'); for(let i=0;i<5;i++) HK.circ(o,x+W*(.005+i*.003),y-H*(.065-(i%2)*.012),1,c); } }],
     ['seat'],
     ['light',(o,s)=>HK.light(o,['star','moon','wisps'][s])]] });
@@ -21712,6 +21751,8 @@ PATCHES.unshift({v:'0.4.9', name:'Work in progress', items:phoneNotes([
 // text changes. Released notes live in notes_release.js.
 const TEST_NOTES={v:'test', label:'Test build · '+(window.DL_BUILD==='ios'?'iPhone':'Android'), name:'0.4.9 test build (newest first)', items:[
   '## New in this build',
+  'Starfall Lake, redone in its own style: your home is a round star observatory of moonstone with a crystal, silver or star-blossom dome and a gold star on top, a moon-shaped door and a frieze of tiny constellations, standing on a floating rock island with crystals hanging beneath. Your telescope and star lantern choices carry over.',
+  '## Test build 2026.11.23-0716',
   'Ember Springs, redone in its own style: your home is a basalt bathhouse on hexagonal basalt columns rising from the hot water, with a curved iron barrel roof, round windows that glow at night, a vent that lets off steam, and the steaming pool beside it. Pick the walls, roof, door, hot pool, lantern and seat in Your home.',
   '## Test build 2026.11.23-0706',
   'Hollow Trench, redone in its own style: your home is a castaway raft of tarred barrels and salvaged planks lashed with rope, glowing growth on the barrels below the water. Its shelter is the wrecked lifeboat of a lost ship turned upside down on props (or a sailcloth tent over an oar, or a crooked plank shack with a ship’s porthole). Your raft, mast, salvage and lantern choices carry over.',
