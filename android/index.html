@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="DL Test Android">
 <script>
-window.DL_BUILD='android'; window.DL_PREVIEW=true; if(/[?&]sweep\b/.test(location.search)){ window.__bootErr=[]; addEventListener("error",function(e){ __bootErr.push(String(e.message||e)+(e.lineno?" (line "+e.lineno+")":"")); }); addEventListener("unhandledrejection",function(e){ __bootErr.push("promise: "+String(e.reason&&e.reason.message||e.reason)); }); window.requestAnimationFrame=function(f){ return setTimeout(function(){ f(performance.now()); },16); }; window.cancelAnimationFrame=function(i){ clearTimeout(i); }; } try{ window.__tOff=/[?&](test|sweep|frozen)\b/.test(location.search)?0:(+(localStorage.getItem("dl-test-toff")||0)||0); }catch(e){ window.__tOff=0; } (function(){ var rn=Date.now.bind(Date); Date.now=function(){ return rn()+window.__tOff; }; })(); if(/[?&]frozen\b/.test(location.search)){ var __fz=20261122; Math.random=function(){ __fz|=0; __fz=__fz+0x6D2B79F5|0; var t=Math.imul(__fz^__fz>>>15,1|__fz); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; var __fc=0, __pn=performance.now.bind(performance); performance.now=function(){ __fc+=0.01; return 100000+__fc; }; Date.now=function(){ return 1795300000000+Math.floor(__fc); }; window.__frozenClock=function(){ return __fc; }; window.requestAnimationFrame=function(){ return 0; }; window.cancelAnimationFrame=function(){}; } window.DL_VERSION='2026.11.23-0547';
+window.DL_BUILD='android'; window.DL_PREVIEW=true; if(/[?&]sweep\b/.test(location.search)){ window.__bootErr=[]; addEventListener("error",function(e){ __bootErr.push(String(e.message||e)+(e.lineno?" (line "+e.lineno+")":"")); }); addEventListener("unhandledrejection",function(e){ __bootErr.push("promise: "+String(e.reason&&e.reason.message||e.reason)); }); window.requestAnimationFrame=function(f){ return setTimeout(function(){ f(performance.now()); },16); }; window.cancelAnimationFrame=function(i){ clearTimeout(i); }; } try{ window.__tOff=/[?&](test|sweep|frozen)\b/.test(location.search)?0:(+(localStorage.getItem("dl-test-toff")||0)||0); }catch(e){ window.__tOff=0; } (function(){ var rn=Date.now.bind(Date); Date.now=function(){ return rn()+window.__tOff; }; })(); if(/[?&]frozen\b/.test(location.search)){ var __fz=20261122; Math.random=function(){ __fz|=0; __fz=__fz+0x6D2B79F5|0; var t=Math.imul(__fz^__fz>>>15,1|__fz); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; var __fc=0, __pn=performance.now.bind(performance); performance.now=function(){ __fc+=0.01; return 100000+__fc; }; Date.now=function(){ return 1795300000000+Math.floor(__fc); }; window.__frozenClock=function(){ return __fc; }; window.requestAnimationFrame=function(){ return 0; }; window.cancelAnimationFrame=function(){}; } window.DL_VERSION='2026.11.23-0600';
 window.addEventListener('beforeinstallprompt',function(e){ e.preventDefault(); window.__dlInstallPrompt=e; });
 </script>
 </head>
@@ -17522,6 +17522,41 @@ const SS = {
     const mx=o.pw+W*.002, mt=y-H*.07; x.fillStyle=N('#3a3230'); x.fillRect(mx-pw*.6,mt,pw*1.2,y-mt); x.fillStyle=v3rgba('#ffffff',.12*lit); x.fillRect(mx-pw*.6,mt,2,y-mt); HK.ell(o,mx,mt-H*.008,W*.006,H*.006,'#f4f4f0'); HK.ell(o,mx+W*.005,mt-H*.012,W*.003,H*.003,'#f4f4f0'); HK.line(o,[mx+W*.007,mt-H*.012,mx+W*.01,mt-H*.011],'#e8a040',1.5); HK.line(o,[mx-W*.004,mt-H*.007,mx-W*.009,mt-H*.005],'#8a8a90',1.5); HK.line(o,[mx-W*.001,mt-H*.003,mx-W*.001,mt],'#e8a040',1); /* a tall mooring piling with a gull on top */ }
 };
 // =====================================================================
+// FROSTBITE LAKE: THE ICE SHANTY (overnight, 2026-11-23; its own design, MAP_THEMES › Frostbite: Minnesota and Finnish ice-fishing houses).
+// A small timber fish house standing on the ice on two sled skids (so it can be dragged off the lake in spring), seen from its long side:
+// a steep gable roof under a thick cap of snow with icicles along the eaves, a stovepipe with smoke, a window glowing warm at night; around it
+// the ice shelf with snowdrifts banked against the walls, footprints, a tip-up flag over its hole and a box sled.
+// Parts: walls, roof, chimney, door, windows, gear, seat.
+// =====================================================================
+const FS = {
+  geo(o){ const C=BH.cab(o,{h:1.15,ratio:1.6}), wh=C.wh, x0=Math.max(HF.x0(),0)+W*.004, w=Math.min(wh*1.7,o.pw*.4), x1=x0+w, sk=H*.012, wallTop=C.wallTop-sk, base=o.dockY-sk;
+    return {x0,x1,vx:x0,w,wh,sk,base,wallTop,roofTop:wallTop-w*.3,mid:(x0+x1)/2}; },
+  /* the skids under the floor: two runners with curled fronts, resting on the snow */
+  skids(o,g){ const y=o.dockY, q=o.x; HK.rect(o,g.x0-W*.002,g.base,g.w+W*.004,g.sk*.45,'#4a3428'); q.strokeStyle=HK.n(o,'#3a2a20'); q.lineWidth=Math.max(3,g.sk*.5); q.lineCap='round'; q.beginPath(); q.moveTo(g.x0+W*.004,y-g.sk*.25); q.lineTo(g.x1+W*.004,y-g.sk*.25); q.quadraticCurveTo(g.x1+W*.014,y-g.sk*.25,g.x1+W*.014,y-g.sk*1.1); q.stroke(); q.lineCap='butt';
+    for(const f of [.15,.5,.85]) HK.rect(o,g.x0+g.w*f-1.5,g.base,3,g.sk*.8,'#3a2a20'); },
+  walls(o,g,kind,c){ BH.walls(o,{x0:g.x0,x1:g.x1,vx:g.x0,wallTop:g.wallTop},kind,c); const q=o.x; for(const e of [g.x0,g.x1-W*.004]) HK.rect(o,e,g.wallTop,W*.004,g.base-g.wallTop,HK.dk(c,.3)); /* corner boards */
+    HK.rect(o,g.x0,g.base-H*.004,g.w,H*.004,HK.dk(c,.35)); },
+  /* a steep gable roof seen from the long side: the near slope as a band, a thick snow cap with soft drifts and icicles along the eave */
+  roof(o,g,kind,c){ const q=o.x, lit=HK.lit(o), ov=W*.01, eb=g.wallTop+H*.004, L=g.x0-ov, R=g.x1+ov, col=kind===2?mix('#c8b890',c,.4):c;
+    q.fillStyle=HK.n(o,col); q.beginPath(); q.moveTo(L,eb); q.lineTo(L+W*.01,g.roofTop); q.lineTo(R-W*.01,g.roofTop); q.lineTo(R,eb); q.closePath(); q.fill();
+    q.save(); q.clip(); q.strokeStyle=HK.n(o,HK.dk(col,.3)); q.lineWidth=1; q.beginPath();
+    if(kind===0) for(let X=L;X<R;X+=W*.006){ q.moveTo(X,g.roofTop); q.lineTo(X,eb); } else if(kind===1) for(let Y=g.roofTop;Y<eb;Y+=H*.007){ q.moveTo(L,Y); q.lineTo(R,Y); } else { for(let X=L+W*.02;X<R;X+=W*.04){ q.moveTo(X,g.roofTop); q.lineTo(X,eb); } } q.stroke(); q.restore(); /* tin seams, shingle rows, canvas panels */
+    const sy=g.roofTop, sd=(eb-g.roofTop)*1.75; q.fillStyle=HK.n(o,'#f6f8ff'); q.beginPath(); q.moveTo(L-W*.002,eb-sd*.35); q.lineTo(L+W*.01,sy-H*.012); for(let X=L+W*.01;X<=R-W*.01;X+=W*.01) q.lineTo(X,sy-H*.012-H*.004*Math.sin(X*.09)); q.lineTo(R-W*.01,sy-H*.012); q.lineTo(R+W*.002,eb-sd*.35); for(let X=R;X>=L;X-=W*.008) q.lineTo(X,eb-sd*.35+H*.006*Math.abs(Math.sin(X*.13))); q.closePath(); q.fill(); /* the snow cap */
+    q.fillStyle=HK.n(o,'#b8c8e4'); q.fillRect(L,eb-sd*.35+H*.004,R-L,H*.003); q.fillStyle=v3rgba('#ffffff',.5*lit); q.fillRect(L+W*.01,sy-H*.012,R-L-W*.02,1.5);
+    q.fillStyle=v3rgba('#e8f4ff',.85); for(let X=L+W*.004,i=0;X<R;X+=W*.007,i++){ const ih=H*(.006+((i*37)%7)*.002); q.beginPath(); q.moveTo(X-W*.0015,eb); q.lineTo(X+W*.0015,eb); q.lineTo(X,eb+ih); q.closePath(); q.fill(); } /* icicles */
+    o.top=Math.min(o.top==null?o.dockY-H*.23:o.top,g.roofTop-H*.08); o.low=Math.max(o.low==null?-1e9:o.low,eb); },
+  chimney(o,g,kind,c){ const px=g.x1-g.w*.22, top=g.roofTop-H*(kind===1?.05:.04); HK.rect(o,px-W*.003,top,W*.006,g.roofTop-top+H*.02,c); HK.rect(o,px-W*.0035,top+H*.01,W*.007,2,HK.dk(c,.3));
+    if(kind===1){ HK.rect(o,px-W*.0045,top-H*.006,W*.009,H*.006,c); HK.poly(o,[px-W*.006,top-H*.006,px+W*.006,top-H*.006,px,top-H*.016],HK.dk(c,.2)); } /* a spark arrestor and rain cap */
+    if(kind===2){ HK.rect(o,px-W*.003,top,W*.012,W*.006,c); HK.rect(o,px+W*.003,top-H*.02,W*.006,H*.02,c); } /* an elbow pipe */ },
+  chimTop(g,kind){ const px=g.x1-g.w*.22; return kind===2?[px+W*.006,g.roofTop-H*.06]:[px,g.roofTop-H*(kind===1?.068:.044)]; },
+  /* the ice around the shanty: drifts banked against the walls, footprints, a tip-up flag over its hole, a box sled */
+  ground(o){ const y=o.dockY, q=o.x, N=c0=>HK.n(o,c0), g=FS.geo(o), r=v3rng(19);
+    q.fillStyle=N('#f6f8ff'); q.beginPath(); q.moveTo(g.x0-W*.02,y); q.quadraticCurveTo(g.x0-W*.004,y-H*.03,g.x0+W*.012,y-H*.008); q.lineTo(g.x0+W*.012,y); q.closePath(); q.fill(); q.beginPath(); q.moveTo(g.x1-W*.006,y); q.quadraticCurveTo(g.x1+W*.002,y-H*.022,g.x1+W*.02,y); q.closePath(); q.fill(); /* drifts */
+    q.fillStyle=N('#b8c4e4'); for(let i=0;i<9;i++){ const fx=g.x1+W*.04+i*(o.pw-g.x1-W*.05)/9, fy=y-H*.002+(i%2)*H*.002; q.beginPath(); q.ellipse(fx,fy,W*.003,H*.0015,0,0,7); q.fill(); } /* footprints to the hole */
+    const hx=o.pw-W*.006; HK.ell(o,hx,y+H*.001,W*.008,H*.0025,'#1a2a4a'); HK.line(o,[hx+W*.004,y,hx+W*.004,y-H*.034],'#4a4440',1.4); HK.poly(o,[hx+W*.004,y-H*.034,hx+W*.016,y-H*.03,hx+W*.004,y-H*.024],'#d8383a'); HK.line(o,[hx-W*.006,y-H*.002,hx+W*.012,y-H*.002],'#5a4a3a',1.6); /* the tip-up over its hole, flag up */
+    const sx=g.x1+W*.034, sc=HF.sc()*.8; HK.curve(o,sx-2*sc,y-.5*sc,sx+12*sc,y+.6*sc,sx+20*sc,y-4*sc,'#4a4440',1.4*sc); HK.block(o,sx,y-11*sc,17*sc,8*sc,'#b8383a'); for(let k=1;k<4;k++) HK.line(o,[sx+k*17*sc/4,y-11*sc,sx+k*17*sc/4,y-3*sc],'#7a2428',.8); HK.rect(o,sx,y-11.5*sc,17*sc,1.5*sc,'#f6f8ff'); /* the box sled, a little snow on its load */ }
+};
+// =====================================================================
 // Every water's home (batch 5, 2026-11-22; designs in docs/HOME_DESIGNS.md, colours in docs/MAP_THEMES.md). Willow Pond (the
 // approved pilot) is in cv_homefmt.js; these 19 are built from the home kit (cw_homekit.js). Each home: the seat plus 5 features
 // made for that water, 3 styles each ("none" first where a feature can be left out), one list of 16 colours for every feature.
@@ -17625,15 +17660,19 @@ const C16=s=>s.split(';').map(p=>{ const [n,h]=p.split('='); return [n.trim(),h.
     ['seat'],
     ['light',(o,s)=>HK.light(o,['hook','lighthouse','buoy'][s])]] }); }
 
-/* 5. Frostbite Lake: the ice camp (stands on the ice) */
-hfMake('frost',{ name:'Ice camp', hname:'ice camp', ice:true,
+/* 5. Frostbite Lake: the ice shanty (overnight, 2026-11-23; its own design, src/cw_icehut.js): a timber fish house on sled skids standing on
+   the ice shelf, a steep roof under a snow cap with icicles, a stovepipe with smoke, a window glowing at night; drifts against its walls,
+   footprints to a tip-up over its hole, a box sled beside it. The old tent, igloo, stove, hole and sled choices became this one building */
+{ const G5=()=>FS.geo({pw:HF.pw(),dockY:HF.dockY()}), WN=()=>{ const g=G5(); return {x0:g.x0,x1:g.x1,vx:g.x0,wallTop:g.wallTop,winA:g.x0+g.w*.45,winB:g.x0+g.w*.72}; }, DR=()=>{ const g=G5(); return {x0:g.x0,x1:g.x1,vx:g.x0,wallTop:g.wallTop}; };
+hfMake('frost',{ name:'Ice shanty', hname:'ice shanty', ice:true, glow:'255,190,120', seatX:()=>HF.pw()-W*.03,
   colors:C16('Snow white=#f6f8ff;Frost=#d8e8f6;Ice blue=#8aaad0;Glacier=#4a6a9a;Deep ice=#1a2a4a;Spruce=#3e5a78;Birch=#e8e0d0;Birch bark=#4a4440;Timber=#7a5440;Dark timber=#4a3428;Wool red=#b8383a;Wool cream=#f0e6d0;Stove iron=#2a2a30;Lantern orange=#f0983a;Aurora green=#7af0b0;Dusk mauve=#9a88b8'),
-  /* map redo (director, 2026-11-22): the ice huts stay (the first building the director liked); the blocky platform becomes an ice shelf
-     with a ragged snow-capped edge; a floor choice made no sense outdoors, so that slot is the angler's gear; the stoves are stoves (no
-     storm lantern) and take the chosen colour; the shanty's roof sits on its walls; the sleds stand clear of the hut door, with detail */
-  els:[{id:'hut',label:'Ice hut',styles:['Canvas tent','Timber shanty','Snow igloo'],def:[0,10]},{id:'gear',label:'Gear',styles:['Hand auger','Bait bucket','Catch on the ice'],def:[0,10]},
-       {id:'hole',label:'Ice hole',styles:['Tip-up flag','Skimmer','Twin holes'],def:[0,10]},{id:'stove',label:'Stove',light:true,styles:['Box stove','Pot-belly stove','Campfire tray'],def:[0,12]},
-       {id:'sled',label:'Sled',none:true,styles:['No sled','Box sled','Snowmobile','Dog sled'],def:[1,8]}],
+  front:null, smoke:(n,t)=>BH.smoke(n,t,FS.chimTop(G5(),hfStyle('frost','chimney')),.8),
+  els:[{id:'walls',label:'Walls',styles:['Painted boards','Shiplap','Canvas over a frame'],def:[0,10],palS:[[10,5,3,8,6,15],[8,9,6],[11,10,5,3]]},
+       {id:'roof',label:'Roof',styles:['Tin roof','Shingles','Canvas'],def:[0,12],palS:[[12,3,10,5],[9,7,12],[11,5,10]]},
+       {id:'chimney',label:'Stovepipe',styles:['Straight pipe','Capped pipe','Elbow pipe'],def:[0,12],pal:[12,7,9,13]},
+       {id:'door',label:'Door',styles:['Plank door','Dutch door','Arched door'],def:[0,9],pal:[9,8,10,11,5,3]},
+       {id:'windows',label:'Windows',light:true,styles:['Four-pane windows','Round windows','Shuttered windows'],def:[0,11],pal:[11,9,10,5,3,6]},
+       {id:'gear',label:'Gear',styles:['Hand auger','Bait bucket','Catch on the ice'],def:[0,10]}],
   seat:['bucket','furbench','icechair'], seatNames:['Bucket stool','Fur bench','Ice chair'], seatDef:[0,12],
   order:[
     ['shelf',(o)=>{ const x0=HF.x0(), y=o.dockY, x=o.x, pw=o.pw+W*.012, wl=o.wl, r=v3rng(7); /* the ice shelf the camp stands on: snow on top, blue ice face, ragged foot with icicles, fading into the water */
@@ -17647,17 +17686,13 @@ hfMake('frost',{ name:'Ice camp', hname:'ice camp', ice:true,
       if(s===0){ HK.line(o,[x,y,x+3*sc,y-26*sc],'#5a5a62',1.6*sc); HK.line(o,[x+1.5*sc,y-13*sc,x+9*sc,y-15*sc],c,1.6*sc); HK.line(o,[x+3*sc,y-26*sc,x-4*sc,y-25*sc],c,1.8*sc); for(let k=0;k<4;k++) HK.line(o,[x-1*sc,y-2*sc-k*2*sc,x+2*sc,y-3*sc-k*2*sc],'#8a8a92',1); } /* a hand auger leaning, its crank and handle in the chosen colour */
       if(s===1){ HK.poly(o,[x-4*sc,y,x+4*sc,y,x+5*sc,y-9*sc,x-5*sc,y-9*sc],c); HK.ell(o,x,y-9*sc,5*sc,1.3*sc,HK.dk(c,.3)); HK.curve(o,x-5*sc,y-9*sc,x,y-15*sc,x+5*sc,y-9*sc,'#5a5a62',1); } /* a bait bucket with its handle */
       if(s===2){ for(const [dx,k] of [[0,1],[7,.8]]){ const fx=x+dx*sc, L=10*sc*k; HK.ell(o,fx,y-1.4*sc,L*.5,1.6*sc*k,mix('#8aa0b8',c,.25)); HK.poly(o,[fx+L*.45,y-1.4*sc,fx+L*.7,y-3*sc*k,fx+L*.7,y+.2*sc],mix('#6a8098',c,.25)); HK.circ(o,fx-L*.32,y-1.8*sc,.8*sc,'#14181e'); } } }], /* two fish laid on the ice */
-    ['hole',(o,s,c)=>{ const x=HK.at(o,.97), y=o.dockY+H*.004; HK.ell(o,x,y,W*.01,H*.003,'#1a2a4a'); if(s===0){ HK.line(o,[x+W*.006,y,x+W*.012,y-H*.03],'#4a4440',1.2); HK.poly(o,[x+W*.012,y-H*.03,x+W*.024,y-H*.026,x+W*.012,y-H*.022],c); } if(s===1){ HK.line(o,[x-W*.008,y,x-W*.018,y-H*.04],'#4a3428',1.4); HK.ell(o,x-W*.008,y,W*.004,H*.003,c); } if(s===2){ HK.ell(o,x-W*.02,y,W*.006,H*.003,'#1a2a4a'); HK.poly(o,[x-W*.012,y,x-W*.004,y,x-W*.005,y-H*.016,x-W*.011,y-H*.016],c); } }],
-    ['hut',(o,s,c)=>{ if(s===0) HK.roof(o,c,'walltent',.02,.4); if(s===1){ HK.roof(o,c,'shackbox',.02,.34); HK.rect(o,HK.at(o,.08),o.dockY-H*.09,W*.012,H*.014,'#f0983a'); } if(s===2){ const m=HK.at(o,.2), R=(HK.at(o,.4)-HK.at(o,.0))*.5; o.x.fillStyle=HK.n(o,c); o.x.beginPath(); o.x.arc(m,o.dockY,R,Math.PI,0); o.x.fill(); for(let i=1;i<4;i++){ o.x.strokeStyle=HK.n(o,HK.dk(c,.12)); o.x.beginPath(); o.x.arc(m,o.dockY,R*i/4+R*.2,Math.PI,0); o.x.stroke(); } HK.poly(o,[m+R*.3,o.dockY,m+R*.3,o.dockY-R*.4,m+R*.6,o.dockY-R*.4,m+R*.6,o.dockY],'#1a2a4a'); } }],
-    ['sled',(o,s,c)=>{ if(!s) return; const x=HK.at(o,.74), y=o.dockY, sc=HF.sc()*.8; /* past the angler, clear of the hut door */
-      if(s===1){ HK.curve(o,x-2*sc,y-.5*sc,x+12*sc,y+.6*sc,x+20*sc,y-4*sc,'#4a4440',1.4*sc); HK.line(o,[x+1*sc,y-.5*sc,x+1*sc,y-3*sc],'#4a4440',1); HK.line(o,[x+15*sc,y-.5*sc,x+15*sc,y-3*sc],'#4a4440',1);
-        HK.block(o,x,y-11*sc,17*sc,8*sc,c); for(let k=1;k<4;k++) HK.line(o,[x+k*17*sc/4,y-11*sc,x+k*17*sc/4,y-3*sc],HK.dk(c,.3),.8); HK.curve(o,x+17*sc,y-9*sc,x+24*sc,y-6*sc,x+26*sc,y,'#c8a878',.9); } /* a box sled: curled runners, slatted box, tow rope */
-      if(s===2){ HK.curve(o,x-1*sc,y,x+14*sc,y+.6*sc,x+22*sc,y-3*sc,'#2a2a30',1.6*sc); HK.poly(o,[x,y-2*sc,x+18*sc,y-2*sc,x+21*sc,y-7*sc,x+12*sc,y-11*sc,x+2*sc,y-10*sc],c); HK.poly(o,[x+12*sc,y-11*sc,x+16*sc,y-16*sc,x+18*sc,y-15*sc,x+16*sc,y-10*sc],v3rgba('#cfe0f4',.7));
-        HK.block(o,x+1*sc,y-13*sc,9*sc,3*sc,'#2a2a30'); HK.rect(o,x-1*sc,y-4*sc,10*sc,3*sc,'#3a3a40'); for(let k=0;k<5;k++) HK.rect(o,x+k*2*sc-1*sc,y-4*sc,1,3*sc,'#5a5a62'); HK.rect(o,x+19*sc,y-8*sc,2*sc,1.4*sc,'#f0e080'); } /* a snowmobile: front ski, body, windshield, seat, track, headlight */
-      if(s===3){ HK.curve(o,x-2*sc,y,x+14*sc,y+.6*sc,x+22*sc,y-5*sc,'#4a3428',1.4*sc); HK.line(o,[x+2*sc,y,x+2*sc,y-6*sc],'#4a3428',1); HK.line(o,[x+14*sc,y,x+14*sc,y-6*sc],'#4a3428',1);
-        o.x.fillStyle=HK.n(o,v3rgba(c,.85)); o.x.beginPath(); o.x.moveTo(x+1*sc,y-6*sc); o.x.quadraticCurveTo(x+8*sc,y-3*sc,x+16*sc,y-6*sc); o.x.lineTo(x+16*sc,y-10*sc); o.x.lineTo(x+1*sc,y-10*sc); o.x.closePath(); o.x.fill(); HK.line(o,[x+1*sc,y-6*sc,x-2*sc,y-17*sc,x+3*sc,y-17*sc],'#4a3428',1.4*sc); } }], /* a dog sled: runners, a basket in the chosen colour, the driver's handlebar */
-    ['seat'],
-    ['stove',(o,s)=>HK.light(o,['stove','potbelly','firering'][s],HK.at(o,.6))]] });
+    ['shanty',(o)=>{ FS.ground(o); FS.skids(o,FS.geo(o)); }],
+    ['walls',(o,s,c)=>FS.walls(o,FS.geo(o),['batten','shiplap','canvas'][s],c)],
+    ['door',(o,s,c)=>BH.door(o,DR(),['plank','dutch','arched'][s],c)],
+    ['windows',(o,s,c)=>BH.windows(o,WN(),['four','round','shutters'][s],c)],
+    ['chimney',(o,s,c)=>FS.chimney(o,FS.geo(o),s,c)],
+    ['roof',(o,s,c)=>FS.roof(o,FS.geo(o),s,c)],
+    ['seat']] }); }
 
 /* 6. Canadian Rockies: the log cabin */
 hfMake('rockies',{ name:'Log cabin', hname:'log cabin', glow:'255,205,130', front:(n,cx)=>rkFront(n,cx), smoke:(n,t)=>rkSmoke(n,t), seatX:()=>HF.pw()-W*.028 /* at the deck's edge, close to the water (director, 2026-11-23: "why would anybody ever fish from that far away") */,
@@ -21419,6 +21454,9 @@ PATCHES.unshift({v:'0.4.9', name:'Work in progress', items:phoneNotes([
 // text changes. Released notes live in notes_release.js.
 const TEST_NOTES={v:'test', label:'Test build · '+(window.DL_BUILD==='ios'?'iPhone':'Android'), name:'0.4.9 test build (newest first)', items:[
   '## New in this build',
+  'Frostbite Lake, redone in its own style: your home is a timber ice shanty on sled skids, with a snow-capped roof and icicles, a stovepipe with smoke and a window that glows at night. Pick the walls, roof, stovepipe, door, windows, gear and seat in Your home.',
+  'Frostbite Lake: snow drifts against the shanty, footprints lead to a tip-up flag over its hole, and a box sled waits beside it.',
+  '## Test build 2026.11.23-0547',
   'Saltmarsh Coast, redone in its own style: your home is a tall saltbox lobster shack at the end of the pier, with a stovepipe, buoys on its wall (or stacked lobster pots, or a net drying on a pole). Pick the siding, roof, door, windows, gear, lamp and seat in Your home.',
   'Saltmarsh Coast: the pier stands on tall tarred pilings with cross bracing, barnacles and weed at the tide line; a ladder goes down to a dory tied at the end, and a gull stands on the mooring post. A bell buoy rocks offshore (its light blinks at night).',
   '## Test build 2026.11.23-0534',
