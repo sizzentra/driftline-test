@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="DL Test iPhone">
 <script>
-window.DL_BUILD='ios'; window.DL_PREVIEW=true; if(/[?&]sweep\b/.test(location.search)){ window.__bootErr=[]; addEventListener("error",function(e){ __bootErr.push(String(e.message||e)+(e.lineno?" (line "+e.lineno+")":"")); }); addEventListener("unhandledrejection",function(e){ __bootErr.push("promise: "+String(e.reason&&e.reason.message||e.reason)); }); window.requestAnimationFrame=function(f){ return setTimeout(function(){ f(performance.now()); },16); }; window.cancelAnimationFrame=function(i){ clearTimeout(i); }; } try{ window.__tOff=/[?&](test|sweep|frozen)\b/.test(location.search)?0:(+(localStorage.getItem("dl-test-toff")||0)||0); }catch(e){ window.__tOff=0; } (function(){ var rn=Date.now.bind(Date); Date.now=function(){ return rn()+window.__tOff; }; })(); if(/[?&]frozen\b/.test(location.search)){ var __fz=20261122; Math.random=function(){ __fz|=0; __fz=__fz+0x6D2B79F5|0; var t=Math.imul(__fz^__fz>>>15,1|__fz); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; var __fc=0, __pn=performance.now.bind(performance); performance.now=function(){ __fc+=0.01; return 100000+__fc; }; Date.now=function(){ return 1795300000000+Math.floor(__fc); }; window.__frozenClock=function(){ return __fc; }; window.requestAnimationFrame=function(){ return 0; }; window.cancelAnimationFrame=function(){}; } window.DL_VERSION='2026.11.23-1827';
+window.DL_BUILD='ios'; window.DL_PREVIEW=true; if(/[?&]sweep\b/.test(location.search)){ window.__bootErr=[]; addEventListener("error",function(e){ __bootErr.push(String(e.message||e)+(e.lineno?" (line "+e.lineno+")":"")); }); addEventListener("unhandledrejection",function(e){ __bootErr.push("promise: "+String(e.reason&&e.reason.message||e.reason)); }); window.requestAnimationFrame=function(f){ return setTimeout(function(){ f(performance.now()); },16); }; window.cancelAnimationFrame=function(i){ clearTimeout(i); }; } try{ window.__tOff=/[?&](test|sweep|frozen)\b/.test(location.search)?0:(+(localStorage.getItem("dl-test-toff")||0)||0); }catch(e){ window.__tOff=0; } (function(){ var rn=Date.now.bind(Date); Date.now=function(){ return rn()+window.__tOff; }; })(); if(/[?&]frozen\b/.test(location.search)){ var __fz=20261122; Math.random=function(){ __fz|=0; __fz=__fz+0x6D2B79F5|0; var t=Math.imul(__fz^__fz>>>15,1|__fz); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; var __fc=0, __pn=performance.now.bind(performance); performance.now=function(){ __fc+=0.01; return 100000+__fc; }; Date.now=function(){ return 1795300000000+Math.floor(__fc); }; window.__frozenClock=function(){ return __fc; }; window.requestAnimationFrame=function(){ return 0; }; window.cancelAnimationFrame=function(){}; } window.DL_VERSION='2026.11.23-1901';
 window.addEventListener('beforeinstallprompt',function(e){ e.preventDefault(); window.__dlInstallPrompt=e; });
 </script>
 </head>
@@ -16144,65 +16144,77 @@ function blossomBridge(x,P,hz){ const a=W*.38, b=W*.48, y=hz+H*.012, h=H*.035, r
    the land by day, at dusk and at night (keyed to see-through sky and water), the lake water, its reflections and six clouds, all in
    src/w_blossom_art.js (made from art/blossom_layers/). The game's own sky shows through the land (its colours for dawn, day, dusk and night,
    stars, sun and moon), the painted clouds drift in it behind the mountains, the lake ripples under the land with its reflections, and the
-   land crossfades between its three lightings. The land is redrawn over the moving water so no water effect ever touches rocks or islands.
-   The drawn scene below stays for the first frames while the picture loads. */
+   land crossfades between its three lightings. Everything painted is drawn every frame by live() (land() leaves the stored scenery empty),
+   so the light changes in fine, overlapping fades instead of the stored scenery's few big steps (director, 2026-11-23: "the image gets blurry
+   during dusk and dawn transitions, and the transitions don't happen in a smooth manner"). The drawn scene stays while the picture loads. */
 const BL_IW=1680, BL_IH=845, BL_WL=358, BL_WT=402, BL_WT0=325; /* the picture's size, its waterline row, the row below the islands and the torii's feet where water effects may start, the top row of the stored lake */
 const BL_IMG=new Image(); BL_IMG.onload=()=>{ BL_IMG.ok=1; V3CACHE=null; V3PREV=null; v3land.job=null; }; BL_IMG.src=BLOSSOM_ART;
 const BL_CLOUDS=[[387,38,578,130,0,2795],[1273,48,370,109,580,2795],[35,184,393,107,952,2795],[780,194,366,100,0,2927],[1087,138,190,43,368,2927],[196,72,158,33,560,2927]]; /* each cloud: where it sits in the sky (x, y, w, h) and where it is stored (x, y) */
-const BL_TREE=[0,0,710,225]; /* the big cherry tree over the top left: drawn live so it can sway */
-const BL_FALL=[1334,239,38,335]; /* the waterfall: centre x, top, width, foot */
+const BL_TREE=[0,0,710,225]; /* the big cherry tree over the top left: it sways */
+const BL_FALL=[1310,236,48,110]; /* the painted waterfall's box: x, y, w, h */
 const BL_FLOWERS=[[0,210,668,845,0],[650,730,712,782,2.9],[1100,1260,770,845,2.1],[1270,1345,700,800,1.4],[1560,1680,640,845,3.7]]; /* shore flowers and grass: x from-to, y from-to, phase */
+const BL_REFL_DX=12; /* the reflections layer sits 12 px left of what it mirrors (measured on the torii and bridge; director: "reflections don't line up") */
 /* the speeds and strengths of the motion, in one place for tuning (ChatGPT's animation notes, 2026-11-23: subtle, natural, never a moving wallpaper) */
-const BL_MOTION={ripple:1.2, rippleSpeed:1, cloudSpeed:.0045, sway:1.6, flowers:2};
+const BL_MOTION={ripple:1.2, rippleSpeed:1, cloudSpeed:.0045, sway:1.6, flowers:2, fall:1, fade:1.3, steps:32};
 /* picture pixels to screen (X*s+ox, Y*s+oy): it always covers the screen with its waterline on the horizon; where it is wider than the screen
    the left side goes (the game's home stands there) and the torii on the right stays */
 function blMap(hz){ const s=Math.max(W/BL_IW,(H-hz)/(BL_IH-BL_WL),hz/BL_WL); return {s,ox:W-BL_IW*s,oy:hz-BL_WL*s}; }
 const blDawn = () => { const p=phase(); return p>.75||p<.2; }; /* the morning side of the clock (dawn and dusk share one palette) */
 const blCalm = () => V3PAR.rm.matches; /* reduced motion: the scene holds still */
+const blKey = P => { const n=BL_MOTION.steps; return Math.round(P.night*n)+'|'+Math.round(P.d*n)+'|'+Math.round(P.gloom*n/2)+'|'+(blDawn()?1:0); }; /* the light level the painted layers are built for */
 /* the palette's colour over its daytime colour, as a multiply colour (how much darker and bluer this light is than day) */
 function blShade(P,k){ const a=hex2rgb(rgb2hex(P[k])), b=hex2rgb(rgb2hex(V3PAL.blossom.day[k])); return a.map((v,i)=>Math.min(1,v/Math.max(8,b[i]))); }
 const blRgb = f => 'rgb('+f.map(v=>Math.round(v*255)).join(',')+')';
+/* a painted layer for the light on screen, built when the light level changes and faded in over the last one (never a jump) */
+function blFaded(slot,P,w,h,build){ const S=blFaded[slot]||(blFaded[slot]={}), key=blKey(P), now=performance.now(), away=now-(S.used||-1e9)>500; S.used=now;
+  if(S.key!==key){ const cv=S.free||document.createElement('canvas'); S.free=null; if(S.cur){ if(S.prev) S.free=S.prev; if(away){ S.free=S.free||S.cur; S.prev=null; } else { S.prev=S.cur; S.t0=now; } } cv.width=w; cv.height=h; build(cv.getContext('2d'),P); S.cur=cv; S.key=key; } /* back after a while (a new arrival, or another screen): the right light at once; fades only while you watch */
+  else if(away&&S.prev){ S.free=S.free||S.prev; S.prev=null; }
+  if(!S.prev) return S.cur; const k=(now-S.t0)/1000/BL_MOTION.fade; if(k>=1){ S.free=S.free||S.prev; S.prev=null; return S.cur; }
+  const m=S.mix||(S.mix=document.createElement('canvas')); if(m.width!==w||m.height!==h){ m.width=w; m.height=h; } const x=m.getContext('2d'); x.clearRect(0,0,w,h); x.drawImage(S.prev,0,0); x.globalAlpha=v3s(k); x.drawImage(S.cur,0,0); x.globalAlpha=1; return m; }
 /* the land in this light: day, then shaded toward the light (so any petal gaps of the dusk and night paintings stay dark), then the dusk and
-   night paintings over it; dawn borrows half the dusk painting with a cool pink light; weather greys it. Kept per light level. */
-function blLand(P){ const dawn=blDawn(), key=P.key+'|'+dawn; let c=blLand.c; if(c&&c.key===key) return c.cv;
-  c=blLand.c={key,cv:(c&&c.cv)||document.createElement('canvas')}; const cv=c.cv; cv.width=BL_IW; cv.height=BL_IH; const x=cv.getContext('2d'), n=P.night, d=P.d*(dawn?.55:1);
-  const mask=()=>{ x.globalCompositeOperation='destination-in'; x.drawImage(BL_IMG,0,0,BL_IW,BL_IH,0,0,BL_IW,BL_IH); x.globalCompositeOperation='source-over'; };
+   night paintings over it; dawn borrows half the dusk painting with a cool pink light; weather greys it */
+function blBuildLand(x,P){ const dawn=blDawn(), n=P.night, d=P.d*(dawn?.55:1), mask=()=>{ x.globalCompositeOperation='destination-in'; x.drawImage(BL_IMG,0,0,BL_IW,BL_IH,0,0,BL_IW,BL_IH); x.globalCompositeOperation='source-over'; };
   x.drawImage(BL_IMG,0,0,BL_IW,BL_IH,0,0,BL_IW,BL_IH);
-  if(n>.01||d>.01){ const f=blShade(P,'far'); x.globalCompositeOperation='multiply'; x.fillStyle=blRgb(f); x.fillRect(0,0,BL_IW,BL_IH); mask(); }
+  if(n>.01||d>.01){ x.globalCompositeOperation='multiply'; x.fillStyle=blRgb(blShade(P,'far')); x.fillRect(0,0,BL_IW,BL_IH); mask(); }
   if(d>.01){ x.globalAlpha=Math.min(1,d); x.drawImage(BL_IMG,0,845,BL_IW,BL_IH,0,0,BL_IW,BL_IH); }
   if(n>.01){ x.globalAlpha=Math.min(1,n); x.drawImage(BL_IMG,0,1690,BL_IW,BL_IH,0,0,BL_IW,BL_IH); } x.globalAlpha=1;
   if(dawn&&P.d>.02){ x.globalCompositeOperation='soft-light'; x.fillStyle='rgba(255,176,206,'+(.45*P.d)+')'; x.fillRect(0,0,BL_IW,BL_IH); mask(); }
-  if(P.gloom>.02){ x.globalCompositeOperation='multiply'; x.fillStyle=blRgb([1,1,1].map(()=>1-.28*P.gloom)); x.fillRect(0,0,BL_IW,BL_IH); mask(); }
-  return cv; }
-/* the lake in this light: the painted water with its reflections (fainter at night and softer at dusk), shaded like the palette's water, warmed
-   at dusk, pink at dawn, catching the sky's horizon colour near the far shore. Half size (it is soft and always rippling). */
-function blLake(P){ const dawn=blDawn(), key=P.key+'|'+dawn; let c=blLake.c; if(c&&c.key===key) return c.cv;
-  c=blLake.c={key,cv:(c&&c.cv)||document.createElement('canvas')}; const cv=c.cv; cv.width=840; cv.height=260; const x=cv.getContext('2d'), n=P.night;
-  x.drawImage(BL_IMG,0,2535,840,260,0,0,840,260); x.globalAlpha=(.95-.45*n)*(1-.3*P.d); x.drawImage(BL_IMG,840,2535,840,260,0,0,840,260); x.globalAlpha=1;
+  if(P.gloom>.02){ x.globalCompositeOperation='multiply'; x.fillStyle=blRgb([1,1,1].map(()=>1-.28*P.gloom)); x.fillRect(0,0,BL_IW,BL_IH); mask(); } }
+/* the lake in this light: the painted water with its reflections (fainter at night and softer at dusk), shaded like the palette's water, a soft
+   moonlit lift at night, warmed at dusk, pink at dawn, catching the sky's horizon colour near the far shore. Half size (soft, always rippling). */
+function blBuildLake(x,P){ const dawn=blDawn(), n=P.night;
+  x.drawImage(BL_IMG,0,2535,840,260,0,0,840,260); x.globalAlpha=(.95-.45*n)*(1-.3*P.d); x.drawImage(BL_IMG,840,2535,840,260,BL_REFL_DX/2,0,840,260); x.globalAlpha=1;
   const f=blShade(P,'wMid'); if(f.some(v=>v<.995)){ x.globalCompositeOperation='multiply'; x.fillStyle=blRgb(f); x.fillRect(0,0,840,260); }
-  if(n>.05){ x.globalCompositeOperation='screen'; x.fillStyle='rgba(70,92,150,'+(.24*n)+')'; x.fillRect(0,0,840,260); /* a soft moonlit lift, so the reflections still show */ x.globalCompositeOperation='saturation'; x.fillStyle='rgba(128,128,128,'+(.35*n)+')'; x.fillRect(0,0,840,260); }
+  if(n>.05){ x.globalCompositeOperation='screen'; x.fillStyle='rgba(70,92,150,'+(.24*n)+')'; x.fillRect(0,0,840,260); x.globalCompositeOperation='saturation'; x.fillStyle='rgba(128,128,128,'+(.35*n)+')'; x.fillRect(0,0,840,260); }
   if(P.d>.02){ x.globalCompositeOperation='soft-light'; x.fillStyle=dawn?'rgba(255,180,210,'+(.45*P.d)+')':'rgba(255,140,90,'+(.45*P.d)+')'; x.fillRect(0,0,840,260); }
   x.globalCompositeOperation='soft-light'; const sg=x.createLinearGradient(0,0,0,150); sg.addColorStop(0,v3rgba(P.bot,.55)); sg.addColorStop(1,v3rgba(P.bot,0)); x.fillStyle=sg; x.fillRect(0,0,840,150); /* the sky's colour on the far water */
   if(P.gloom>.02){ x.globalCompositeOperation='multiply'; x.fillStyle=blRgb([1,1,1].map(()=>1-.3*P.gloom)); x.fillRect(0,0,840,260); }
-  x.globalCompositeOperation='source-over'; return cv; }
+  x.globalCompositeOperation='source-over'; }
 /* the clouds in this light: white by day, pink at dawn, peach at dusk, slate blue at night, grey in bad weather */
-function blCloudArt(P){ const dawn=blDawn(), key=P.key+'|'+dawn; let c=blCloudArt.c; if(c&&c.key===key) return c.cv;
-  c=blCloudArt.c={key,cv:(c&&c.cv)||document.createElement('canvas')}; const cv=c.cv; cv.width=BL_IW; cv.height=232; const x=cv.getContext('2d');
-  x.drawImage(BL_IMG,0,2795,BL_IW,232,0,0,BL_IW,232); let col=mix('#ffffff',dawn?'#ffc8d8':'#ffb08c',Math.min(1,P.d*1.2)); col=mix(col,'#4a5482',P.night); col=mix(col,'#9aa0aa',P.gloom*.7);
-  x.globalCompositeOperation='multiply'; x.fillStyle=col; x.fillRect(0,0,BL_IW,232); x.globalCompositeOperation='destination-in'; x.drawImage(BL_IMG,0,2795,BL_IW,232,0,0,BL_IW,232); x.globalCompositeOperation='source-over'; return cv; }
+function blBuildClouds(x,P){ const dawn=blDawn(); x.drawImage(BL_IMG,0,2795,BL_IW,232,0,0,BL_IW,232); let col=mix('#ffffff',dawn?'#ffc8d8':'#ffb08c',Math.min(1,P.d*1.2)); col=mix(col,'#4a5482',P.night); col=mix(col,'#9aa0aa',P.gloom*.7);
+  x.globalCompositeOperation='multiply'; x.fillStyle=col; x.fillRect(0,0,BL_IW,232); x.globalCompositeOperation='destination-in'; x.drawImage(BL_IMG,0,2795,BL_IW,232,0,0,BL_IW,232); x.globalCompositeOperation='source-over'; }
+/* rows of a stored picture redrawn on screen in thin strips, each shifted sideways by fn(screen y): the ripples. The picture's pixel (X, Y)
+   is at (X*kx, (Y-oy0)*ky) in C; x0, y0, w, h are picture pixels; st is the strip height on screen. */
+function blRows(C,M,kx,ky,oy0,x0,y0,w,h,st,fn){ const s=M.s, X0=M.ox+x0*s, Y0=Math.max(0,Math.floor(M.oy+y0*s)), Y1=Math.min(H,M.oy+(y0+h)*s), cy=C.height;
+  for(let y=Y0;y<Y1;y+=st){ const iy=(y-M.oy)/s, sy=(iy-oy0)*ky, sh=st/s*ky; if(sy<0||sy>=cy) continue; g.drawImage(C,x0*kx,sy,w*kx,Math.min(sh,cy-sy),X0+fn(y,iy),y,w*s,st); } }
 /* a piece of the land (picture pixels x0, y0, w, h) drawn leaning from its foot, its top shifted amp screen pixels: one smooth skew, no seams */
 function blLean(C,M,x0,y0,w,h,amp){ const s=M.s; g.save(); g.translate(M.ox+x0*s,M.oy+(y0+h)*s); if(amp) g.transform(1,0,-amp/(h*s),1,0,0); g.drawImage(C,x0,y0,w,h,0,-h*s,w*s,h*s); g.restore(); }
-/* rows of a stored picture redrawn on screen in thin strips, each shifted sideways by fn(screen y): ripples, sway and nodding. The picture's
-   pixel (X, Y) is at (X*kx, (Y-oy0)*ky) in C; x0, y0, w, h are picture pixels; st is the strip height on screen. */
-function blRows(C,M,kx,ky,oy0,x0,y0,w,h,st,fn){ const s=M.s, X0=M.ox+x0*s, Y0=Math.max(0,M.oy+y0*s), Y1=Math.min(H,M.oy+(y0+h)*s), cy=C.height;
-  for(let y=Y0;y<Y1;y+=st){ const iy=(y-M.oy)/s, sy=(iy-oy0)*ky, sh=st/s*ky; if(sy<0||sy>=cy) continue; g.drawImage(C,x0*kx,sy,w*kx,Math.min(sh,cy-sy),X0+fn(y,iy),y,w*s,st); } }
-function blKoi(x,y,L,dir,t,i,a){ const w=Math.sin(t*4)*.18; g.save(); g.translate(x,y); g.scale(dir,1); g.globalAlpha=a; g.fillStyle=['#f2742e','#f4f0e8','#e8a030','#f05a3a'][i%4]; g.beginPath(); g.ellipse(0,0,L*.5,L*.17,0,0,7); g.fill();
-  g.beginPath(); g.moveTo(-L*.42,0); g.quadraticCurveTo(-L*.62,-L*(.2+w),-L*.78,-L*(.18+w)); g.quadraticCurveTo(-L*.66,0,-L*.78,L*(.18-w)); g.quadraticCurveTo(-L*.62,L*(.2-w),-L*.42,0); g.fill(); /* the tail, waving */
-  g.fillStyle=i%2?'#e84a2a':'#ffffff'; g.beginPath(); g.ellipse(L*.1,-L*.03,L*.16,L*.08,0,0,7); g.fill(); g.beginPath(); g.ellipse(-L*.18,L*.02,L*.1,L*.06,0,0,7); g.fill(); /* its patches */
-  g.fillStyle=v3rgba('#ffffff',.5); g.beginPath(); g.ellipse(L*.05,L*.14,L*.12,L*.04,.5,0,7); g.ellipse(L*.05,-L*.14,L*.12,L*.04,-.5,0,7); g.fill(); g.restore(); g.globalAlpha=1; } /* fins */
-/* life in the water, drawn under the land (koi, glints, a leaping fish), and life in the air over it (butterflies, dragonflies, birds, fireflies) */
+/* the waterfall flows (director, 2026-11-23: the moving pieces showed each time they looped, and stuck up above the lip): a seamless streak
+   texture scrolls down at two speeds, cut to the painted falling water's own shape, so nothing ever shows outside it or repeats a visible piece */
+function blFallMask(){ if(blFallMask.c) return blFallMask.c; const [fx,fy,fw,fh]=BL_FALL, c=document.createElement('canvas'); c.width=fw; c.height=fh; const x=c.getContext('2d'); x.drawImage(BL_IMG,fx,fy,fw,fh,0,0,fw,fh);
+  const D=x.getImageData(0,0,fw,fh), d=D.data; for(let i=0;i<d.length;i+=4){ const r=d[i],gg=d[i+1],b=d[i+2], wet=b>150&&b>=r+8&&gg>140||(r>200&&gg>200&&b>200); d[i]=d[i+1]=d[i+2]=255; d[i+3]=wet?255:0; } x.putImageData(D,0,0); return blFallMask.c=c; }
+function blFallTex(){ if(blFallTex.c) return blFallTex.c; const c=document.createElement('canvas'); c.width=48; c.height=128; const x=c.getContext('2d'), r=v3rng(77);
+  for(let i=0;i<46;i++){ const sx=r()*48, sy=r()*128, len=10+r()*36, w=.6+r()*1.6, a=.25+r()*.5; x.fillStyle='rgba(255,255,255,'+a+')'; for(const o of [-128,0,128]) x.fillRect(sx,sy+o,w,len); } return blFallTex.c=c; } /* drawn three times a tile apart, so it repeats without a seam */
+function blFall(M,P,t){ const [fx,fy,fw,fh]=BL_FALL, s=M.s, dim=1-P.night*.6, T=blFall.c||(blFall.c=document.createElement('canvas')); T.width=fw*2; T.height=fh*2; const x=T.getContext('2d'), tex=blFallTex(), sp=BL_MOTION.fall;
+  for(const [v,a,sc] of [[70,.55,1],[120,.4,.75]]){ const off=((t*v*sp)%(128*sc)); x.globalAlpha=a; x.save(); x.scale(sc,sc); x.fillStyle=x.createPattern(tex,'repeat'); x.translate(0,off/sc); x.fillRect(0,-128,fw*2/sc,fh*2/sc+128); x.restore(); } x.globalAlpha=1;
+  x.globalCompositeOperation='destination-in'; x.drawImage(blFallMask(),0,0,fw*2,fh*2); x.globalCompositeOperation='source-over';
+  g.globalAlpha=dim; g.drawImage(T,M.ox+fx*s,M.oy+fy*s,fw*s,fh*s); g.globalAlpha=1;
+  const cx=M.ox+(fx+fw*.5)*s, bt=M.oy+(fy+fh*.9)*s, w=fw*.8*s;
+  for(let i=0;i<9;i++){ const q=((t*.5+i/9)%1), dx=(i%2?1:-1)*(.2+q*.9)*w*.8*(.5+((i*3)%4)*.18), r=w*(.12+q*.3); g.fillStyle=v3rgba('#ffffff',(.4*(1-q))*dim); g.beginPath(); g.ellipse(cx+dx*.6,bt-r*.2-q*w*.15,r,r*.55,0,0,7); g.fill(); } /* foam boiling out at the foot */
+  v3glow(g,cx,bt-w*.1,w*1.4,'rgba(235,245,255,.8)',(.22+.06*Math.sin(t*1.7))*dim); } /* and its mist */
+/* life in the water, drawn under the land (glints, a leaping fish), and life in the air over it (butterflies, dragonflies, birds, fireflies);
+   no koi (director, 2026-11-23: "the koi fish needs to be removed") */
 function blWaterLife(P,t,M,wt,sun){ const s=M.s, X=v=>M.ox+v*s, Y=v=>M.oy+v*s;
-  for(let i=0;i<4;i++){ const per=46+i*9, q=((t+i*17)%per)/per, dir=i%2?1:-1, px=dir>0?-80+q*(BL_IW+160):BL_IW+80-q*(BL_IW+160), x=X(px), y=Y(610+i*16+Math.sin(t*.5+i*2)*8), L=(26+i*3)*s; if(x>-L*3&&x<W+L*3) blKoi(x,y,L,dir,t+i,i,.72*(1-P.night*.5)); } /* koi under the clear water */
   if(gfxHigh()&&sun.vis>.1) for(let i=0;i<22;i++){ const per=2.6+(i%5)*.5, q=((t+i*.83)%per)/per, r=v3rng(Math.floor((t+i*.83)/per)*7+i*101), x=X(300+r()*1330), y=Y(410+r()*260); if(y<wt) continue; g.fillStyle=v3rgba('#ffffff',Math.sin(q*Math.PI)*.7*sun.vis); g.fillRect(x-3*s,y,6*s,Math.max(1,s)); } /* glints on the water */
   { const per=21, q=(t%per)/per, r=v3rng(Math.floor(t/per)*31+7), fx=X(570+r()*860), fy=Y(430+r()*150), L=14*s; /* now and then a fish leaps, and its rings spread */
     if(q<.06){ const e=q/.06; g.save(); g.translate(fx+(e-.5)*L*2,fy-Math.sin(e*Math.PI)*L*1.4); g.rotate((e-.5)*2.2); g.fillStyle=v3rgba(mix('#c8d0d8','#2a3048',P.night*.6),.9); g.beginPath(); g.ellipse(0,0,L*.5,L*.16,0,0,7); g.fill(); g.beginPath(); g.moveTo(-L*.45,0); g.lineTo(-L*.72,-L*.16); g.lineTo(-L*.72,L*.16); g.fill(); g.restore(); }
@@ -16225,8 +16237,7 @@ function blToro(x,y,s,a,t,i){ if(a<.02) return; v3glow(g,x,y-s*1.1,s*4.5,'rgba(2
   g.fillRect(x-s*1.05,y-s*2.3,s*2.1,s*.22); g.fillRect(x-s*.7,y-s*2.45,s*1.4,s*.16); g.globalAlpha=1; } /* the small roof */
 V3SCENES.blossom={
   land(x,P,hz,cnv){
-    if(BL_IMG.ok){ const M=blMap(hz), s=M.s, [tx,ty,tw,th]=BL_TREE; x.drawImage(blLake(P),0,0,840,260,M.ox,M.oy+BL_WT0*s,BL_IW*s,(BL_IH-BL_WT0)*s); /* the still lake (live() ripples it) */
-      x.save(); x.beginPath(); x.rect(-W,-H,W*3,H*3); x.rect(M.ox+tx*s,M.oy+ty*s,tw*s,th*s); x.clip('evenodd'); x.drawImage(blLand(P),M.ox,M.oy,BL_IW*s,BL_IH*s); x.restore(); return; } /* the land, less the big tree (live() draws it, swaying); the sky stays see-through for the game's sky, sun, moon, stars and the painted clouds */
+    if(BL_IMG.ok) return; /* the layered painting is drawn every frame by live() (smooth light changes), so the stored scenery stays empty and the game's sky shows through */
     waFuji(x,P,hz);
     /* no recycled mountain range: Fuji alone behind hazy hills thick with distant blossom (a cherry blossom forest) */
     blossomForest(x,P,hz); blossomFalls(x,P,hz); /* the reference layout: ridges, forested hills, the waterfall and its pavilion */
@@ -16251,9 +16262,10 @@ V3SCENES.blossom={
     /* side by side with a little water between them, never on top of each other (director: they covered each other) */
     { const r=v3rng(41); for(const [cx,cy,n] of [[.42,.06,3],[.62,.1,2],[.7,.3,3],[.74,.44,4],[.34,.48,4]]){ const k=cy*H/(H-hz), s0=H*(.008+k*.04); let px=W*cx-s0*1.5*(n-1);
       for(let i=0;i<n;i++){ const s=s0*(.75+r()*.35), yy=hz+H*cy+(i%2?1:-1)*s0*.35, fl=r()<.75?(r()<.85?'#f4a0c0':'#fff4f8'):null; waLily(x,px,yy,s,P,500+i+Math.round(cx*100),fl); px+=s0*3.1; } } } },
-  live(P,t,hz,sun){ const FX=S.settings.effects, PT=BL_IMG.ok, M=blMap(hz), s=M.s, wt=PT?Math.max(hz,M.oy+BL_WT*s):hz, calm=blCalm(), hi=gfxHigh(), A=BL_MOTION, lk=PT?blLake(P):null, ld=PT?blLand(P):null;
-    if(PT){ if(calm) g.drawImage(lk,0,(BL_WL-8-BL_WT0)*.5,840,(BL_IH-BL_WL+8)*.5,M.ox,M.oy+(BL_WL-8)*s,BL_IW*s,(BL_IH-BL_WL+8)*s);
-      else { const w0=M.oy+BL_WL*s, Hh=Math.max(1,H-w0); blRows(lk,M,.5,.5,BL_WT0,0,BL_WL-8,BL_IW,BL_IH-BL_WL+8,hi?2:3,(y,iy)=>{ const k=clamp((y-w0)/Hh,0,1), T=t*A.rippleSpeed; return (Math.sin(T*1.1+iy*.11)*(.35+k*1.4)+Math.sin(T*.63+iy*.047+1.7)*.5+Math.sin(T*1.9+iy*.31)*.25*k)*s*A.ripple; }); } } /* the lake and its reflections ripple, slow and uneven, more toward you */
+  live(P,t,hz,sun){ const FX=S.settings.effects, PT=BL_IMG.ok, M=blMap(hz), s=M.s, wt=PT?Math.max(hz,M.oy+BL_WT*s):hz, calm=blCalm(), hi=gfxHigh(), A=BL_MOTION;
+    const ld=PT?blFaded('land',P,BL_IW,BL_IH,blBuildLand):null, lk=PT?blFaded('lake',P,840,260,blBuildLake):null;
+    if(PT){ if(calm) g.drawImage(lk,0,0,840,260,M.ox,M.oy+BL_WT0*s,BL_IW*s,(BL_IH-BL_WT0)*s);
+      else { const w0=M.oy+BL_WL*s, Hh=Math.max(1,H-w0); blRows(lk,M,.5,.5,BL_WT0,0,BL_WT0,BL_IW,BL_IH-BL_WT0,hi?2:3,(y,iy)=>{ const k=clamp((y-w0)/Hh,0,1), T=t*A.rippleSpeed; return (Math.sin(T*1.1+iy*.11)*(.35+k*1.4)+Math.sin(T*.63+iy*.047+1.7)*.5+Math.sin(T*1.9+iy*.31)*.25*k)*s*A.ripple; }); } } /* the lake and its reflections ripple, slow and uneven, more toward you */
     v3glitter(P,t,wt,sun); /* water effects start below the painted islands (director: "some water effects appear on land") */
     // petals resting on the lake, drifting slowly with the breeze (smaller and flatter toward the far shore)
     for(let i=0,n=gfxHigh()?30:18;i<n;i++){ const y=wt+H*(.015+((i*.377)%1)*.75), k=(y-hz)/(H-hz), x=((W*((i*.618)%1)+t*W*(.003+(i%3)*.0015)*(1+k))%(W*1.05))-W*.02, s2=1+k*3.2;
@@ -16268,28 +16280,20 @@ V3SCENES.blossom={
     if(P.night>.3){ if(!PT) for(const px of WA_TORO) v3glow(g,W*px,hz-H*.006-H*.018,H*.025,'rgba(255,190,110,.9)',.6*P.night);
       for(let i=0;i<5;i++){ const q=((t*.01+i*.2)%1), x=W*(-.05+q*1.1) /* in from beyond the left edge and out past the right, never popping up mid-lake (director) */, y=wt+H*(.03+i*.04)+Math.sin(t*.8+i)*2, s2=H*.005*(1+(y-hz)/(H-hz)*2.2); blToro(x,y,s2,Math.min(1,(P.night-.3)/.3),t,i); } }
     if(PT){ blWaterLife(P,t,M,wt,sun);
-      const nod=hi&&!calm; g.save(); if(nod){ g.beginPath(); g.rect(-W,-H,W*3,H*3); for(const [a,b,top,bot] of BL_FLOWERS) g.rect(M.ox+a*s,M.oy+top*s,(b-a)*s,(bot-top)*s); g.clip('evenodd'); }
-      g.drawImage(ld,0,BL_WL-8,BL_IW,BL_IH-BL_WL+8,M.ox,M.oy+(BL_WL-8)*s,BL_IW*s,(BL_IH-BL_WL+8)*s); g.restore(); /* the land again over the moving water: islands, rocks and shore flowers stay solid */
-      if(nod) for(const [a,b,top,bot,ph] of BL_FLOWERS) blLean(ld,M,a,top,b-a,bot-top,(Math.sin(t*1.5+ph)+.4*Math.sin(t*.55+ph*2))*A.flowers*s); /* the flowers nod, heads more than roots */
-      { const [tx,ty,tw,th]=BL_TREE; blLean(ld,M,tx,ty,tw,th,nod?(Math.sin(t*.9)+.35*Math.sin(t*.37+1.2))*A.sway*s:0); } /* the big tree sways, its tips most, its trunk not at all */
-      /* the waterfall (director, 2026-11-23: "needs a more realistic animation"): the painted falling water flows down, with water sheets sliding
-         and speeding up as they fall, foam boiling out at the foot and a drifting mist */
-      { const [cx,ft,cw,fb]=BL_FALL, fx=M.ox+cx*s, top=M.oy+ft*s, bt=M.oy+fb*s, fw=cw*s, dim=1-P.night*.6, hh=bt-top; g.save(); g.beginPath(); g.rect(fx-fw/2,top,fw,hh); g.clip();
-        { const b0=ft+(fb-ft)*.06, bh=(fb-ft)*.86, off=(t*hh*.85)%(bh*s); for(const [o2,a] of [[off-bh*s,1],[off,1],[off-bh*s*.5,.45],[off+bh*s*.5,.45]]){ g.globalAlpha=a; g.drawImage(ld,cx-cw/2,b0,cw,bh,fx-fw/2,M.oy+b0*s+o2,fw,bh*s); } g.globalAlpha=1; }
-        for(let i=0;i<16;i++){ const lane=((i*7)%16)/16, sp=.55+((i*5)%7)*.07, q=((t*sp+i*.37)%1), e=q*q, yy=top+e*hh*1.25-hh*.15, len=hh*(.08+e*.22), w=fw*(.04+((i*3)%5)*.012), a=(.25+((i*11)%5)*.08)*dim*(1-q*.4);
-          g.fillStyle=v3rgba('#ffffff',a); g.fillRect(fx-fw/2+lane*fw,yy,w,len); g.fillStyle=v3rgba('#cfe8ff',a*.6); g.fillRect(fx-fw/2+lane*fw+w,yy+len*.2,w*.6,len*.7); }
-        g.restore();
-        for(let i=0;i<9;i++){ const q=((t*.5+i/9)%1), dx=(i%2?1:-1)*(.2+q*.9)*fw*.8*(.5+((i*3)%4)*.18), r=fw*(.12+q*.3); g.fillStyle=v3rgba('#ffffff',(.45*(1-q))*dim); g.beginPath(); g.ellipse(fx+dx*.6,bt-r*.2-q*fw*.15,r,r*.55,0,0,7); g.fill(); }
-        v3glow(g,fx,bt-fw*.1,fw*1.4,'rgba(235,245,255,.8)',(.25+.08*Math.sin(t*1.7))*dim); }
+      /* the land over the moving water and in front of the sky: the swaying tree and the nodding flowers are left out here and drawn leaning,
+         each a few pixels bigger than its gap so no seam can show (director, 2026-11-23: "a weird line in this mountain") */
+      const nod=hi&&!calm, cut=(x0,y0,w,h)=>g.rect(M.ox+x0*s,M.oy+y0*s,w*s,h*s), [tx,ty,tw,th]=BL_TREE;
+      g.save(); g.beginPath(); g.rect(-W,-H,W*3,H*3); cut(tx,ty,tw,th); if(nod) for(const [a,b,top,bot] of BL_FLOWERS) cut(a,top,b-a,bot-top); g.clip('evenodd'); g.drawImage(ld,M.ox,M.oy,BL_IW*s,BL_IH*s); g.restore();
+      if(nod) for(const [a,b,top,bot,ph] of BL_FLOWERS){ const x0=Math.max(0,a-3), y0=top-3, x1=Math.min(BL_IW,b+3), y1=Math.min(BL_IH,bot); blLean(ld,M,x0,y0,x1-x0,y1-y0,(Math.sin(t*1.5+ph)+.4*Math.sin(t*.55+ph*2))*A.flowers*s); } /* the flowers nod, heads more than roots */
+      blLean(ld,M,tx,ty,Math.min(BL_IW,tw+4),th+4,nod?(Math.sin(t*.9)+.35*Math.sin(t*.37+1.2))*A.sway*s:0); /* the big tree sways, its tips most, its trunk not at all */
+      blFall(M,P,t);
       if(P.night>.05) for(const wy of [170,186,204,220]) v3glow(g,M.ox+1390*s,M.oy+wy*s,H*.016,'rgba(255,200,120,.9)',.7*P.night); /* the pagoda's windows */
       blAirLife(P,t,M); }
     else { const fx=W*.7, top=hz-H*.144, bt=hz, fw=W*.018; g.fillStyle=v3rgba('#ffffff',.6*(1-P.night*.65)); for(let i=0;i<7;i++){ const q=((t*.9+i/7)%1), yy=top+q*(bt-top); g.fillRect(fx-fw/2+i*fw/7,yy,1.5,H*.016); } }
-    if(FX) for(let i=0,n=gfxHigh()?22:12;i<n;i++){ const per=9+(i%5), q=((t+i*1.7)%per)/per, x=W*(((i*.137)+q*.25)%1), y=H*.05+q*H*.85+Math.sin(t*1.3+i)*6; if(y>H*.97) continue; wa.petal(g,x,y,2.6,t*2+i,i%3?'rgba(255,190,210,.85)':'rgba(255,230,240,.9)'); } /* petals falling from the trees */
-    // now and then a gust carries a swirl of petals across the lake
-    if(FX){ const q=t%47; if(q<7){ const e=q/7; for(let i=0;i<120;i++){ const u=i/120, x=-W*.1+(e*1.4-u*.16)*W*1.1+Math.cos(u*13+t*3)*W*.02, y=hz*.95+Math.sin(u*13+t*3)*H*.04+u*H*.08; /* a tight swirl, so it reads as one gust */ /* low over the water, where it shows: over the giant pink trees it vanished (map QC) */ if(x<-10||x>W+10) continue; wa.petal(g,x,y,5.2,t*4+i,i%3?'rgba(255,186,212,.9)':'rgba(255,214,230,.9)'); } } } }, /* pink, so the swirl never reads as little white fish */
+    if(FX) for(let i=0,n=gfxHigh()?22:12;i<n;i++){ const per=9+(i%5), q=((t+i*1.7)%per)/per, x=W*(((i*.137)+q*.25)%1), y=H*.05+q*H*.85+Math.sin(t*1.3+i)*6; if(y>H*.97) continue; wa.petal(g,x,y,2.6,t*2+i,i%3?'rgba(255,190,210,.85)':'rgba(255,230,240,.9)'); } }, /* petals falling from the trees (the petal gust is gone: director, 2026-11-23, no moment for now) */
   /* the painted clouds drift behind the land, the big ones slowest, each at its own pace, coloured for the time of day */
   get noClouds(){ return !!BL_IMG.ok; },
-  sky(P,t,hz){ if(!BL_IMG.ok) return; const M=blMap(hz), s=M.s, c=blCloudArt(P), calm=blCalm(); g.globalAlpha=(1-.25*P.night)*(1-P.gloom*.2);
+  sky(P,t,hz){ if(!BL_IMG.ok) return; const M=blMap(hz), s=M.s, c=blFaded('clouds',P,BL_IW,232,blBuildClouds), calm=blCalm(); g.globalAlpha=(1-.25*P.night)*(1-P.gloom*.2);
     BL_CLOUDS.forEach(([sx,sy,w,h,ax,ay],i)=>{ const sw=w*s, sh=h*s, v=calm?0:W*BL_MOTION.cloudSpeed*(1.25-.55*w/578)*(i%2?1:.82), span=W+sw*2, x=(((M.ox+sx*s+sw+t*v)%span)+span)%span-sw, y=M.oy+sy*s+(calm?0:Math.sin(t*.05+i*1.7)*s*1.5); g.drawImage(c,ax,ay-2795,w,h,x,y,sw,sh); }); g.globalAlpha=1; },
   /* dawn is cooler and pinker than dusk (they share one palette) */
   skyBack(P,t,hz){ if(!BL_IMG.ok||!blDawn()||P.d<.02) return; const gr=g.createLinearGradient(0,0,0,hz); gr.addColorStop(0,'rgba(190,170,230,0)'); gr.addColorStop(.55,'rgba(255,190,215,'+(.28*P.d)+')'); gr.addColorStop(1,'rgba(255,214,200,'+(.5*P.d)+')'); g.fillStyle=gr; g.fillRect(-W,0,W*3,hz+1); },
@@ -22135,6 +22139,10 @@ PATCHES.unshift({v:'0.4.9', name:'Work in progress', items:phoneNotes([
 // text changes. Released notes live in notes_release.js.
 const TEST_NOTES={v:'test', label:'Test build · '+(window.DL_BUILD==='ios'?'iPhone':'Android'), name:'0.4.9 test build (newest first)', items:[
   '## New in this build',
+  'Cherry Blossom Lake: the light now changes smoothly through dawn and dusk, with no blur or sudden steps.',
+  'Cherry Blossom Lake: the reflections line up with what they mirror, the waterfall flows without visible repeating pieces and stays inside its painted water, and the line across a hill is gone.',
+  'Cherry Blossom Lake: the koi and the swirling ribbon of petals are gone.',
+  '## Test build 2026.11.23-1827',
   'Cherry Blossom Lake now uses a new layered painting: clouds drift slowly behind the mountains, the lake and its reflections ripple, the big cherry tree sways and the shore flowers nod.',
   'The scene changes properly with the time of day: a cool pink dawn, a bright day, a warm dusk with peach clouds and pink reflections, and a moonlit night where the hills, trees and Fuji are relit in blue and the water darkens.',
   'The sky, sun, moon and stars now show behind the painted mountains and trees, and the water picks up the colour of the sky.',
@@ -23340,7 +23348,7 @@ const MAP_STD={
   ember:{m:[45,2,11], life:['geyser','ravens','moths','lava bombs','embers'], night:['moths','embers']},
   starfall:{m:null, life:['star whale','lanterns','star-blossoms','floating islands','wisps'], night:['star whale','lanterns'],
     inT:()=>{ for(let t=600;t<1200;t+=.5){ const E=sfEvent(t); if(E.into>3&&E.into<4) return t; } return 600; }, outT:j=>{ let t=700+j*9; while(sfEvent(t).into<=SF_DUR+.5) t+=.7; return t; }},
-  blossom:{m:[47,0,7], life:['ducks','petals','paper lanterns','petal gust'], night:['paper lanterns','ducks']},
+  blossom:{m:[47,0,7], eye:'no moment for now (director, 2026-11-23: the petal gust removed and nothing in its place)', life:['ducks','petals','paper lanterns','waterfall'], night:['paper lanterns','ducks']},
   rockies:{m:[37,0,16.6], life:['beavers','moose','geese','canoe','waterfall'], night:['beavers','canoe']},
   keys:{m:[29,0,3.5], life:['traffic','speedboats','pelicans','gulls','fish school','leaping fish'], night:['traffic','lighthouse']},
   amazon:{m:[60,20,32], life:['macaws','dragonflies','caiman','frogs','branches'], night:['fireflies','caiman','frogs']},
