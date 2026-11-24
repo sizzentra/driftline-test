@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="DL Test iPhone">
 <script>
-window.DL_BUILD='ios'; window.DL_PREVIEW=true; if(/[?&]sweep\b/.test(location.search)){ window.__bootErr=[]; addEventListener("error",function(e){ __bootErr.push(String(e.message||e)+(e.lineno?" (line "+e.lineno+")":"")); }); addEventListener("unhandledrejection",function(e){ __bootErr.push("promise: "+String(e.reason&&e.reason.message||e.reason)); }); window.requestAnimationFrame=function(f){ return setTimeout(function(){ f(performance.now()); },16); }; window.cancelAnimationFrame=function(i){ clearTimeout(i); }; } try{ window.__tOff=/[?&](test|sweep|frozen)\b/.test(location.search)?0:(+(localStorage.getItem("dl-test-toff")||0)||0); }catch(e){ window.__tOff=0; } (function(){ var rn=Date.now.bind(Date); Date.now=function(){ return rn()+window.__tOff; }; })(); if(/[?&]frozen\b/.test(location.search)){ var __fz=20261122; Math.random=function(){ __fz|=0; __fz=__fz+0x6D2B79F5|0; var t=Math.imul(__fz^__fz>>>15,1|__fz); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; var __fc=0, __pn=performance.now.bind(performance); performance.now=function(){ __fc+=0.01; return 100000+__fc; }; Date.now=function(){ return 1795300000000+Math.floor(__fc); }; window.__frozenClock=function(){ return __fc; }; window.requestAnimationFrame=function(){ return 0; }; window.cancelAnimationFrame=function(){}; } window.DL_VERSION='2026.11.23-2023';
+window.DL_BUILD='ios'; window.DL_PREVIEW=true; if(/[?&]sweep\b/.test(location.search)){ window.__bootErr=[]; addEventListener("error",function(e){ __bootErr.push(String(e.message||e)+(e.lineno?" (line "+e.lineno+")":"")); }); addEventListener("unhandledrejection",function(e){ __bootErr.push("promise: "+String(e.reason&&e.reason.message||e.reason)); }); window.requestAnimationFrame=function(f){ return setTimeout(function(){ f(performance.now()); },16); }; window.cancelAnimationFrame=function(i){ clearTimeout(i); }; } try{ window.__tOff=/[?&](test|sweep|frozen)\b/.test(location.search)?0:(+(localStorage.getItem("dl-test-toff")||0)||0); }catch(e){ window.__tOff=0; } (function(){ var rn=Date.now.bind(Date); Date.now=function(){ return rn()+window.__tOff; }; })(); if(/[?&]frozen\b/.test(location.search)){ var __fz=20261122; Math.random=function(){ __fz|=0; __fz=__fz+0x6D2B79F5|0; var t=Math.imul(__fz^__fz>>>15,1|__fz); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; var __fc=0, __pn=performance.now.bind(performance); performance.now=function(){ __fc+=0.01; return 100000+__fc; }; Date.now=function(){ return 1795300000000+Math.floor(__fc); }; window.__frozenClock=function(){ return __fc; }; window.requestAnimationFrame=function(){ return 0; }; window.cancelAnimationFrame=function(){}; } window.DL_VERSION='2026.11.23-2049';
 window.addEventListener('beforeinstallprompt',function(e){ e.preventDefault(); window.__dlInstallPrompt=e; });
 </script>
 </head>
@@ -16185,10 +16185,11 @@ function blReflect(x,P,land){ const {runs,near}=blShore(), mk=n=>blReflect[n]||(
     k.globalCompositeOperation='destination-out'; const vg=k.createLinearGradient(0,ax+NL*.6,0,ax+NL); vg.addColorStop(0,'rgba(0,0,0,0)'); vg.addColorStop(1,'rgba(0,0,0,1)'); k.fillStyle=vg; k.fillRect(x0,ax+NL*.6,w,NL*.4); k.globalCompositeOperation='source-over'; }
   for(const q of [r,t,k]) q.setTransform(1,0,0,1,0,0);
   t.globalCompositeOperation='destination-in'; t.drawImage(K,0,0); r.globalCompositeOperation='destination-out'; r.drawImage(K,0,0); r.globalCompositeOperation='source-over'; r.drawImage(T,0,0);
+  { const Mk=mk('m'); Mk.width=840; Mk.height=(BL_IH-BL_WT0)/2; Mk.getContext('2d').drawImage(R,0,0,840,Mk.height); } /* the full shape of the land's reflection, before it fades with depth: the sky's reflection (blSkyRefl) never shows through it (director, 2026-11-23: "cloud reflection doesn't go behind mountains") */
   r.globalCompositeOperation='destination-in'; const fg=r.createLinearGradient(0,0,0,BL_IH-BL_WT0); fg.addColorStop(0,'rgba(0,0,0,1)'); fg.addColorStop(.45,'rgba(0,0,0,.6)'); fg.addColorStop(1,'rgba(0,0,0,.18)'); r.fillStyle=fg; r.fillRect(0,0,BL_IW,BL_IH-BL_WT0); /* fading with depth */
   r.globalCompositeOperation='source-atop'; r.fillStyle='rgba(24,44,78,.22)'; r.fillRect(0,0,BL_IW,BL_IH-BL_WT0); r.globalCompositeOperation='source-over'; /* water darkens and cools a reflection */
   const ra=(.85-.35*P.night)*(1-.2*P.gloom); x.globalAlpha=ra; x.drawImage(R,0,0); x.globalAlpha=1;
-  const Mk=mk('m'); Mk.width=840; Mk.height=(BL_IH-BL_WT0)/2; const mq=Mk.getContext('2d'); mq.globalAlpha=Math.min(1,ra*1.15); mq.drawImage(R,0,0,840,Mk.height); } /* where the land's reflection stands, the sky's reflection (blSkyRefl) does not show */
+  }
 /* the speeds and strengths of the motion, in one place for tuning (ChatGPT's animation notes, 2026-11-23: subtle, natural, never a moving wallpaper) */
 const BL_MOTION={ripple:1.4, rippleSpeed:1, cloudSpeed:.0045, sway:1.6, flowers:2, fall:1, fade:1.3, steps:32};
 /* picture pixels to screen (X*s+ox, Y*s+oy): it always covers the screen with its waterline on the horizon; where it is wider than the screen
@@ -16263,13 +16264,14 @@ function blCloudAt(i,t,M,calm){ const [sx,sy,w,h]=BL_CLOUDS[i], s=M.s, sw=w*s, s
 function blBirds(P,t,M){ const day=1-P.night, s=M.s; if(day<=.15) return; const q=(t%58)/58; if(q>=.5) return; const e=q/.5; g.strokeStyle=v3rgba('#2a2a3a',.75*day); g.lineWidth=Math.max(1,1.4*s);
   for(let i=0;i<5;i++){ const x=W*(1.08-e*1.25)+i*16*s+(i%2)*6*s, y=M.oy+(70+i*7+(i%2)*5)*s+Math.sin(t*2+i)*2, f=Math.sin(t*10+i*1.3), w=7*s; g.beginPath(); g.moveTo(x-w,y-f*w*.5); g.quadraticCurveTo(x-w*.4,y-w*.3,x,y); g.quadraticCurveTo(x+w*.4,y-w*.3,x+w,y-f*w*.5); g.stroke(); } }
 /* SKY LANTERNS at night (director, 2026-11-23: "white paper lanterns, and they need to float in the sky, not in the water"): white paper lanterns
-   lit warm from inside rise from behind the far shore, near ones bigger and faster, far ones small, drifting and swaying as they climb and
-   fading as they get high; they fly behind the big tree and the hills, and the lake reflects them. Positions in picture pixels. */
-const BL_LANTERNS=18;
-function blLanterns(P,t){ const a0=clamp((P.night-.3)/.3,0,1)*(1-P.gloom*.7), out=[]; if(a0<=0) return out; const n=gfxHigh()?BL_LANTERNS:8;
-  for(let i=0;i<n;i++){ const per=46+(i*17)%31, T=t+i*23.7, cyc=Math.floor(T/per), q=(T%per)/per, r=v3rng(cyc*53+i*7), z=.5+r()*.9, x0=180+r()*1450;
-    const y=(z>.95?345:300)-q*(380+z*120), x=x0+Math.sin(T*.35+i)*14*z+q*40*(r()-.5)*2, fade=Math.min(1,q/.08)*Math.min(1,(1-q)/.3); if(fade<=0) continue;
-    out.push({x,y,z,a:a0*fade*(.85+.15*Math.sin(t*3.1+i*2.3)),sw:Math.sin(T*.8+i)*.08}); } return out; }
+   lit warm from inside cross from beyond the left edge to beyond the right, climbing on a diagonal; near ones bigger and faster, in front of
+   the hills, far ones small and slow, behind them; all behind the big tree; the lake mirrors each one. Positions in picture pixels. */
+const BL_LANTERNS=10;
+function blLanterns(P,t){ const a0=clamp((P.night-.3)/.3,0,1)*(1-P.gloom*.7), out=[]; if(a0<=0) return out; const n=gfxHigh()?BL_LANTERNS:6;
+  for(let i=0;i<n;i++){ const base=70+(i*13)%23, r0=v3rng(i*991+5), zc=r0()<.35?.95+r0()*.3:.35+r0()*.5, per=base/(.55+.45*zc), T=t+((i*.618)%1)*per+i*3.1, /* spread evenly along the way, never bunched (director: "too cluttered") */ cyc=Math.floor(T/per), q=(T%per)/per, r=v3rng(cyc*53+i*7);
+    const z=clamp(zc+(r()-.5)*.1,.3,1.25), near=z>.95, y0=near?360+r()*40:290+r()*50, rise=230+170*z+r()*80; /* from beyond the left edge to beyond the right, climbing on a diagonal (director, 2026-11-23) */
+    const x=-90+q*(BL_IW+180), y=y0-q*rise+Math.sin(T*.5+i)*6*z, a=a0*Math.min(1,(y+120)/80)*(.85+.15*Math.sin(t*3.1+i*2.3)); if(a<=.01) continue;
+    out.push({x,y,z,a,sw:Math.sin(T*.8+i)*.07}); } return out; }
 /* one lantern, drawn once as a stored picture (its glow, the paper wider at the top lit warm from the flame, the flame at the opening) and
    reused for every lantern at its size: cheap at night */
 function blLanternArt(){ if(blLanternArt.c) return blLanternArt.c; const c=document.createElement('canvas'); c.width=128; c.height=160; const x=c.getContext('2d'), h=48, w=h*.62, cx=64, cy=78;
@@ -16279,17 +16281,19 @@ function blLanternArt(){ if(blLanternArt.c) return blLanternArt.c; const c=docum
   x.strokeStyle='rgba(210,170,120,.35)'; x.lineWidth=1; for(const u of [-.22,0,.22]){ x.beginPath(); x.moveTo(u*w,-h*.5); x.lineTo(u*w*.85,h*.5); x.stroke(); } /* the paper's seams */
   x.fillStyle='rgba(255,165,60,.95)'; x.beginPath(); x.ellipse(0,h*.46,w*.2,h*.06,0,0,7); x.fill(); return blLanternArt.c=c; }
 function blLantern(x,y,h,a,sw){ if(a<.02) return; const k=h/48, c=blLanternArt(); g.save(); g.translate(x,y); if(sw) g.rotate(sw); g.globalAlpha=a; g.drawImage(c,-64*k,-78*k,128*k,160*k); g.restore(); g.globalAlpha=1; }
-/* the sky in the lake (director, 2026-11-23: "could we do the clouds as well? and the moon/sun?"): the clouds, the sun or moon's path of light
+/* the sky in the lake (director, 2026-11-23: "could we do the clouds as well? and the moon/sun?"; then "no sun reflection"): the clouds, the moon's path of light
    and the lanterns, mirrored at the waterline, only where the land's own reflection is not (it stands in front), gently wobbling. A small
    picture redrawn each frame (half size) and laid over the water in a few rippling bands: cheap. */
 function blSkyRefl(P,t,M,sun,lan){ const S=blSkyRefl.c||(blSkyRefl.c=document.createElement('canvas')), w=840, h=(BL_IH-BL_WT0)/2; if(S.width!==w){ S.width=w; S.height=h; } const x=S.getContext('2d'), s=M.s, ax=BL_WL, calm=blCalm(), cl=blFaded.clouds&&blFaded.clouds.cur;
   x.setTransform(1,0,0,1,0,0); x.clearRect(0,0,w,h); x.setTransform(.5,0,0,.5,0,-BL_WT0*.5);
   if(cl){ x.save(); x.translate(0,ax*2); x.scale(1,-1); x.globalAlpha=.5*(1-.3*P.night); for(let i=0;i<BL_CLOUDS.length;i++){ const [cx,cy,sw,sh]=blCloudAt(i,t,M,calm), [,,cw,ch,qx,qy]=BL_CLOUDS[i]; x.drawImage(cl,qx,qy-2795,cw,ch,(cx-M.ox)/s,(cy-M.oy)/s,sw/s,sh/s); } x.restore(); }
-  if(sun.vis>.05){ const sx=(sun.x-M.ox)/s, col=sun.up?(P.d>.1?'255,170,110':'255,250,225'):'225,235,255', A=sun.vis*(sun.up?.55:.6); /* the path of light under the sun or moon */
-    for(let k=0;k<22;k++){ const y=ax+8+k*k*1.05, wd=(18+k*4.5)*(.55+.45*Math.sin(t*1.7+k*1.9)), a=A*(1-k/24); if(y>BL_IH) break; x.fillStyle='rgba('+col+','+a+')'; x.fillRect(sx-wd/2+Math.sin(t*1.1+k*2.3)*6,y,wd,2.5+k*.18); } }
-  for(const L of lan){ const ry=ax*2-L.y, hh=36*L.z; x.fillStyle='rgba(255,200,130,'+(.6*L.a)+')'; x.beginPath(); x.ellipse(L.x,ry,hh*.35,hh*.5,0,0,7); x.fill(); x.fillStyle='rgba(255,190,110,'+(.25*L.a)+')'; x.fillRect(L.x-hh*.6,ry-1,hh*1.2,3); } /* the lanterns' glow in the water */
+  if(sun.vis>.05&&!sun.up){ const sx=(sun.x-M.ox)/s, A=sun.vis*.6; /* the moon's path of light (no sun reflection: director, 2026-11-23) */
+    for(let k=0;k<22;k++){ const y=ax+8+k*k*1.05, wd=(18+k*4.5)*(.55+.45*Math.sin(t*1.7+k*1.9)), a=A*(1-k/24); if(y>BL_IH) break; x.fillStyle='rgba(225,235,255,'+a+')'; x.fillRect(sx-wd/2+Math.sin(t*1.1+k*2.3)*6,y,wd,2.5+k*.18); } }
+  const lr=near=>{ const art=blLanternArt(); for(const L of lan){ if((L.z>.95)!==near) continue; const k=16*L.z/48, ry=ax*2-L.y; x.save(); x.translate(L.x,ry); x.scale(1,-1); x.globalAlpha=.6*L.a; x.drawImage(art,-64*k,-78*k,128*k,160*k); x.restore(); } x.globalAlpha=1; }; /* each lantern mirrored as a lantern */
+  lr(false); /* the far lanterns' reflections sit behind the hills' reflections, like the far lanterns behind the hills */
   const m=blReflect.m; x.setTransform(1,0,0,1,0,0); if(m){ x.globalCompositeOperation='destination-out'; x.drawImage(m,0,0,w,h); x.globalCompositeOperation='source-over'; }
-  const top=M.oy+BL_WT0*s, n=14, bh=h/n; for(let b=0;b<n;b++){ const off=calm?0:Math.sin(t*1.2+b*1.9)*s*(1+2*b/n); g.drawImage(S,0,b*bh,w,bh,M.ox+off,top+b*bh*2*s,BL_IW*s,bh*2*s+.5); } }
+  x.setTransform(.5,0,0,.5,0,-BL_WT0*.5); lr(true); x.setTransform(1,0,0,1,0,0); /* the near lanterns' reflections in front of them, like the near lanterns in front of the hills */
+  const top=M.oy+BL_WT0*s, n=14, bh=h/n; for(let b=0;b<n;b++){ const off=calm?0:Math.sin(t*1.2+b*1.9)*s*(1+2*b/n), y0=Math.round(top+b*bh*2*s), y1=Math.round(top+(b+1)*bh*2*s); g.drawImage(S,0,b*bh,w,bh,M.ox+off,y0,BL_IW*s,y1-y0); } } /* bands meet exactly: overlapping them by half a pixel drew white lines (director, 2026-11-23) */
 V3SCENES.blossom={
   land(x,P,hz,cnv){
     if(BL_IMG.ok) return; /* the layered painting is drawn every frame by live() (smooth light changes), so the stored scenery stays empty and the game's sky shows through */
@@ -16341,7 +16345,7 @@ V3SCENES.blossom={
       const nod=hi&&!calm, cut=(x0,y0,w,h)=>g.rect(M.ox+x0*s,M.oy+y0*s,w*s,h*s), [tx,ty,tw,th]=BL_TREE;
       g.save(); g.beginPath(); g.rect(-W,-H,W*3,H*3); cut(tx,ty,tw,th); if(nod) for(const [a,b,top,bot] of BL_FLOWERS) cut(a,top,b-a,bot-top); g.clip('evenodd'); g.drawImage(ld,M.ox,M.oy,BL_IW*s,BL_IH*s); g.restore();
       if(nod) for(const [a,b,top,bot,ph] of BL_FLOWERS){ const x0=Math.max(0,a-3), y0=top-3, x1=Math.min(BL_IW,b+3), y1=Math.min(BL_IH,bot); blLean(ld,M,x0,y0,x1-x0,y1-y0,(Math.sin(t*1.5+ph)+.4*Math.sin(t*.55+ph*2))*A.flowers*s); } /* the flowers nod, heads more than roots */
-      for(const L of (blLanterns.list||[])) if(L.z>.95) blLantern(M.ox+L.x*s,M.oy+L.y*s,36*L.z*s,L.a,L.sw); /* the near sky lanterns lift off from the shore in front of the hills, behind the big tree */
+      for(const L of (blLanterns.list||[])) if(L.z>.95) blLantern(M.ox+L.x*s,M.oy+L.y*s,16*L.z*s,L.a,L.sw); /* the near sky lanterns lift off from the shore in front of the hills, behind the big tree */
       blLean(ld,M,tx,ty,Math.min(BL_IW,tw+4),th+4,nod?(Math.sin(t*.9)+.35*Math.sin(t*.37+1.2))*A.sway*s:0); /* the big tree sways, its tips most, its trunk not at all */
       blFall(M,P,t);
       if(P.night>.05) for(const wy of [170,186,204,220]) v3glow(g,M.ox+1390*s,M.oy+wy*s,H*.016,'rgba(255,200,120,.9)',.7*P.night); /* the pagoda's windows */
@@ -16353,7 +16357,7 @@ V3SCENES.blossom={
   sky(P,t,hz){ if(!BL_IMG.ok) return; const M=blMap(hz), s=M.s, c=blFaded('clouds',P,BL_IW,232,blBuildClouds), calm=blCalm(); g.globalAlpha=(1-.25*P.night)*(1-P.gloom*.2);
     BL_CLOUDS.forEach(([,,w,h,ax,ay],i)=>{ const [x,y,sw,sh]=blCloudAt(i,t,M,calm); g.drawImage(c,ax,ay-2795,w,h,x,y,sw,sh); }); g.globalAlpha=1;
     blBirds(P,t,M); /* behind the tree and the hills */
-    const lan=blLanterns.list=blLanterns(P,t); for(const L of lan) if(L.z<=.95) blLantern(M.ox+L.x*s,M.oy+L.y*s,36*L.z*s,L.a,L.sw); }, /* the far sky lanterns, behind the hills (the near ones rise in front of the hills, in live(); the list is reused for their reflection) */
+    const lan=blLanterns.list=blLanterns(P,t); for(const L of lan) if(L.z<=.95) blLantern(M.ox+L.x*s,M.oy+L.y*s,16*L.z*s,L.a,L.sw); }, /* the far sky lanterns, behind the hills (the near ones rise in front of the hills, in live(); the list is reused for their reflection) */
   /* dawn is cooler and pinker than dusk (they share one palette) */
   skyBack(P,t,hz){ if(!BL_IMG.ok||!blDawn()||P.d<.02) return; const gr=g.createLinearGradient(0,0,0,hz); gr.addColorStop(0,'rgba(190,170,230,0)'); gr.addColorStop(.55,'rgba(255,190,215,'+(.28*P.d)+')'); gr.addColorStop(1,'rgba(255,214,200,'+(.5*P.d)+')'); g.fillStyle=gr; g.fillRect(-W,0,W*3,hz+1); },
 };
@@ -22198,6 +22202,10 @@ PATCHES.unshift({v:'0.4.9', name:'Work in progress', items:phoneNotes([
 // text changes. Released notes live in notes_release.js.
 const TEST_NOTES={v:'test', label:'Test build · '+(window.DL_BUILD==='ios'?'iPhone':'Android'), name:'0.4.9 test build (newest first)', items:[
   '## New in this build',
+  'Cherry Blossom Lake: no more white lines in the water where the clouds are reflected.',
+  'Cherry Blossom Lake: the sky lanterns now drift across the sky from left to right, climbing as they go, at many distances and sizes, a few at a time and spread out (near ones in front of the hills, far ones behind them), and each is mirrored as a lantern in the lake.',
+  'Cherry Blossom Lake: cloud reflections stay behind the mountains’ reflections, and the sun no longer leaves a path on the water (the moon still does).',
+  '## Test build 2026.11.23-2023',
   'Cherry Blossom Lake: the clouds, the sun and the moon now reflect in the lake, with a shimmering path of light under the sun or moon.',
   'Cherry Blossom Lake: white paper sky lanterns rise into the night sky, near ones lifting off in front of the hills and far ones behind them, and their glow shows in the water. The lanterns floating on the lake are gone.',
   'Cherry Blossom Lake: rain makes rings on the water, the ripples are a little stronger and grow in rain and storms, and the birds now fly behind the big cherry tree.',
