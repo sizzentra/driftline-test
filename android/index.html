@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="DL Test Android">
 <script>
-window.DL_BUILD='android'; window.DL_PREVIEW=true; if(/[?&]sweep\b/.test(location.search)){ window.__bootErr=[]; addEventListener("error",function(e){ __bootErr.push(String(e.message||e)+(e.lineno?" (line "+e.lineno+")":"")); }); addEventListener("unhandledrejection",function(e){ __bootErr.push("promise: "+String(e.reason&&e.reason.message||e.reason)); }); window.requestAnimationFrame=function(f){ return setTimeout(function(){ f(performance.now()); },16); }; window.cancelAnimationFrame=function(i){ clearTimeout(i); }; } try{ window.__tOff=/[?&](test|sweep|frozen)\b/.test(location.search)?0:(+(localStorage.getItem("dl-test-toff")||0)||0); }catch(e){ window.__tOff=0; } (function(){ var rn=Date.now.bind(Date); Date.now=function(){ return rn()+window.__tOff; }; })(); if(/[?&]frozen\b/.test(location.search)){ var __fz=20261122; Math.random=function(){ __fz|=0; __fz=__fz+0x6D2B79F5|0; var t=Math.imul(__fz^__fz>>>15,1|__fz); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; var __fc=0, __pn=performance.now.bind(performance); performance.now=function(){ __fc+=0.01; return 100000+__fc; }; Date.now=function(){ return 1795300000000+Math.floor(__fc); }; window.__frozenClock=function(){ return __fc; }; window.requestAnimationFrame=function(){ return 0; }; window.cancelAnimationFrame=function(){}; } window.DL_VERSION='2026.11.25-1233';
+window.DL_BUILD='android'; window.DL_PREVIEW=true; if(/[?&]sweep\b/.test(location.search)){ window.__bootErr=[]; addEventListener("error",function(e){ __bootErr.push(String(e.message||e)+(e.lineno?" (line "+e.lineno+")":"")); }); addEventListener("unhandledrejection",function(e){ __bootErr.push("promise: "+String(e.reason&&e.reason.message||e.reason)); }); window.requestAnimationFrame=function(f){ return setTimeout(function(){ f(performance.now()); },16); }; window.cancelAnimationFrame=function(i){ clearTimeout(i); }; } try{ window.__tOff=/[?&](test|sweep|frozen)\b/.test(location.search)?0:(+(localStorage.getItem("dl-test-toff")||0)||0); }catch(e){ window.__tOff=0; } (function(){ var rn=Date.now.bind(Date); Date.now=function(){ return rn()+window.__tOff; }; })(); if(/[?&]frozen\b/.test(location.search)){ var __fz=20261122; Math.random=function(){ __fz|=0; __fz=__fz+0x6D2B79F5|0; var t=Math.imul(__fz^__fz>>>15,1|__fz); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; var __fc=0, __pn=performance.now.bind(performance); performance.now=function(){ __fc+=0.01; return 100000+__fc; }; Date.now=function(){ return 1795300000000+Math.floor(__fc); }; window.__frozenClock=function(){ return __fc; }; window.requestAnimationFrame=function(){ return 0; }; window.cancelAnimationFrame=function(){}; } window.DL_VERSION='2026.11.25-1249';
 window.addEventListener('beforeinstallprompt',function(e){ e.preventDefault(); window.__dlInstallPrompt=e; });
 </script>
 </head>
@@ -1609,7 +1609,7 @@ const fresh = () => ({v:3, money:0, xp:0, lvl:1, gear:{rod:0,reel:0,line:0,hook:
   perks:{}, bonusPts:0, tank:[], tankSlots:3, tankT:0, tankBank:0, feats:{}, pearls:0, pearlV:2, tides:0, streak:0,
   buffs:[], look:{g:'m',skin:1,hair:1,shirt:'#3a6f9a',pat:'none',pants:'#2f3b4a',hat:'cap',hatCol:'#c8553a',hairStyle:'auto',beard:'none',glasses:'none',outfit:'none',outCol:'#d8a020',build:'average',eye:0,shoes:'boots',neck:'none',back:'none',accCol:'#c8553a',nose:'button',brows:'soft',mouth:'smile',blush:'on',aura:'none',bob:'none',line:'none',face:'natural',eyeShape:'round'},
   owned:{hats:['none','cap','bucket'],cols:[],pats:['none'],pets:['dog'],outfits:['none','vest'],glasses:['none','round'],shoes:['boots','sneakers','barefoot'],necks:['none'],backs:['none'],auras:[],bobs:[],lines:[]}, pet:'dog', junk:{}, tickets:0, freeSpins:1,
-  settings:{master:.8, music:.55, sfx:.7, amb:.5, musicOn:true, ambient:true, style:'auto', castMode:'meter', dist:'m', vibrate:true, minigames:true, rest:false, effects:true, boostsOnScreen:true, hints:true, protectRare:true, units:'kg', hand:'r', uiScale:'auto', renderQ:'auto'},
+  settings:{fightUi:'new' /* the fight display: old, new or mid (Cam, round 7) */, master:.8, music:.55, sfx:.7, amb:.5, musicOn:true, ambient:true, style:'auto', castMode:'meter', dist:'m', vibrate:true, minigames:true, rest:false, effects:true, boostsOnScreen:true, hints:true, protectRare:true, units:'kg', hand:'r', uiScale:'auto', renderQ:'auto'},
   aq:{theme:'lagoon', sand:'gold', decor:[], hid:[], owned:['lagoon','gold']}, voyCatch:{}, titled:{}, nib:{}, nibAmt:1, pathXP:{}, pearlOld:0, pearlMig:1, pshop:{}, boons:{}, boonPts:0, passMig:1, fedT:0, wheelT:0, rankClaimed:0, tokens:{small:0,big:0,legend:0},
   gstats:{frenzy:0, frenzyFish:0, chests:0, stars:0, spins:0, crates:0, flips:0, flipWins:0, scratch:0, scratchWins:0, pets:0, tasks:0},
   petLook:{}, bond:{}, petTints:['none'], petAccs:['none','bandana'], scales:0, specs:{}, relics:[], castN:0,
@@ -1652,7 +1652,7 @@ function migrate(o){ const d=fresh(); if(!isObj(o)) return d; o=saveClean(o,d);
   m.tickets=+o.tickets||0; if(o.freeSpins==null) m.freeSpins = (Date.now()-(o.wheelT||0)>=3600000) ? 1 : 0;
   if(!m.owned.hats.includes(m.look.hat)) m.look.hat='cap'; if(!PETI[m.pet]||!m.owned.pets.includes(m.pet)) m.pet='dog';
   m.buffs=(o.buffs||[]).filter(b=>b&&BK[b.k]&&b.until>Date.now()); m.junk=Object.assign({},o.junk||{});
-  m.settings=Object.assign(fresh().settings,o.settings||{}); if(m.settings.units!=='lb') m.settings.units='kg'; if(m.settings.dist!=='ft') m.settings.dist='m'; if(m.settings.hand!=='l') m.settings.hand='r'; if(m.settings.uiScale!=='auto'&&!(+m.settings.uiScale>=.85&&+m.settings.uiScale<=2.5)) m.settings.uiScale='auto'; if(!['auto','sharp','balanced','fast'].includes(m.settings.renderQ)) m.settings.renderQ='auto'; const aq=Object.assign(fresh().aq,o.aq||{}); aq.owned=uniq(['lagoon','gold',...(aq.owned||[])]); aq.decor=(aq.decor||[]).filter(x=>aq.owned.includes(x)); aq.hid=(Array.isArray(aq.hid)?aq.hid:[]).filter(x=>aq.decor.includes(x));
+  m.settings=Object.assign(fresh().settings,o.settings||{}); if(m.settings.units!=='lb') m.settings.units='kg'; if(!['old','new','mid'].includes(m.settings.fightUi)) m.settings.fightUi='new'; if(m.settings.dist!=='ft') m.settings.dist='m'; if(m.settings.hand!=='l') m.settings.hand='r'; if(m.settings.uiScale!=='auto'&&!(+m.settings.uiScale>=.85&&+m.settings.uiScale<=2.5)) m.settings.uiScale='auto'; if(!['auto','sharp','balanced','fast'].includes(m.settings.renderQ)) m.settings.renderQ='auto'; const aq=Object.assign(fresh().aq,o.aq||{}); aq.owned=uniq(['lagoon','gold',...(aq.owned||[])]); aq.decor=(aq.decor||[]).filter(x=>aq.owned.includes(x)); aq.hid=(Array.isArray(aq.hid)?aq.hid:[]).filter(x=>aq.decor.includes(x));
   if(!o.voyCatch||typeof o.voyCatch!=='object'){ m.voyCatch={}; for(const L of LOCS){ let n=0; for(const s of SP) if(s.loc===L.id&&m.journal&&m.journal[s.id]) n+=m.journal[s.id].n||1; if(n) m.voyCatch[L.id]=n; } } else { m.voyCatch={}; for(const k in o.voyCatch) if(LOCS.some(L=>L.id===k)&&o.voyCatch[k]>0) m.voyCatch[k]=Math.floor(o.voyCatch[k]); } /* [16] old saves start with their lifetime catches per water */
   { const t={}; if(o.titled&&typeof o.titled==='object'){ for(const k in o.titled){ const id=k.split(':')[0]; if(SPI[id]) t[k]=1; } } else { for(const id in (m.journal||{})) if(m.journal[id]&&m.journal[id].pr) t[id+':old']=1; } m.titled=t; } /* [18] titled shinies ever caught; old saves count every species with a prismatic catch */
   { const nb={}; if(o.nib&&typeof o.nib==='object') for(const k in o.nib){ const n=Math.floor(+o.nib[k]); if(!(n>0)) continue; const kk=/^r[0-5]$/.test(k)?k:SPI[k]?'r'+Math.min(5,SPI[k].r):null; if(kk) nb[kk]=Math.min((nb[kk]||0)+n,1e6); } /* C27: Nibbles are kept per rarity (r0 common .. r5 mythic); old per-species ones fold into their rarity */ m.nib=nb; for(const f of (m.tank||[])){ if(f.fed!=null) f.fed=Math.max(0,Math.floor(+f.fed)||0); if(f.nbst!=null) f.nbst=Math.max(0,Math.floor(+f.nbst)||0); for(const q of ['fdb','fdi']) if(f[q]!=null) f[q]=Math.min(50,Math.max(0,Math.floor(+f[q])||0)); /* C28 feeding gains */ if(f.abx) f.abx=(Array.isArray(f.abx)?f.abx:[]).filter(b=>b&&BK[b.k]).slice(0,5); } } /* [19] Fish Nibbles */ m.aq=aq;
@@ -2395,10 +2395,10 @@ function feelPop(txt){ if(!FEEL.juice) return; (G.pops=G.pops||[]).push({txt,t:0
 function feelCombo(d){ if(!FEEL.combo&&d>0) return; const was=G.combo||0; G.combo=d>0?Math.min(10,was+1):0; if(d<0&&was>=2) feelPop('Combo lost'); }
 const feelReelK = () => 1+Math.min(.4,.05*(G.combo||0)*(FEEL.combo||0));
 /* drawn over the fight every frame (d_draw.js): the hook flash, the perfect-pull ring, pop-ups rising from the float and the combo badge */
-function feelDraw(t){ if(G.st!=='reeling'||!G.fish) return; const bx=G.bob.x, by=G.bob.y, s=clamp(H/420,.7,1.25);
-  if(G.ppw>0){ const k=1-G.ppw/.45; g.strokeStyle='rgba(255,230,120,'+(.9-k*.5)+')'; g.lineWidth=2.5*s; g.beginPath(); g.ellipse(bx,by,(10+k*14)*s,(4+k*5)*s,0,0,7); g.stroke(); }
-  if(G.tell){ g.strokeStyle='rgba(255,140,90,.8)'; g.lineWidth=2*s; const k=(t*6)%1; g.beginPath(); g.ellipse(bx,by,(6+k*10)*s,(2.5+k*4)*s,0,0,7); g.stroke(); }
-  if(G.grooveT>.3){ g.strokeStyle='rgba(150,240,170,'+(.45+.2*Math.sin(t*5))+')'; g.lineWidth=2*s; g.beginPath(); g.ellipse(bx,by,13*s,5*s,0,0,7); g.stroke(); } /* in the groove */
+function feelDraw(t){ if(G.st!=='reeling'||!G.fish) return; const bx=G.bob.x, by=G.bob.y, s=clamp(H/420,.7,1.25), ui=fightUi(); /* Old: none of the rings at the lure; Middle ground: the warning and groove cues sit on the dial under the dock */
+  if(G.ppw>0&&ui!=='old'){ const k=1-G.ppw/.45; g.strokeStyle='rgba(255,230,120,'+(.9-k*.5)+')'; g.lineWidth=2.5*s; g.beginPath(); g.ellipse(bx,by,(10+k*14)*s,(4+k*5)*s,0,0,7); g.stroke(); }
+  if(G.tell&&ui==='new'){ g.strokeStyle='rgba(255,140,90,.8)'; g.lineWidth=2*s; const k=(t*6)%1; g.beginPath(); g.ellipse(bx,by,(6+k*10)*s,(2.5+k*4)*s,0,0,7); g.stroke(); }
+  if(G.grooveT>.3&&ui==='new'){ g.strokeStyle='rgba(150,240,170,'+(.45+.2*Math.sin(t*5))+')'; g.lineWidth=2*s; g.beginPath(); g.ellipse(bx,by,13*s,5*s,0,0,7); g.stroke(); } /* in the groove */
   /* (no swim-direction arrows: Cam, round 6 "remove fish swim direction indicator arrows entirely") */
   g.save(); g.textAlign='left'; g.font='800 '+Math.round(15*s)+'px system-ui'; (G.pops||[]).forEach((p,i,arr)=>{ const a=Math.max(0,1-p.t/1.1), off=(arr.length-1-i)*17*s; g.fillStyle='rgba(20,24,30,'+(a*.6)+')'; g.fillText(p.txt,bx+71*s,by-2*s-off-p.t*30*s+1); g.fillStyle=p.txt.startsWith('Combo lost')?'rgba(255,140,120,'+a+')':'rgba(255,236,150,'+a+')'; g.fillText(p.txt,bx+70*s,by-2*s-off-p.t*30*s); }); /* beside the float, clear of the fight card, newest lowest */
   if(FEEL.juice&&(G.combo||0)>=2){ g.font='700 '+Math.round(12*s)+'px system-ui'; g.fillStyle='rgba(255,236,150,.95)'; g.fillText('×'+G.combo+' combo',bx+70*s,by+18*s); }
@@ -3034,12 +3034,49 @@ function draw(now){
     if(G.st!=='charging' && S.settings.boostsOnScreen && !document.body.classList.contains('pch-on')){ const bs=activeBuffs().slice(0,4); g.font='700 11px system-ui'; g.textAlign='left'; let yy=H-((innerWidth<=520||innerHeight<=520)?38:48); const now2=Date.now(); /* start above the Rest button in the corner */
       for(const b of bs){ const txt=fmtB(b.k,b.v)+'  '+mmss(Math.ceil((b.until-now2)/1000)); const tw=g.measureText(txt).width; g.fillStyle='rgba(5,14,20,.7)'; rr(10,yy-15,tw+16,20,10); g.fill(); g.fillStyle='#7fc8a9'; g.fillText(txt,18,yy-1); yy-=24; } } }
 }
+/* the fight display the player chose in Settings (Cam's round 7, 2026-11-25; per device, New the first time):
+   'old' = the live layout (tension ring, card and words at the fish, pop-ups and combo) without the newer rings around the lure,
+   'new' = everything around the lure and the fish (the test builds' look), 'mid' = Middle ground: one dial under the dock, the words above
+   the fish and the combo beside it, so nothing covers the fish */
+const fightUi = () => { const v=S&&S.settings&&S.settings.fightUi; return v==='old'||v==='mid'?v:'new'; };
+/* Middle ground: everything in one dial in the water right under the dock. The outer ring is the tension (fills clockwise from the top and
+   turns green, yellow, red; the snap zone and the dive band marked on it); the inner left half is the fish's Fight, the inner right half its
+   Temper; the middle shows how far out it is, with the line out as a thin bar. The warning and groove cues light the dial's rim. The words
+   stay above the fish, the combo and pop-ups beside it (feelDraw). */
+function drawFightDial(t){ const ten=clamp(G.ten/100,0,1), danger=ten>.8, warn=ten>.55, dockY=HF.dockY(), r=clamp(H*.062,22,56), lw=Math.max(4,r*.18);
+  const cx=clamp(HF.pw()*.52,r+lw+8,W*.4), cy=Math.min(H-r-lw-10,HF.wl(dockY)+r+lw+H*.012), shake=ten>.85?Math.sin(t*60)*1.5:0, A0=-Math.PI/2;
+  const tc=ten<.55?mix('#7fe3c4','#ffc94d',ten/.55):mix('#ffc94d','#ff5468',clamp((ten-.55)/.3,0,1));
+  g.save(); g.translate(shake,0);
+  g.fillStyle='rgba(5,14,20,.66)'; g.beginPath(); g.arc(cx,cy,r+lw*.9,0,7); g.fill();
+  if(G.tell){ const k=(t*4)%1; g.strokeStyle='rgba(255,140,90,'+(.7*(1-k))+')'; g.lineWidth=2; g.beginPath(); g.arc(cx,cy,r+lw*.9+2+k*6,0,7); g.stroke(); } /* a move is coming */
+  if(G.grooveT>.3){ g.strokeStyle='rgba(150,240,170,'+(.45+.2*Math.sin(t*5))+')'; g.lineWidth=2.5; g.beginPath(); g.arc(cx,cy,r+lw*.9+1.5,0,7); g.stroke(); } /* in the groove */
+  g.lineCap='round'; g.lineWidth=lw; g.strokeStyle='rgba(255,255,255,.08)'; g.beginPath(); g.arc(cx,cy,r,0,7); g.stroke();
+  g.strokeStyle='rgba(255,84,104,.28)'; g.beginPath(); g.arc(cx,cy,r,A0+Math.PI*2*.8,A0+Math.PI*2); g.stroke(); /* the snap zone */
+  const Z=fightZone(); if(Z){ g.strokeStyle=Z.inZ?'rgba(255,170,240,.7)':'rgba(255,170,240,.38)'; g.lineWidth=lw+4; g.beginPath(); g.arc(cx,cy,r,A0+Math.PI*2*Z.lo,A0+Math.PI*2*Z.hi); g.stroke(); g.lineWidth=lw; }
+  if(danger){ const p=.5+.5*Math.sin(t*14); g.strokeStyle='rgba(255,84,104,'+(.2+.15*p)+')'; g.lineWidth=lw+5+p*4; g.beginPath(); g.arc(cx,cy,r,A0,A0+Math.PI*2*ten); g.stroke(); g.lineWidth=lw; }
+  g.strokeStyle=Z&&Z.inZ?'#ffb0f0':tc; g.beginPath(); g.arc(cx,cy,r,A0,A0+Math.PI*2*Math.max(.02,ten)); g.stroke();
+  /* Fight (left) and Temper (right): half rings filling from the bottom up */
+  const ri=r*.64, li=Math.max(3,r*.13), hot=G.temper>1.7; g.lineWidth=li; g.strokeStyle='rgba(255,255,255,.08)'; g.beginPath(); g.arc(cx,cy,ri,Math.PI*.5+.12,Math.PI*1.5-.12); g.stroke(); g.beginPath(); g.arc(cx,cy,ri,-Math.PI*.5+.12,Math.PI*.5-.12); g.stroke();
+  const fs=clamp(G.sta,0,1), tp=clamp((G.temper||0)/3,0,1), span=Math.PI-.24;
+  if(fs>.01){ g.strokeStyle='#ff8a4a'; g.beginPath(); g.arc(cx,cy,ri,Math.PI*.5+.12,Math.PI*.5+.12+span*fs); g.stroke(); }
+  if(tp>.01){ g.strokeStyle=hot?'#ff5468':'#c38bff'; g.beginPath(); g.arc(cx,cy,ri,Math.PI*.5-.12,Math.PI*.5-.12-span*tp,true); g.stroke(); }
+  /* the middle: distance and line out */
+  g.textAlign='center'; g.textBaseline='middle'; g.fillStyle='#e6efe8'; g.font='800 '+Math.round(r*.36)+'px system-ui'; g.fillText(dStr(Math.max(0,G.d)),cx,cy-r*.06);
+  const lim=clamp(G.d/G.maxOut,0,1), bw=r*.7; g.fillStyle='rgba(255,255,255,.12)'; rr(cx-bw/2,cy+r*.22,bw,3,1.5); g.fill(); g.fillStyle=lim>.8?'#ff5468':'#5aa9ff'; rr(cx-bw/2,cy+r*.22,Math.max(2,bw*lim),3,1.5); g.fill();
+  g.restore();
+  /* the words, right above the fish (no ring around it) */
+  const msg=fightMsg(danger,danger), alert=!!(G.ev||G.run||G.temper>1.7||G.swT>0||danger||(fishNew()&&G.sta<=0&&G.fish.kind==='fish'));
+  g.save(); g.font='800 '+(W<700?15:17)+'px "Bricolage Grotesque", system-ui'; g.textAlign='center'; g.textBaseline='alphabetic';
+  const mw=g.measureText(msg).width+22, mx=clamp(G.bob.x,mw/2+8,W-mw/2-8), my=clamp(G.bob.y-H*.07,48,H-80);
+  g.fillStyle=alert?'rgba(40,24,6,.82)':'rgba(5,14,20,.78)'; rr(mx-mw/2,my-19,mw,27,13.5); g.fill();
+  if(alert){ g.strokeStyle='#ffc94d99'; g.lineWidth=1.5; rr(mx-mw/2,my-19,mw,27,13.5); g.stroke(); }
+  g.fillStyle=alert?'#ffd36a':'#ffffff'; g.fillText(msg,mx,my); g.restore(); }
 function rr(x,y,w,h,r){ g.beginPath(); g.roundRect ? g.roundRect(x,y,Math.max(0,w),h,r) : g.rect(x,y,Math.max(0,w),h); }
 /* the fish fight, drawn where the action is (shared since PC Reborn, director 2026-11-21: "PC and mobile fishing should match"; it was the
    phones' layout, mobile/fight08.js): a TENSION RING around the fish (green / yellow / red, shakes and glows near breaking; the dive band
    in light magenta), the instruction right above it, a small card under it (distance, Fight, Temper, line out) and a soft light under the
    fish so it stands out on any water. The card and words stay inside the water and clear of the corners wherever the fish swims. */
-function drawFightHUD(t){ if(!G.fish||!G.bob) return;
+function drawFightHUD(t){ if(!G.fish||!G.bob) return; if(fightUi()==='mid') return drawFightDial(t);
 
     const ten=clamp(G.ten/100,0,1), danger=ten>.8, warn=ten>.55, col=danger?'#ff5468':warn?'#ffc94d':'#7fe3c4';
     const r=clamp(H*.085,24,44), shake=ten>.85?Math.sin(t*60)*2:0;
@@ -3257,7 +3294,7 @@ function renderSettings(P){ const s=S.settings; const sl=(k,label)=>`<div class=
      ${tg('musicOn','Music','Calm music that plays while you fish.')}${tg('ambient','Nature sounds','Waves, birds, crickets and wind for each water.')}
      <h5>Music style</h5><div class="chips">${styles.map(([k,n])=>`<button class="chipb" data-act="mstyle" data-k="${k}" aria-pressed="${s.style===k}">${n}</button>`).join('')}</div></div>
    ${V3ON?`<div class="tile"><h4>Controls</h4><h5>Casting</h5><div class="chips"><button class="chipb" data-act="castmode" data-k="meter" aria-pressed="${s.castMode!=='aim'}">Power meter</button><button class="chipb" data-act="castmode" data-k="aim" aria-pressed="${s.castMode==='aim'}">${PLAT.touch()?"Tap":"Click"} to aim</button></div><div class="meta" style="margin-top:6px">${s.castMode==='aim'?'Tap the spot on the water you want. The line lands close to it, never quite perfect.':'Hold to fill the meter, let go at the right moment.'}</div>${tg('vibrate','Vibration','Phones buzz on a bite, when the line is close to snapping, and on a catch.')}<div class="meta" style="margin-top:6px">Reel by <b>holding</b>, by <b>drawing circles</b> on the water like a crank, or with the <b>mouse wheel</b>. Controllers work too: <b>A</b> casts and reels, the <b>right trigger</b> reels with pressure.</div></div>`:''}
-   <div class="tile"><h4>Display</h4>${tg('effects','Weather effects','Rain, snow, lightning flashes and sparkles.')}${tg('boostsOnScreen','Boost timers on screen','Show active boosts in the corner of the water.')}${tg('hints','Hints','The help line under the water.')}<h5>Weights</h5><div class="chips"><button class="chipb" data-act="units" data-k="kg" aria-pressed="${s.units!=='lb'}">Kilograms (kg)</button><button class="chipb" data-act="units" data-k="lb" aria-pressed="${s.units==='lb'}">Pounds (lb)</button></div><h5>Distances and depths</h5><div class="chips"><button class="chipb" data-act="dist" data-k="m" aria-pressed="${s.dist!=='ft'}">Metres (m)</button><button class="chipb" data-act="dist" data-k="ft" aria-pressed="${s.dist==='ft'}">Feet (ft)</button></div><h5>Rod hand</h5><div class="chips"><button class="chipb" data-act="hand" data-k="r" aria-pressed="${s.hand!=='l'}">Right-handed</button><button class="chipb" data-act="hand" data-k="l" aria-pressed="${s.hand==='l'}">Left-handed</button></div>${tg('showFps','Frame rate','Shows how many frames per second the game draws, in the corner of the water.')}
+   <div class="tile"><h4>Display</h4><h5>Fight display</h5><div class="chips">${[['old','Classic'],['new','Around the fish'],['mid','Dial under the dock']].map(([k,n])=>`<button class="chipb" data-act="fightui" data-k="${k}" aria-pressed="${fightUi()===k}">${n}</button>`).join('')}</div><div class="meta" style="margin:6px 0 10px">${fightUi()==='old'?'The tension ring, words and card at the fish, without the extra rings around the lure.':fightUi()==='mid'?'One dial in the water under your dock, so nothing covers the fish. Tips stay above the fish.':'Every sign around the lure and the fish: tension, warnings, perfect pulls and your groove.'}</div>${tg('effects','Weather effects','Rain, snow, lightning flashes and sparkles.')}${tg('boostsOnScreen','Boost timers on screen','Show active boosts in the corner of the water.')}${tg('hints','Hints','The help line under the water.')}<h5>Weights</h5><div class="chips"><button class="chipb" data-act="units" data-k="kg" aria-pressed="${s.units!=='lb'}">Kilograms (kg)</button><button class="chipb" data-act="units" data-k="lb" aria-pressed="${s.units==='lb'}">Pounds (lb)</button></div><h5>Distances and depths</h5><div class="chips"><button class="chipb" data-act="dist" data-k="m" aria-pressed="${s.dist!=='ft'}">Metres (m)</button><button class="chipb" data-act="dist" data-k="ft" aria-pressed="${s.dist==='ft'}">Feet (ft)</button></div><h5>Rod hand</h5><div class="chips"><button class="chipb" data-act="hand" data-k="r" aria-pressed="${s.hand!=='l'}">Right-handed</button><button class="chipb" data-act="hand" data-k="l" aria-pressed="${s.hand==='l'}">Left-handed</button></div>${tg('showFps','Frame rate','Shows how many frames per second the game draws, in the corner of the water.')}
      <div class="toggle"><div><b>Full screen</b><div class="meta">Fill the whole screen with the game.</div></div><button class="btn alt sm" data-act="fullscreen">Toggle</button></div></div>
    <div class="tile"><h4>Gameplay</h4>${tg('protectRare','Protect rare fish','“Sell all” keeps Epic, Legendary and shiny fish, unless you choose otherwise in the cooler’s Sell choices.')}${tg('minigames','Mini-games','Now and then a mini-game pops up between catches. Turn this off and they never will.')}
      </div>
@@ -3280,6 +3317,7 @@ function extraAct(b){ const k=b.dataset.k, i=+b.dataset.i;
     case 'mstyle': S.settings.style=k; return;
     case 'castmode': S.settings.castMode=k==='aim'?'aim':'meter'; return;
     case 'units': S.settings.units=k==='lb'?'lb':'kg'; return;
+    case 'fightui': S.settings.fightUi=['old','new','mid'].includes(k)?k:'new'; return; /* Cam, round 7: the fight display */
     case 'dist': S.settings.dist=k==='ft'?'ft':'m'; return;
     case 'hand': S.settings.hand=k==='l'?'l':'r'; return;
     case 'fullscreen': { const d=document; try{ if(d.fullscreenElement) d.exitFullscreen(); else d.documentElement.requestFullscreen(); }catch(e){} return 'skip'; }
@@ -20283,7 +20321,7 @@ var MB_STATUS_B=40; /* the bottom of the top-left status corner (scene chip + bo
 //    two are hidden there. The help text speaks about touch only (no mouse wheel, no keyboard).
 // Android + iPhone only.
 // =====================================================================
-const DEV_KEYS=['master','music','sfx','amb','musicOn','ambient','style','castMode','units','dist','hand','vibrate','effects','boostsOnScreen','hints','showFps','gfx','fpsCap','dockMini','hdrStat','logShow','vaultSort','hideGoal','lastPage','pageLast'];
+const DEV_KEYS=['fightUi','master','music','sfx','amb','musicOn','ambient','style','castMode','units','dist','hand','vibrate','effects','boostsOnScreen','hints','showFps','gfx','fpsCap','dockMini','hdrStat','logShow','vaultSort','hideGoal','lastPage','pageLast'];
 const DEV_STORE='dl-device-settings-v1';
 var DEV_GUARD=null;
 const IS_IPHONE=()=>/iPhone|iPod/.test(navigator.userAgent)||(/[?&]test\b/.test(location.search)&&/[?&]iphone\b/.test(location.search));
@@ -21857,6 +21895,8 @@ PATCHES.unshift({v:'0.4.9', name:'Work in progress', items:phoneNotes([
 // text changes. Released notes live in notes_release.js.
 const TEST_NOTES={v:'test', label:'Test build · '+(window.DL_BUILD==='ios'?'iPhone':'Android'), name:'0.4.9 test build (newest first)', items:[
   '## New in this build',
+  'New setting, Settings › Display › Fight display: Classic (the fight signs from the live game), Around the fish (everything around the lure and the fish, as on the test builds) or Dial under the dock (one dial in the water under your dock, so nothing covers the fish; tips stay above it). Around the fish is the default, and your device remembers your choice.',
+  '## Test build 2026.11.25-1233',
   'Homes are now fixed for good: every water has one building, the platform you stand on and its own seat. The leftover home options are gone behind the scenes (nothing changes on screen).',
   'Brine Shelf: the boat’s light now hangs on its mast instead of a lamp post on the deck.',
   '## Test build 2026.11.25-0252',
@@ -23235,6 +23275,10 @@ if(/[?&]test\b/.test(location.search)) window.__homeSheet=async(name,idsIn,cwIn,
   o.width=cols*2*cw; o.height=Math.ceil(ids.length/cols)*(ch+18); const x=o.getContext('2d'); x.fillStyle='#0b1622'; x.fillRect(0,0,o.width,o.height); x.font='13px sans-serif';
   ids.forEach((id,i)=>{ [0,1].forEach(rest=>{ __go(id); V3CACHE=null; G.st=rest?'rest':'idle'; if(rest) restCast(); draw(performance.now()); draw(performance.now()+16); const cx=((i%cols)*2+rest)*cw, cy=Math.floor(i/cols)*(ch+18); x.drawImage(cv,0,sy,sw,sh,cx,cy+18,cw,ch); x.fillStyle='#fff'; x.fillText(id+(rest?' (rest)':''),cx+4,cy+14); }); });
   G.st='idle'; draw(performance.now()); return (await fetch('/shot/'+(name||'homes_all'),{method:'POST',body:o.toDataURL('image/jpeg',.85)})).status; };
+// test builds: __fightShot(name, mode, water, secs) a fight paused after secs of steady reeling, drawn with the chosen fight display (old / new / mid), whole screen
+if(/[?&]test\b/.test(location.search)) window.__fightShot=async(name,mode,id,secs)=>{ __go(id||'pond'); V3CACHE=null; const keep=S.settings.fightUi; S.settings.fightUi=mode; const sp=SP.filter(s=>s.loc===S.loc&&s.r===3)[0]||SP.find(s=>s.loc===S.loc);
+  G.fish=rollFish(sp,{noHybrid:true,noPrey:true}); G.st='reeling'; G.lastCast=.75; G.ten=0; G.temper=0; G.sta=1; G.fightT=0; ffInit(); let t=0; while(t<(secs||4)&&G.st==='reeling'){ G.hold=G.ten<70; fightNew(1/60); t+=1/60; } G.temper=Math.max(G.temper,1.2); G.ten=Math.max(G.ten,58); G.tell=G.tell||{t:0}; G.combo=Math.max(G.combo||0,3);
+  draw(performance.now()); draw(performance.now()+16); const url=cv.toDataURL('image/png'); S.settings.fightUi=keep; G.st='idle'; G.fish=null; G.tell=null; draw(performance.now()); return (await fetch('/shot/'+name,{method:'POST',body:url})).status; };
 
 // ---------- loop ----------
 let last=performance.now();
