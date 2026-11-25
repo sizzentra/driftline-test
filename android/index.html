@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="DL Test Android">
 <script>
-window.DL_BUILD='android'; window.DL_PREVIEW=true; if(/[?&]sweep\b/.test(location.search)){ window.__bootErr=[]; addEventListener("error",function(e){ __bootErr.push(String(e.message||e)+(e.lineno?" (line "+e.lineno+")":"")); }); addEventListener("unhandledrejection",function(e){ __bootErr.push("promise: "+String(e.reason&&e.reason.message||e.reason)); }); window.requestAnimationFrame=function(f){ return setTimeout(function(){ f(performance.now()); },16); }; window.cancelAnimationFrame=function(i){ clearTimeout(i); }; } try{ window.__tOff=/[?&](test|sweep|frozen)\b/.test(location.search)?0:(+(localStorage.getItem("dl-test-toff")||0)||0); }catch(e){ window.__tOff=0; } (function(){ var rn=Date.now.bind(Date); Date.now=function(){ return rn()+window.__tOff; }; })(); if(/[?&]frozen\b/.test(location.search)){ var __fz=20261122; Math.random=function(){ __fz|=0; __fz=__fz+0x6D2B79F5|0; var t=Math.imul(__fz^__fz>>>15,1|__fz); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; var __fc=0, __pn=performance.now.bind(performance); performance.now=function(){ __fc+=0.01; return 100000+__fc; }; Date.now=function(){ return 1795300000000+Math.floor(__fc); }; window.__frozenClock=function(){ return __fc; }; window.requestAnimationFrame=function(){ return 0; }; window.cancelAnimationFrame=function(){}; } window.DL_VERSION='2026.11.25-0218';
+window.DL_BUILD='android'; window.DL_PREVIEW=true; if(/[?&]sweep\b/.test(location.search)){ window.__bootErr=[]; addEventListener("error",function(e){ __bootErr.push(String(e.message||e)+(e.lineno?" (line "+e.lineno+")":"")); }); addEventListener("unhandledrejection",function(e){ __bootErr.push("promise: "+String(e.reason&&e.reason.message||e.reason)); }); window.requestAnimationFrame=function(f){ return setTimeout(function(){ f(performance.now()); },16); }; window.cancelAnimationFrame=function(i){ clearTimeout(i); }; } try{ window.__tOff=/[?&](test|sweep|frozen)\b/.test(location.search)?0:(+(localStorage.getItem("dl-test-toff")||0)||0); }catch(e){ window.__tOff=0; } (function(){ var rn=Date.now.bind(Date); Date.now=function(){ return rn()+window.__tOff; }; })(); if(/[?&]frozen\b/.test(location.search)){ var __fz=20261122; Math.random=function(){ __fz|=0; __fz=__fz+0x6D2B79F5|0; var t=Math.imul(__fz^__fz>>>15,1|__fz); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; var __fc=0, __pn=performance.now.bind(performance); performance.now=function(){ __fc+=0.01; return 100000+__fc; }; Date.now=function(){ return 1795300000000+Math.floor(__fc); }; window.__frozenClock=function(){ return __fc; }; window.requestAnimationFrame=function(){ return 0; }; window.cancelAnimationFrame=function(){}; } window.DL_VERSION='2026.11.25-0252';
 window.addEventListener('beforeinstallprompt',function(e){ e.preventDefault(); window.__dlInstallPrompt=e; });
 </script>
 </head>
@@ -860,7 +860,7 @@ const SPI = Object.fromEntries(SP.map(s=>[s.id,s]));
 const GEAR = {
   rod:   {name:'Rod length', get what(){ return typeof fishNew==='function'&&fishNew()?'Better rare odds on every cast':'Longer casts and better odds on far casts'; } /* Cam's fight feel: every cast reaches 40 m at the far edge, so the rod gives its rare odds */, lv:[22,26,31,36,42,48,55,62,70,80,90], cost:[0,250,2500,10000,36000,75000,225000,675000,2000000,6000000,15000000] /* Cam, 2026-11-23: levels 0 to 10 (a 90 m top level for the missing one) and these prices */, fmt:v=>typeof fishNew==='function'&&fishNew()?'+'+Math.round((ROD_RARE[GEAR.rod.lv.indexOf(v)]||0)*100)+'% rare odds':v+' m cast'},
   reel:  {name:'Reel',   what:'How fast you wind line in', lv:[3.1,3.8,4.6,5.5,6.5,7.6,8.8,10.1,11.5,13.2,15], cost:[0,250,2500,10000,36000,75000,225000,675000,2000000,6000000,15000000] /* Cam, 2026-11-23: the Rod length price curve */, fmt:v=>v.toFixed(1)+' m/s'},
-  line:  {name:'Line',   what:'Your Angler strength: fish stronger than it are heavy for you', lv:[9,13,17,21,24,28,33,40,52,60,70,80], /* C30 (director + Cam, 2026-11-20; Feel call): about 8% lower so each water opens with a few more fish stronger than you, and the top level just matches the hardest waters' strongest fish (about 78); it was 100, stronger than every fish */ /* 0.4.9 (director): levels follow the waters, so each water opens with you stronger than some fish and weaker than its rarest (was up to 230, stronger than every fish from level 7) */ cost:[0,250,2500,10000,36000,75000,225000,675000,2000000,6000000,15000000,35000000] /* Cam, 2026-11-23: the Rod length price curve; its 11th upgrade continues the climb (Feel call) */, fmt:v=>Math.round(wNum(v))+' '+wUnit()+' test'},
+  line:  {name:'Line',   what:'Your Angler strength: fish stronger than it are heavy for you', lv:[9,13,17,21,24,28,33,40,52,68,95,137], /* Cam, round 7 (2026-11-25): fish are stronger (Starfall tops at 200 lb, the last end-game water at 300 lb), so the top three levels climb to meet them: level 10 (95 kg, about 209 lb) just beats Starfall, level 11 (137 kg, just over 300 lb) matches the strongest fish; the lower levels are unchanged, so fish feel stronger through the game (Feel call) */ /* C30 (director + Cam, 2026-11-20; Feel call): about 8% lower so each water opens with a few more fish stronger than you, and the top level just matches the hardest waters' strongest fish (about 78); it was 100, stronger than every fish */ /* 0.4.9 (director): levels follow the waters, so each water opens with you stronger than some fish and weaker than its rarest (was up to 230, stronger than every fish from level 7) */ cost:[0,250,2500,10000,36000,75000,225000,675000,2000000,6000000,15000000,35000000] /* Cam, 2026-11-23: the Rod length price curve; its 11th upgrade continues the climb (Feel call) */, fmt:v=>Math.round(wNum(v))+' '+wUnit()+' test'},
   hook:  {name:'Hook',   what:'Longer window to set the hook', lv:[.6,.66,.72,.78,.84,.9,.96,1.02,1.08,1.14,1.2], cost:[0,250,2500,10000,36000,75000,225000,675000,2000000,6000000,15000000] /* Cam, 2026-11-23: the same 0.6 to 1.2 s over 10 upgrades (was 6), the Rod length price curve */, fmt:v=>v.toFixed(2)+' s window'},
   cooler:{name:'Cooler', what:'Fish you can carry before selling', lv:[8,12,18,26,36,50,66,85,110,140,175], cost:[0,250,2500,10000,36000,75000,225000,675000,2000000,6000000,15000000] /* Cam, 2026-11-23: levels 0 to 10 (175 fish for the missing one), the Rod length price curve */, fmt:v=>v+' fish'},
   finder:{name:'Fish Finder', what:'Reads the bite before you strike, and finds more hotspots', lv:[0,.5,1,1.5,2,2.5,3,3.5,4,4.5,5], cost:[0,1000,5000,15000,45000,90000,250000,750000,2200000,6500000,16000000], /* Cam, 2026-11-23: the same range over 10 upgrades (was 5): colour from level 1, rarity name from 6, species at 10 */
@@ -1536,6 +1536,14 @@ const WATER_EG = WATERS_NEW.filter(w=>w.eg);
     const [bk,bn,sp,rare,price,bnote]=Wd.bait; if(!BAIT[bk]) BAIT[bk]={name:bn, speed:sp, rare, pack:10, price, loc:Wd.id, locMul:Wd.mul, note:bnote};
   }
 })();
+/* Cam, round 7 (2026-11-25): fish are stronger. Starfall's strongest fish pulls 200 lb (it was about 170), every other water gets the same
+   lift so the climb keeps its shape, and the end-game waters climb from 200 lb (the first) to 300 lb (the furthest); each water's
+   strongest fish lands on its target exactly. Strength is a fish's pull (fishPull, kg), shown in the player's unit. Feel call. */
+const STR_TOP_LB={starfall:200, eg:[200,300]};
+(()=>{ const KG=2.20462, top={}; for(const s of SP){ const p=s.str*4/3; if(!(top[s.loc]>=p)) top[s.loc]=p; }
+  const lift=STR_TOP_LB.starfall/KG/top.starfall, egs=LOCS.filter(l=>l.eg).map(l=>l.eg), e0=Math.min(...egs), e1=Math.max(...egs), k={};
+  for(const L of LOCS) k[L.id]=L.eg&&top[L.id]?(STR_TOP_LB.eg[0]+(STR_TOP_LB.eg[1]-STR_TOP_LB.eg[0])*(L.eg-e0)/Math.max(1,e1-e0))/KG/top[L.id]:lift;
+  for(const s of SP) s.str=+(s.str*(k[s.loc]||lift)).toFixed(2); })();
 // ---------- end-game waters: open by voyages, never in the unlock chain, scaled to your progress ----------
 const isEgLoc = id => { const L=LOCS[locIdx(id)]; return !!(L&&L.eg); };
 /* Cam's list #12: an end-game water is "Uncharted Waters" (name and card) until you reach its voyage; then it opens for coins like any
@@ -1723,6 +1731,7 @@ const salePrice = f => Math.round(f.value*sellMult()*(demandSp().id===f.id?(maxe
 const CATCHUP_SHARE=.7;
 function waterAvg(id){ const c=waterAvg.c||(waterAvg.c={}); if(c[id]!=null) return c[id]; const L=SP.filter(s=>s.loc===id&&s.r<=1); return (c[id]=L.length?L.reduce((a,s)=>a+s.base,0)/L.length:1); }
 function waterCatchUp(id){ const i=locIdx(id), top=(S.unlocked||[]).reduce((m,u)=>Math.max(m,locIdx(u)),0); if(!(i>=0)||i>=top) return 1; return Math.max(1,CATCHUP_SHARE*waterAvg(LOCS[top].id)/waterAvg(id)); }
+const REFLEX_PULL=[.5,.5,.35,.25,.15,.1]; /* Quick Reflexes at max rank: how much of the distance a perfect hook pulls in, by rarity (Cam, round 7; Feel call) */
 const hookWin = () => gv('hook') + .05*pr('reflex') + rodHook() + (relic('goldhook')?.15:0);
 const reelSpeed = () => gv('reel') * (1 + .04*pr('strong')) * (1 + bonus('reel'));
 const tensionMult = () => (1 - .04*pr('steady')) * (1 - bonus('tension'));
@@ -1879,7 +1888,7 @@ function hookIt(){ const perfect = (G.waitT - (G.biteEnd - hookWin())) < .3*hook
   G.eatAt = G.forceEat ? (G.forceEat=false, .5) : (G.fish.kind==='fish' && !isPredator(G.fish.sp) && G.fish.sp.r<=2 && Math.random()<.05*pathMul('eat')) ? rnd(1.4,3.8) : null; /* 0.4.9: half as often (director: "slightly rarer") */
   if(G.fish.kind==='fish' && G.fish.shiny===2) setTimeout(()=>toast('It shimmers like nothing you have seen. It will fight every way a fish can.'),400);
   if(G.fish.kind==='fish' && G.fish.hy) setTimeout(()=>toast(G.fish.kg>(G.fish.sp.min+G.fish.sp.max)/2?'This feels far too heavy for what it looks like...':'Strangely light on the line...'),600);
-  if(perfect){ G.sta=.8; G.ten=0; G.runT=rnd(.5,.9); /* 0.4.9 (director: "perfect hook needs fish inactivity time slightly reduced"): a smaller head start in stamina and a shorter first rest */ S.stats.perfect++; if(maxed('reflex')){ G.d*=.5; toast('Lightning hook! Halfway in already.'); } else toast('Perfect hook! The fish starts tired.'); tone(990,.1,'triangle',.07,0,.05); } }
+  if(perfect){ G.sta=.8; G.ten=0; G.runT=rnd(.5,.9); /* 0.4.9 (director: "perfect hook needs fish inactivity time slightly reduced"): a smaller head start in stamina and a shorter first rest */ S.stats.perfect++; if(maxed('reflex')){ const pk=REFLEX_PULL[(G.fish&&G.fish.sp?G.fish.sp.r:0)|0]||.1; G.d*=1-pk; toast(pk>=.5?'Lightning hook! Halfway in already.':'Lightning hook! A head start.'); } /* Cam, round 7 ("right now it's just broken"): half the way only for common and uncommon fish, less for rarer ones */ else toast('Perfect hook! The fish starts tired.'); tone(990,.1,'triangle',.07,0,.05); } }
 function breakStreak(why){ const n=S.streak; if(!n){ if(why) toast(why); return; } const keep=maxed("streaker")?Math.floor(n/2):0; /* director 2026-11-18: a streak ends only when a fish that bit gets away; On a Roll maxed keeps half */ S.streak=keep; const msg=keep?"Fish lost: streak "+n+" halved to "+keep:"Streak of "+n+" ended"; if(why) toast(n>=3?why+' '+msg+'.':why); else if(n>=3) setTimeout(()=>toast(msg),1200); save(); } /* why: Cam's list #10 puts the reason into the streak message */ /* 0.3.6: saved at once, so a refresh can't bring a broken streak back */
 function endFight(kind){
   if(kind==='caught'){ G.st='landing'; G.land={t:0, dur:.85, x0:G.bob.x, y0:G.bob.y}; splash(G.bob.x,G.bob.y,24); sfx.pull(); return; }
@@ -2029,10 +2038,10 @@ const FEATS = [
   {id:'tide3', name:'Old sea dog',            d:'Set sail again 3 times',    p:()=>[S.tides,3],           coins:0, pt:3},
 ];
 function checkFeats(){ for(const f of FEATS){ if(S.feats[f.id]) continue; const [a,b]=f.p(); if(a>=b){ S.feats[f.id]=true; earn(f.coins); if(f.pt) S.bonusPts+=f.pt;
-  let extra=''; if(f.pet && !S.owned.pets.includes(f.pet)){ S.owned.pets.push(f.pet); extra=', new pet: '+PETI[f.pet].name; }
-  if(f.rod && !S.rods.owned.includes(f.rod)){ S.rods.owned.push(f.rod); extra+=', new rod: '+ROD_I[f.rod].name; }
+  let extra='', gift=''; if(f.pet && !S.owned.pets.includes(f.pet)){ S.owned.pets.push(f.pet); gift='New pet: '+PETI[f.pet].name+'!'; }
+  if(f.rod && !S.rods.owned.includes(f.rod)){ S.rods.owned.push(f.rod); gift+=(gift?' ':'')+'New rod: '+ROD_I[f.rod].name+'!'; } /* a pet or rod gets its own pop-up: with the crate, one line ran past 80 letters (2026-11-25) */
   { const ck=f.pt?'big':'small'; S.tokens[ck]=(S.tokens[ck]||0)+1; extra+=', a '+ck+' Mystery Crate'; } /* Cam, round 5: crates come from feats (big for a feat with a skill point) */
-  setTimeout(()=>{ toast('Feat: '+f.name+' (+'+fmt(f.coins)+' coins'+(f.pt?', +'+f.pt+' skill point'+(f.pt>1?'s':''):'')+extra+')'); sfx.coin(); }, 900); } } }
+  setTimeout(()=>{ toast('Feat: '+f.name+' (+'+fmt(f.coins)+' coins'+(f.pt?', +'+f.pt+' skill point'+(f.pt>1?'s':''):'')+extra+')'); sfx.coin(); if(gift) setTimeout(()=>toast(gift),1400); }, 900); } } }
 
 // ---------- aquarium ----------
 const fishRate = f => aqFishBase(f)*(spec('curator')?1.25:1)*(1+.08*pr('keeper'))*(1+bonus('tank')+decorBonus())*coinMult();
@@ -2272,7 +2281,7 @@ function rollFish(sp,ctx){ const b=BAIT[S.baitSel], wx=weather(), dm=ctx.dist||{
   if(!ctx.noPrey && isPredator(sp) && Math.random()<.12+sp.aggr*.12){ const pp=preyPool(sp,SP.filter(s=>s.loc===sp.loc && timeOk(s,phase()))); if(pp.length){ f.prey=[]; const n=Math.random()<.15?2:1; for(let i=0;i<n;i++) f.prey.push(rollFish(pick(pp),{noHybrid:true,noPrey:true})); } }
   return f; }
 // the cooler entry for a landed fish
-function coolerEntry(f){ const e={id:f.sp.id, kg:+f.kg.toFixed(3), value:f.value, sh:f.shiny||0, tr:f.trophy?1:0}; if(f.pv) e.pv=f.pv; if(f.hy) e.hy=f.hy; if(f.hx) e.hx=f.hx; if(f.ab) e.ab=f.ab; if(f.ab2) e.ab2=f.ab2; return e; }
+function coolerEntry(f){ const e={id:f.sp.id, kg:+f.kg.toFixed(3), value:f.value, sh:f.shiny||0, tr:f.trophy?1:0}; if(f.pv) e.pv=f.pv; if(f.hy) e.hy=f.hy; if(f.hx) e.hx=f.hx; if(f.ab) e.ab=f.ab; if(f.ab2) e.ab2=f.ab2; const cu=waterCatchUp(f.sp.loc); if(cu>1) e.cu=+cu.toFixed(3); /* Cam, round 7: the catch-up already in its price, so the aquarium can follow today's catch-up instead */ return e; }
 // journal update incl. smallest, prismatic and hybrid records
 function journalAdd(f){ const sp=f.sp, j=S.journal[sp.id], kg=+f.kg.toFixed(3);
   const n={n:(j?j.n:0)+1, best:j?j.best:0, min:j&&j.min!=null?j.min:null, sh:(j&&j.sh)||!!f.shiny, pr:(j&&j.pr)||f.shiny===2, tr:(j&&j.tr)||f.trophy, bv:Math.max((j&&j.bv)||0, f.value), first:(j&&j.first)||Date.now()};
@@ -2290,7 +2299,7 @@ if(/[?&]test\b/.test(location.search)) window.__prismSheet=(ids)=>{ const o=docu
 // rising with rarity. So a full tank is a strong passive bonus, and fishing yourself always pays more per hour.
 const AQ_CAP_K=[.006,.008,.012,.02,.03,.045], WATER_EV={};
 function waterEV(loc){ if(WATER_EV[loc]==null){ const pool=SP.filter(s=>s.loc===loc); let a=0,t=0; for(let r=0;r<6;r++){ const L=pool.filter(s=>s.r===r); if(!L.length) continue; a+=RAR[r].w*L.reduce((x,s)=>x+s.base,0)/L.length*RAR[r].val; t+=RAR[r].w; } WATER_EV[loc]=t?a/t:1; } return WATER_EV[loc]; }
-function aqFishBase(f){ const sp=SPI[f.id]; if(!sp) return 0; const sm=hySmall(f,sp), raw=(+f.value||0)/(sm?hyWeightK(sm):1)*TANK_RATE*.75*RAR[sp.r].aq*(f.sh===2?1.6:1)*(f.hy?1.3:1), cap=waterEV(sp.loc)*4.6*AQ_CAP_K[sp.r]*(sm?aqWeightK({kg:(sp.min+sp.max)/2},sp):aqWeightK(f,sp))*(f.sh===2?1.6:f.sh?1.25:1)*(f.hy?1.3:1)*(f.hx||1); return Math.min(raw,cap); } /* [23] in-range hybrids lift the cap by the same multiplier */
+function aqFishBase(f){ const sp=SPI[f.id]; if(!sp) return 0; const cu=waterCatchUp(sp.loc), sm=hySmall(f,sp), raw=(+f.value||0)/(+f.cu||1)*cu/(sm?hyWeightK(sm):1)*TANK_RATE*.75*RAR[sp.r].aq*(f.sh===2?1.6:1)*(f.hy?1.3:1), cap=waterEV(sp.loc)*4.6*AQ_CAP_K[sp.r]*(sm?aqWeightK({kg:(sp.min+sp.max)/2},sp):aqWeightK(f,sp))*(f.sh===2?1.6:f.sh?1.25:1)*(f.hy?1.3:1)*(f.hx||1)*cu; return Math.min(raw,cap); } /* Cam, round 7 (2026-11-25): fish from earlier waters earn more in the aquarium as later waters open, like their sale price (waterCatchUp: competitive, never better than the top water) */ /* [23] in-range hybrids lift the cap by the same multiplier */
 // 0.3.2: weight counts in the aquarium. A fish heavy for its kind earns more (its income cap grows from x0.75 for the
 // lightest to x1.7 for a record-breaker) and rolls stronger buffs, so your best prized catches belong on display.
 function aqRel(f,sp){ return sp&&sp.max>sp.min ? clamp(((+f.kg||0)-sp.min)/(sp.max-sp.min),0,1.5) : .5; }
@@ -2341,7 +2350,7 @@ const FF = { FAR_M:40, SPOOL_M:80, LB:.4536, /* Cam, 2026-11-23 (round 4): spool
   LONG_RESET:3,                     /* Cam, 2026-11-23: a long run within 3 s of the last one ending must be shorter than it */
   TEMPER_DROP:1, TEMPER_RATE:3,     /* Cam: temper empties in 3 s; full temper = moves up to 3 times as often (Feel call), each costing 1/3 */
   DIVE_HALF:10.625,                 /* Cam, 2026-11-23: the band that stops a dive is 15% narrower than before (25% wide to 21.25%) */
-  TEMPER_TEN:1.5,                   /* Cam, 2026-11-23: "high temper needs to be more punishing": reeling between moves builds tension up to 1 + this times faster as the temper bar fills past half (2.5x when full; Feel call) */
+  TEMPER_TEN:2.5, TEMPER_MOVE:1.1, /* Cam, round 7 (2026-11-25): "temper needs to hit harder still": between moves up to 3.5x the tension build at full temper (was 2.5x), and every move pulls up to 2.1x tighter at full temper (was 1.7x); Feel calls */ /* Cam, 2026-11-23: "high temper needs to be more punishing": reeling between moves builds tension up to 1 + this times faster as the temper bar fills past half (2.5x when full; Feel call) */
   ACT_DRAIN:1.5,                    /* Cam: reeling into a move drains Fight 1.5 times as fast */
   SWIM_P:[.5,.45,.38,.32,.26,.2], SWIM_K:[1.25,1.5], SWIM_T:[.25,3], SWIM_EVERY:[1,2], /* Cam: still or swimming toward you between moves */
   TIRED_FAST:[.6,.45,.3,.25,.2,.1], /* Cam: a tired fish reels in this much faster, by rarity */
@@ -2350,6 +2359,7 @@ const FF = { FAR_M:40, SPOOL_M:80, LB:.4536, /* Cam, 2026-11-23 (round 4): spool
   SW_EXTRA:[0,0,1,1,2,2], SW_WAITS:[5,3,1], SW_LAST_TO:.25, /* Cam: extra Second winds by rarity, their flip waits, the legendary / mythic third */
   DIVE_SHARE:1/3, DIVE_T:[5,20], DIVE_HOLD:1.5, DIVE_RATE:.5, DIVE_MK:3, /* Cam: dives = a third of runs, 5-20 s, stopped by 1.5 s in the band, slower but longer */
   PERFECT_REST:1.5,                 /* Cam: after a perfect hook the fish doesn't fight for 1.5 s */
+  GRIP:[.35,.8], GRIP_VAR:.3, STAM_VAR:.2, /* Cam, round 7: the stronger you are than the fish, the less its hold counts: hold x (fish / you)^0.8, never below 35% of it; and every species has its own character, its hold 0.7x to 1.3x and its stamina 0.8x to 1.2x (fixed per species, so two fish of one rarity fight differently; Feel calls) */
   RESIST:[.15,.55,.75,.86,.9,.92],   /* maths: how hard a fresh fish of each rank holds against your reel (C U R E L M) */
   TIRE_T:[12,12,13,15,18,19],       /* seconds of reeling a fish needs to tire with the best gear (Cam 2026-11-21: "speed up fishing" to about half the speed of the old fight with great gear; was 15-24) */
   SHARE:{shake:35,run:45,jump:20},  /* Cam: rough share of each move (Middle and Arcade: runs 40, see ffPick) */
@@ -2386,7 +2396,6 @@ function feelCombo(d){ if(!FEEL.combo&&d>0) return; const was=G.combo||0; G.comb
 const feelReelK = () => 1+Math.min(.4,.05*(G.combo||0)*(FEEL.combo||0));
 /* drawn over the fight every frame (d_draw.js): the hook flash, the perfect-pull ring, pop-ups rising from the float and the combo badge */
 function feelDraw(t){ if(G.st!=='reeling'||!G.fish) return; const bx=G.bob.x, by=G.bob.y, s=clamp(H/420,.7,1.25);
-  if(G.flashT>0){ g.fillStyle='rgba(255,252,235,'+(G.flashT/.18*.35)+')'; g.fillRect(0,0,W,H); }
   if(G.ppw>0){ const k=1-G.ppw/.45; g.strokeStyle='rgba(255,230,120,'+(.9-k*.5)+')'; g.lineWidth=2.5*s; g.beginPath(); g.ellipse(bx,by,(10+k*14)*s,(4+k*5)*s,0,0,7); g.stroke(); }
   if(G.tell){ g.strokeStyle='rgba(255,140,90,.8)'; g.lineWidth=2*s; const k=(t*6)%1; g.beginPath(); g.ellipse(bx,by,(6+k*10)*s,(2.5+k*4)*s,0,0,7); g.stroke(); }
   if(G.grooveT>.3){ g.strokeStyle='rgba(150,240,170,'+(.45+.2*Math.sin(t*5))+')'; g.lineWidth=2*s; g.beginPath(); g.ellipse(bx,by,13*s,5*s,0,0,7); g.stroke(); } /* in the groove */
@@ -2412,7 +2421,7 @@ function ffInit(){ const f=G.fish; G.surge3=null;
   else if(f&&f.kind==='fish'&&fishRank(f)>=2&&G.d0<25){ G.ffOpen=true; G.ffRest=.35; }
   G.swim=null; G.swimT=rnd(FF.SWIM_EVERY[0],FF.SWIM_EVERY[1]); G.swStep=0; G.swNext=0; G.swN=0;
   if(G.perfect){ G.ffOpen=false; G.ffRest=Math.max(FF.PERFECT_REST,G.ffRest); } /* Cam: a perfect hook holds the fish still for 1.5 s */
-  G.combo=0; G.pops=[]; G.ppw=0; G.tell=null; G.prevRin=0; G.dartNext=false; G.dartLeft=0; G.grooveT=0; G.reelHold=0; G.restHold=0; G.flashT=FEEL.juice&&f&&f.kind==='fish'?.18:0; G.ffMin=0; G.lastK=null; G.dQ=0; if(G.perfect) feelPop('Perfect hook!'); /* Feel lab */ }
+  G.combo=0; G.pops=[]; G.ppw=0; G.tell=null; G.prevRin=0; G.dartNext=false; G.dartLeft=0; G.grooveT=0; G.reelHold=0; G.restHold=0; G.ffMin=0; G.lastK=null; G.dQ=0; if(G.perfect) feelPop('Perfect hook!'); /* Feel lab */ }
 // how often the fish acts, from its temper: 1x calm, up to FF.TEMPER_RATE x at full temper (Cam: full temper = rapid moves)
 const ffRate = () => 1+(FF.TEMPER_RATE-1)*clamp((G.temper||0)/3,0,1);
 /* the weight a fish fights with: a small hybrid fights as one of its usual size (Cam, round 4: "weight does not reduce a small hybrid's fight", nor do the light-fish line rules apply) */
@@ -2445,7 +2454,7 @@ function ffEnd(f,tk,lively){ const was=G.ffA; G.ffA=null; G.ev=null; G.run=false
   G.ffRest=rest*rnd(.8,1.2); if(FEEL.runs) G.ffMin=was&&was.k==='run'?1.2:.6; } /* real-time floors: 1.2 s after a run, 0.6 s after anything, however hot the fish (director, 2026-11-23: runs mustn't crowd out the rest) */
 function fightNew(dt){
   if(!G.fish){ G.st='idle'; return; }
-  const f=G.fish; if(f.kind!=='fish'){ G.flashT=0; snagFight(dt); return; } /* no hook flash in an oddity's fight: it never faded there and left the screen white (bug, director 2026-11-23) */
+  const f=G.fish; if(f.kind!=='fish'){ snagFight(dt); return; } /* (no screen flash on any hook since Cam's round 7, 2026-11-25) */
   maybeEatEvent(dt); eatTick(dt);
   if(f.shiny===2){ G.behT=(G.behT||0)-dt; if(G.behT<=0){ G.behT=rnd(2.2,3.6); const ks=Object.keys(BEH); f.beh=ks[Math.floor(Math.random()*ks.length)]; } }
   const rk=fishRank(f), tk=Math.min(5,rk+(f.shiny===2?1:0)) /* Cam: titled shinies fight much harder */, B=BEH[f.beh]||BEH.calm, wc=ffWeightClass(f), kg=ffKg(f);
@@ -2490,13 +2499,13 @@ function fightNew(dt){
       if(good){ A.good=(A.good||0)+dt; G.sta=Math.max(0,G.sta-dt*.035*FEEL.counter*(A.style==='dart'?1.5:1)); if(!A.paid&&A.good>=.4){ A.paid=1; feelPop(A.k==='dive'?'Held it!':(A.k==='jump'&&!A.away)?'Reeled in!':A.style==='dart'?'Let it dart!':'Nice!'); feelCombo(1); } } /* letting a dart go tires the fish faster */
       else if(live&&rin>0&&G.ten>80&&!A.bad){ A.bad=1; feelCombo(-1); } }
     if(A.t>=A.dur){ if(A.k==='jump') splash(G.bob.x+(A.away?30:-30),G.bob.y,18); ffEnd(f,tk,lively); } }
-  if(tenRate>0) tenRate*=1+.7*(FEEL.tx||0)*clamp((G.temper||0)/3,0,1); /* Cam, 2026-11-23: the more temper, the harder every move pulls the line tight */
+  if(tenRate>0) tenRate*=1+FF.TEMPER_MOVE*(FEEL.tx||0)*clamp((G.temper||0)/3,0,1); /* Cam, 2026-11-23: the more temper, the harder every move pulls the line tight */
   if(strong){ tenRate*=ffStrongK(FF.STRONG_TEN,tk); outV*=ffStrongK(FF.STRONG_LINE,tk); } /* a fish stronger than your tackle strains the line 1.5x and its runs and jumps take 1.5x line (Cam, round 4) */
   // reeling: a fresh fish holds against you by rank (only fish of 1.5 lb and up); a tired one comes in at full speed
-  if(rin>0){ const tired=G.sta<=0, fast=tired?(1+FF.TIRED_FAST[tk])/FF.TIRED_SLOW[tk]/Math.pow(Math.max(1,over/FF.TIRED_STRONG[0]),FF.TIRED_STRONG[1]):1, res=wc>=1?clamp(FF.RESIST[tk]*(tired?FF.TIRED_RES:Math.pow(Math.max(0,G.sta),.6))*(B.heavy?1.1:1),0,.97):0, gain=Math.min(reel*rin*(1-res)*gainK*fast, FF.FAR_M*fast/(tired?FF.TIRED_T[tk]:FF.SHORT_T[tk]*FEEL.len))*dt; /* Cam, round 6: a tired fish keeps half its hold and takes at least TIRED_T s from the far edge */ /* Cam: a tired fish comes in 10-60% faster by rarity */ /* Cam: never faster than its rarity's shortest time while it has fight; a tired fish comes in at full speed (about 3 s from the far edge at most) */
+  if(rin>0){ const tired=G.sta<=0, fast=tired?(1+FF.TIRED_FAST[tk])/FF.TIRED_SLOW[tk]/Math.pow(Math.max(1,over/FF.TIRED_STRONG[0]),FF.TIRED_STRONG[1]):1, res=wc>=1?clamp(FF.RESIST[tk]*(tired?FF.TIRED_RES:Math.pow(Math.max(0,G.sta),.6))*(B.heavy?1.1:1)*ffGrip(f,over),0,.97):0, gain=Math.min(reel*rin*(1-res)*gainK*fast, FF.FAR_M*fast/(tired?FF.TIRED_T[tk]:FF.SHORT_T[tk]*FEEL.len))*dt; /* Cam, round 6: a tired fish keeps half its hold and takes at least TIRED_T s from the far edge */ /* Cam: a tired fish comes in 10-60% faster by rarity */ /* Cam: never faster than its rarity's shortest time while it has fight; a tired fish comes in at full speed (about 3 s from the far edge at most) */
     if(G.dd>0){ const back=Math.min(G.dd,.75*gain); G.dd-=back; } G.d-=gain; /* Cam: dive distance comes back at a 75% rate */
     const intoMove=A&&!(A.k==='jump'&&!A.away&&A.t>=JUMP_WINDUP)?FF.ACT_DRAIN:1; /* Cam: reeling into a move (not a jump toward you) drains its Fight 1.5x */
-    G.sta=Math.max(0,G.sta-intoMove*rin*dt/(FF.TIRE_T[tk]*fk*FEEL.len*clamp(Math.sqrt(over),1,2)*(B.heavy?1.15:1)*(1+.5*(fightVoy()-1))*(strong?ffStrongK(FF.STRONG_FIGHT,tk):1))*(1-.25*G.temper/3)); /* a fish stronger than your tackle has double its Fight */ /* Cam: the temper keeps its Fight from draining */
+    G.sta=Math.max(0,G.sta-intoMove*rin*dt/(FF.TIRE_T[tk]*ffStam(f)*fk*FEEL.len*clamp(Math.sqrt(over),1,2)*(B.heavy?1.15:1)*(1+.5*(fightVoy()-1))*(strong?ffStrongK(FF.STRONG_FIGHT,tk):1))*(1-.25*G.temper/3)); /* a fish stronger than your tackle has double its Fight */ /* Cam: the temper keeps its Fight from draining */
     G.tickT-=rin*dt; if(G.tickT<=0){ G.tickT=.07; sfx.tick(); } }
   if(rin<1 && outV>0) G.d+=outV*(1-rin)*dt; /* only a fish over 5 lb takes line, and only while you let it */
   // tension: moves strain the line while you reel into them; between moves it settles; letting go lets it fall (slower for heavy fish)
@@ -2520,7 +2529,7 @@ function fightNew(dt){
   if(G.strip){ const P=G.strip; P.t+=dt; const k=Math.min(1,P.t/P.dur), e=1-Math.pow(1-k,2); G.d=Math.max(G.d,P.from+(P.to-P.from)*e); G.run=true; if(rin>0) G.ten+=EAT_STRIP_TEN*rin*dt*tensionMult(); if(k>=1){ G.strip=null; if(!G.ffA) G.run=false; } }
   /* Feel lab: the perfect pull (press reel inside the glowing window as a move ends), the hook flash, pop-ups, a mistake at the snap line */
   { const press=rin>0&&!(G.prevRin>0); if(G.ppw>0){ G.ppw-=dt; if(press&&G.sta>0){ G.ppw=0; G.sta=Math.max(0,G.sta-.1*FEEL.pull); G.dQ=(G.dQ||0)+1.2*FEEL.pull; feelPop('Perfect pull!'); feelCombo(1); try{ tone(880,.08,'triangle',.06); }catch(e){} } }
-    G.prevRin=rin; if(G.flashT>0) G.flashT=Math.max(0,G.flashT-dt); if(G.pops){ for(const p of G.pops) p.t+=dt; G.pops=G.pops.filter(p=>p.t<1.1); }
+    G.prevRin=rin; if(G.pops){ for(const p of G.pops) p.t+=dt; G.pops=G.pops.filter(p=>p.t<1.1); }
     if(G.ten>92&&rin>0&&(G.combo||0)>0&&!G.ffA) feelCombo(-1); }
   if(G.dQ>0){ const st=Math.min(G.dQ,Math.max(.05,G.dQ*dt*8)); G.d=Math.max(.5,G.d-st); G.dQ-=st; } /* line won back by a reward comes in over a moment, so the float glides instead of jumping (bug: "landing a combo reaction, the game jumps", director 2026-11-23) */
   G.noReelT=rin>0?0:(G.noReelT||0)+dt;
@@ -2551,6 +2560,10 @@ function ffFightK(f){ if(!f||f.kind!=='fish'||!f.sp) return 1; let k=1;
   return k; }
 /* Cam, round 6: a stronger-than-you fish's extra fight, tension and line, scaled by its rarity (a common gets 60% of the extra, a mythic 140%) */
 const ffStrongK = (k,tk) => 1+(k-1)*FF.STRONG_RK[tk];
+/* Cam, round 7: each species' own character (from its id, so it never changes), and how much of its hold counts against a stronger angler */
+const ffTrait = (f,salt) => { const s=(f&&f.sp&&f.sp.id||'')+salt; let h=2166136261; for(let i=0;i<s.length;i++){ h^=s.charCodeAt(i); h=Math.imul(h,16777619); } return (h>>>0)/4294967296; };
+const ffGrip = (f,over) => (f&&f.kind==='fish'?1+FF.GRIP_VAR*(2*ffTrait(f,'g')-1):1)*(over<1?clamp(Math.pow(over,FF.GRIP[1]),FF.GRIP[0],1):1);
+const ffStam = f => f&&f.kind==='fish'?1+FF.STAM_VAR*(2*ffTrait(f,'s')-1):1;
 // =====================================================================
 // 0.3 CONTROLS: new ways to fish, all optional and all on top of the classic one-button controls.
 //  - Tap to aim (setting): tap the spot on the water you want; a little scatter keeps it honest.
@@ -3987,8 +4000,10 @@ function dailyLogin(){ const k=dayKey(), y=dayKey(new Date(Date.now()-86400000))
   if(!S.stats.caught && !S.savedAt) return null; const day=S.login.streak, mult=Math.min(3,1+day*.25); const coins=earn(bestLoot()*3*mult*coinMult()); const sc=Math.min(10,day); S.scales+=sc; let extra='';
   if(day%7===0){ S.tokens.big++; extra=' and a big Mystery Crate'; } S.freeSpins=Math.min(3,S.freeSpins+1);
   return 'Daily gift, day '+day+': +'+fmt(coins)+' coins, +'+sc+' Scales, a free spin'+extra+'!'; }
-function dailyHTML(){ const d=ensureDaily(); const done=d.tasks.filter(t=>taskHave(t)>=t.n).length;
-  return `<div class="tile" style="margin-bottom:12px"><div class="row spread"><div><h4>Daily tasks</h4><div class="meta">New tasks every day. Finish all three for a bonus crate. Login streak: ${S.login.streak} day${S.login.streak===1?'':'s'}.</div></div><span class="meta">${done} / 3</span></div>
+/* presses one panel action as if its button were clicked (Claim all reuses each Claim exactly) */
+function actClick(a,i){ const P=document.getElementById('panel')||document.body, b=document.createElement('button'); b.type='button'; b.dataset.act=a; b.dataset.i=i; b.hidden=true; P.appendChild(b); try{ b.click(); } finally{ b.remove(); } }
+function dailyHTML(){ const d=ensureDaily(); const done=d.tasks.filter(t=>taskHave(t)>=t.n).length, ready=d.tasks.filter(t=>!t.claimed&&taskHave(t)>=t.n).length;
+  return `<div class="tile" style="margin-bottom:12px"><div class="row spread"><div><h4>Daily tasks</h4><div class="meta">New tasks every day. Finish all three for a bonus crate. Login streak: ${S.login.streak} day${S.login.streak===1?'':'s'}.</div></div><span class="meta">${done} / 3</span>${ready>1?'<button class="btn sm" data-act="taskclaimall">Claim all</button>':''}</div>
    ${d.tasks.map((t,i)=>{ const h=Math.min(t.n,taskHave(t)), ok=h>=t.n; return `<div class="toggle"><div style="min-width:0"><b>${esc(t.d.replace('{n}',fmt(t.n)).replace('{pet}',petName()))}</b><div class="meta">${fmt(h)} / ${fmt(t.n)} · reward <span class="coin">${fmt(t.coins)}</span> + ${t.scales} Scales</div><div class="prog"><i style="width:${h/t.n*100}%"></i></div></div>
      ${t.claimed?'<span class="badge g">Done</span>':`<button class="btn sm" data-act="taskclaim" data-i="${i}" ${ok?'':'disabled'}>Claim</button>`}</div>`; }).join('')}
    ${d.tasks.every(t=>t.claimed)?(d.bonus?'<p class="sub">Bonus collected. See you tomorrow!</p>':'<button class="btn" data-act="taskbonus" style="margin-top:8px">Claim bonus crate</button>'):''}</div>`; }
@@ -4076,6 +4091,8 @@ function extraAct2(b){ const k=b.dataset.k, i=+b.dataset.i;
     case 'pethat': if(S.owned.hats.includes(k)) petLook().hat=k; return 'render';
     case 'petcol': petLook()[k]=b.dataset.v; return 'render';
     case 'taskclaim': { const t=ensureDaily().tasks[i]; if(!t||t.claimed||taskHave(t)<t.n) return 'skip'; t.claimed=true; addPassXP(40); earn(t.coins*coinMult()); S.scales+=t.scales; S.gstats.tasks++; sfx.coin(); toast('Task done: +'+fmt(t.coins*coinMult())+' coins, +'+t.scales+' Scales'); return 'render'; }
+    case 'claimall': { const is=S.bounties.map((b,j)=>[b,j]).filter(([b])=>bDone(b)&&(!b.loc||S.unlocked.includes(b.loc))).map(([,j])=>j).sort((a,b)=>b-a); if(!is.length) return 'skip'; for(const j of is) actClick('claim',j); return 'render'; } /* Cam, round 7: claim every finished bounty at once (each through its own Claim, so every bonus still applies; highest first, so the others keep their places) */
+    case 'taskclaimall': { const d=ensureDaily(), is=d.tasks.map((t,j)=>j).filter(j=>!d.tasks[j].claimed&&taskHave(d.tasks[j])>=d.tasks[j].n); if(!is.length) return 'skip'; for(const j of is) actClick('taskclaim',j); return 'render'; }
     case 'taskbonus': { const d=ensureDaily(); if(d.bonus||!d.tasks.every(t=>t.claimed)) return 'skip'; d.bonus=true; S.tokens.small++; sfx.catch(3); toast('All tasks done! A small Mystery Crate is waiting at the Boardwalk.'); return 'render'; }
     case 'patches': showPatchNotes(); return 'skip';
     case 'safereset': { const w=$('resetword'); if(!w||w.value.trim()!=='DELETE') return 'skip'; try{ localStorage.setItem(BACKUP_KEY, JSON.stringify(S)); }catch(e){}
@@ -4281,7 +4298,7 @@ const MASTERY_FX = {
   steady:'Second wind: once per fight, your line survives a snap.',
   strong:'Power start: the first 2 seconds of every fight reel twice as fast.',
   softtouch:'Calm aura: fish lose their temper twice as fast whenever you let go.',
-  reflex:'Lightning hook: a perfect hook pulls the fish halfway in.',
+  reflex:'Lightning hook: a perfect hook pulls common and uncommon fish halfway in, rarer fish a shorter way.',
   patience:'Every 10th cast bites almost instantly.',
   lucky:'Every 25th catch is at least Rare.',
   caster:'Bullseye: a full-power cast makes its own little hotspot.',
@@ -21969,6 +21986,16 @@ PATCHES.unshift({v:'0.4.9', name:'Work in progress', items:phoneNotes([
 // text changes. Released notes live in notes_release.js.
 const TEST_NOTES={v:'test', label:'Test build · '+(window.DL_BUILD==='ios'?'iPhone':'Android'), name:'0.4.9 test build (newest first)', items:[
   '## New in this build',
+  'Fish fights, Cam’s list: when you are stronger than a fish, its hold counts for less (down to about a third of it), so weaker fish reel in faster; and every kind of fish now has its own hold and stamina, so two fish of the same rarity fight differently.',
+  'Temper hits harder: a fired-up fish builds tension much faster between moves, and its moves pull the line tighter.',
+  'Fish are stronger everywhere: Starfall Lake’s strongest fish now pull about 200 lb, and the end-game waters climb up to about 300 lb at the last one.',
+  'Quick Reflexes at max rank: a perfect hook pulls common and uncommon fish halfway in, and rarer fish a shorter way (it pulled every fish halfway, mythics too).',
+  'Fish from earlier waters now also earn more in your aquarium as you open later waters, like their sale price.',
+  'No more screen flash when you hook a fish.',
+  'Claim all: one button to claim every finished bounty, and one for finished daily tasks.',
+  'The top three Line levels are stronger to keep up with the stronger fish (the last one now holds about 300 lb).',
+  'A feat that gives a pet or rod now shows it in its own pop-up, so the feat line stays short.',
+  '## Test build 2026.11.25-0218',
   'Cherry Blossom Lake is now Maplewood Hollow, a fall water drawn in the game’s own style: a treehouse in a giant maple to fish from, a red covered bridge, a pumpkin patch with a scarecrow who fishes too, falling and floating leaves, geese, a busy squirrel, bats and glowing pumpkins at night, and a little leaf whirlwind now and then. Same fish, same place on your journey; the bait is now Maple Leaves.',
   '## Test build 2026.11.25-0116',
   'Willow Pond is back to its drawn scene in the game’s own style: the red boathouse, the far cabin, ducks, the frog, deer, ducklings, fireflies and the owl. The painted version is gone.',
@@ -22598,6 +22625,15 @@ T('Cam 2026-11-23 (3): one price curve for five tackle items, darts chain by rar
     const chained=tk=>{ let n=0,min=9; for(let i=0;i<400;i++){ ffStart(G.fish,tk,tk,1,.5,'run','dart'); if(G.dartLeft>0) n++; min=Math.min(min,G.dartLeft); G.ffA=null; } return {p:n/400,min}; }; const c0=chained(0), c5=chained(5); if(!(c0.p>.05&&c0.p<.3)) e.push('common darts chain '+Math.round(c0.p*100)+'%'); if(c5.min<2) e.push('a mythic dart did not chain twice');
   } finally { save=sv; toast=ts; G.st='idle'; G.fish=null; G.ffA=null; G.dartLeft=0; G.dartNext=false; G.lrPrev=0; }
   if(!(FF.TEN_CALM>0)) e.push('no calm-fish tension drop'); return e.length?{ok:false,detail:e.join(' | ')}:true; });
+T('Cam 2026-11-25 (7): weaker fish hold less (floor 35%), species differ, harder temper, Quick Reflexes by rarity, strength to 200 / 300 lb, aquarium catch-up, no hook flash, Claim all',()=>{ const e=[];
+  const sp=SP.find(s=>s.loc==='pond'), f={kind:'fish',sp}; if(!(ffGrip(f,.5)<ffGrip(f,1)&&ffGrip(f,.01)>=FF.GRIP[0]*(1-FF.GRIP_VAR)-1e-9&&ffGrip(f,2)===ffGrip(f,1))) e.push('grip '+[ffGrip(f,.01),ffGrip(f,.5),ffGrip(f,1),ffGrip(f,2)].map(v=>v.toFixed(2)));
+  const gs=SP.filter(s=>s.loc==='pond'&&s.r===0).map(s=>ffGrip({kind:'fish',sp:s},1)); if(!(Math.max(...gs)-Math.min(...gs)>.2)) e.push('species all alike ('+gs.length+')');
+  if(!(FF.TEMPER_TEN>=2.5&&FF.TEMPER_MOVE>.7)) e.push('temper '+FF.TEMPER_TEN+'/'+FF.TEMPER_MOVE); if(!(REFLEX_PULL[0]===.5&&REFLEX_PULL[1]===.5&&REFLEX_PULL[5]<REFLEX_PULL[2])) e.push('reflexes '+REFLEX_PULL);
+  const top=id=>Math.max(...SP.filter(s=>s.loc===id).map(s=>fishPull(s)))*2.20462; const ts=top('starfall'), to=top('olympus'), tf=top('farm'); if(Math.abs(ts-200)>1.5||Math.abs(to-300)>1.5||Math.abs(tf-200)>1.5) e.push('top pull lb starfall '+ts.toFixed(0)+' farm '+tf.toFixed(0)+' olympus '+to.toFixed(0)); if(!(top('river')>top('pond'))) e.push('climb lost');
+  const keepU=S.unlocked.slice(), ps=SP.find(s=>s.loc==='pond'&&s.r===2), fish={id:ps.id,kg:(ps.min+ps.max)/2,value:ps.base*3,sh:0}; S.unlocked=['pond']; const a1=aqFishBase(fish); S.unlocked=LOCS.slice(0,8).map(l=>l.id); const a8=aqFishBase(fish); S.unlocked=keepU; if(!(a8>a1)) e.push('aquarium catch-up '+[a1,a8].map(v=>v.toFixed(2)));
+  if(/flashT/.test(String(feelDraw))) e.push('hook flash still drawn');
+  { const keep=snap(), sv=save, ts=toast; save=()=>{}; toast=()=>{}; try{ for(const ft of FEATS) S.feats[ft.id]=S.feats[ft.id]||1; /* no feat can fire from these claims */ const m0=S.money; fillBounties(); let n=0; for(const b of S.bounties) if(b.loc===S.loc&&n<2&&b.type==='count'){ b.have=b.n; n++; } const ready=S.bounties.filter(b=>bDone(b)&&(!b.loc||S.unlocked.includes(b.loc))).length; act('claimall'); const left=S.bounties.filter(b=>bDone(b)&&(!b.loc||S.unlocked.includes(b.loc))).length; if(ready>=2&&!(left===0&&S.money>m0)) e.push('claim all left '+left+' of '+ready); } finally{ save=sv; toast=ts; restore(keep); } } /* the whole save comes back: a real claim can finish feats (it unlocked one and broke later tests, 2026-11-25) */
+  return e.length?{ok:false,detail:e.join('; ')}:{ok:true,detail:'starfall '+ts.toFixed(0)+' lb, olympus '+to.toFixed(0)+' lb, aquarium x'+(a8/a1).toFixed(2)+' with 8 waters'}; });
 T('Cam 2026-11-24 (6): tired fish keep half their hold and a slower cap, stronger-than-you extras scale with rarity, voyages to 100, earlier waters pay more, no swim arrows',()=>{ const e=[];
   if(FF.TIRED_RES!==.5) e.push('tired hold '+FF.TIRED_RES); if(!(FF.TIRED_T[0]<=3&&FF.TIRED_T[5]>=8)) e.push('tired cap '+FF.TIRED_T);
   if(!(ffStrongK(2,0)<ffStrongK(2,5)&&ffStrongK(2,0)>1)) e.push('strong extras do not scale with rarity');
@@ -22773,7 +22809,7 @@ T('Cam 2026-11-23 (4): second winds by rarity, small hybrids fight full, spool 8
     { /* Cam's list #12: uncharted until the voyage, then bought for coins, then open for good */ S.tides=2; S.unlocked=['pond','river']; S.egPaid=[]; egOpenAdd(S); if(S.unlocked.some(isEgLoc)) e.push('an end-game water opened for free: '+S.unlocked.join(','));
       const iF=locIdx('farm'), iB=locIdx('buffet'), iC=locIdx('corporate'); if(!unlockMet(iF)||!unlockMet(iB)||unlockMet(iC)) e.push('voyage requirement wrong');
       if(LOCS[iC].name!=='Uncharted Waters'||LOCS[iF].name==='Uncharted Waters') e.push('names: '+LOCS[iF].name+' / '+LOCS[iC].name); if(!(locCost(LOCS[iF])>0)) e.push('Animal Farm is free');
-      S.money=locCost(LOCS[iF]); act('unlock',{k:'farm'}); if(!S.unlocked.includes('farm')||S.money!==0) e.push('paying did not open Animal Farm'); S.unlocked=['pond']; egOpenAdd(S); if(!S.unlocked.includes('farm')) e.push('a paid water closed after a voyage');
+      for(const ft of FEATS) S.feats[ft.id]=S.feats[ft.id]||1; /* state-independent: a feat paying out on the unlock changed the money (2026-11-25) */ S.money=locCost(LOCS[iF]); act('unlock',{k:'farm'}); if(!S.unlocked.includes('farm')||S.money!==0) e.push('paying did not open Animal Farm'); S.unlocked=['pond']; egOpenAdd(S); if(!S.unlocked.includes('farm')) e.push('a paid water closed after a voyage');
       const o=JSON.parse(JSON.stringify(S)); o.egPaid=undefined; o.unlocked=['pond','buffet']; const m=migrate(o); if(!(m.egPaid||[]).includes('buffet')) e.push('an open end-game water on an old save was not kept'); S.unlocked=['pond','river']; S.egPaid=[]; S.tides=0; } /* end-game waters open one voyage sooner (director, 2026-11-23): Animal Farm after voyage 1 */
     const fi=locIdx('farm'); if(unlockMet(fi)&&!S.unlocked.includes('farm')) e.push('farm unlockable by catches'); if(!/voyage/.test(unlockLine(locIdx('olympus')))) e.push('end-game unlock text');
     if(bestLoot()!==LOCS[locIdx('river')].loot) e.push('end-game water raised bestLoot to '+bestLoot());
@@ -23490,9 +23526,9 @@ function renderAquarium(P){ accrue(); const rate=tankRate(); let AQS=null; const
    : '<div class="empty">No fish on display yet. In the Cooler, press <b>To aquarium</b> on a fish you want to keep.</div>') + aqCustomHTML();
   paintFish(P); paintDecor(P);
 }
-function renderBounties(P){ fillBounties();
+function renderBounties(P){ fillBounties(); const ready=S.bounties.filter(b=>bDone(b)&&(!b.loc||S.unlocked.includes(b.loc))).length;
   P.innerHTML=dailyHTML()+`<h2>Bounties</h2><p class="sub">The harbourmaster pays extra for specific catches. Every water has its own board, and its bounties wait there until you finish them. Fish still go in your cooler.</p>
-  <div class="chips" style="margin:6px 0 10px">${S.unlocked.slice().sort((a,b)=>locIdx(a)-locIdx(b)).map(L=>{ const n=S.bounties.filter(b=>b.loc===L&&bDone(b)).length; return `<button class="chipb" data-act="bloc" data-k="${L}" aria-pressed="${(bLoc||S.loc)===L}">${esc(LOCS[locIdx(L)].name)}${n?' · '+n+' ready':''}</button>`; }).join('')}</div><div class="grid">`+
+  <div class="chips" style="margin:6px 0 10px">${S.unlocked.slice().sort((a,b)=>locIdx(a)-locIdx(b)).map(L=>{ const n=S.bounties.filter(b=>b.loc===L&&bDone(b)).length; return `<button class="chipb" data-act="bloc" data-k="${L}" aria-pressed="${(bLoc||S.loc)===L}">${esc(LOCS[locIdx(L)].name)}${n?' · '+n+' ready':''}</button>`; }).join('')}</div>${ready>1?`<button class="btn" data-act="claimall" style="margin:0 0 10px">Claim all · ${ready} ready</button>`:''}<div class="grid">`+
   S.bounties.map((b,i)=>{ if(b.loc!==(S.unlocked.includes(bLoc)?bLoc:S.loc)) return ''; const bt=bountyText(b); if(bt){ const d=bDone(b), rw=Math.round(b.reward*coinMult()*1);
       return `<div class="tile ${d?'done':''}"><span class="rar" style="color:var(--kelp)">${b.type==='shiny'?'Shiny hunt':b.type==='trophy'?'Trophy hunt':'Style hunt'}</span><h4>${esc(bt.what)}</h4><div class="meta">${bt.where} · ${b.type==='style'?Math.min(b.have,b.n)+' / '+b.n:(d?'Done':'Not yet')}</div>
        <div class="row spread"><span class="val"><span class="coin">${fmt(rw)}</span> + ${b.scales} Scales</span>${d?`<button class="btn" data-act="claim" data-i="${i}">Claim</button>`:`<button class="btn alt" data-act="reroll" data-i="${i}" ${S.money>=Math.ceil(b.reward*.1)?'':'disabled'}>Swap · <span class="coin">${fmt(Math.ceil(b.reward*.1))}</span></button>`}</div></div>`; }
