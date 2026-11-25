@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="DL Test iPhone">
 <script>
-window.DL_BUILD='ios'; window.DL_PREVIEW=true; if(/[?&]sweep\b/.test(location.search)){ window.__bootErr=[]; addEventListener("error",function(e){ __bootErr.push(String(e.message||e)+(e.lineno?" (line "+e.lineno+")":"")); }); addEventListener("unhandledrejection",function(e){ __bootErr.push("promise: "+String(e.reason&&e.reason.message||e.reason)); }); window.requestAnimationFrame=function(f){ return setTimeout(function(){ f(performance.now()); },16); }; window.cancelAnimationFrame=function(i){ clearTimeout(i); }; } try{ window.__tOff=/[?&](test|sweep|frozen)\b/.test(location.search)?0:(+(localStorage.getItem("dl-test-toff")||0)||0); }catch(e){ window.__tOff=0; } (function(){ var rn=Date.now.bind(Date); Date.now=function(){ return rn()+window.__tOff; }; })(); if(/[?&]frozen\b/.test(location.search)){ var __fz=20261122; Math.random=function(){ __fz|=0; __fz=__fz+0x6D2B79F5|0; var t=Math.imul(__fz^__fz>>>15,1|__fz); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; var __fc=0, __pn=performance.now.bind(performance); performance.now=function(){ __fc+=0.01; return 100000+__fc; }; Date.now=function(){ return 1795300000000+Math.floor(__fc); }; window.__frozenClock=function(){ return __fc; }; window.requestAnimationFrame=function(){ return 0; }; window.cancelAnimationFrame=function(){}; } window.DL_VERSION='2026.11.25-0252';
+window.DL_BUILD='ios'; window.DL_PREVIEW=true; if(/[?&]sweep\b/.test(location.search)){ window.__bootErr=[]; addEventListener("error",function(e){ __bootErr.push(String(e.message||e)+(e.lineno?" (line "+e.lineno+")":"")); }); addEventListener("unhandledrejection",function(e){ __bootErr.push("promise: "+String(e.reason&&e.reason.message||e.reason)); }); window.requestAnimationFrame=function(f){ return setTimeout(function(){ f(performance.now()); },16); }; window.cancelAnimationFrame=function(i){ clearTimeout(i); }; } try{ window.__tOff=/[?&](test|sweep|frozen)\b/.test(location.search)?0:(+(localStorage.getItem("dl-test-toff")||0)||0); }catch(e){ window.__tOff=0; } (function(){ var rn=Date.now.bind(Date); Date.now=function(){ return rn()+window.__tOff; }; })(); if(/[?&]frozen\b/.test(location.search)){ var __fz=20261122; Math.random=function(){ __fz|=0; __fz=__fz+0x6D2B79F5|0; var t=Math.imul(__fz^__fz>>>15,1|__fz); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; var __fc=0, __pn=performance.now.bind(performance); performance.now=function(){ __fc+=0.01; return 100000+__fc; }; Date.now=function(){ return 1795300000000+Math.floor(__fc); }; window.__frozenClock=function(){ return __fc; }; window.requestAnimationFrame=function(){ return 0; }; window.cancelAnimationFrame=function(){}; } window.DL_VERSION='2026.11.25-1233';
 window.addEventListener('beforeinstallprompt',function(e){ e.preventDefault(); window.__dlInstallPrompt=e; });
 </script>
 </head>
@@ -6032,7 +6032,7 @@ setTimeout(thumbNext,3000);
 // the Waters pictures are kept on the device between visits (Cam's list #2: after a restart they took about 10 s to appear); a new
 // build or a changed home makes fresh ones, and old ones are cleared out
 const THUMB_DB={ready:null};
-const thumbSig = () => { const s=(window.DL_VERSION||'')+'|'+JSON.stringify(LOCS.map(L=>{ const sp=hfSpec(L.id); return sp?sp.els.map(e=>hfChoice(L.id,e.id).join('.')).join(','):''; })); /* every water's own home choices: travelling no longer throws the saved pictures away (2026-11-22) */ let h=0; for(let i=0;i<s.length;i++) h=(h*31+s.charCodeAt(i))|0; return String(h>>>0); };
+const thumbSig = () => { const s=(window.DL_VERSION||'')+'|'+LOCS.map(L=>L.id).join(','); /* a new build or a new water list makes fresh pictures (homes are fixed: no choices to follow, 2026-11-25) */ let h=0; for(let i=0;i<s.length;i++) h=(h*31+s.charCodeAt(i))|0; return String(h>>>0); };
 function thumbDB(){ if(THUMB_DB.ready) return THUMB_DB.ready; return THUMB_DB.ready=new Promise(res=>{ try{ const r=indexedDB.open('dl-thumbs',1); r.onupgradeneeded=()=>{ try{ r.result.createObjectStore('t'); }catch(e){} }; r.onsuccess=()=>res(r.result); r.onerror=()=>res(null); }catch(e){ res(null); } }); }
 function thumbSave(id,url){ if(!url||!window.indexedDB) return; const k=thumbSig()+'|'+id; thumbDB().then(db=>{ if(!db) return; try{ db.transaction('t','readwrite').objectStore('t').put(url,k); }catch(e){} }); }
 function thumbLoadAll(){ if(!window.indexedDB) return; const sig=thumbSig(); thumbDB().then(db=>{ if(!db) return; try{ const rq=db.transaction('t','readwrite').objectStore('t').openCursor();
@@ -10503,7 +10503,7 @@ function prizeInfo(p){ const id=p[0], nm=p[1].replace(/\s*\(.*\)\s*$/,''), tag=(
   if(hat) return {cat:'Hat', d:'A hat for your angler, only from the Boardwalk.'};
   if(id==='spacesuit') return {cat:'Outfit', d:'A full space suit for your angler.'};
   if(dec||id==='carousel') return {cat:'Aquarium decor', d:'A spinning carousel for your tank: +'+Math.round(((dec&&dec.b)||.04)*100)+'% aquarium income.'};
-  if(id==='balloon'||id==='partyhat') return {cat:'Pet accessory', d:'Your pet wears it on the water and on your dock.'};
+  if(id==='balloon'||id==='partyhat') return {cat:'Pet accessory', d:'Your pet wears it while you fish.'};
   if(id==='golden'||id==='rainbow') return {cat:'Pet color', d:'Recolors any of your pets in '+nm.toLowerCase()+'.'};
   if(id==='scales10') return {cat:'Scales', d:'Scales level up your rods and buy rod attachments and special bait.'};
   if(id==='crate') return {cat:'Mystery crate', d:'Opens into clothes, lures, decor and now and then a pet.'};
@@ -10778,7 +10778,7 @@ function restLand(){ const f=chooseCatch(); splash(G.bob.x,G.bob.y,18); sfx.pull
   if(S.cooler.length>=gv('cooler')){ toast('Your cooler is full, so you stand up again.'); setRest(false); return; }
   restCast(); }
 // where and how the angler sits: in the home's seat (every water has one since batch 5)
-function restPose(dockY,pb,sc){ const sp=HOMEF[S.loc]; if(sp&&sp.seatH){ const ss=hfStyle(S.loc,"seat"); return {ax:HF.seatX()+3*sc, ay:dockY+pb, sit:{seat:sp.seatH[ss],hang:false}, hx:10, hy:-26}; } /* resting sits the angler in the home's seat (batch 5) */
+function restPose(dockY,pb,sc){ const sp=HOMEF[S.loc]; if(sp&&sp.seatH){ return {ax:HF.seatX()+3*sc, ay:dockY+pb, sit:{seat:sp.seatH,hang:false}, hx:10, hy:-26}; } /* the home's one seat (homes fixed, 2026-11-25) */ /* resting sits the angler in the home's seat (batch 5) */
   return {ax:W*.19-14*sc, ay:dockY+pb, sit:{seat:.5,hang:true}, hx:10, hy:-12}; }
 // the toggle on the water
 function restBtn(){ let b=$('resttog'); if(!b){ $('stage').insertAdjacentHTML('beforeend','<button id="resttog" class="resttog" type="button" title="Rest mode: sit down and fish slowly by yourself"></button>'); b=$('resttog');
@@ -10795,7 +10795,7 @@ if(/[?&]test\b/.test(location.search)) window.__bal={ SP, SPI, catchOdds, rareMu
 // tension passes a threshold or the fish runs or leaps, with a reaction delay. Restores the game state afterwards.
 if(/[?&]test\b/.test(location.search)) window.__fightSim=(opts)=>{ const B=__bal, S0=S, snap=JSON.stringify(S); const gsnap={}; for(const k of Object.keys(G)){ try{ gsnap[k]=typeof G[k]==='object'&&G[k]!==null?JSON.parse(JSON.stringify(G[k])):G[k]; }catch(e){} } const out=[]; const os=window.save;
  try{ window.save=()=>{};
-  for(const [loc,lvl,g,rod] of opts.places) for(const r of opts.rars) for(const [name,lag,thr] of opts.players){ S.loc=loc; S.lvl=lvl; ['rod','reel','line','hook','cooler','finder'].forEach((k,i)=>S.gear[k]=g[i]); S.rod=rod; S.baitSel='worm'; S.perks=opts.perks||{}; S.tides=opts.tides||0;
+  for(const [loc,lvl,g,rod] of opts.places) for(const r of opts.rars) for(const [name,lag,thr] of opts.players){ S.loc=loc; S.lvl=lvl; ['rod','reel','line','hook','cooler','finder'].forEach((k,i)=>S.gear[k]=g[i]); S.rod=rod; S.baitSel='worm'; S.perks=opts.perks||{}; S.boons=opts.boons||{}; S.relics=opts.relics||[]; S.tides=opts.tides||0; /* no Boons or relics unless asked: the result no longer depends on the save it runs on (2026-11-25) */
    const pool=SP.filter(s=>s.loc===loc&&s.r===r); if(!pool.length) continue; let caught=0,ts=0,N=opts.N||100,peak=0;
    for(let i=0;i<N;i++){ const sp=pool[i%pool.length]; G.fish=rollFish(sp,{}); G.fish.kind='fish'; G.fish.shiny=0; G.st='reeling'; G.lastCast=.8; G.d0=G.d=6+.8*gv('rod')*.6; G.maxOut=gv('rod')+28; G.ten=10; G.sta=1; G.temper=0; G.run=false; G.runT=.8; G.ev=null; G.evT=1.6; G.hold=false; G.fightT=0; G.eatAt=null; G.eat=null; G.behT=0; G.tickT=1; G.surge=null; G.surgeN=0; G.dd=0; G.lastCast=opts.cast||.8; if(fishNew()) ffInit();
     let t=0; const dt=1/60, hist=[]; let pk=0;
@@ -12810,7 +12810,7 @@ body.pc-wide.side-off .wrap > #stage{grid-column:1 / -1}
 const PAGE_DESC={cooler:'Fish you are carrying: sell them or keep them', map:'Travel between waters, and set sail again', bounties:'Paid jobs for specific catches, daily tasks and weekly quests', events:'Challenges, the event calendar, the derby and the weather forecast',
   shop:'Line, reel and other gear, bait and special lures', rods:'Your rods, upgrades and attachments', skills:'Spend skill points on small steady gains', paths:'Big choices that shape your style',
   aquarium:'Fish that earn coins and boosts while you play', trophy:'Fish you keep forever', journal:'Every species and oddity, found and missing', feats:'Goals with rewards',
-  home:'Your dock and its decorations', pets:'Your companions, new pets and their looks', style:'Your angler: body, clothes and accessories', pass:'Levels and rewards from fishing', games:'Mini-games, prizes and tickets',
+  pets:'Your companions, new pets and their looks', style:'Your angler: body, clothes and accessories', pass:'Levels and rewards from fishing', games:'Mini-games, prizes and tickets',
   settings:'Sound, controls, display, patch notes and saves', stats:'Every number in the game, and your odds', save:'Move your progress to another device'};
 SEARCH_IDX.push(
  ['Events: challenges','events',null,'challenge rare run mixed bag long cast steady hands treasure dive weigh in trophy'],
@@ -13167,10 +13167,8 @@ $('panel').addEventListener('click',e=>{ const b=e.target.closest('[data-act]');
 //    (a category, a link, the goal chip, search, settings) opens it; Back to fishing, Esc or the phone's back gesture
 //    closes it. While it is open the line waits: fishing is paused, never reset. Clocks (events, aquarium) keep running.
 //  S.tab==='dash' means fishing mode, so every old "if(S.tab==='x')" check stays correct.
-// Also: every water keeps its own home choices.
 // =====================================================================
 const DASH='dash';
-const DOCK_KEYS=['el'];
 
 // ---------- the 5 categories (the menus read MENU_SECS, so changing it in place changes every menu) ----------
 const SEC_ICONS={
@@ -13201,23 +13199,12 @@ KEYS.forEach((k,i)=>{ if(k[0]==='Esc') KEYS[i]=['Esc','Close the menu, a card or
   bar.innerHTML=MENU_SECS.map(s=>`<button type="button" class="secb" data-sec="${s.id}" aria-pressed="false" title="${esc(s.name)}"><span class="seci">${svg(s.icon)}</span><span class="secl"><span class="secfull">${s.name}</span><span class="secshort">${s.short}</span></span><span class="seclive" hidden>LIVE</span><span class="secdot" hidden></span></button>`).join('');
   menuSubKey=''; })();
 
-// ---------- per-water docks ----------
-function dockCopy(d){ d=d||{}; const el=hfClean(d.el); return Object.keys(el).length?{el}:{}; } /* el: this water's home choices (docs/HOME_STANDARD.md), only when there are some (a save round trip stays identical) */
-function dockApply(L){ const D=dockCopy(L); for(const k of DOCK_KEYS) S.dock[k]=D[k]; }
-// keep S.dock (what the game draws and edits) showing the dock of the water you are at
-function dockSync(){ if(!S||!S.dock) return; if(!S.docks||typeof S.docks!=='object'||Array.isArray(S.docks)) S.docks={};
-  const here=S.loc; if(S.dockAt===here&&S.docks[here]) return;
-  if(S.dockAt&&LOCS.some(L=>L.id===S.dockAt)) S.docks[S.dockAt]=dockCopy(S.dock); // store the dock you are leaving
-  dockApply(S.docks[here]||{}); // its own choices; a water you never fished at starts with its defaults
-  S.docks[here]=dockCopy(S.dock);
-  S.dockAt=here; }
-function dockStore(){ try{ dockSync(); if(S.dockAt) S.docks[S.dockAt]=dockCopy(S.dock); }catch(e){} }
-{ const _save04=save; save=function(){ dockStore(); return _save04.apply(this,arguments); }; }
+/* (the per-water home store, dockSync / dockStore, is gone: homes are fixed since 2026-11-24; old saves keep S.dock / S.docks untouched) */
 function rodsClean(st){ try{ const r=st.rods; if(!r) return; r.owned=uniq(['bamboo',...(r.owned||[]).filter(x=>ROD_I[x])]); if(!r.owned.includes(r.eq)) r.eq='bamboo'; }catch(e){} }
 function perksClean(st){ const keep=S; try{ S=st; if(ptsFree()<0) st.perks={}; }catch(e){} finally{ S=keep; } } // more ranks than points (a damaged save): refund them
 rodsClean(S); perksClean(S);
 { const _mig04=migrate; migrate=function(o){ const st=_mig04(o); rodsClean(st); perksClean(st); try{ if(!st.docks||typeof st.docks!=='object'||Array.isArray(st.docks)) st.docks={};
-    for(const k of Object.keys(st.docks)){ if(!LOCS.some(L=>L.id===k)) delete st.docks[k]; else st.docks[k]=dockCopy(st.docks[k]); }
+    for(const k of Object.keys(st.docks)){ if(!LOCS.some(L=>L.id===k)) delete st.docks[k]; else { const el=hfClean(st.docks[k]&&st.docks[k].el); st.docks[k]=Object.keys(el).length?{el}:{}; } } /* old home choices stay valid in the save, unread (homes are fixed) */
     if(st.dockAt&&!LOCS.some(L=>L.id===st.dockAt)) st.dockAt=null; }catch(e){} return st; }; }
 
 // ---------- menu mode ----------
@@ -13265,7 +13252,7 @@ addEventListener('keydown',e=>{ if(e.key!=='Escape'||!MENU_OPEN) return; const s
 addEventListener('keydown',e=>{ if(MENU_OPEN&&e.code==='Space') e.stopImmediatePropagation(); },true);
 addEventListener('keyup',e=>{ if(MENU_OPEN&&e.code==='Space') e.stopImmediatePropagation(); },true);
 // the line waits while a menu is open (rest mode keeps fishing by itself); the water draws a few times a second behind it
-{ const _up=update; update=function(dt){ if(S.dockAt!==S.loc) dockSync(); if(MENU_OPEN){ if(G.st==='rest') restTick(dt); return; } return _up(dt); }; }
+{ const _up=update; update=function(dt){ if(MENU_OPEN){ if(G.st==='rest') restTick(dt); return; } return _up(dt); }; }
 { let lastD=0; const _dr=draw; draw=function(now){ if(MENU_OPEN&&now-lastD<250&&!resize.force) return; lastD=now; return _dr(now); }; }
 // a full cooler: show it on the dashboard instead of throwing you into a menu
 // a full cooler when you try to cast: the game opens the Cooler page (in the full-screen menu)
@@ -13349,12 +13336,12 @@ function dashFlash(id){ const el=document.querySelector('#panel .dash [data-w="'
     if(a==='dbait'){ searchGo(['','shop',['tackleview','bait']]); return 'skip'; }
     return _xa(b); }; }
 // the panel shows the dashboard in fishing mode, the page otherwise
-{ const _rp=renderPanel; renderPanel=function(){ dockSync(); if(S.tab===DASH){ const P=$('panel'); if(P&&MENU_OPEN){ renderDash(P); P.dataset.tab035=DASH; } try{ menuSync(); }catch(e){} return; } const r=_rp.apply(this,arguments); try{ menuHead(); }catch(e){} return r; }; }
+{ const _rp=renderPanel; renderPanel=function(){ if(S.tab===DASH){ const P=$('panel'); if(P&&MENU_OPEN){ renderDash(P); P.dataset.tab035=DASH; } try{ menuSync(); }catch(e){} return; } const r=_rp.apply(this,arguments); try{ menuHead(); }catch(e){} return r; }; }
 setInterval(()=>{ if(MENU_OPEN){ const c=$('mocoin'), v=fmtShort(S.money); if(c&&c.textContent!==v){ c.textContent=v; c.title=fmt(S.money)+' coins'; } menuHead(); } },250);
 // start in fishing mode; the last page opens again from its category
 { if(S.tab&&S.tab!==DASH) S.settings.pageLast=S.tab; S.tab=DASH; }
 
-if(/[?&]test\b/.test(location.search)) window.__ui={open:(...a)=>openMenu(...a), close:(...a)=>closeMenu(...a), isOpen:()=>MENU_OPEN, dash:()=>[...document.querySelectorAll('#panel .dash > [data-w]')].map(e=>e.dataset.w), dockSync};
+if(/[?&]test\b/.test(location.search)) window.__ui={open:(...a)=>openMenu(...a), close:(...a)=>closeMenu(...a), isOpen:()=>MENU_OPEN, dash:()=>[...document.querySelectorAll('#panel .dash > [data-w]')].map(e=>e.dataset.w)};
 
 document.head.insertAdjacentHTML('beforeend',`<style>
 body.chal-live .secb[data-sec="chal"] .secdot{display:none!important}
@@ -13471,7 +13458,7 @@ for(let i=SEARCH_IDX.length-1;i>=0;i--) if(SEARCH_IDX[i][0]==='Hide menus') SEAR
 // a save that could not be read was kept aside at load: say so once
 if(window.__dlUnreadable) setTimeout(()=>toast(localStorage.getItem(AUTO_BK)?'Your saved game could not be read. Restore it from Save, Backup on this device.':'Your saved game could not be read, so a new one started. The old file was kept on this device.'),1800);
 // save codes and the account copy carry the current dock exactly as it is right now
-{ const _mc=makeCode; makeCode=function(){ dockStore(); return _mc.apply(this,arguments); }; const _pc=pushCloud; pushCloud=function(){ dockStore(); return _pc.apply(this,arguments); }; }
+
 // phones held sideways: the top bar's seven chips share the width by what they hold, so the water name always fits
 document.head.insertAdjacentHTML('beforeend',`<style>@media (orientation:landscape) and (max-height:560px){.hud{grid-template-columns:minmax(0,.9fr) minmax(0,.85fr) minmax(0,1.65fr) minmax(0,.8fr) minmax(0,.9fr) minmax(0,1fr) minmax(0,.95fr)!important}}</style>`);
 
@@ -16739,15 +16726,14 @@ WA_MORE.olympus={
         g.strokeStyle='#fbf8f0'; g.lineWidth=Math.max(1,s*.35); g.beginPath(); g.moveTo(s*1.3,s*.6); g.lineTo(s*2.4,s*1.4); g.moveTo(s*.9,s*.6); g.lineTo(s*1.4,s*1.8); g.moveTo(-s*1.4,s*.6); g.lineTo(-s*2.2,s*1.5); g.moveTo(-s*1.8,s*.5); g.lineTo(-s*2.4,s*1.9); g.stroke();
         g.fillStyle='rgba(255,255,255,.95)'; g.beginPath(); g.moveTo(-s*.2,-s*.6); g.quadraticCurveTo(-s*1.6,-s*(2.6+f*1.4),-s*3,-s*(2+f*2)); g.quadraticCurveTo(-s*1.4,-s*(1+f*.6),s*.8,-s*.6); g.fill(); g.strokeStyle='#e8d090'; g.lineWidth=1; g.beginPath(); g.moveTo(-s*2.4,0); g.quadraticCurveTo(-s*3.2,s*.2,-s*3.6,s*1); g.stroke(); g.restore(); v3glow(g,px,py,H*.04,'rgba(255,230,160,.9)',.25); } } } };
 // =====================================================================
-// The home format (docs/HOME_STANDARD.md, decided with the director 2026-11-21). Pilot: Willow Pond.
-// Every format home has the same footprint, standing surface, light spot, seat spot and pet spots; the player changes 6 features
-// (the light and the seat always, plus 4 that fit the home), each with 3 styles, all coloured from ONE list of 16+ colours per home
-// (director, 2026-11-21: so parts can match), all free. Every home's design: docs/HOME_DESIGNS.md.
-// Performance: the still home is painted once into a stored picture and pasted every frame; it is repainted only when a choice,
-// the screen size or the light of the day (in small steps) changes. Drawn live each frame: the light's glow, its pool and its
-// reflection, the ripples at the supports, and the bob of floating homes (the stored picture pasted a little higher or lower).
-// Choices are saved per water in S.dock.el ({element id: [style, color]}), carried by dockCopy like the rest of the home.
-// Waters without a format home keep the older home system until they are converted.
+// Homes: every water has ONE fixed building, the platform the angler stands on and one seat (homes are fixed since 2026-11-24; the
+// customisation options were removed on 2026-11-25). Every home shares the same footprint, standing line, light spot, seat spot and pet
+// spots (HF below). A home is either built from the kit with a fixed look (cw_homes.js, hfMake) or draws itself (HOMEF.<id>.fixed with
+// draw, like Maplewood Hollow's treehouse in w_maple.js).
+// Performance: the still home is painted once into a stored picture and pasted every frame; it is repainted only when the screen size
+// or the light of the day (in small steps) changes. Drawn live each frame: the light's glow, its pool and its reflection, the ripples at
+// the supports, and the bob of floating homes.
+// Old saves may still hold the choices players made (S.dock.el); they are kept untouched for a later idea and never read.
 // =====================================================================
 const HOMEF={};
 /* the format, in the scene's own units (W, H): the same for every format home */
@@ -16756,23 +16742,20 @@ const HF = { pw:()=>W*.19, x0:()=>-4 /* the deck starts at the left edge (no ban
 const hfSpec = id => HOMEF[id]||null;
 /* homes are fixed (director, 2026-11-24: customisation removed for now, the idea comes back later as something else): every home shows its
    default look; the choices players made stay in their saves untouched (S.dock / S.docks) for that later idea */
-function hfChoice(id,el){ const sp=hfSpec(id), e=sp&&sp.els.find(x=>x.id===el); if(!e) return [0,0]; const c=null; /* each water's own choices: the map pictures of other waters showed the current water's (2026-11-22) */
-  const st=Array.isArray(c)&&c[0]>=0&&c[0]<e.styles.length?c[0]|0:(e.def?e.def[0]:0), pal=hfPal(e,st), d1=e.def?e.def[1]:0;
-  return [st, Array.isArray(c)&&c[1]>=0&&c[1]<sp.colors.length&&(!pal||pal.includes(c[1]|0))?c[1]|0:(!pal||pal.includes(d1)?d1:pal[0])]; } /* a feature may offer only the colours real ones come in (e.pal: indices into the home's list) */
-/* the colours a feature offers in a style: e.palS[style] when its styles differ (a sod roof grows grass, a tin roof is painted any colour), else e.pal, else all */
-function hfPal(e,st){ return e.palS&&e.palS[st]||e.pal||null; }
-function hfColor(id,el){ const sp=hfSpec(id); return sp.colors[hfChoice(id,el)[1]][1]; }
-/* the light's glow colour: the chosen colour, lifted toward white so even a deep shade still reads as light */
-function hfGlow(id){ const sp=hfSpec(id); if(sp&&sp.glow) return sp.glow; /* a home whose light is a window glows warm whatever the door's colour */ const e=sp&&sp.els.find(x=>x.light||x.id==='light'); const v=hex2rgb(mix(hfColor(id,e?e.id:'light'),'#ffffff',.3)); return v.join(','); } /* the feature that carries the home's light (batch 5: not always called "light") */
-function hfStyle(id,el){ return hfChoice(id,el)[0]; }
-/* the saved choices of one home: only valid numbers survive (dockCopy) */
+/* each home's fixed look: a part's style and colour (homes are fixed since 2026-11-24; the options were removed 2026-11-25) */
+const hfPart = (id,el) => { const sp=hfSpec(id); return sp&&sp.look&&sp.look[el]||[0,'#8a8a8a']; };
+function hfColor(id,el){ return hfPart(id,el)[1]; }
+/* the light's glow colour: the light part's colour, lifted toward white so even a deep shade still reads as light */
+function hfGlow(id){ const sp=hfSpec(id); if(sp&&sp.glow) return sp.glow; /* a home whose light is a window glows warm */ const v=hex2rgb(mix(hfColor(id,sp&&sp.light||'light'),'#ffffff',.3)); return v.join(','); }
+function hfStyle(id,el){ return hfPart(id,el)[0]; }
+/* old saves' home choices: only valid numbers survive a load (migrate in bm_ui04.js); the game never reads them */
 function hfClean(o){ const r={}; if(o&&typeof o==='object'&&!Array.isArray(o)) for(const k in o){ const v=o[k]; if(Array.isArray(v)&&v.length===2&&v.every(n=>Number.isInteger(n)&&n>=0&&n<32)) r[k]=[v[0],v[1]]; } return r; }
 
 /* ---------- the stored picture ---------- */
 const HF_CACHE={};
 /* d: pixels per scene unit (the scene's own, or the close-up's); slot: a separate stored picture for the close-up */
 function hfPaintCache(L,P,night,dockY,dIn,slot){ const sp=hfSpec(L.id), d=dIn||Math.max(1,(typeof cv!=='undefined'&&cv&&W>0)?cv.width/W:1), id=L.id+(slot||'');
-  const x0=-4, y0=HF.top(dockY), x1=HF.pw()*1.14, y1=H /* down to the bottom of the screen: the supports fade into the water all the way (director) */, key=[L.id,W,H,d,Math.round(night*24),P.rim,...sp.els.map(e=>hfChoice(L.id,e.id).join('.'))].join('|');
+  const x0=-4, y0=HF.top(dockY), x1=HF.pw()*1.14, y1=H /* down to the bottom of the screen: the supports fade into the water all the way (director) */, key=[L.id,W,H,d,Math.round(night*24),P.rim].join('|');
   let c=HF_CACHE[id]; if(c&&c.key===key) return c;
   if(!c){ c={cv:document.createElement('canvas')}; HF_CACHE[id]=c; } c.key=key; c.x=x0; c.y=y0; c.w=x1-x0; c.h=y1-y0;
   c.cv.width=Math.max(1,Math.ceil(c.w*d)); c.cv.height=Math.max(1,Math.ceil(c.h*d)); const x=c.cv.getContext('2d'); x.setTransform(d,0,0,d,-x0*d,-y0*d); x.clearRect(x0,y0,c.w,c.h);
@@ -17947,29 +17930,20 @@ const TP = {
   clouds(o){ const q=o.x, y=o.dockY, N=c0=>HK.n(o,c0), x0=HF.x0(); for(let i=0;i<9;i++){ const cx=x0+(o.pw-x0)*(i/8), cy=y+HK.fh()+H*.03+(i%3)*H*.012; q.fillStyle=v3rgba(N('#fbf8ff'),.85); q.beginPath(); for(let k=0;k<4;k++) q.arc(cx+(k-1.5)*W*.008,cy-(k%2)*H*.008,H*.016,0,7); q.fill(); } }
 };
 // =====================================================================
-// Every water's home (batch 5, 2026-11-22; designs in docs/HOME_DESIGNS.md, colours in docs/MAP_THEMES.md). Willow Pond (the
-// approved pilot) is in cv_homefmt.js; these 19 are built from the home kit (cw_homekit.js). Each home: the seat plus 5 features
-// made for that water, 3 styles each ("none" first where a feature can be left out), one list of 16 colours for every feature.
-// A home listed here replaces that water's older home (the scene draws HOMEF homes instead, f_v3scene.js).
+// Every water's home: ONE fixed building, platform and seat per water (homes are fixed since 2026-11-24; the options were removed on
+// 2026-11-25). Each home's look is a list of its parts, each part's style and colour (look), drawn by the kit (cw_homekit.js) and the
+// building's own file (src/cw_<building>.js); its seat is one kind (seat) and one part carries its light (light).
 // =====================================================================
-function hfMake(id,d){ d.seatH=d.seat.map(k=>HK.seatH(k));
-  d.els.push({id:'seat',label:'Seat',styles:d.seatNames,def:d.seatDef||[0,0],pal:d.seatPal}); /* a home may limit its seats to real colours (seatPal) */
+function hfMake(id,d){ d.seatH=HK.seatH(d.seat);
   d.paint=function(o){ o.lights=[]; const col=e=>hfColor(id,e);
-    for(const [e,fn] of d.order){ o.elCol=col(e); /* lights read their feature's colour (a stove's body, director 2026-11-22: colours did nothing) */ const r=e==='seat'?HK.seat(o,d.seat[hfStyle(id,'seat')],col('seat')):fn(o,hfStyle(id,e),col(e),col); if(r&&r.x!=null) o.lights.push(r); } };
+    for(const [e,fn] of d.order){ o.elCol=col(e); /* lights read their part's colour (a stove's body) */ const r=e==='seat'?HK.seat(o,d.seat,col('seat')):fn(o,hfStyle(id,e),col(e),col); if(r&&r.x!=null) o.lights.push(r); } };
   HOMEF[id]=d; }
-const C16=s=>s.split(';').map(p=>{ const [n,h]=p.split('='); return [n.trim(),h.trim()]; });
 /* 1. Willow Pond: the boathouse (overnight, 2026-11-23; its own design, src/cw_pondhouse.js): a gable-end boathouse over the water with its
    boat bay at the waterline, a cupola on the ridge and a lean-to porch along its side; a pine bank behind it, round piles under the deck */
-{ const PW=C16('Honey pine=#b98a5a;Weathered pine=#8a6a4a;Dark stain=#5a4030;Driftwood=#9a9488;Moss=#5f8a6c;Pine green=#2c4a3e;Sage=#9ab08a;Willow=#7fae5c;Lake teal=#3f827b;Sky blue=#86bcd9;Canvas=#f3e4ca;Warm white=#f4efe6;Barn red=#a8483a;Lantern gold=#e8b04a;Dusk rose=#c97a8a;Lilac=#8a7aa8');
-  const G1=()=>PH.geo({pw:HF.pw(),dockY:HF.dockY()}), LT=()=>{ const g=G1(); return {x0:g.xb,x1:g.x1,vx:g.xb,wallTop:g.lt,winA:g.xb+W*.014,winB:g.x1-W*.03}; };
-  hfMake('pond',{ name:'Boathouse', hname:'boathouse', glow:'255,210,140', seatX:()=>HF.pw()-W*.028, colors:PW, front:null, smoke:null,
-    els:[{id:'walls',label:'Walls',styles:['Board and batten','Shiplap','Cedar shingles'],def:[0,12],pal:[0,1,2,3,4,5,6,8,10,11,12]},
-         {id:'roof',label:'Roof',styles:['Asphalt shingles','Cedar shakes','Tin roof'],def:[1,1],palS:[[2,3,4,5,12],[0,1,2,3],[3,4,5,8,9,11,12]]},
-         {id:'cupola',label:'Cupola',styles:['Cupola with a fish vane','Rooster weathervane','Little bell'],def:[0,11],pal:[0,1,2,4,5,10,11,12]},
-         {id:'bay',label:'Boat bay',styles:['Open, canoe inside','Swing doors','Sliding door'],def:[0,11],pal:[0,1,2,4,5,8,10,11,12]},
-         {id:'windows',label:'Windows',styles:['Four-pane windows','Windows with flower boxes','Shuttered windows'],def:[0,11],pal:[0,1,2,4,5,8,9,10,11,12]},
-         {id:'light',label:'Lantern',light:true,styles:['Hurricane lantern','Lamp post','String lights'],def:[0,13],pal:[2,3,5,12,13]}],
-    seat:['deckchair','logbench','campchair'], seatNames:['Wooden folding chair','Log bench','Camp chair'], seatDef:[0,0], seatPal:[0,1,2,4,5,8,9,10,12,13],
+{   const G1=()=>PH.geo({pw:HF.pw(),dockY:HF.dockY()}), LT=()=>{ const g=G1(); return {x0:g.xb,x1:g.x1,vx:g.xb,wallTop:g.lt,winA:g.xb+W*.014,winB:g.x1-W*.03}; };
+  hfMake('pond',{ name:'Boathouse', hname:'boathouse', glow:'255,210,140', seatX:()=>HF.pw()-W*.028, front:null, smoke:null,
+    look:{walls:[0,'#a8483a'],roof:[1,'#8a6a4a'],cupola:[0,'#f4efe6'],bay:[0,'#f4efe6'],windows:[0,'#f4efe6'],light:[0,'#e8b04a'],seat:[0,'#b98a5a']}, light:'light',
+    seat:'deckchair',
     order:[
       ['base',(o)=>{ PH.ground(o); BH.piles(o,'log','#8a6a4a'); HK.deck(o,'#b98a5a','planks'); }],
       ['walls',(o,s,c)=>{ const g=PH.geo(o), K=['batten','shiplap','shingles'][s]; PH.leanTo(o,g,K,c,['shingles','shakes','tin'][hfStyle('pond','roof')],hfColor('pond','roof')); }],
@@ -17984,15 +17958,9 @@ const C16=s=>s.split(';').map(p=>{ const [n,h]=p.split('='); return [n.trim(),h.
    ferns and foxgloves around it; the deck runs along its front as a walkway */
 { const G2=()=>MH.geo({pw:HF.pw(),dockY:HF.dockY()}), LW=()=>{ const g=G2(), fl=g.wallTop+(HF.dockY()-g.wallTop)*.48; return {x0:g.x0,x1:g.x1,vx:g.vx,wallTop:fl,winA:g.x0+(g.x1-g.x0)*.5,winB:g.x1-W*.026}; };
   hfMake('river',{ name:'Mill house', hname:'mill house', glow:'255,205,140', seatX:()=>HF.pw()-W*.026,
-    colors:C16('River stone=#bab2a2;Dark stone=#8a8478;Slate=#5a6470;Mill oak=#7a5a3e;Dark oak=#4a3626;Roof brick=#7a4a3a;Iron=#3a3a40;Moss=#6a9a5e;Fern=#4f8050;River blue=#5a9aa4;Deep teal=#28525e;Sky=#a8d0ec;Birch white=#eef0e2;Autumn orange=#c8783a;Maple red=#a8402e;Wheat=#d8c08a'),
     front:null, smoke:(n,t)=>BH.smoke(n,t,MH.chimTop(G2(),['stone','brick','pipe'][hfStyle('river','chimney')]),hfStyle('river','chimney')===2?.7:1),
-    els:[{id:'walls',label:'Walls',styles:['Fieldstone','Whitewashed stone','Timber frame'],def:[0,0],palS:[[0,1,2],[12,0,15],[12,15,0]]},
-         {id:'roof',label:'Roof',styles:['Slate','Cedar shakes','Thatch'],def:[0,2],palS:[[2,1,5,6],[3,4,1],[15,3,13]]},
-         {id:'dormer',label:'Dormer',styles:['Hoist and flour sack','Dormer window','Pigeon loft'],def:[0,3],pal:[3,4,6,9,10,14]},
-         {id:'chimney',label:'Chimney',styles:['Fieldstone','Brick','Stovepipe'],def:[0,1],palS:[[0,1,2],[5,14,13],[6,4,10]]},
-         {id:'door',label:'Door',styles:['Plank door','Dutch door','Arched door'],def:[2,3],pal:[3,4,5,7,8,9,10,14]},
-         {id:'windows',label:'Windows',light:true,styles:['Four-pane windows','Arched windows','Shuttered windows'],def:[1,4],pal:[3,4,5,7,8,9,10,14]}],
-    seat:['stump','gardenbench','barrel'], seatNames:['Stump stool','Slatted bench','Barrel'], seatDef:[1,3], seatPal:[0,1,3,4,7,8,13,14,15],
+    look:{walls:[0,'#bab2a2'],roof:[0,'#5a6470'],dormer:[0,'#7a5a3e'],chimney:[0,'#8a8478'],door:[2,'#7a5a3e'],windows:[1,'#4a3626'],seat:[0,'#7a5a3e']}, light:'windows',
+    seat:'gardenbench',
     order:[
       ['base',(o)=>{ MH.ground(o); BH.piles(o,'stone','#8a8478'); }],
       ['chimney',(o,s,c)=>MH.chimney(o,G2(),['stone','brick','pipe'][s],c)],
@@ -18008,15 +17976,9 @@ const C16=s=>s.split(';').map(p=>{ const [n,h]=p.split('='); return [n.trim(),h.
    bracing, barnacles and weed, a ladder with a dory tied to it and a gull on the mooring piling */
 { const G4=()=>SS.geo({pw:HF.pw(),dockY:HF.dockY()}), WN=()=>{ const g=G4(); return {x0:g.x0,x1:g.x1,vx:g.vx,wallTop:g.wallTop,winA:g.x0+g.w*.36,winB:g.x0+g.w*.6}; };
   hfMake('coast',{ name:'Lobster shack', hname:'lobster shack', glow:'255,210,150', seatX:()=>HF.pw()-W*.03,
-  colors:C16('Driftwood=#a8a090;Silver-grey=#8a8a84;Tar black=#2e2a28;Weathered blue=#5a7a8a;Sea glass=#9adcd8;Sea teal=#3aa0a8;Deep sea=#145a6a;Sand=#e8d6a4;Dune grass=#8aa85a;Rope tan=#c8a878;Buoy red=#c8483a;Buoy yellow=#e8c04a;Lighthouse white=#f4f0e6;Shingle brown=#6a5440;Gull grey=#c8ccd0;Oilskin yellow=#d8b030'),
   front:null, smoke:null,
-  els:[{id:'siding',label:'Siding',styles:['Cedar shingles','Clapboard','Board and batten'],def:[0,1],palS:[[0,1,13,14],[3,10,12,6,14],[0,1,3,10,12]]},
-       {id:'roof',label:'Roof',styles:['Asphalt shingles','Cedar shakes','Tin roof'],def:[0,2],palS:[[2,1,6,13],[13,0,1],[1,14,10,3]]},
-       {id:'door',label:'Door',styles:['Plank door','Dutch door','Arched door'],def:[0,10],pal:[2,3,5,6,10,11,12,15]},
-       {id:'windows',label:'Windows',light:true,styles:['Four-pane windows','Porthole windows','Shuttered windows'],def:[0,12],pal:[2,3,5,6,10,12,15]},
-       {id:'tackle',label:'Fishing gear',styles:['Buoys on the wall','Lobster pots','Drying net'],def:[0,10],palS:[[10,11,12,5,15],[13,0,3,10],[5,8,9,6]]},
-       {id:'light',label:'Lamp',styles:['Ship’s lantern','Harbour lamp','Buoy light'],def:[0,13]}],
-  seat:['crate','bucket','driftbench'], seatNames:['Fish crate','Upturned bucket','Driftwood bench'], seatDef:[0,0],
+  look:{siding:[0,'#8a8a84'],roof:[0,'#2e2a28'],door:[0,'#c8483a'],windows:[0,'#f4f0e6'],tackle:[0,'#c8483a'],light:[0,'#6a5440'],seat:[0,'#a8a090']}, light:'windows',
+  seat:'crate',
   order:[
     ['base',(o)=>{ SS.ground(o); HK.deck(o,'#a8a090','boards'); }],
     ['siding',(o,s,c)=>SS.walls(o,SS.geo(o),['shingles','clapboard','batten'][s],c)],
@@ -18032,15 +17994,9 @@ const C16=s=>s.split(';').map(p=>{ const [n,h]=p.split('='); return [n.trim(),h.
    footprints to a tip-up over its hole, a box sled beside it. The old tent, igloo, stove, hole and sled choices became this one building */
 { const G5=()=>FS.geo({pw:HF.pw(),dockY:HF.dockY()}), WN=()=>{ const g=G5(); return {x0:g.x0,x1:g.x1,vx:g.x0,wallTop:g.wallTop,winA:g.x0+g.w*.45,winB:g.x0+g.w*.72}; }, DR=()=>{ const g=G5(); return {x0:g.x0,x1:g.x1,vx:g.x0,wallTop:g.wallTop}; };
 hfMake('frost',{ name:'Ice shanty', hname:'ice shanty', ice:true, glow:'255,190,120', seatX:()=>HF.pw()-W*.03,
-  colors:C16('Snow white=#f6f8ff;Frost=#d8e8f6;Ice blue=#8aaad0;Glacier=#4a6a9a;Deep ice=#1a2a4a;Spruce=#3e5a78;Birch=#e8e0d0;Birch bark=#4a4440;Timber=#7a5440;Dark timber=#4a3428;Wool red=#b8383a;Wool cream=#f0e6d0;Stove iron=#2a2a30;Lantern orange=#f0983a;Aurora green=#7af0b0;Dusk mauve=#9a88b8'),
   front:null, smoke:(n,t)=>BH.smoke(n,t,FS.chimTop(G5(),hfStyle('frost','chimney')),.8),
-  els:[{id:'walls',label:'Walls',styles:['Painted boards','Shiplap','Canvas over a frame'],def:[0,10],palS:[[10,5,3,8,6,15],[8,9,6],[11,10,5,3]]},
-       {id:'roof',label:'Roof',styles:['Tin roof','Shingles','Canvas'],def:[0,12],palS:[[12,3,10,5],[9,7,12],[11,5,10]]},
-       {id:'chimney',label:'Stovepipe',styles:['Straight pipe','Capped pipe','Elbow pipe'],def:[0,12],pal:[12,7,9,13]},
-       {id:'door',label:'Door',styles:['Plank door','Dutch door','Arched door'],def:[0,9],pal:[9,8,10,11,5,3]},
-       {id:'windows',label:'Windows',light:true,styles:['Four-pane windows','Round windows','Shuttered windows'],def:[0,11],pal:[11,9,10,5,3,6]},
-       {id:'gear',label:'Gear',styles:['Hand auger','Bait bucket','Catch on the ice'],def:[0,10]}],
-  seat:['bucket','furbench','icechair'], seatNames:['Bucket stool','Fur bench','Ice chair'], seatDef:[0,12],
+  look:{walls:[0,'#b8383a'],roof:[0,'#2a2a30'],chimney:[0,'#2a2a30'],door:[0,'#4a3428'],windows:[0,'#f0e6d0'],gear:[0,'#b8383a'],seat:[0,'#2a2a30']}, light:'windows',
+  seat:'bucket',
   order:[
     ['shelf',(o)=>{ const x0=HF.x0(), y=o.dockY, x=o.x, pw=o.pw+W*.012, wl=o.wl, r=v3rng(7); /* the ice shelf the camp stands on: snow on top, blue ice face, ragged foot with icicles, fading into the water */
       const g=x.createLinearGradient(0,y,0,wl+H*.04); g.addColorStop(0,HK.n(o,'#cfe0f4')); g.addColorStop(.6,HK.n(o,'#7a9ac8')); g.addColorStop(1,v3rgba(HK.n(o,'#4a6a9a'),0)); x.fillStyle=g;
@@ -18063,17 +18019,11 @@ hfMake('frost',{ name:'Ice shanty', hname:'ice shanty', ice:true, glow:'255,190,
 
 /* 6. Canadian Rockies: the log cabin */
 hfMake('rockies',{ name:'Log cabin', hname:'log cabin', glow:'255,205,130', front:(n,cx)=>rkFront(n,cx), smoke:(n,t)=>rkSmoke(n,t), seatX:()=>HF.pw()-W*.028 /* at the deck's edge, close to the water (director, 2026-11-23: "why would anybody ever fish from that far away") */,
-  colors:C16('Cedar log=#9a6a42;Spruce log=#7a5a3e;Dark log=#4a3426;Granite=#9a948a;Dark granite=#5a5650;Glacier turquoise=#2a9aa8;Ice teal=#7ad8d8;Deep lake=#0a4858;Spruce green=#2e5040;Moss=#5a7a4a;Snow=#f4f8fc;Flannel red=#b8322a;Flannel black=#2a2626;Maple orange=#d8702a;Birch cream=#ece2cc;Canoe green=#3a6a4a'),
   /* the log cabin (director, 2026-11-22 night: "customise aspects of a log cabin"): a wide log lodge seen from its long side at the back of a
      log deck on a granite ledge. Its walls, roof, chimney, porch, door and windows are the choices, each one real-life option for that part
      in the colours real ones come in (director, 2026-11-23: door and windows are two parts; "tin" any colour; a real sod roof) */
-  els:[{id:'walls',label:'Log walls',styles:['Round logs','Dovetailed timbers','Logs on a stone base'],def:[0,0],pal:[0,1,2,8,11,12,13,14,15]},
-       {id:'roof',label:'Cabin roof',styles:['Cedar shakes','Tin roof','Sod roof'],def:[0,4],palS:[[0,1,2,3,4,8,12,13,14],[0,2,3,4,5,7,8,10,11,12,13,14,15],[9,8,13,14]]},
-       {id:'chimney',label:'Chimney',styles:['Fieldstone','Stovepipe','Brick'],def:[0,3],palS:[[3,4,14,0],[12,2,4,7,8,11,15],[11,13,0,2,14,12]]},
-       {id:'porch',label:'Porch',styles:['Open deck','Covered porch','Porch with log rail'],def:[1,1],pal:[0,1,2,8,11,12,13,14,15]},
-       {id:'door',label:'Door',styles:['Plank door','Dutch door','Door with a glass pane'],def:[0,11],pal:[0,1,2,5,7,8,11,12,13,14,15]},
-       {id:'windows',label:'Windows',light:true,styles:['Four-pane windows','Windows with flower boxes','Shuttered windows'],def:[0,2],pal:[0,1,2,5,7,8,11,12,13,14,15]}],
-  seat:['muskoka','stumpblanket','logrocker'], seatNames:['Muskoka chair','Stump and blanket','Log rocker'], seatDef:[0,11], seatPal:[0,1,2,8,11,12,13,14,15],
+  look:{walls:[0,'#9a6a42'],roof:[0,'#5a5650'],chimney:[0,'#9a948a'],porch:[1,'#7a5a3e'],door:[0,'#b8322a'],windows:[0,'#4a3426'],seat:[0,'#b8322a']}, light:'windows',
+  seat:'muskoka',
   order:[
     ['base',(o)=>{ rkShore(o); rkLedge(o); HK.deck(o,'#8a6040','logs'); }],
     ['chimney',(o,s,c)=>{ const C=rkCab(o), x=C.x1-W*.04, w=W*.016, top=C.roofTop-H*.045, y=C.wallTop+H*.01, q=o.x; /* at the lodge's right end; drawn before the roof, which covers its foot */
@@ -18227,15 +18177,9 @@ function rkLedge(o){ const x=o.x, y=o.dockY, yu=y+HK.fh(), wl=o.wl, at=f=>HK.at(
    starfish showing through, a coconut palm leaning over the roof. The old stilts, platform and cover choices became this one building */
 { const G7=()=>RB.geo({pw:HF.pw(),dockY:HF.dockY()}), WN=()=>{ const g=G7(); return {x0:g.x0,x1:g.x1,vx:g.x0,wallTop:g.wallTop,winA:g.x0+g.w*.45,winB:g.x0+g.w*.72}; };
 hfMake('reef',{ name:'Overwater bungalow', hname:'bungalow', glow:'255,200,140', seatX:()=>HF.pw()-W*.03,
-  colors:C16('Palm wood=#9a7a52;Bleached wood=#c8b088;Thatch=#d8b46a;Dark thatch=#a8843a;Sand=#f4e2b0;Shell white=#fbf2e4;Turquoise=#18b0c0;Lagoon=#7ae8e0;Deep reef=#0a6a8a;Palm green=#3a9a4a;Frond dark=#22703a;Coral=#ff7a6a;Mango=#ffb84a;Orchid=#c86ad8;Hibiscus red=#e0403a;Sky blue=#6ccaf4'),
   front:null, smoke:null,
-  els:[{id:'walls',label:'Walls',styles:['Woven bamboo','Palm planks','Reed screens'],def:[0,1],palS:[[1,0,4],[0,1,5,6],[1,2,3]]},
-       {id:'thatch',label:'Roof',styles:['Palm thatch','Layered reed thatch','Palm-leaf shingles'],def:[0,2],palS:[[2,3],[2,3,1],[9,10,3]]},
-       {id:'door',label:'Door',styles:['Cloth curtain','Plank door','Arched door'],def:[0,11],palS:[[11,12,13,14,6,5],[0,1,6,8],[0,1,6,8]]},
-       {id:'windows',label:'Windows',styles:['Shuttered windows','Round windows','Four-pane windows'],def:[0,6],pal:[0,1,5,6,8,11,12]},
-       {id:'gear',label:'Beach gear',none:true,styles:['No gear','Surfboard','Snorkel set','Shell garland'],def:[1,11]},
-       {id:'torch',label:'Torch',light:true,styles:['Tiki torch','Shell lantern','Glass floats'],def:[0,13]}],
-  seat:['beachchair','hammock','peacock'], seatNames:['Beach chair','Hammock','Peacock chair'], seatDef:[0,6],
+  look:{walls:[0,'#c8b088'],thatch:[0,'#d8b46a'],door:[0,'#ff7a6a'],windows:[0,'#18b0c0'],gear:[1,'#ff7a6a'],torch:[0,'#c86ad8'],seat:[0,'#18b0c0']}, light:'torch',
+  seat:'beachchair',
   order:[
     ['base',(o)=>{ RB.ground(o); HK.supports(o,'#9a7a52','palm',5); HK.deck(o,'#c8b088','planks'); }],
     ['walls',(o,s,c)=>RB.walls(o,RB.geo(o),['woven','shiplap','bamboo'][s],c)],
@@ -18249,12 +18193,9 @@ hfMake('reef',{ name:'Overwater bungalow', hname:'bungalow', glow:'255,200,140',
    to the right, with a rub rail, boot stripe, registration and an outboard; console, top and gear choices; staked out with a push pole.
    Same ids as before, so saved choices still fit */
 hfMake('keys',{ name:'Flats skiff', hname:'skiff', floats:true, seatX:()=>HF.pw()-W*.03,
-  colors:C16('Boat white=#f4f6f4;Fiberglass cream=#ece4d0;Aluminium=#b8c0c4;Teak=#9a6a3a;Flats aqua=#28c0c8;Shallow mint=#8af0e0;Deep channel=#0a7090;Conch pink=#f0a0a8;Flamingo=#f06a8a;Mint=#9ae0c0;Lemon=#f4e07a;Sunset orange=#f8a050;Sand=#f4e6c0;Palm green=#3a8a5a;Navy trim=#1e3a5a;Cooler red=#d8483a'),
   front:null, smoke:null,
-  els:[{id:'hull',label:'Hull',styles:['Flats skiff','Bay boat','Pastel jon boat'],def:[0,0]},{id:'top',label:'Top',none:true,styles:['Open sky','T-top','Bimini','Clamp umbrella'],def:[1,1]},
-       {id:'console',label:'Console',styles:['Center console','Poling platform','Tiller boat'],def:[0,0]},{id:'gear',label:'Gear',styles:['Rod holders','Cooler','Flamingo float'],def:[0,15]},
-       {id:'light',label:'Nav lights',light:true,styles:['Bow lights','T-top light','Cooler lantern'],def:[0,13]}],
-  seat:['captain','coolerseat','beanbag'], seatNames:['Captain’s chair','Cooler seat','Bean bag'], seatDef:[0,14],
+  look:{hull:[0,'#f4f6f4'],top:[1,'#ece4d0'],console:[0,'#f4f6f4'],gear:[0,'#d8483a'],light:[0,'#3a8a5a'],seat:[0,'#1e3a5a']}, light:'light',
+  seat:'captain',
   order:[
     ['stake',(o)=>FK.ground(o)],
     ['hull',(o,s,c)=>FK.hull(o,s,c)],
@@ -18267,12 +18208,8 @@ hfMake('keys',{ name:'Flats skiff', hname:'skiff', floats:true, seatX:()=>HF.pw(
 /* 9. Brine Shelf: the sport-fisher (overnight, 2026-11-23; its own design, src/cw_sportfisher.js; floats): the after half of a big-game boat,
    stern toward the fish, bow off the left edge; cabin, flybridge / wheelhouse / tuna tower, outriggers. Same ids as before, so saved choices fit */
 hfMake('shelf',{ name:'Sport-fisher', hname:'boat', floats:true, seatX:()=>HF.pw()-W*.03, front:null, smoke:null,
-  colors:C16('Hull white=#f2f2ee;Deck teak=#a8743a;Dark teak=#6a4626;Brass=#c8a04a;Chrome=#c0c8cc;Navy hull=#1e2e4a;Ocean blue=#2a7a9a;Deep ocean=#0c3a5a;Foam=#e4f0f0;Sail canvas=#f4ead8;Rope=#c8a878;Flag red=#c8382e;Flag yellow=#e8c03a;Flag blue=#2a5aa8;Life-ring orange=#f0782a;Horizon gold=#ffe0a8'),
-  els:[{id:'hull',label:'Hull',styles:['Sport-fisher','Wooden cruiser','Steel workboat'],def:[0,0]},{id:'bridge',label:'Flybridge',styles:['Open flybridge','Wheelhouse','Tuna tower'],def:[0,0]},
-       {id:'rig',label:'Outriggers',styles:['Twin outriggers','Rod rack','Gaff rack'],def:[0,4]},
-{id:'flags',label:'Flags',none:true,styles:['No flags','Signal flags','Marlin pennant','Burgee'],def:[1,11]},
-       {id:'light',label:'Deck light',light:true,styles:['Brass lantern','Masthead light','Floodlight'],def:[0,15]}],
-  seat:['fighting','teakbench','deckstool'], seatNames:['Fighting chair','Teak bench','Deck stool'], seatDef:[0,1],
+  look:{hull:[0,'#f2f2ee'],bridge:[0,'#f2f2ee'],rig:[0,'#c0c8cc'],flags:[1,'#c8382e'],light:[1,'#ffe0a8'] /* the light up on the tower, not a lamp post on the deck (2026-11-25) */,seat:[0,'#a8743a']}, light:'light',
+  seat:'fighting',
   order:[
     ['hull',(o,s,c)=>SF.hull(o,s,c)],
     ['bridge',(o,s,c)=>SF.bridge(o,s,c,hfColor('shelf','hull'))],
@@ -18286,13 +18223,8 @@ hfMake('shelf',{ name:'Sport-fisher', hname:'boat', floats:true, seatX:()=>HF.pw
    The old stilts, floor and roof choices became this one building; river gear and lamp keep their ids */
 {
 hfMake('amazon',{ name:'Palafito', hname:'palafito', glow:'255,190,110', seatX:()=>HF.pw()-W*.03, front:null, smoke:null,
-  colors:C16('Hardwood=#7a5a3e;Dark hardwood=#4a3420;Vine=#5a6a2a;Palm thatch=#c8a85a;Dry thatch=#a8843a;River clay=#a8683a;Jungle green=#2e6a32;Deep jungle=#123a18;Fern=#6aa04a;Leaf highlight=#a8e07a;Tannin water=#3a5a32;Macaw red=#d8302a;Macaw blue=#2a6ad8;Macaw yellow=#f0c83a;Orchid pink=#e070b0;Mist=#e8f4e0'),
-  els:[{id:'walls',label:'Walls',styles:['Split palm','Woven cane','Clay plaster'],def:[0,0],palS:[[0,1,3],[3,4,0],[5,3,4]]},
-       {id:'thatch',label:'Roof',styles:['Palm thatch','Dry thatch','Giant leaves'],def:[0,3],palS:[[3,4],[4,3],[6]]},
-       {id:'door',label:'Door',styles:['Woven mat','Plank door','Bead curtain'],def:[0,4],palS:[[3,4,2],[0,1],[11,12,13,14,15]]},
-       {id:'canoe',label:'River gear',none:true,styles:['No gear','Dugout canoe','Paddle and trap','Hanging net'],def:[1,1]},
-       {id:'lamp',label:'Lamp',light:true,styles:['Gourd lamp','Firefly basket','Bamboo torch'],def:[0,13]}],
-  seat:['hammock','wovenstool','logseat'], seatNames:['Hammock','Woven stool','Carved log seat'], seatDef:[0,11],
+  look:{walls:[0,'#7a5a3e'],thatch:[0,'#c8a85a'],door:[0,'#a8843a'],canoe:[1,'#4a3420'],lamp:[0,'#f0c83a'],seat:[0,'#d8302a']}, light:'lamp',
+  seat:'hammock',
   order:[
     ['base',(o)=>{ AP.ground(o); HK.deck(o,'#7a5a3e','planks'); }],
     ['walls',(o,s,c)=>AP.walls(o,AP.geo(o),['batten','woven','plaster'][s],c)],
@@ -18305,11 +18237,8 @@ hfMake('amazon',{ name:'Palafito', hname:'palafito', glow:'255,190,110', seatX:(
 /* 11. Midnight Deep: the trawler (overnight, 2026-11-23; its own design, src/cw_trawler.js; floats): a rust-streaked steel stern trawler with a
    high bulwark, freeing ports, tyre fenders and a towering wheelhouse forward; net drum, gantry with a trawl door, or crab pots. Same ids as before */
 hfMake('deep',{ name:'Trawler', hname:'trawler', floats:true, seatX:()=>HF.pw()-W*.03, front:null, smoke:null,
-  colors:C16('Steel grey=#6a7480;Dark steel=#3a424c;Gunmetal=#2a2e34;Rust=#8a4a2a;Rust light=#b8683a;Safety orange=#f0782a;Float orange=#e85a2a;Oilskin yellow=#d8b030;Floodlight=#f4eccc;Net green=#4a6a5a;Deck black=#1a1c20;Sea grey=#6a8290;Deep sea=#0a1826;Foam white=#e8ecf0;Bruised amber=#c8704a;Cold rim=#8aa0d8'),
-  els:[{id:'hull',label:'Hull',styles:['Steel deck','Rusty trawler','Wood on steel'],def:[0,0]},{id:'house',label:'Wheelhouse',styles:['Boxy wheelhouse','Low pilothouse','Open helm'],def:[0,13]},
-       {id:'gear',label:'Trawl gear',styles:['Net drum','A-frame gantry','Crab pots'],def:[0,9]},{id:'mast',label:'Mast',none:true,styles:['No mast','Mast and boom','Radar mast','Antenna mast'],def:[1,1]},
-       {id:'light',label:'Floodlight',light:true,styles:['Floodlight','Caged lamp','Swinging lantern'],def:[0,8]}],
-  seat:['floatcrate','steelbench','ropecoil'], seatNames:['Crate of floats','Steel bench','Rope coil'], seatDef:[0,9],
+  look:{hull:[0,'#6a7480'],house:[0,'#e8ecf0'],gear:[0,'#4a6a5a'],mast:[1,'#3a424c'],light:[0,'#f4eccc'],seat:[0,'#4a6a5a']}, light:'light',
+  seat:'floatcrate',
   order:[
     ['hull',(o,s,c)=>MT.hull(o,s,c)],
     ['house',(o,s,c)=>MT.house(o,s,c)],
@@ -18321,11 +18250,8 @@ hfMake('deep',{ name:'Trawler', hname:'trawler', floats:true, seatX:()=>HF.pw()-
 /* 12. Hollow Trench: the castaway raft (overnight, 2026-11-23; its own design, src/cw_castaway.js; floats): barrels and salvaged planks lashed with
    rope, glowing growth below; the shelter an upturned lifeboat on props, a sailcloth tent over an oar, or a plank shack with a porthole */
 hfMake('trench',{ name:'Castaway raft', hname:'raft', floats:true, glow:'255,180,90', seatX:()=>HF.pw()-W*.03, front:null, smoke:null,
-  colors:C16('Salvage plank=#6a5a48;Dark plank=#3a3028;Tarred barrel=#4a3a2a;Barrel band=#5a5a5a;Rope=#9a8868;Old brass=#a8884a;Lantern amber=#f0b050;Sail scrap=#c8bca0;Abyss black=#020e14;Deep teal=#123a44;Trench teal=#3a6a70;Bio cyan=#5afff0;Bio violet=#a080ff;Pale glow=#b8e8dc;Wet rock=#2a3e46;Bone=#e0dccc'),
-  els:[{id:'raft',label:'Raft',styles:['Barrel raft','Plank raft','Door raft'],def:[0,2]},{id:'mast',label:'Mast',styles:['Scrap sail','Crow’s nest','Oar flag'],def:[0,7]},
-       {id:'salvage',label:'Salvage',styles:['Sea chest','Anchor','Ship’s wheel'],def:[0,5]},{id:'cabin',label:'Shelter',styles:['Upturned lifeboat','Sailcloth tent','Plank shack'],def:[0,2],palS:[[2,0,4,7],[7,4],[0,1,2]]},
-       {id:'light',label:'Lantern',light:true,styles:['Pole lantern','Jellyfish jar','Wreck lamp'],def:[0,6]}],
-  seat:['barrel','seachest','crate'], seatNames:['Barrel','Sea chest','Broken crate'], seatDef:[0,2],
+  look:{raft:[0,'#4a3a2a'],mast:[0,'#c8bca0'],salvage:[0,'#a8884a'],cabin:[0,'#4a3a2a'],light:[0,'#f0b050'],seat:[0,'#4a3a2a']}, light:'light',
+  seat:'barrel',
   order:[
     ['raft',(o,s,c)=>TR.raft(o,s,c)],
     ['cabin',(o,s,c)=>TR.shelter(o,s,c)],
@@ -18339,13 +18265,8 @@ hfMake('trench',{ name:'Castaway raft', hname:'raft', floats:true, glow:'255,180
    choices became this one building; the pool and lantern keep their ids */
 { const G13=()=>EB.geo({pw:HF.pw(),dockY:HF.dockY()});
 hfMake('ember',{ name:'Basalt bathhouse', hname:'bathhouse', glow:'255,150,80', seatX:()=>HF.pw()-W*.03, front:null, smoke:(n,t)=>BH.smoke(n,t,EB.ventTop(G13()),.9),
-  colors:C16('Basalt=#4a3a3a;Black basalt=#2a2024;Obsidian=#1a1418;Ash grey=#7a6e6a;Volcanic earth=#7a6258;Iron=#3a3436;Forged iron=#5a4a44;Copper=#b8683a;Ember orange=#ff7a2a;Lava gold=#ffc04a;Crimson=#a83030;Spring turquoise=#7ad8d0;Steam white=#f0e8e4;Onsen cedar=#a87a52;Tile red=#b8483a;Amber sky=#f0c8a0'),
-  els:[{id:'walls',label:'Walls',styles:['Basalt stone','Ash render','Charred cedar'],def:[0,0],palS:[[0,1,3,4],[3,4,0],[2,1,5]]},
-       {id:'vault',label:'Roof',styles:['Corrugated iron','Copper vault','Slate vault'],def:[0,5],palS:[[5,6,3],[7,6],[1,2,3]]},
-       {id:'door',label:'Door',styles:['Iron-strapped door','Dutch door','Arched door'],def:[0,6],pal:[5,6,7,2,1]},
-       {id:'pool',label:'Hot pool',styles:['Stone bath','Cedar tub','Lava-rock ring'],def:[0,11]},
-       {id:'light',label:'Lantern',light:true,styles:['Iron lantern','Lava bowl','Steam lamp'],def:[0,8]}],
-  seat:['steelbench','bathstool','warmrock'], seatNames:['Stone bench','Bath stool','Warm rock'], seatDef:[0,3],
+  look:{walls:[0,'#4a3a3a'],vault:[0,'#3a3436'],door:[0,'#5a4a44'],pool:[0,'#7ad8d0'],light:[0,'#ff7a2a'],seat:[0,'#7a6e6a']}, light:'light',
+  seat:'steelbench',
   order:[
     ['base',(o)=>EB.ground(o)],
     ['deck',(o)=>HK.deck(o,'#4a3a3a','stone')],
@@ -18360,13 +18281,8 @@ hfMake('ember',{ name:'Basalt bathhouse', hname:'bathhouse', glow:'255,150,80', 
    crystal, silver or star-blossom dome and a gold star finial, a moon-shaped door, on a floating rock island with crystals hanging beneath. The old
    platform, underglow and arch choices became this one building; telescope and star lantern keep their ids */
 hfMake('starfall',{ name:'Star observatory', hname:'observatory', floats:true, glow:'220,200,255', seatX:()=>HF.pw()-W*.03, front:null, smoke:null,
-  colors:C16('Moonstone=#e8e0f4;Silver=#c8c8d8;Starlight=#fff8ff;Crystal violet=#b88aff;Crystal cyan=#7ae0ff;Deep violet=#6a5ab0;Night indigo=#2a1a5a;Lilac=#c8a0e8;Cloud lavender=#c8b8e0;Moon gold=#f0d080;Planet peach=#f0b890;Rose=#ff9ab0;Plum=#7a3a8a;Island moss=#5a8a6a;Twilight blue=#4a4aa8;Star ring=#e8d0ff'),
-  els:[{id:'walls',label:'Walls',styles:['Moonstone blocks','Silver plaster','Starlight glass'],def:[0,0],palS:[[0,1,8],[1,0,7],[4,3,2]]},
-       {id:'dome',label:'Dome',styles:['Crystal dome','Silver dome','Star-blossom dome'],def:[0,3],palS:[[3,4,7],[1,0],[7,8]]},
-       {id:'door',label:'Door',styles:['Crescent window door','Starry door','Crystal bead curtain'],def:[0,5],pal:[5,6,3,1]},
-       {id:'scope',label:'Telescope',none:true,styles:['None','Brass telescope','Astrolabe','Star chart'],def:[1,9]},
-       {id:'light',label:'Star lantern',light:true,styles:['Star lantern','Moon orb','Constellation wisps'],def:[0,2]}],
-  seat:['crescent','cloudcushion','crystalstool'], seatNames:['Crescent bench','Cloud cushion','Crystal stool'], seatDef:[0,0],
+  look:{walls:[0,'#e8e0f4'],dome:[0,'#b88aff'],door:[0,'#6a5ab0'],scope:[1,'#f0d080'],light:[0,'#fff8ff'],seat:[0,'#e8e0f4']}, light:'light',
+  seat:'crescent',
   order:[
     ['base',(o)=>{ SO.ground(o); HK.deck(o,'#e8e0f4','moonstone'); }],
     ['walls',(o,s,c)=>SO.walls(o,SO.geo(o),s,c)],
@@ -18380,14 +18296,8 @@ hfMake('starfall',{ name:'Star observatory', hname:'observatory', floats:true, g
    white trim, a hayloft with a hoist and big white X-braced doors; a grassy bank with a hay stack and sunflowers; the dock on fence posts. The old
    deck, footing and roof choices became this one building; the fence and lantern keep their ids */
 hfMake('farm',{ name:'Red barn', hname:'barn', glow:'255,205,130', seatX:()=>HF.pw()-W*.03, front:null, smoke:null,
-  colors:C16('Barn red=#b8322a;Dark barn=#7a2a22;Trim white=#f4f0e6;Fence grey=#9a948a;Weathered board=#8a6a4a;Hay gold=#e0c060;Straw=#d8b46a;Tin=#a8b0b4;Rust tin=#a8683a;Grass green=#6aaa4a;Field green=#3a6a2a;Pond green=#5a7a4a;Sky blue=#a8d8f4;Gingham blue=#5a8ad8;Sunflower=#f0c83a;Mud brown=#6a5038'),
-  els:[{id:'walls',label:'Walls',styles:['Barn-red boards','Weathered boards','White clapboard'],def:[0,0],palS:[[0,1,4],[4,1],[2,3]]},
-       {id:'gambrel',label:'Roof',styles:['Shingles','Tin roof','Rusty tin'],def:[0,1],palS:[[1,4,3],[7,3],[8,7]]},
-       {id:'loft',label:'Hayloft',styles:['Open loft and hoist','Closed loft doors','Round window'],def:[0,1],pal:[0,1,4,2]},
-       {id:'doors',label:'Doors',styles:['X-braced doors','Dutch door','Doors rolled open'],def:[0,0],pal:[0,1,4,2]},
-       {id:'fence',label:'Fence',none:true,styles:['No fence','Picket fence','Post-and-rail','Wagon wheel'],def:[1,2]},
-       {id:'light',label:'Lantern',light:true,styles:['Lantern on a nail','String of bulbs','Milk-can lantern'],def:[0,14]}],
-  seat:['haybale','milkcan','rocker'], seatNames:['Hay bale','Milk-can stool','Rocking chair'], seatDef:[0,5],
+  look:{walls:[0,'#b8322a'],gambrel:[0,'#7a2a22'],loft:[0,'#7a2a22'],doors:[0,'#b8322a'],fence:[1,'#f4f0e6'],light:[0,'#f0c83a'],seat:[0,'#e0c060']}, light:'light',
+  seat:'haybale',
   order:[
     ['base',(o)=>{ AB.ground(o); HK.supports(o,'#9a948a','fence',5); HK.deck(o,'#8a6a4a','boards'); }],
     ['walls',(o,s,c)=>AB.walls(o,AB.geo(o),s,c)],
@@ -18402,14 +18312,8 @@ hfMake('farm',{ name:'Red barn', hname:'barn', glow:'255,205,130', seatX:()=>HF.
    steep roof under dripping icing and gumdrops, candy-cane corners, icing piping, a peppermint window; a giant fork in the soup with a cherry, a dollop
    of cream on the platter. The old platter, posts and roof choices became this one building; trim and candle keep their ids */
 hfMake('buffet',{ name:'Gingerbread house', hname:'gingerbread house', glow:'255,200,130', seatX:()=>HF.pw()-W*.03, front:null, smoke:null,
-  colors:C16('Gingerbread=#b8743a;Dark gingerbread=#7a4a22;Wafer=#e8c890;Biscuit=#d8a860;Chocolate=#5a3420;Milk chocolate=#8a5a3a;Icing white=#fff6ee;Strawberry=#f4a0b0;Mint=#a8e0c8;Lemon=#f8e08a;Blueberry=#7a8ad8;Cherry red=#d8303a;Caramel=#d88a3a;Candle gold=#ffd060;Porcelain=#f0f0f4;Broth gold=#e8b060'),
-  els:[{id:'walls',label:'Walls',styles:['Gingerbread','Chocolate bar','Shortbread'],def:[0,0],palS:[[0,1,3],[4,5],[2,3]]},
-       {id:'iroof',label:'Roof',styles:['Icing snow','Chocolate tiles','Candy shingles'],def:[0,1],palS:[[1,0,4],[4,5],[7,8]]},
-       {id:'door',label:'Door',styles:['Chocolate bar door','Candy-cane arch','Cookie door'],def:[0,4],palS:[[4,5],[7,8,1],[3,2]]},
-       {id:'windows',label:'Window',styles:['Peppermint','Sugar glass','Iced lattice'],def:[0,10],pal:[10,11,12,7,8]},
-       {id:'trim',label:'Trim',none:true,styles:['No trim','Icing piping','Licorice rope','Breadsticks'],def:[1,6]},
-       {id:'light',label:'Candle',light:true,styles:['Dripping candle','Cupcake candles','Jelly mould'],def:[0,13]}],
-  seat:['cupcake','teacup','macaron'], seatNames:['Cupcake stool','Teacup chair','Macaron pouf'], seatDef:[0,7],
+  look:{walls:[0,'#b8743a'],iroof:[0,'#7a4a22'],door:[0,'#5a3420'],windows:[0,'#7a8ad8'],trim:[1,'#fff6ee'],light:[0,'#ffd060'],seat:[0,'#f4a0b0']}, light:'light',
+  seat:'cupcake',
   order:[
     ['base',(o)=>{ GB.ground(o); HK.supports(o,'#e8c890','wafer',5); HK.deck(o,'#c8c8d0','platter'); }],
     ['walls',(o,s,c)=>GB.walls(o,GB.geo(o),s,c)],
@@ -18424,13 +18328,8 @@ hfMake('buffet',{ name:'Gingerbread house', hname:'gingerbread house', glow:'255
    with a thin cantilevered roof slab and a logo, the office visible inside; a concrete planter and a coffee cup on the deck. The old floor,
    supports and awning choices became this one building; the partition and lamp keep their ids */
 hfMake('corporate',{ name:'Glass pavilion', hname:'glass pavilion', glow:'230,240,255', seatX:()=>HF.pw()-W*.03, front:null, smoke:null,
-  colors:C16('Brushed steel=#a8b0b8;Dark steel=#5a6470;Concrete=#9a9a98;Light concrete=#c8c8c4;Glass cyan=#9ad0e0;Glass blue=#4a6a88;Corporate navy=#1e2e4a;Carpet grey=#6a6e74;Office white=#f4f6f8;Ficus green=#4a8a4a;Coffee brown=#6a4a32;Sticky yellow=#f8e070;Ticker green=#4ad86a;Ticker red=#e84a4a;Lanyard blue=#2a6ad8;Walnut=#8a5a3a'),
-  els:[{id:'glass',label:'Walls',styles:['Glass curtain wall','Frosted glass','Concrete and glass'],def:[0,4],palS:[[4,5],[8,4],[4,5]]},
-       {id:'slab',label:'Roof',styles:['Flat slab','Green roof','Solar panels'],def:[0,0],palS:[[0,1,2,6],[2,3],[0,1]]},
-       {id:'inside',label:'Inside',styles:['Desk and monitor','Ficus and water cooler','Whiteboard'],def:[0,4],pal:[4,5,6,11,12]},
-       {id:'partition',label:'Partition',none:true,styles:['None','Glass balustrade','Cubicle wall','Velvet rope'],def:[1,4]},
-       {id:'light',label:'Lamp',light:true,styles:['Desk lamp','Floor lamp','Open 9–5 sign'],def:[0,8]}],
-  seat:['swivel','executive','beanbag'], seatNames:['Swivel chair','Executive chair','Beanbag'], seatDef:[0,6],
+  look:{glass:[0,'#9ad0e0'],slab:[0,'#a8b0b8'],inside:[0,'#9ad0e0'],partition:[1,'#9ad0e0'],light:[0,'#f4f6f8'],seat:[0,'#1e2e4a']}, light:'light',
+  seat:'swivel',
   order:[
     ['base',(o)=>{ CO.ground(o); HK.deck(o,'#c8c8c4','concrete'); }],
     ['glass',(o,s,c)=>CO.walls(o,CO.geo(o),s,c)],
@@ -18442,11 +18341,8 @@ hfMake('corporate',{ name:'Glass pavilion', hname:'glass pavilion', glow:'230,24
 
 /* 18. The Nile: the reed boat (floats; its own drawing overnight 2026-11-23, src/cw_reedboat.js: a papyrus crescent hull with high ends and flower heads, lashings, a steering oar, a lotus-column cabin) */
 hfMake('nile',{ name:'Reed boat', hname:'reed boat', floats:true, seatX:()=>HF.pw()-W*.03, front:null, smoke:null,
-  colors:C16('Sandstone=#d8b880;Dark sandstone=#a8844a;Limestone=#ece0c4;Papyrus reed=#c8b060;Papyrus green=#6a9a4a;Palm wood=#7a5a3a;Linen=#f0e8d4;Gold leaf=#d8a830;Bright gold=#f0c84a;Lapis blue=#2a4a9a;Turquoise=#3ab0a8;Nile teal=#2a7a80;Carnelian=#b8402e;Ochre=#c8803a;Kohl black=#2a2428;Lotus pink=#f0a8b8'),
-  els:[{id:'hull',label:'Hull',styles:['Papyrus reeds','Wooden felucca','Gilded barque'],def:[0,3]},{id:'sail',label:'Sail',styles:['Lateen sail','Square sail','Painted eye sail'],def:[0,6]},
-       {id:'cabin',label:'Cabin',none:true,styles:['No cabin','Linen awning','Temple pylon','Striped tent'],def:[1,6]},{id:'cargo',label:'Cargo',none:true,styles:['No cargo','Amphorae','Fish baskets','Scroll chest'],def:[1,13]},
-       {id:'light',label:'Lamp',light:true,styles:['Lotus lamp','Bronze brazier','Sun-disc lantern'],def:[0,15]}],
-  seat:['lionstool','xstool','throne'], seatNames:['Lion-foot stool','Folding X stool','Gilded throne'], seatDef:[0,5],
+  look:{hull:[0,'#c8b060'],sail:[0,'#f0e8d4'],cabin:[1,'#f0e8d4'],cargo:[1,'#c8803a'],light:[0,'#f0a8b8'],seat:[0,'#7a5a3a']}, light:'light',
+  seat:'lionstool',
   order:[
     ['hull',(o,s,c)=>NB.hull(o,s,c)], /* its own drawing (overnight 2026-11-23, src/cw_reedboat.js) */
     ['sail',(o,s,c)=>{ const x=HK.at(o,.6), y=o.dockY, top=y-H*.24; HK.rect(o,x,top,2.4,H*.24,'#7a5a3a'); if(s===0){ HK.line(o,[x-W*.04,y-H*.04,x+W*.02,top-H*.02],'#7a5a3a',1.6); HK.poly(o,[x-W*.036,y-H*.05,x+W*.018,top-H*.012,x+W*.03,y-H*.05],c); } else { HK.rect(o,x-W*.03,top+H*.02,W*.06,2,'#7a5a3a'); HK.poly(o,[x-W*.03,top+H*.022,x+W*.03,top+H*.022,x+W*.026,y-H*.06,x-W*.026,y-H*.06],c); if(s===2){ HK.ell(o,x,top+H*.09,W*.01,H*.008,'#f4f0e6'); HK.circ(o,x,top+H*.09,H*.006,'#2a4a9a'); HK.line(o,[x-W*.012,top+H*.09,x-W*.016,top+H*.1],'#2a2428',1.4); } } }],
@@ -18459,13 +18355,8 @@ hfMake('nile',{ name:'Reed boat', hname:'reed boat', floats:true, seatX:()=>HF.p
    home with a glowing round window (or a noodle stall, or an arcade booth), a neon sign on the roof, an antenna and a vending machine beside it.
    Pad, thrusters, trim and light keep their ids; the canopy id is retired */
 hfMake('circuit',{ name:'Capsule pod', hname:'capsule pod', glow:'255,120,220', seatX:()=>HF.pw()-W*.03, front:null, smoke:null,
-  colors:C16('Chrome=#c8ccd8;Gunmetal=#3a3e4a;Carbon=#1a1c22;Hot pink=#ff4ab8;Neon magenta=#d83ad8;Electric cyan=#3ae8ff;Deep blue=#1a1a4a;Violet=#8a3a9a;Hologram lilac=#c8a0ff;Acid green=#7aff4a;Warning yellow=#ffe04a;LED white=#f4f8ff;Night purple=#2a1050;Cable black=#0e0e14;Sunset pink=#ff7ab8;Teal glow=#2ad8c8'),
-  els:[{id:'pod',label:'Home',styles:['Capsule pod','Noodle stall','Arcade booth'],def:[0,0],palS:[[0,7,3,5],[3,4,7],[5,3,9]]},
-       {id:'sign',label:'Neon sign',styles:['NOODLES','OPEN 24/7','RAMEN'],def:[0,3],pal:[3,4,5,9]},
-       {id:'pad',label:'Pad',styles:['Chrome plate','Carbon deck','Circuit glass'],def:[0,0]},{id:'thrust',label:'Thrusters',styles:['Anti-gravity rings','Thruster jets','Magnetic coils'],def:[0,5]},
-       {id:'trim',label:'Trim',none:true,styles:['No trim','Neon strip','Hologram rail','Cable rail'],def:[1,3]},
-       {id:'light',label:'Neon light',light:true,styles:['Neon tube','Hologram','LED orb'],def:[0,3]}],
-  seat:['gaming','orbseat','arcadestool'], seatNames:['Gaming chair','Orb seat','Arcade stool'], seatDef:[0,2],
+  look:{pod:[0,'#c8ccd8'],sign:[0,'#ff4ab8'],pad:[0,'#c8ccd8'],thrust:[0,'#3ae8ff'],trim:[1,'#ff4ab8'],light:[0,'#ff4ab8'],seat:[0,'#1a1c22']}, light:'light',
+  seat:'gaming',
   order:[
     ['thrust',(o,s,c)=>HK.supports(o,c,['rings','jets','coils'][s],4)],
     ['pad',(o,s,c)=>HK.deck(o,c,['chrome','carbon','glass'][s])],
@@ -18479,13 +18370,8 @@ hfMake('circuit',{ name:'Capsule pod', hname:'capsule pod', glow:'255,120,220', 
    cloud-water, four columns (Doric, Ionic, Corinthian), a frieze and pediment with gold acroteria, a god's statue inside, clouds around the
    posts. The old floor, columns and roof ids are retired; balustrade and brazier keep theirs */
 hfMake('olympus',{ name:'Marble temple', hname:'temple', glow:'255,220,140', seatX:()=>HF.pw()-W*.03, front:null, smoke:null,
-  colors:C16('White marble=#f0ecf4;Veined marble=#d8d4e4;Shadow marble=#b8b4c8;Gold=#d8a830;Bright gold=#f4d060;Bronze=#a8743a;Laurel green=#6a8a4a;Olive=#8a9a5a;Royal blue=#2a4aa8;Cerulean=#4aa0d8;Sky blue=#a0c0f4;Cloud white=#ffffff;Storm violet=#5a4a9a;Lightning yellow=#fff07a;Tyrian purple=#7a2a6a;Terracotta=#c8683a'),
-  els:[{id:'colorder',label:'Columns',styles:['Doric','Ionic','Corinthian'],def:[0,0],pal:[0,1,3]},
-       {id:'pediment',label:'Pediment',styles:['Gold sun relief','Plain marble','Painted frieze'],def:[0,3],pal:[3,4,5]},
-       {id:'statue',label:'Statue',styles:['Zeus','Athena','Poseidon'],def:[0,0],pal:[0,1,3,5]},
-       {id:'balustrade',label:'Balustrade',none:true,styles:['None','Marble balustrade','Laurel garland','Golden rail'],def:[0,0]},
-       {id:'light',label:'Brazier',light:true,styles:['Golden brazier','Lightning orb','Laurel torch'],def:[0,3]}],
-  seat:['marblethrone','cloudbench','klismos'], seatNames:['Marble throne','Cloud bench','Klismos chair'], seatDef:[0,0],
+  look:{colorder:[0,'#f0ecf4'],pediment:[0,'#d8a830'],statue:[0,'#f0ecf4'],balustrade:[0,'#f0ecf4'],light:[0,'#d8a830'],seat:[0,'#f0ecf4']}, light:'light',
+  seat:'marblethrone',
   order:[
     ['base',(o)=>{ HK.supports(o,'#e8e4f0','column',5); HK.deck(o,'#f0ecf4','marble'); TP.clouds(o); TP.base(o,TP.geo(o)); }],
     ['statue',(o,s,c)=>TP.statue(o,TP.geo(o),s,c)],
@@ -18708,7 +18594,7 @@ function mlHomeDraw(t,night,dockY,P){ if(!P) return false; const DL=Math.min(DPR
     v3lightPool(X,dockY-1,W*.06,'255,160,70',.25*lit); v3lanternReflect(X,HF.wl(dockY),lit,t,'255,170,80'); }
   if(S.settings.effects){ const sx=c0+cw*.72+W*.003, sy=wy-H*.088, sc=mix(P.farHaze,'#ffffff',.4); for(let i=0;i<5;i++){ const k=((t*.12+i/5)%1); v3glow(g,sx+Math.sin(k*4+i)*H*.006+k*H*.03,sy-k*H*.09,H*(.007+k*.025),v3rgba(sc,.9),.4*(1-k)*(k<.08?k/.08:1)); } }
   return true; }
-HOMEF.blossom={ name:'Treehouse', hname:'treehouse', fixed:true /* a home with no options (homes are fixed since 2026-11-24): it draws itself */, els:[], colors:[], seatH:[MLH_SEAT], seatX:()=>HF.pw()-W*.03, draw:mlHomeDraw, front:null, smoke:null };
+HOMEF.blossom={ name:'Treehouse', hname:'treehouse', fixed:true /* it draws itself */, seatH:MLH_SEAT, seatX:()=>HF.pw()-W*.03, draw:mlHomeDraw, front:null, smoke:null };
 // =====================================================================
 // More body variety in the newer waters. The water costumes that used to sit on these fish (Farm ears and horns, Buffet toppings,
 // Corporate ties, Nile headdresses, Circuit lines, Olympus laurels, and the odd fox ear or maple leaf elsewhere) were removed on
@@ -20874,21 +20760,6 @@ html body.phone-app #menuov #panel.wd08 .aq07-sheet > .bwx-nav > button .wl,html
 document.head.insertAdjacentHTML('beforeend',`<style>
 html body.phone-app #menuov #panel.wd08 .aq07-sheet > .bwx-nav > button,html body.phone-land #menuov #panel.wd08 .aq07-sheet > .bwx-nav > button{padding-left:3px!important;padding-right:3px!important;justify-content:center!important}
 </style>`);
-/* "home", not "dock", wherever the text is about any water (director: "some places won't be called docks, make sure that's corrected
-   for places without a true dock"). Phones and tablets: the Home page, feats, Tide Pass rewards, notices and Search. Flavour text
-   (a fish that is "a dock regular") stays. */
-const DEDOCK=[[/\bDock decoration:/g,'Home decoration:'],[/\bDock decorations\b/g,'Home decorations'],[/\bDock wood: pale, pearly planks for any of your docks\./g,'Home wood: pale, pearly planks for any home with wood.'],
-  [/\bdecorations on your dock\b/g,'decorations at your home'],[/\bcozy on your dock\b/g,'cozy at your home'],[/\bYour dock is full\b/g,'Your home is full'],[/\bfor more docks\b/g,'for more homes'],
-  [/\bYou are editing the dock at\b/g,'You are editing your home at'],[/\bIt starts as a copy of the dock you arrive with\b/g,'It starts as a copy of the home you arrive with'],
-  [/^Tap again: replace the (.+) dock$/,'Tap again: replace your home at $1'],[/\bPreviewing on your dock:/g,'Trying at your home:'],[/\bon your dock\b/g,'at your home'],
-  [/\bYour dock and its decorations\b/g,'Your home and its decorations'],[/\bYour dock at each water\b/g,'Your home at each water'],[/^Home: dock\b/,'Home'],[/^Full dock$/,'Full home']];
-const deDockText=s=>{ if(!s||s.indexOf('ock')<0) return s; let t=s; for(const [re,to] of DEDOCK) t=t.replace(re,to); return t; };
-{ const walk=root=>{ if(!root) return; const it=document.createTreeWalker(root,NodeFilter.SHOW_TEXT); let n; while((n=it.nextNode())){ const v=n.nodeValue; if(v.indexOf('ock')<0) continue; const t=deDockText(v); if(t!==v) n.nodeValue=t; } };
-  const _rp=renderPanel; renderPanel=function(){ const r=_rp.apply(this,arguments); try{ if(MOB()) walk($('panel')); }catch(e){} return r; };
-  const _t=toast; toast=function(m){ return _t.call(this,MOB()?deDockText(String(m)):m); };
-  /* Search results are built from the index when you type: their text is fixed as it appears */
-  new MutationObserver(ms=>{ if(!MOB()) return; for(const m of ms) for(const a of m.addedNodes) if(a.nodeType===1) walk(a); }).observe(document.body,{childList:true,subtree:false});
-  document.addEventListener('input',()=>{ if(MOB()) setTimeout(()=>{ const sv=document.getElementById('searchov'); if(sv) walk(sv); },0); },true); }
 /* Save > App on phones: how to install Driftline on THIS phone (the Windows program was the only thing offered) */
 pageDone('save',P=>{ /* a finishing touch of the Save page (Clean Pages 2026-11-21: was its own renderPanel wrapper) */
       const tile=[...P.querySelectorAll('.tile')].find(t=>/Windows desktop app/.test(t.textContent)); if(!tile||tile.dataset.mb) return; tile.dataset.mb='1';
@@ -22011,6 +21882,9 @@ PATCHES.unshift({v:'0.4.9', name:'Work in progress', items:phoneNotes([
 // text changes. Released notes live in notes_release.js.
 const TEST_NOTES={v:'test', label:'Test build · '+(window.DL_BUILD==='ios'?'iPhone':'Android'), name:'0.4.9 test build (newest first)', items:[
   '## New in this build',
+  'Homes are now fixed for good: every water has one building, the platform you stand on and its own seat. The leftover home options are gone behind the scenes (nothing changes on screen).',
+  'Brine Shelf: the boat’s light now hangs on its mast instead of a lamp post on the deck.',
+  '## Test build 2026.11.25-0252',
   'Fish fights, Cam’s list: when you are stronger than a fish, its hold counts for less (down to about a third of it), so weaker fish reel in faster; and every kind of fish now has its own hold and stamina, so two fish of the same rarity fight differently.',
   'Temper hits harder: a fired-up fish builds tension much faster between moves, and its moves pull the line tighter.',
   'Fish are stronger everywhere: Starfall Lake’s strongest fish now pull about 200 lb, and the end-game waters climb up to about 300 lb at the last one.',
@@ -22526,13 +22400,13 @@ events(){ QA.sys='Events';
     try{ for(const m of [false,true]){ S.specs=Object.assign({},s0||{}); for(const k in S.specs) if(S.specs[k]==='merchant') delete S.specs[k]; if(m) S.specs.qa='merchant'; const r=run(); res.push((m?'with Merchant ':'')+r.detail); if(!r.ok) return {ok:false,detail:res.join('; ')}; } } finally{ S.specs=s0; } return {ok:true,detail:res.join('; ')}; });
 },
 saves(){ QA.sys='Saves';
-  T('save -> load keeps everything (JSON round trip through migrate)',()=>{ dockStore(); const a=JSON.parse(JSON.stringify(S)); const b=migrate(JSON.parse(JSON.stringify(S))); const keys=['money','lvl','xp','scales','pearls','loc','unlocked','gear','bait','journal','cooler','tank','perks','feats','rods','hunts','docks','dock','pass','look','owned']; const diff=keys.filter(k=>JSON.stringify(a[k])!==JSON.stringify(b[k])); return diff.length?{ok:false,detail:'changed: '+diff.join(',')}:true; });
+  T('save -> load keeps everything (JSON round trip through migrate)',()=>{ const a=JSON.parse(JSON.stringify(S)); const b=migrate(JSON.parse(JSON.stringify(S))); const keys=['money','lvl','xp','scales','pearls','loc','unlocked','gear','bait','journal','cooler','tank','perks','feats','rods','hunts','docks','dock','pass','look','owned']; const diff=keys.filter(k=>JSON.stringify(a[k])!==JSON.stringify(b[k])); return diff.length?{ok:false,detail:'changed: '+diff.join(',')}:true; });
   T('empty, broken and wrong-typed saves load safely',()=>{ const cases=[null,'x',42,[],{}, {money:'abc',lvl:-5,xp:'?',cooler:'x',tank:null,bait:null,gear:{rod:999,reel:-3},journal:5,hunts:'x',docks:[],dock:{decor:'x'},unlocked:'pond',loc:'nowhere',perks:{lucky:99},scales:'lots',tankBank:'NaN',pass:{lvl:'x'},rods:{eq:'ghost'}}, {money:Infinity,xp:NaN,lvl:2.5,tickets:-9,pearls:-1}];
       const bad=[]; for(const c of cases){ let st; try{ st=migrate(c); }catch(e){ bad.push(JSON.stringify(c).slice(0,30)+' threw '+e.message); continue; } const keep=snap(); restore(JSON.stringify(st)); const p=inv(); if(p.length) bad.push(JSON.stringify(c).slice(0,40)+': '+p.slice(0,4).join('; ')); restore(keep); } return bad.length?{ok:false,detail:bad.join(' | ')}:true; });
-  T('a 0.3.5-era save (no hunts, no docks, old tab) loads into fishing mode',()=>{ const o=JSON.parse(snap()); delete o.hunts; delete o.docks; delete o.dockAt; delete o.chal; delete o.chalCd; o.tab='home'; o.settings.secLast={home:'pets'}; const st=migrate(o); restore(JSON.stringify(st)); dockSync(); const p=inv(); return p.length?{ok:false,detail:p.join('; ')}:(S.docks[S.loc]?true:{ok:false,detail:'dock not seeded'}); });
+  T('a 0.3.5-era save (no hunts, no docks, old tab) loads into fishing mode',()=>{ const o=JSON.parse(snap()); delete o.hunts; delete o.docks; delete o.dockAt; delete o.chal; delete o.chalCd; o.tab='home'; o.settings.secLast={home:'pets'}; const st=migrate(o); restore(JSON.stringify(st)); const p=inv(); return p.length?{ok:false,detail:p.join('; ')}:true /* (no per-water home to seed since homes are fixed, 2026-11-25) */; });
   T('save code: make -> read gives the same progress',()=>{ return {ok:'async'}; });
   T('a very old minimal save (2.x era: coins, level, a few fish) loads with valid data',()=>{ const old={money:5400, lvl:7, xp:120, journal:{bluegill:{n:3,kg:.4,big:.4}}, gear:{rod:2,reel:1}, cooler:[{id:'bluegill',kg:.3,value:12}], bait:{cricket:4}, loc:'pond', unlocked:['pond'], tab:'shop', v:1};
-      const st=migrate(old); restore(JSON.stringify(st)); dockSync(); const p=inv(); if(p.length) return {ok:false,detail:p.join('; ')}; return (S.money===5400&&S.lvl===7&&S.cooler.length===1&&S.bait.cricket===4&&S.journal.bluegill)?true:{ok:false,detail:'values changed: '+[S.money,S.lvl,S.cooler.length,S.bait.cricket].join(',')}; });
+      const st=migrate(old); restore(JSON.stringify(st)); const p=inv(); if(p.length) return {ok:false,detail:p.join('; ')}; return (S.money===5400&&S.lvl===7&&S.cooler.length===1&&S.bait.cricket===4&&S.journal.bluegill)?true:{ok:false,detail:'values changed: '+[S.money,S.lvl,S.cooler.length,S.bait.cricket].join(',')}; });
   T('save backup: a copy is made on this device, a drop in progress keeps the better copy, and the backup can be restored',()=>{ const keep=JSON.stringify(S), ka=localStorage.getItem(AUTO_BK), kk=localStorage.getItem(AUTO_BK_KEEP), kb=localStorage.getItem(BACKUP_KEY), e=[];
     try{ localStorage.removeItem(AUTO_BK); localStorage.removeItem(AUTO_BK_KEEP); S.lvl=Math.max(S.lvl,12); autoBackup(true); const a=bkRead(AUTO_BK); if(!a||a.lvl!==S.lvl) e.push('no backup made');
       const lv=S.lvl; S=fresh(); autoBackup(true); const k=bkRead(AUTO_BK_KEEP); if(!k||k.lvl!==lv) e.push('a reset overwrote the good backup');
@@ -22541,16 +22415,13 @@ saves(){ QA.sys='Saves';
       if(typeof autoBackupHTML()!=='string'||!/Earlier backup/.test(autoBackupHTML())) e.push('Save page does not offer the kept backup'); }
     finally{ S=JSON.parse(keep); const put=(k,v)=>{ if(v==null) localStorage.removeItem(k); else localStorage.setItem(k,v); }; put(AUTO_BK,ka); put(AUTO_BK_KEEP,kk); put(BACKUP_KEY,kb); }
     return e.length?{ok:false,detail:e.join('; ')}:okInv(); });
-  T('per-water homes: each water keeps its own home choices through travel and a save round trip, a new water starts with its defaults',()=>{ S.unlocked=uniq(['pond','reef',...S.unlocked]); S.docks={}; S.dockAt=null; S.loc='pond'; dockSync(); S.dock.el={seat:[1,3]};
-      dockStore(); const st=migrate(JSON.parse(JSON.stringify(S))); restore(JSON.stringify(st)); S.loc='reef'; dockSync(); if(S.dock.el) return {ok:false,detail:'reef copied '+JSON.stringify(S.dock.el)};
-      S.loc='pond'; dockSync(); return JSON.stringify(S.dock.el)===JSON.stringify({seat:[1,3]})?okInv():{ok:false,detail:'pond '+JSON.stringify(S.dock.el)}; });
 },
 ui(){ QA.sys='UI';
   const pages=[...new Set(MENU_SECS.concat([MENU_MORE]).flatMap(s=>s.tabs))].filter(t=>t==='settings'||menuTabBtn(t));
   T('every page renders with no error (this save)',()=>{ const errs=[]; const h=e=>errs.push((e.message||e.reason||'')+''); addEventListener('error',h); try{ for(const t of pages){ try{ setTab(t); }catch(e){ errs.push(t+': '+e.message); } } setTab(DASH); } finally{ removeEventListener('error',h); } return errs.length?{ok:false,detail:errs.slice(0,5).join(' | ')}:{ok:true,detail:pages.length+' pages'}; });
-  T('every page renders with no error (fresh save)',()=>{ restore(JSON.stringify(migrate(null))); dockSync(); const errs=[]; for(const t of pages){ try{ setTab(t); }catch(e){ errs.push(t+': '+e.message); } } try{ setTab(DASH); }catch(e){ errs.push('dash: '+e.message); } return errs.length?{ok:false,detail:errs.slice(0,5).join(' | ')}:true; });
-  T('every page renders with no error (everything unlocked)',()=>{ if(!window.DL_PREVIEW) return {ok:true,detail:'release build (skipped)'}; testerUnlock('all'); dockSync(); const errs=[]; for(const t of pages){ try{ setTab(t); }catch(e){ errs.push(t+': '+e.message); } } setTab(DASH); return errs.length?{ok:false,detail:errs.slice(0,5).join(' | ')}:okInv(); });
-  T('the action gate never blocks a real button (every page, everything unlocked)',()=>{ if(window.DL_PREVIEW) testerUnlock('all'); dockSync(); const bad=[]; let n=0; const sub=['tackleview','bwview','statsec','petedit'];
+  T('every page renders with no error (fresh save)',()=>{ restore(JSON.stringify(migrate(null))); const errs=[]; for(const t of pages){ try{ setTab(t); }catch(e){ errs.push(t+': '+e.message); } } try{ setTab(DASH); }catch(e){ errs.push('dash: '+e.message); } return errs.length?{ok:false,detail:errs.slice(0,5).join(' | ')}:true; });
+  T('every page renders with no error (everything unlocked)',()=>{ if(!window.DL_PREVIEW) return {ok:true,detail:'release build (skipped)'}; testerUnlock('all'); const errs=[]; for(const t of pages){ try{ setTab(t); }catch(e){ errs.push(t+': '+e.message); } } setTab(DASH); return errs.length?{ok:false,detail:errs.slice(0,5).join(' | ')}:okInv(); });
+  T('the action gate never blocks a real button (every page, everything unlocked)',()=>{ if(window.DL_PREVIEW) testerUnlock('all'); const bad=[]; let n=0; const sub=['tackleview','bwview','statsec','petedit'];
       for(const t of pages){ setTab(t); const P=$('panel'); const seen=new Set(); const visit=()=>P.querySelectorAll('[data-act]').forEach(b=>{ const f=ACT_OK[b.dataset.act]; if(!f) return; const key=b.dataset.act+'|'+b.dataset.k+'|'+b.dataset.i; if(seen.has(key)) return; seen.add(key); n++; let ok=false; try{ ok=f(b.dataset.k, b.dataset.i!=null&&b.dataset.i!==''?+b.dataset.i:NaN); }catch(e){} if(!ok) bad.push(t+': '+key); });
         visit(); [...P.querySelectorAll('[data-act]')].filter(b=>sub.includes(b.dataset.act)).map(b=>[b.dataset.act,b.dataset.k]).forEach(([a,k])=>{ try{ act(a,{k}); visit(); }catch(e){} }); [...P.querySelectorAll('[data-sect]')].map(b=>b.dataset.sect).forEach(s=>{ const b=[...P.querySelectorAll('[data-sect]')].find(x=>x.dataset.sect===s); try{ b&&b.click(); visit(); }catch(e){} }); }
       setTab(DASH); return bad.length?{ok:false,detail:bad.slice(0,8).join(' | ')}:{ok:true,detail:n+' real buttons checked'}; });
@@ -23060,18 +22931,11 @@ T('page tabs: a part hidden by a page tab never stays on screen (a forced style 
     for(const p of PETS) if((p.src==='crate'||p.src==='gift')&&p.name&&word(p.name).test(items)) e.push(p.src+' pet: '+p.name);
     const odds=items.match(/\b\d+(\.\d+)?\s?% (chance|odds)\b/gi); if(odds) e.push('exact odds: '+odds.join(', '));
     return e.length?{ok:false,detail:e.slice(0,10).join(' | ')}:{ok:true,detail:'version '+P0.v+', '+(P0.items||[]).length+' lines'}; });
-  T('home format (docs/HOME_STANDARD.md): every format home has 6 features (a seat and one carrying its light), 3 styles each and one shared list of 16+ colours, every style and color paints by day and night, choices survive a save, the pets keep their fixed spots',()=>{ const e=[]; let n=0; const keepDock=JSON.parse(JSON.stringify(S.dock)), keepLoc=S.loc;
-    try{ for(const id in HOMEF){ const sp=HOMEF[id]; if(!LOCS.some(L=>L.id===id)) e.push(id+': not a water'); if(sp.fixed){ /* a fixed home with no options (homes are fixed since 2026-11-24) draws itself: it needs its drawing and its seat */ if(typeof sp.draw!=='function') e.push(id+': fixed home without a drawing'); if(!Array.isArray(sp.seatH)||!(sp.seatH[0]>0)) e.push(id+': fixed home without a seat height'); continue; }
-        if(sp.els.length<6||sp.els.length>7) e.push(id+': '+sp.els.length+' features (6, or 7 where a part splits in two: the Rockies door and windows)'); if(!sp.els.some(x=>x.id==='seat')) e.push(id+': no seat'); if(!Array.isArray(sp.colors)||sp.colors.length<16) e.push(id+': '+(sp.colors||[]).length+' shared colours (16+)'); if(!sp.els.some(x=>x.light||x.id==='light')) e.push(id+': no feature carries its light');
-        for(const el of sp.els){ if(el.styles.length!==(el.none?4:3)) e.push(id+' '+el.id+': '+el.styles.length+' styles ('+(el.none?'nothing + 3':'3')+')'); }
-        S.loc=id; const P0=v3palette.v||v3palette(id,0,.1,0);
-        /* every style (default colour, by day and night) and every colour (first style, by day), painted small: the same coverage of every drawing path at a fraction of the work (batch 5: 20 homes at full size blocked the page for minutes) */
-        for(const el of sp.els){ const dc=(el.def||[0,0])[1]; const runs=[]; for(let s=0;s<el.styles.length;s++) for(const nt of [0,.9]) runs.push([s,dc,nt]); for(let c=0;c<sp.colors.length;c++) runs.push([0,c,0]);
-          for(const [s,c,nt] of runs){ S.dock.el=Object.assign({},S.dock.el||{},{[el.id]:[s,c]}); delete HF_CACHE[id]; try{ const cc=hfPaintCache(LOCS[locIdx(id)],P0,nt,HF.dockY(),.25); n++; if(!cc.cv.width||!cc.cv.height) e.push(id+' '+el.id+' '+s+'/'+c+': empty picture'); if((el.light||el.id==='light')&&!cc.lights.length) e.push(id+' light style '+s+': no light spot'); }catch(er){ e.push(id+' '+el.id+' '+s+'/'+c+': '+er.message); } } }
-        S.dock.el={light:[2,3],deck:[1,4]}; const back=dockCopy(JSON.parse(JSON.stringify(S.dock))); if(JSON.stringify(back.el)!==JSON.stringify({light:[2,3],deck:[1,4]})) e.push(id+': choices lost in a save ('+JSON.stringify(back.el)+')');
-        const bad=dockCopy({el:{light:[99,0],deck:'x',posts:[1,2,3]}}); if(Object.keys(bad.el||{}).length) e.push(id+': a broken choice survived ('+JSON.stringify(bad.el)+')'); }
-    } finally{ S.dock=keepDock; S.loc=keepLoc; for(const k in HF_CACHE) delete HF_CACHE[k]; }
-    return {ok:!e.length, detail:e.slice(0,8).join(' | ')||Object.keys(HOMEF).length+' format home(s), '+n+' paintings'}; });
+  T('fixed homes (2026-11-25): every water has one home with one seat; it draws by day and by night without an error, and a home with a light shows it',()=>{ const e=[], keepLoc=S.loc; let n=0;
+    try{ for(const L of LOCS){ const sp=HOMEF[L.id]; if(!sp){ e.push(L.id+': no home'); continue; } if(!(sp.seatH>0)) e.push(L.id+': no seat height'); if(sp.els||sp.colors) e.push(L.id+': still has option lists');
+        S.loc=L.id; for(const nt of [0,.9]){ const P0=v3palette(L.id,nt,.1,0); try{ if(sp.draw){ if(typeof sp.draw!=='function') e.push(L.id+': bad drawing'); } else { delete HF_CACHE[L.id]; const cc=hfPaintCache(L,P0,nt,HF.dockY(),.25); n++; if(!cc.cv.width||!cc.cv.height) e.push(L.id+': empty picture'); if(sp.light&&!cc.lights.length) e.push(L.id+': light part '+sp.light+' shows no light'); } }catch(er){ e.push(L.id+' '+(nt?'night':'day')+': '+er.message); } } }
+    } finally{ S.loc=keepLoc; for(const k in HF_CACHE) delete HF_CACHE[k]; }
+    return {ok:!e.length, detail:e.slice(0,8).join(' | ')||LOCS.length+' homes, '+n+' paintings'}; });
   T('memory (#151, the iPhone ran out of memory): pictures a page redraw drops are released, and angler previews share their scratch canvases',()=>{ const e=[];
     setTab('journal'); const a=[...$('panel').getElementsByTagName('canvas')]; if(!a.length) e.push('the Fish Log drew no pictures to test with');
     setTab('settings'); setTab('journal'); const kept=a.filter(c=>!c.isConnected&&c.width>0).length; if(kept) e.push(kept+' of '+a.length+' dropped Fish Log pictures still hold their memory');
@@ -23096,7 +22960,7 @@ function __setPhaseSync(ph){ for(let k=0;k<80;k++){ const cur=(window.__realNow(
 window.__qa=async(groups)=>{ QA.R=[]; const keep=snap(), tab=S.tab, off=window.__off; QA.realSave=QA.realSave||save; QA.realToast=QA.realToast||toast; clearTimeout(QA.settleT); const os=QA.realSave, ot=QA.realToast; save=function(){}; window.__qaToasts=new Set(); toast=function(m){ try{ __qaToasts.add(String(m)); }catch(e){} }; /* every pop-up the tests cause is kept for the text check (__textInv) */
   try{ for(const g of (groups||Object.keys(GROUPS))) GROUPS[g]();
     // async: save codes
-    QA.sys='Saves'; const i=QA.R.findIndex(r=>r.name.startsWith('save code')); try{ dockStore(); const ref=JSON.parse(snap()); const c=await makeCode(); const o=await readCode(c); const diff=['money','lvl','journal','unlocked','hunts','docks','dock','gear','cooler','tank'].filter(k=>JSON.stringify(o[k])!==JSON.stringify(ref[k])); if(i>=0) QA.R[i]={sys:'Saves',name:QA.R[i].name,ok:!diff.length&&c.startsWith('DL'),detail:!diff.length?'code '+c.length+' chars':'differs: '+diff.join(',')}; }catch(e){ if(i>=0) QA.R[i]={sys:'Saves',name:QA.R[i].name,ok:false,detail:'THREW '+e.message}; }
+    QA.sys='Saves'; const i=QA.R.findIndex(r=>r.name.startsWith('save code')); try{ const ref=JSON.parse(snap()); const c=await makeCode(); const o=await readCode(c); const diff=['money','lvl','journal','unlocked','hunts','docks','dock','gear','cooler','tank'].filter(k=>JSON.stringify(o[k])!==JSON.stringify(ref[k])); if(i>=0) QA.R[i]={sys:'Saves',name:QA.R[i].name,ok:!diff.length&&c.startsWith('DL'),detail:!diff.length?'code '+c.length+' chars':'differs: '+diff.join(',')}; }catch(e){ if(i>=0) QA.R[i]={sys:'Saves',name:QA.R[i].name,ok:false,detail:'THREW '+e.message}; }
     // the text standard on everything the tests showed (C, 2026-11-20): hints, every pop-up the tests and random actions caused, item lines
     QA.sys='Text'; try{ const ti=window.__textInv(), e=[], jokes=Object.values(QUIPS).flat().sort((a,b)=>b.length-a.length);
       for(const [k,L] of Object.entries(ti.out)){ if(k==='fishlog'||k==='quip') continue; for(const x of L){ for(const bad of textBad(x.t)) e.push(k+': '+bad+' in "'+x.t.slice(0,60)+'"');
@@ -23364,23 +23228,9 @@ window.__mapQC=async(o={})=>{ const keep={loc:S.loc,off:window.__off,np:window._
 // test builds: __shot(name, water, rest, full) draws the scene at that water (resting or fishing) and saves a picture through the local
 // server's /shot/<name> (tools/shots/<name>.png): the home area enlarged, or the whole screen with full=true (director, 2026-11-22: Claude
 // looks at every look change itself before showing it)
-if(/[?&]test\b/.test(location.search)) window.__shot=async(name,id,rest,full)=>{ __go(id); dockSync(); V3CACHE=null; G.st=rest?'rest':'idle'; if(rest) restCast(); draw(performance.now()); draw(performance.now()+16);
+if(/[?&]test\b/.test(location.search)) window.__shot=async(name,id,rest,full)=>{ __go(id); V3CACHE=null; G.st=rest?'rest':'idle'; if(rest) restCast(); draw(performance.now()); draw(performance.now()+16);
   const d=cv.width/W; let url; if(full) url=cv.toDataURL('image/png'); else { const sx=0, sy=H*.2*d, sw=W*.34*d, sh=H*.72*d, k=Math.max(1,900/sw), o=document.createElement('canvas'); o.width=Math.round(sw*k); o.height=Math.round(sh*k); const x=o.getContext('2d'); x.imageSmoothingQuality='high'; x.drawImage(cv,sx,sy,sw,sh,0,0,o.width,o.height); url=o.toDataURL('image/png'); }
   const r=await fetch('/shot/'+name,{method:'POST',body:url}); return r.status; };
-// test builds: __hfSheet(id) pictures every style of every home feature at one water, fishing and resting, on one sheet (map redo, 2026-11-22)
-if(/[?&]test\b/.test(location.search)) window.__hfSheet=async(id,name)=>{ __go(id); dockSync(); const sp=hfSpec(id); if(!sp) return 'no home'; const keep=JSON.stringify(S.dock.el||{});
-  const d=cv.width/W, sx=0, sy=H*.2*d, sw=W*.34*d, sh=H*.72*d, cw=420, ch=Math.round(cw*sh/sw), rows=[]; for(const e of sp.els) rows.push(e);
-  const cols=Math.max(...rows.map(e=>e.styles.length))*2, o=document.createElement('canvas'); o.width=cols*cw; o.height=rows.length*(ch+22); const x=o.getContext('2d'); x.fillStyle='#0b1622'; x.fillRect(0,0,o.width,o.height); x.font='16px sans-serif';
-  rows.forEach((e,r)=>{ e.styles.forEach((nm,s)=>{ [0,1].forEach(rest=>{ S.dock.el=JSON.parse(keep); S.dock.el[e.id]=[s,hfChoice(id,e.id)[1]]; V3CACHE=null; G.st=rest?'rest':'idle'; if(rest) restCast(); draw(performance.now()); draw(performance.now()+16);
-      const cx=(s*2+rest)*cw, cy=r*(ch+22); x.drawImage(cv,sx,sy,sw,sh,cx,cy+22,cw,ch); x.fillStyle='#fff'; x.fillText(e.label+': '+nm+(rest?' (resting)':''),cx+6,cy+17); }); }); });
-  S.dock.el=JSON.parse(keep); G.st='idle'; draw(performance.now()); const r=await fetch('/shot/'+(name||'hf_'+id),{method:'POST',body:o.toDataURL('image/png')}); return r.status; };
-// test builds: __qcSheet(ids,name) every style of every home feature at several waters, resting (the state where covers and the rod matter), compact (map redo QC, 2026-11-22)
-if(/[?&]test\b/.test(location.search)) window.__qcSheet=async(ids,name)=>{ const d=cv.width/W, sy=H*.2*d, sw=W*.34*d, sh=H*.72*d, cw=200, ch=Math.round(cw*sh/sw), rows=[]; for(const id of ids){ const sp=hfSpec(id); if(sp) for(const e of sp.els) rows.push([id,e]); }
-  const o=document.createElement('canvas'); o.width=cw*4+120; o.height=rows.length*ch; const x=o.getContext('2d'); x.fillStyle='#0b1622'; x.fillRect(0,0,o.width,o.height); x.font='13px sans-serif';
-  for(let r=0;r<rows.length;r++){ const [id,e]=rows[r]; __go(id); dockSync(); const keep=JSON.stringify(S.dock.el||{}); x.fillStyle='#fff'; x.fillText(id,4,r*ch+16); x.fillText(e.label,4,r*ch+32);
-    e.styles.forEach((nm,s)=>{ S.dock.el=JSON.parse(keep); S.dock.el[e.id]=[s,hfChoice(id,e.id)[1]]; V3CACHE=null; G.st='rest'; restCast(); draw(performance.now()); draw(performance.now()+16); x.drawImage(cv,0,sy,sw,sh,120+s*cw,r*ch,cw,ch); x.fillStyle='rgba(0,0,0,.6)'; x.fillRect(120+s*cw,r*ch,cw,16); x.fillStyle='#fff'; x.fillText(nm,124+s*cw,r*ch+12); });
-    S.dock.el=JSON.parse(keep); }
-  G.st='idle'; draw(performance.now()); return (await fetch('/shot/'+name,{method:'POST',body:o.toDataURL('image/jpeg',.8)})).status; };
 // test builds: __feelSim(preset,n) plays n fights per rarity at the current water with a scripted player who reacts the right way
 // (eases off in runs and shakes, reels into jumps toward it, keeps the dive band, presses on a perfect pull) and reports seconds to land
 if(/[?&]test\b/.test(location.search)) window.__feelSim=(preset,n=3,stopAt=0)=>{ const keepF=JSON.stringify(FEEL), keepOld=!fishNew(); feelPreset(preset); const out={preset,ranks:[]};
@@ -23392,22 +23242,10 @@ if(/[?&]test\b/.test(location.search)) window.__feelSim=(preset,n=3,stopAt=0)=>{
       if(G.st!=='reeling'){ landed++; tot+=t; } combo=Math.max(combo,mx); pops+=np; G.st='idle'; G.hold=false; }
     out.ranks.push({r, s:landed?+(tot/landed).toFixed(1):null, landed:landed+'/'+n, combo, pops}); }
   FEEL=JSON.parse(keepF); feelSave(); setFishOld(keepOld); G.fish=null; G.st='idle'; return out; };
-// test builds: __hfAll(id,name,pairs) every combination of the features that touch each other (pairs of feature ids, every style of one with
-// every style of the other), then every colour of every feature, resting and fishing (director, 2026-11-22: "check all options as well")
-if(/[?&]test\b/.test(location.search)) window.__hfAll=async(id,name,pairs,big)=>{ __go(id); dockSync(); const sp=hfSpec(id); if(!sp) return 'no home'; S.dock.el=S.dock.el||{}; const keep=JSON.stringify(S.dock.el), d=cv.width/W, sy=H*.2*d, sw=W*.34*d, sh=H*.72*d, cw=big?300:150, ch=Math.round(cw*sh/sw), cells=[];
-  const E=k=>sp.els.find(e=>e.id===k); for(const [a,b] of pairs){ const A=E(a), B=E(b); if(!A||!B) continue; A.styles.forEach((na,i)=>B.styles.forEach((nb,j)=>{ for(const rest of [0,1]) cells.push({lab:na+' + '+nb+(rest?' (rest)':''),set:{[a]:i,[b]:j},rest}); })); }
-  if(!big) for(const e of sp.els) e.styles.forEach((sn,st)=>sp.colors.forEach((col,ci)=>{ const pl=hfPal(e,st); if(!pl||pl.includes(ci)) cells.push({lab:sn+': '+col[0],set:{[e.id]:st},col:{[e.id]:ci},rest:1}); })); /* every colour of every style (a style may offer its own colours) */
-  const cols=big?6:12, o=document.createElement('canvas'); o.width=cols*cw; o.height=Math.ceil(cells.length/cols)*(ch+14); const x=o.getContext('2d'); x.fillStyle='#0b1622'; x.fillRect(0,0,o.width,o.height); x.font='10px sans-serif';
-  cells.forEach((c,n)=>{ S.dock.el=JSON.parse(keep); for(const k in (c.set||{})) S.dock.el[k]=[c.set[k],hfChoice(id,k)[1]]; for(const k in (c.col||{})) S.dock.el[k]=[hfChoice(id,k)[0],c.col[k]]; V3CACHE=null; G.st=c.rest?'rest':'idle'; if(c.rest) restCast(); draw(performance.now()); draw(performance.now()+16);
-    const X=(n%cols)*cw, Y=Math.floor(n/cols)*(ch+14); x.drawImage(cv,0,sy,sw,sh,X,Y+14,cw,ch); x.fillStyle='#fff'; x.fillText(c.lab.slice(0,30),X+2,Y+11); });
-  S.dock.el=JSON.parse(keep); G.st='idle'; draw(performance.now()); return (await fetch('/shot/'+name,{method:'POST',body:o.toDataURL('image/jpeg',.8)})).status+' '+cells.length+' cells'; };
 // test builds: __timeSheet(name,id,rx,ry,rw,rh,n,step) draws the scene at n moments step seconds apart and keeps one part of each (fractions of the frame), to follow an animal or event through its whole loop
 if(/[?&]test\b/.test(location.search)) window.__timeSheet=async(name,id,rx,ry,rw,rh,n,step)=>{ __go(id); await new Promise(r=>setTimeout(r,300)); const d=cv.width/W, cw=Math.round(cv.width*rw), ch=Math.round(cv.height*rh), cols=4, o=document.createElement('canvas'); o.width=cols*cw; o.height=Math.ceil(n/cols)*ch; const x=o.getContext('2d'), t0=performance.now();
   for(let i=0;i<n;i++){ draw(t0+i*step*1000); x.drawImage(cv,cv.width*rx,cv.height*ry,cw,ch,(i%cols)*cw,Math.floor(i/cols)*ch,cw,ch); x.fillStyle='#fff'; x.font=Math.round(14*d)+'px sans-serif'; x.fillText((i*step).toFixed(1)+' s',(i%cols)*cw+6,Math.floor(i/cols)*ch+18*d); }
   draw(performance.now()); return (await fetch('/shot/'+name,{method:'POST',body:o.toDataURL('image/jpeg',.88)})).status; };
-// test builds: __hfOne(id,name,set,rest,night) one home combination at full size (set = {feature:style}), the home's area only, to judge details the sheets are too small for
-if(/[?&]test\b/.test(location.search)) window.__hfOne=async(id,name,set,rest,night)=>{ __go(id); dockSync(); if(night!=null) await __setPhase(night); S.dock.el=S.dock.el||{}; const keep=JSON.stringify(S.dock.el), d=cv.width/W; for(const k in (set||{})) S.dock.el[k]=[set[k],hfChoice(id,k)[1]]; V3CACHE=null; G.st=rest?'rest':'idle'; if(rest) restCast(); draw(performance.now()); draw(performance.now()+16);
-  const o=document.createElement('canvas'); o.width=Math.round(W*.4*d); o.height=Math.round(H*.5*d); o.getContext('2d').drawImage(cv,0,H*.25*d,o.width,o.height,0,0,o.width,o.height); S.dock.el=JSON.parse(keep); V3CACHE=null; return (await fetch('/shot/'+name,{method:'POST',body:o.toDataURL('image/jpeg',.92)})).status; };
 // test builds: __cropShot(name,id,x,y,w,h,rest) saves part of the frame (fractions of the screen); __mkSheet(name,id,[[label,setup,rest],…]) a 2-wide sheet of whole frames
 if(/[?&]test\b/.test(location.search)){ window.__cropShot=async(name,id,rx,ry,rw,rh,rest)=>{ await __shot('tmp',id,!!rest,true); const o=document.createElement('canvas'); o.width=Math.round(cv.width*rw); o.height=Math.round(cv.height*rh); o.getContext('2d').drawImage(cv,cv.width*rx,cv.height*ry,o.width,o.height,0,0,o.width,o.height); return (await fetch('/shot/'+name,{method:'POST',body:o.toDataURL('image/jpeg',.9)})).status; };
   window.__mkSheet=async(name,id,list)=>{ const cw=960, ch=Math.round(cw*cv.height/cv.width), o=document.createElement('canvas'); o.width=cw*2; o.height=Math.ceil(list.length/2)*ch; const x=o.getContext('2d'); x.font='22px sans-serif';
@@ -23417,6 +23255,11 @@ if(/[?&]test\b/.test(location.search)){ window.__cropShot=async(name,id,rx,ry,rw
 // untangling step can prove nothing visible changed: take one before, one after, and compare (Clean Pages, docs/PLAN.md › Untangling plan)
 if(/[?&]test\b/.test(location.search)) window.__fingerprint=(root=document.getElementById('panel'))=>{ const out=[]; const walk=(el,path)=>{ for(const c of el.children){ const r=c.getBoundingClientRect(); if(!r.width&&!r.height) continue; const cs=getComputedStyle(c); if(cs.display==='none'||cs.visibility==='hidden') continue; const p=path+'>'+c.tagName.toLowerCase()+(c.className&&typeof c.className==='string'?'.'+c.className.trim().split(/\s+/).sort().join('.'):''); const own=[...c.childNodes].filter(n=>n.nodeType===3).map(n=>n.textContent.trim()).join(' ').slice(0,40);
   out.push([p,own,Math.round(r.left),Math.round(r.top),Math.round(r.width),Math.round(r.height),cs.color,cs.backgroundColor,cs.backgroundImage.slice(0,40),cs.fontSize,cs.fontWeight].join('|')); walk(c,p); } }; walk(root,''); return out; };
+// test builds: __homeSheet(name, phaseList) every water's home area, fishing and resting, on one sheet (homes fixed, 2026-11-25: one look per water)
+if(/[?&]test\b/.test(location.search)) window.__homeSheet=async(name,idsIn,cwIn,colsIn)=>{ const d=cv.width/W, sy=H*.12*d, sw=W*.4*d, sh=H*.66*d, cw=cwIn||300, ch=Math.round(cw*sh/sw), ids=idsIn||LOCS.map(l=>l.id), cols=colsIn||4, o=document.createElement('canvas');
+  o.width=cols*2*cw; o.height=Math.ceil(ids.length/cols)*(ch+18); const x=o.getContext('2d'); x.fillStyle='#0b1622'; x.fillRect(0,0,o.width,o.height); x.font='13px sans-serif';
+  ids.forEach((id,i)=>{ [0,1].forEach(rest=>{ __go(id); V3CACHE=null; G.st=rest?'rest':'idle'; if(rest) restCast(); draw(performance.now()); draw(performance.now()+16); const cx=((i%cols)*2+rest)*cw, cy=Math.floor(i/cols)*(ch+18); x.drawImage(cv,0,sy,sw,sh,cx,cy+18,cw,ch); x.fillStyle='#fff'; x.fillText(id+(rest?' (rest)':''),cx+4,cy+14); }); });
+  G.st='idle'; draw(performance.now()); return (await fetch('/shot/'+(name||'homes_all'),{method:'POST',body:o.toDataURL('image/jpeg',.85)})).status; };
 
 // ---------- loop ----------
 let last=performance.now();
