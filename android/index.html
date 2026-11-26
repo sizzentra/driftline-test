@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="DL Test Android">
 <script>
-window.DL_BUILD='android'; window.DL_PREVIEW=true; if(/[?&]sweep\b/.test(location.search)){ window.__bootErr=[]; addEventListener("error",function(e){ __bootErr.push(String(e.message||e)+(e.lineno?" (line "+e.lineno+")":"")); }); addEventListener("unhandledrejection",function(e){ __bootErr.push("promise: "+String(e.reason&&e.reason.message||e.reason)); }); window.requestAnimationFrame=function(f){ return setTimeout(function(){ f(performance.now()); },16); }; window.cancelAnimationFrame=function(i){ clearTimeout(i); }; } try{ window.__tOff=/[?&](test|sweep|frozen)\b/.test(location.search)?0:(+(localStorage.getItem("dl-test-toff")||0)||0); }catch(e){ window.__tOff=0; } (function(){ var rn=Date.now.bind(Date); Date.now=function(){ return rn()+window.__tOff; }; })(); if(/[?&]frozen\b/.test(location.search)){ var __fz=20261122; Math.random=function(){ __fz|=0; __fz=__fz+0x6D2B79F5|0; var t=Math.imul(__fz^__fz>>>15,1|__fz); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; var __fc=0, __pn=performance.now.bind(performance); performance.now=function(){ __fc+=0.01; return 100000+__fc; }; Date.now=function(){ return 1795300000000+Math.floor(__fc); }; window.__frozenClock=function(){ return __fc; }; window.requestAnimationFrame=function(){ return 0; }; window.cancelAnimationFrame=function(){}; } window.DL_VERSION='2026.11.26-1341';
+window.DL_BUILD='android'; window.DL_PREVIEW=true; if(/[?&]sweep\b/.test(location.search)){ window.__bootErr=[]; addEventListener("error",function(e){ __bootErr.push(String(e.message||e)+(e.lineno?" (line "+e.lineno+")":"")); }); addEventListener("unhandledrejection",function(e){ __bootErr.push("promise: "+String(e.reason&&e.reason.message||e.reason)); }); window.requestAnimationFrame=function(f){ return setTimeout(function(){ f(performance.now()); },16); }; window.cancelAnimationFrame=function(i){ clearTimeout(i); }; } try{ window.__tOff=/[?&](test|sweep|frozen)\b/.test(location.search)?0:(+(localStorage.getItem("dl-test-toff")||0)||0); }catch(e){ window.__tOff=0; } (function(){ var rn=Date.now.bind(Date); Date.now=function(){ return rn()+window.__tOff; }; })(); if(/[?&]frozen\b/.test(location.search)){ var __fz=20261122; Math.random=function(){ __fz|=0; __fz=__fz+0x6D2B79F5|0; var t=Math.imul(__fz^__fz>>>15,1|__fz); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; var __fc=0, __pn=performance.now.bind(performance); performance.now=function(){ __fc+=0.01; return 100000+__fc; }; Date.now=function(){ return 1795300000000+Math.floor(__fc); }; window.__frozenClock=function(){ return __fc; }; window.requestAnimationFrame=function(){ return 0; }; window.cancelAnimationFrame=function(){}; } window.DL_VERSION='2026.11.26-1607';
 window.addEventListener('beforeinstallprompt',function(e){ e.preventDefault(); window.__dlInstallPrompt=e; });
 </script>
 </head>
@@ -1613,7 +1613,7 @@ const fresh = () => ({v:3, money:0, xp:0, lvl:1, gear:{rod:0,reel:0,line:0,hook:
   aq:{theme:'lagoon', sand:'gold', decor:[], hid:[], owned:['lagoon','gold']}, voyCatch:{}, titled:{}, nib:{}, nibAmt:1, pathXP:{}, pearlOld:0, pearlMig:1, pshop:{}, boons:{}, boonPts:0, passMig:1, fedT:0, wheelT:0, rankClaimed:0, tokens:{small:0,big:0,legend:0},
   gstats:{frenzy:0, frenzyFish:0, chests:0, stars:0, spins:0, crates:0, flips:0, flipWins:0, scratch:0, scratchWins:0, pets:0, tasks:0},
   petLook:{}, bond:{}, petTints:['none'], petAccs:['none','bandana'], scales:0, specs:{}, relics:[], castN:0,
-  pet2:null, dock:{wood:'oak', decor:[], owned:['oak']}, pass:{xp:0,lvl:0,claimed:0}, derby:null, medals:{gold:0,silver:0,bronze:0},
+  pet2:null, dock:{wood:'oak', decor:[], owned:['oak']}, docks:{}, pass:{xp:0,lvl:0,claimed:0}, derby:null, medals:{gold:0,silver:0,bronze:0},
   rods:{owned:['bamboo'], eq:'bamboo', lvl:{}, att:{}}, atts:{}, daily:null, login:{last:'', streak:0}, seenPatch:'',
   stats:{caught:0,earned:0,runEarned:0,snapped:0,shiny:0,treasure:0,stormEpic:0,trophies:0,bestStreak:0,perfect:0,demand:0,hot:0,bought:0,maxBuffs:0},
   muted:true, tab:'cooler', savedAt:0});
@@ -21895,6 +21895,8 @@ PATCHES.unshift({v:'0.4.9', name:'Work in progress', items:phoneNotes([
 // text changes. Released notes live in notes_release.js.
 const TEST_NOTES={v:'test', label:'Test build · '+(window.DL_BUILD==='ios'?'iPhone':'Android'), name:'0.4.9 test build (newest first)', items:[
   '## New in this build',
+  'Behind the scenes only, nothing changes on screen: publishing test builds is faster, and a brand-new save now starts with the same empty home record a reloaded save has (a self-check disagreed with itself about it).',
+  '## Test build 2026.11.25-1249',
   'New setting, Settings › Display › Fight display: Classic (the fight signs from the live game), Around the fish (everything around the lure and the fish, as on the test builds) or Dial under the dock (one dial in the water under your dock, so nothing covers the fish; tips stay above it). Around the fish is the default, and your device remembers your choice.',
   '## Test build 2026.11.25-1233',
   'Homes are now fixed for good: every water has one building, the platform you stand on and its own seat. The leftover home options are gone behind the scenes (nothing changes on screen).',
@@ -23279,6 +23281,46 @@ if(/[?&]test\b/.test(location.search)) window.__homeSheet=async(name,idsIn,cwIn,
 if(/[?&]test\b/.test(location.search)) window.__fightShot=async(name,mode,id,secs)=>{ __go(id||'pond'); V3CACHE=null; const keep=S.settings.fightUi; S.settings.fightUi=mode; const sp=SP.filter(s=>s.loc===S.loc&&s.r===3)[0]||SP.find(s=>s.loc===S.loc);
   G.fish=rollFish(sp,{noHybrid:true,noPrey:true}); G.st='reeling'; G.lastCast=.75; G.ten=0; G.temper=0; G.sta=1; G.fightT=0; ffInit(); let t=0; while(t<(secs||4)&&G.st==='reeling'){ G.hold=G.ten<70; fightNew(1/60); t+=1/60; } G.temper=Math.max(G.temper,1.2); G.ten=Math.max(G.ten,58); G.tell=G.tell||{t:0}; G.combo=Math.max(G.combo||0,3);
   draw(performance.now()); draw(performance.now()+16); const url=cv.toDataURL('image/png'); S.settings.fightUi=keep; G.st='idle'; G.fish=null; G.tell=null; draw(performance.now()); return (await fetch('/shot/'+name,{method:'POST',body:url})).status; };
+// Foundation F1 (2026-11-26): the three test saves kept in git (tools/saves/) are made here, so they can be made again the same way.
+// __mkSave('mid' | 'heavy') builds the save from a brand-new one with the tester tools (gift pets are never included) and returns its
+// text; the page's own save is put back. 'new' needs no file content: it is the absence of a save.
+if(/[?&]test\b/.test(location.search)) window.__mkSave=kind=>{ if(!window.DL_PREVIEW) return null; const keep=JSON.stringify(S), T0=1795300000000; let out=null;
+  try{ S=migrate(fresh());
+    if(kind==='heavy'){ for(const k of ['all','log','feats','pass','lvl','cooler']) testerUnlock(k); }
+    else { S.unlocked=LOCS.slice(0,6).map(l=>l.id); S.loc=S.unlocked[3]; for(const g in GEAR) S.gear[g]=Math.floor((GEAR[g].lv.length-1)*.4); S.money=250000; testerUnlock('lvl'); testerUnlock('lvl');
+      let i=0; for(const sp of SP){ if(!sp||!S.unlocked.includes(sp.loc)) continue; if(i++%5<3) S.journal[sp.id]={n:1+i%4,best:1,min:1,sh:false,pr:false,tr:false,bv:0,first:T0}; }
+      for(const j of JUNK.slice(0,8)) S.junk[j.id]=1; for(const p of PETS.filter(p=>p.src!=='gift').slice(0,3)) if(!S.owned.pets.includes(p.id)) S.owned.pets.push(p.id);
+      testerUnlock('cooler'); S.cooler.length=Math.min(S.cooler.length,Math.ceil(gv('cooler')/2)); }
+    for(const id in S.journal) S.journal[id].first=T0; S.savedAt=T0; out=JSON.stringify(migrate(JSON.parse(JSON.stringify(S)))); }
+  finally{ S=migrate(JSON.parse(keep)); }
+  return out; };
+// Foundation F1: the baseline "pictures" every later foundation step is compared against, as fingerprints (a picture's worth of pixels
+// squeezed into one short code; any pixel that changes gives a different code). On a ?test&frozen page (same random numbers, a clock that
+// only moves when asked, no frame loop): every water at dawn, day, dusk and night drawn by hand, and every menu page and page tab as its
+// text, element boxes and small pictures. tools/baseline.html runs it per build and save; tools/baseline.ps1 makes and checks the set.
+if(/[?&]test\b/.test(location.search)) window.__baseline=async(o={})=>{ const wait=ms=>new Promise(r=>setTimeout(r,ms));
+  const fnv=u=>{ let h=0x811c9dc5; for(let i=0;i<u.length;i++){ h^=u[i]; h=Math.imul(h,16777619); } return (h>>>0).toString(16); };
+  const pix=c=>{ try{ if(!c.width||!c.height) return '0'; const d=c.getContext('2d').getImageData(0,0,c.width,c.height).data; return fnv(new Uint32Array(d.buffer,0,d.byteLength>>2)); }catch(e){ return 'x'; } };
+  const str=s=>{ const u=new Uint32Array(s.length); for(let i=0;i<s.length;i++) u[i]=s.charCodeAt(i); return fnv(u); };
+  try{ await document.fonts.ready; }catch(e){}
+  const keep={loc:S.loc, un:S.unlocked.slice(), off:window.__off, st:G.st, tab:S.tab, pn:performance.now, mr:Math.random, rn:window.__realNow}, scenes={}, pages={};
+  /* pinned for the whole run, so timers that ran while the page loaded cannot shift anything: one clock value, and random numbers restarted for every picture */
+  const played0=+S.stats.playS||0, played=0; Object.defineProperty(S.stats,'playS',{get:()=>played, set(){}, configurable:true, enumerable:true}); /* the play-time counter ticks every second: held still for the run */
+  let seed=1; const reseed=n=>{ seed=n; }; performance.now=()=>200000; window.__realNow=()=>1795300000000; Math.random=()=>{ seed|=0; seed=seed+0x6D2B79F5|0; let t=Math.imul(seed^seed>>>15,1|seed); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; };
+  try{
+    if(!o.noScenes) for(const L of LOCS){ if(o.ids&&!o.ids.includes(L.id)) continue; for(const [nm,ph] of [['dawn',.99],['day',.3],['dusk',.475],['night',.75]]){ reseed(20261126); __go(L.id); await __setPhase(ph); V3CACHE=null; G.st='idle'; draw(200000); draw(200016); scenes[L.id+'@'+nm]=pix(cv); } }
+    S.loc=keep.loc; S.unlocked=keep.un; window.__off=keep.off; G.st=keep.st;
+    if(!o.noPages){ /* movement switched off while pages are measured (a menu sliding in gave boxes 1 px apart from run to run); class names are left out because timers switch some on and off */ const still=document.createElement('style'); still.id='__still'; still.textContent='*,*::before,*::after{transition:none!important;animation:none!important;scroll-behavior:auto!important}'; document.head.appendChild(still);
+      const print=()=>{ const P=document.getElementById('menuov')||document.getElementById('panel'); if(!P) return 'none'; let s=''; for(const e of P.querySelectorAll('*')){ if(e.closest('#toast')) continue; /* pop-ups come and go on their own clock */ const r=e.getBoundingClientRect(); if(r.width<1||r.height<1) continue; let t=''; for(const n of e.childNodes) if(n.nodeType===3) t+=n.textContent.trim(); t=t.replace(/\d{4}\.\d\d\.\d\d-\d{4}/g,'(stamp)'); /* the build stamp changes with every build */ s+=e.tagName+'|'+t+'|'+Math.round(r.left)+','+Math.round(r.top)+','+Math.round(r.width)+','+Math.round(r.height)+(e.tagName==='CANVAS'?'|'+pix(e):'')+'\n'; } return s; };
+      /* a page counts once it has stopped moving: the same reading four times in a row, 80 ms apart (some bars ease into place over real time) */
+      const settled=async()=>{ let a=print(), same=0; for(let i=0;i<60&&same<3;i++){ await wait(80); const b=print(); if(b===a) same++; else { same=0; a=b; } } if(o.dump) (window.__baseDump=window.__baseDump||{})[S.tab+'#'+Object.keys(window.__baseDump||{}).length]=a; return str(a); };
+      const all=[...new Set([...MENU_SECS.flatMap(s=>s.tabs),...MENU_MORE.tabs,...[...$('tabs').querySelectorAll(':scope > [data-tab]')].map(b=>b.dataset.tab),'trophy'])].filter(t=>t&&t!=='dash');
+      for(const t of all){ if(o.tabs&&!o.tabs.includes(t)) continue; try{ reseed(20261126); openMenu(t); try{ renderPanel(); }catch(e){} pages[t]=await settled();
+          const subs=[...document.querySelectorAll('#menuov .sect-nav [data-sect]')].map(b=>b.dataset.sect); for(const k of subs){ const b=document.querySelector('#menuov .sect-nav [data-sect="'+k+'"]'); if(!b) continue; reseed(20261126); b.click(); try{ renderPanel(); }catch(e){} pages[t+'/'+k]=await settled(); } }
+        catch(e){ pages[t]='error: '+e.message; } }
+      try{ closeMenu(); }catch(e){} }
+  } finally { delete S.stats.playS; S.stats.playS=played0; const st2=document.getElementById('__still'); if(st2) st2.remove(); performance.now=keep.pn; Math.random=keep.mr; window.__realNow=keep.rn; S.tab=keep.tab; S.loc=keep.loc; S.unlocked=keep.un; window.__off=keep.off; G.st=keep.st; }
+  return {build:window.DL_BUILD||'', size:innerWidth+'x'+innerHeight, dpr:window.devicePixelRatio, scenes, pages}; };
 
 // ---------- loop ----------
 let last=performance.now();
