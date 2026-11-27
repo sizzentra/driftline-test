@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="DL Test iPhone">
 <script>
-window.DL_BUILD='ios'; window.DL_PREVIEW=true; if(/[?&]sweep\b/.test(location.search)){ window.__bootErr=[]; addEventListener("error",function(e){ __bootErr.push(String(e.message||e)+(e.lineno?" (line "+e.lineno+")":"")); }); addEventListener("unhandledrejection",function(e){ __bootErr.push("promise: "+String(e.reason&&e.reason.message||e.reason)); }); window.requestAnimationFrame=function(f){ return setTimeout(function(){ f(performance.now()); },16); }; window.cancelAnimationFrame=function(i){ clearTimeout(i); }; } try{ window.__tOff=/[?&](test|sweep|frozen)\b/.test(location.search)?0:(+(localStorage.getItem("dl-test-toff")||0)||0); }catch(e){ window.__tOff=0; } (function(){ var rn=Date.now.bind(Date); Date.now=function(){ return rn()+window.__tOff; }; })(); if(/[?&]frozen\b/.test(location.search)){ var __fz=20261122; Math.random=function(){ __fz|=0; __fz=__fz+0x6D2B79F5|0; var t=Math.imul(__fz^__fz>>>15,1|__fz); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; var __fc=0, __pn=performance.now.bind(performance); performance.now=function(){ __fc+=0.01; return 100000+__fc; }; Date.now=function(){ return 1795300000000+Math.floor(__fc); }; window.__frozenClock=function(){ return __fc; }; window.requestAnimationFrame=function(){ return 0; }; window.cancelAnimationFrame=function(){}; } window.DL_VERSION='2026.11.26-1607';
+window.DL_BUILD='ios'; window.DL_PREVIEW=true; if(/[?&]sweep\b/.test(location.search)){ window.__bootErr=[]; addEventListener("error",function(e){ __bootErr.push(String(e.message||e)+(e.lineno?" (line "+e.lineno+")":"")); }); addEventListener("unhandledrejection",function(e){ __bootErr.push("promise: "+String(e.reason&&e.reason.message||e.reason)); }); window.requestAnimationFrame=function(f){ return setTimeout(function(){ f(performance.now()); },16); }; window.cancelAnimationFrame=function(i){ clearTimeout(i); }; } try{ window.__tOff=/[?&](test|sweep|frozen)\b/.test(location.search)?0:(+(localStorage.getItem("dl-test-toff")||0)||0); }catch(e){ window.__tOff=0; } (function(){ var rn=Date.now.bind(Date); Date.now=function(){ return rn()+window.__tOff; }; })(); if(/[?&]frozen\b/.test(location.search)){ var __fz=20261122; Math.random=function(){ __fz|=0; __fz=__fz+0x6D2B79F5|0; var t=Math.imul(__fz^__fz>>>15,1|__fz); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; var __fc=0, __pn=performance.now.bind(performance); performance.now=function(){ __fc+=0.01; return 100000+__fc; }; Date.now=function(){ return 1795300000000+Math.floor(__fc); }; window.__frozenClock=function(){ return __fc; }; window.requestAnimationFrame=function(){ return 0; }; window.cancelAnimationFrame=function(){}; } window.DL_VERSION='2026.11.26-1730';
 window.addEventListener('beforeinstallprompt',function(e){ e.preventDefault(); window.__dlInstallPrompt=e; });
 </script>
 </head>
@@ -464,6 +464,9 @@ const PLAT={
   detail:()=>1,                // how much finer moving detail is drawn (particles, ripples, stars): PC full screen draws more (src/pc/ui_display.js)
   touch:()=>!!(window.matchMedia&&matchMedia('(pointer:coarse)').matches) // touch wording: Tap / Let go and no keys, written beside the mouse wording at the source (e_ui, ai_cooler); phones: always
 };
+// ---------- feature switches (Foundation, 2026-11-26): one line turns a larger feature off without deleting it; its save data stays, unread ----------
+// controller: off on the director's word (2026-11-26: "we shouldn't even allow controller yet anyways, it's not ready"); the code stays in k_controls.js
+const FEATURE = {controller:false};
 // ---------- data ----------
 const RAR = [
   {k:'Common',    c:'#b9c6c3', w:60,  f:0,   xp:1,   val:1,    aq:1,   sc:0},
@@ -2591,7 +2594,7 @@ stage.addEventListener('pointerup',()=>{ CTRL.crankA=null; CTRL.start=false; });
 stage.addEventListener('wheel',e=>{ const now=performance.now(); if(G.st!=='reeling'){ /* keep wheel reeling from scrolling the page as the fight ends (catch or escape) */ if(now-(stage._reelT||-1e9)<1600||G.st==='landing'){ e.preventDefault(); stage._reelT=now; } return; } stage._reelT=now; e.preventDefault(); G.crank=Math.min(.3,(G.crank||0)+Math.min(1,Math.abs(e.deltaY)/100)*.09); },{passive:false});
 
 // gamepad: polled only while a pad is connected
-window.addEventListener('gamepadconnected',e=>{ CTRL.padIdx=e.gamepad.index; toast('Controller connected: A to cast and reel, right trigger to reel gently.'); });
+window.addEventListener('gamepadconnected',e=>{ if(!FEATURE.controller) return; /* switched off (b_data.js FEATURE): no pad is ever taken, so padPoll never reads one and no pop-up shows */ CTRL.padIdx=e.gamepad.index; toast('Controller connected: A to cast and reel, right trigger to reel gently.'); });
 window.addEventListener('gamepaddisconnected',()=>{ CTRL.padIdx=-1; G.padReel=0; });
 function padPoll(){ if(CTRL.padIdx<0||!navigator.getGamepads) return; const p=navigator.getGamepads()[CTRL.padIdx]; if(!p) return;
   const a=!!(p.buttons[0]&&p.buttons[0].pressed); if(a&&!CTRL.padPrev){ startAudio(); down(null); } if(!a&&CTRL.padPrev) up(); CTRL.padPrev=a;
@@ -21920,6 +21923,7 @@ PATCHES.unshift({v:'0.4.9', name:'Work in progress', items:phoneNotes([
 // text changes. Released notes live in notes_release.js.
 const TEST_NOTES={v:'test', label:'Test build · '+(window.DL_BUILD==='ios'?'iPhone':'Android'), name:'0.4.9 test build (newest first)', items:[
   '## New in this build',
+  'Game controllers are switched off for now (the director: not ready yet). A connected controller does nothing and no pop-up appears; it comes back when it is ready.',
   'Behind the scenes only, nothing changes on screen: publishing test builds is faster, and a brand-new save now starts with the same empty home record a reloaded save has (a self-check disagreed with itself about it).',
   '## Test build 2026.11.25-1249',
   'New setting, Settings › Display › Fight display: Classic (the fight signs from the live game), Around the fish (everything around the lure and the fish, as on the test builds) or Dial under the dock (one dial in the water under your dock, so nothing covers the fish; tips stay above it). Around the fish is the default, and your device remembers your choice.',
@@ -22345,7 +22349,9 @@ const QA={R:[], sys:''};
 /* the text standard's checkable rules (C, 2026-11-20; docs/TEXT_STANDARD.md), shared by __contentQC (every visible line on every page)
    and __qa (hints, pop-ups and item lines): touch builds never mention clicking, hovering, a mouse, a keyboard or the Space key; PC
    never says Tap; apostrophes are curly. Lengths per place (jokes and Fish Log notes have none; a pop-up's joke is not counted). */
-const textBad=v=>{ const out=[], touch=window.DL_BUILD?window.DL_BUILD!=='pc':PLAT.touch(); /* from the build, never from the setting under test (#149) */ if(touch){ if(/\b[Cc]lick(s|ed|ing)?\b/.test(v)) out.push('says click (phones tap)'); if(/\b[Hh]over/.test(v)) out.push('says hover'); if(/\b[Mm]ouse\b/.test(v)) out.push('mentions a mouse'); if(/\b[Kk]eyboard\b/.test(v)) out.push('mentions a keyboard'); if(/\b(press|hold|or|tap) Space\b|\bSpace (bar|key)\b/.test(v)) out.push('mentions the Space key'); }
+let ITEM_NAMES=null; /* an item's own name is not an instruction: the oddity "Soggy Keyboard" tripped "mentions a keyboard" on phones once it was in the log (2026-11-26, the end-game test save) */
+const textBad=v=>{ if(!ITEM_NAMES) ITEM_NAMES=new Set(JUNK.map(j=>j.name)); if(ITEM_NAMES.has(String(v).trim())) return [];
+  const out=[], touch=window.DL_BUILD?window.DL_BUILD!=='pc':PLAT.touch(); /* from the build, never from the setting under test (#149) */ if(touch){ if(/\b[Cc]lick(s|ed|ing)?\b/.test(v)) out.push('says click (phones tap)'); if(/\b[Hh]over/.test(v)) out.push('says hover'); if(/\b[Mm]ouse\b/.test(v)) out.push('mentions a mouse'); if(/\b[Kk]eyboard\b/.test(v)) out.push('mentions a keyboard'); if(/\b(press|hold|or|tap) Space\b|\bSpace (bar|key)\b/.test(v)) out.push('mentions the Space key'); }
   else if(/\bTap\b|\btap (to|the|a|an|it)\b/.test(v)) out.push('says tap (PC clicks)'); if(/[A-Za-z]'[A-Za-z]/.test(v)) out.push('straight apostrophe'); if(/[Cc]olour/.test(v)) out.push('British spelling: the game says color (director, 2026-11-21)'); return out; };
 const TEXT_LIMITS={hint:75, popup:80, pagedesc:72, bait:70, rod:70, attachment:70, skill:85, feat:45, pet:70}; /* approved by the director, 2026-11-20 */
 /* memory per test (2026-11-20, the iPhone ran out of memory during __qa, #151): drawing memory each test allocates (canvas width x height x 4 bytes, counted once per canvas when it is first drawn on) */
