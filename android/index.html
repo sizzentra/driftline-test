@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="DL Test Android">
 <script>
-window.DL_BUILD='android'; window.DL_PREVIEW=true; if(/[?&]sweep\b/.test(location.search)){ window.__bootErr=[]; addEventListener("error",function(e){ __bootErr.push(String(e.message||e)+(e.lineno?" (line "+e.lineno+")":"")); }); addEventListener("unhandledrejection",function(e){ __bootErr.push("promise: "+String(e.reason&&e.reason.message||e.reason)); }); window.requestAnimationFrame=function(f){ return setTimeout(function(){ f(performance.now()); },16); }; window.cancelAnimationFrame=function(i){ clearTimeout(i); }; } try{ window.__tOff=/[?&](test|sweep|frozen)\b/.test(location.search)?0:(+(localStorage.getItem("dl-test-toff")||0)||0); }catch(e){ window.__tOff=0; } (function(){ var rn=Date.now.bind(Date); Date.now=function(){ return rn()+window.__tOff; }; })(); if(/[?&]frozen\b/.test(location.search)){ var __fz=20261122; Math.random=function(){ __fz|=0; __fz=__fz+0x6D2B79F5|0; var t=Math.imul(__fz^__fz>>>15,1|__fz); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; var __fc=0, __pn=performance.now.bind(performance); performance.now=function(){ __fc+=0.01; return 100000+__fc; }; Date.now=function(){ return 1795300000000+Math.floor(__fc); }; window.__frozenClock=function(){ return __fc; }; window.requestAnimationFrame=function(){ return 0; }; window.cancelAnimationFrame=function(){}; } window.DL_VERSION='2026.11.27-1019';
+window.DL_BUILD='android'; window.DL_PREVIEW=true; if(/[?&]sweep\b/.test(location.search)){ window.__bootErr=[]; addEventListener("error",function(e){ __bootErr.push(String(e.message||e)+(e.lineno?" (line "+e.lineno+")":"")); }); addEventListener("unhandledrejection",function(e){ __bootErr.push("promise: "+String(e.reason&&e.reason.message||e.reason)); }); window.requestAnimationFrame=function(f){ return setTimeout(function(){ f(performance.now()); },16); }; window.cancelAnimationFrame=function(i){ clearTimeout(i); }; } try{ window.__tOff=/[?&](test|sweep|frozen)\b/.test(location.search)?0:(+(localStorage.getItem("dl-test-toff")||0)||0); }catch(e){ window.__tOff=0; } (function(){ var rn=Date.now.bind(Date); Date.now=function(){ return rn()+window.__tOff; }; })(); if(/[?&]frozen\b/.test(location.search)){ var __fz=20261122; Math.random=function(){ __fz|=0; __fz=__fz+0x6D2B79F5|0; var t=Math.imul(__fz^__fz>>>15,1|__fz); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; var __fc=0, __pn=performance.now.bind(performance); performance.now=function(){ __fc+=0.01; return 100000+__fc; }; Date.now=function(){ return 1795300000000+Math.floor(__fc); }; window.__frozenClock=function(){ return __fc; }; window.requestAnimationFrame=function(){ return 0; }; window.cancelAnimationFrame=function(){}; } window.DL_VERSION='2026.11.27-1125';
 window.addEventListener('beforeinstallprompt',function(e){ e.preventDefault(); window.__dlInstallPrompt=e; });
 </script>
 </head>
@@ -14841,24 +14841,29 @@ stepOn('bonus', function(v,k){ return v+featCatBonus(k); });
 { const _v=specLocValue; specLocValue=function(loc){ return _v(loc)*(S.setDone&&S.setDone[loc]?1.1:1); }; }
 
 // ---------- bounty rewards (director, 2026-11-27: "Just scales and nibble crates"; no coins; daily tasks and weekly quests are gone) ----------
-//  An ordinary bounty pays 3 Scales or a small Nibble crate; a harder one (a legend, a shiny, a trophy, many kinds of fish) pays 8 Scales or a
-//  big crate. The player picks on claim; with the Bounty Ledger relic a bounty pays both. Every claim also gives Tide Pass XP (daily tasks did).
+//  The reward follows the effort (director, 2026-11-27: "some of these bounties don't equal the same rewards for effort"): bountyEffort scores a
+//  bounty from the rarity of its fish, how many, and how picky it is; the score sets the Scales (2 to 12) and the size of the Nibble crate (4 to 10
+//  Nibbles; from a score of 8 it is a big crate). The player picks on claim; with the Bounty Ledger relic a bounty pays both. Every claim also
+//  gives Tide Pass XP (daily tasks did).
 //  A Nibble crate opens straight away: each Nibble rolls its own tier from the pool; a big crate holds at least one Epic or better.
-//  Feel calls (first versions, the director and Cam tune them): the Scales, the crate sizes and odds, the Tide Pass XP.
-const BOUNTY_SC=[3,8], BOUNTY_PASS=40, NIB_CRATE={small:{n:6, odds:[50,30,14,5,1,0], min:0}, big:{n:10, odds:[30,30,22,12,5,1], min:3}};
-const bountyHard = b => !!(b.legend||b.type==='shiny'||b.type==='trophy'||b.type==='kinds');
-const bountyPay = b => bountyHard(b) ? {sc:BOUNTY_SC[1], cr:'big'} : {sc:BOUNTY_SC[0], cr:'small'};
+//  Feel calls (first versions, the director and Cam tune them): the effort weights, the Scales, the crate sizes and odds, the Tide Pass XP.
+const BOUNTY_PASS=40, BOUNTY_BIG=8, BOUNTY_W=[1,1.5,3,5,8,12], NIB_CRATE={small:{odds:[50,30,14,5,1,0], min:0}, big:{odds:[30,30,22,12,5,1], min:3}};
+/* how much work a bounty is: one common fish = 1. A fish counts by its rarity (BOUNTY_W), more for one that only bites by day or by night; a size
+   bounty counts double (it needs a big one); a style hunt 1.2 a fish, a variety hunt 1.5 a kind, a trophy 8, a shiny or a legend 12 */
+function bountyEffort(b){ const sp=b.sp&&SPI[b.sp]; if(b.legend||b.type==='shiny') return 12; if(b.type==='trophy') return 8; if(b.type==='kinds') return (b.n||1)*1.5; if(b.type==='style') return (b.n||1)*1.2;
+  if(!sp) return 1; const w=BOUNTY_W[Math.min(5,sp.r)]*(sp.time&&sp.time!=='any'?1.25:1); return b.type==='size' ? w*2 : w*(b.n||1); }
+const bountyPay = b => { const e=bountyEffort(b); return {sc:clamp(Math.round(1+e),2,12), cr:e>=BOUNTY_BIG?'big':'small', n:clamp(Math.round(3+e*.7),4,10)}; };
 const bountyBoth = () => !!relic('seasoned');
-const bountyPayText = b => { const p=bountyPay(b); return p.sc+' Scales '+(bountyBoth()?'and':'or')+' a '+p.cr+' Nibble crate'; };
+const bountyPayText = b => { const p=bountyPay(b); return p.sc+' Scales '+(bountyBoth()?'and':'or')+' a '+(p.cr==='big'?'big ':'')+'crate of '+p.n+' Nibbles'; };
 function bountyClaimBtns(b,i,sm){ const p=bountyPay(b), c='btn'+(sm?' sm':''); if(bountyBoth()) return `<button class="${c}" data-act="claim" data-i="${i}" data-k="both">Claim</button>`;
-  return `<span class="bpick"><button class="${c}" data-act="claim" data-i="${i}" data-k="sc" title="Take ${p.sc} Scales">${p.sc} Scales</button><button class="${c}" data-act="claim" data-i="${i}" data-k="cr" title="Take a ${p.cr} Nibble crate: it opens straight away">Nibble crate</button></span>`; }
-function nibCrateRoll(size){ const C=NIB_CRATE[size]||NIB_CRATE.small, out=[0,0,0,0,0,0];
-  for(let j=0;j<C.n;j++){ let x=Math.random()*100, t=0; for(let i=0;i<6;i++){ if(x<C.odds[i]){ t=i; break; } x-=C.odds[i]; } out[t]++; }
+  return `<span class="bpick"><button class="${c}" data-act="claim" data-i="${i}" data-k="sc" title="Take ${p.sc} Scales">${p.sc} Scales</button><button class="${c}" data-act="claim" data-i="${i}" data-k="cr" title="Take the crate of ${p.n} Nibbles: it opens straight away">${p.n} Nibbles</button></span>`; }
+function nibCrateRoll(size,n){ const C=NIB_CRATE[size]||NIB_CRATE.small, out=[0,0,0,0,0,0];
+  for(let j=0;j<n;j++){ let x=Math.random()*100, t=0; for(let i=0;i<6;i++){ if(x<C.odds[i]){ t=i; break; } x-=C.odds[i]; } out[t]++; }
   if(C.min&&!out.slice(C.min).some(n=>n>0)){ out[out.findIndex(n=>n>0)]--; out[C.min]++; } return out; }
 let bountyGot=null; /* what the claims of one press paid, shown once (Claim all pays many) */
 function bountyGive(b,pick){ const p=bountyPay(b), g=bountyGot||(bountyGot={sc:0, nib:[0,0,0,0,0,0], crates:0, n:0}); g.n++;
   if(pick!=='cr'){ S.scales+=p.sc; g.sc+=p.sc; }
-  if(pick!=='sc'){ nibCrateRoll(p.cr).forEach((n,i)=>{ if(n){ nibAdd('r'+i,n); g.nib[i]+=n; } }); g.crates++; }
+  if(pick!=='sc'){ nibCrateRoll(p.cr,p.n).forEach((n,i)=>{ if(n){ nibAdd('r'+i,n); g.nib[i]+=n; } }); g.crates++; }
   addPassXP(BOUNTY_PASS); S.gstats.tasks=(S.gstats.tasks||0)+1; /* the counter daily tasks used; its two feats count bounties now */
   setTimeout(bountyShow,0); }
 function nibCrateClose(){ const o=$('nibcrate'); if(o) o.remove(); }
@@ -20880,15 +20885,15 @@ html body.phone-app .hud > #mblive .lbl,html body.phone-land .hud > #mblive .lbl
   const pass=()=>{ try{ const pl=S.pass.lvl|0, un=pl-(S.pass.claimed|0); return {ready:un>0, txt:'Lv '+pl+(un>0?' · claim':'')}; }catch(e){ oops('mobile/header08:pass-chip',e); return {ready:false,txt:'—'}; } };
   const fit=()=>{ const hud=document.querySelector('.hud'); if(!hud||!T) return; const land=document.body.classList.contains('phone-land');
     T.hidden=!land; Pz.hidden=true; hud.classList.remove('mb-compact'); if(!land) return;
-    /* when the bar runs out of room: Tasks steps aside first, then Live shrinks to its icon and time, then Live steps aside; Bait, Cooler,
+    /* when the bar runs out of room: Live shrinks to its icon and time, then Live steps aside, then Bounties (it went first until 2026-11-27); Bait, Cooler,
        Aquarium, Home and Fish Log always stay */
     /* "out of room" also means the Bait name is being cut: the Bait chip is allowed to shrink (polish08), so without this it soaked up all
        the shortage, the bar never overflowed and Tasks and Live never stepped aside (0.4.8.9.4 hotfix: Bait squeezed to a 19 px sliver) */
     const over=()=>{ if(hud.scrollWidth>hud.clientWidth+1) return true; const bb=document.querySelector('#mbbait > b'); return !!(bb&&bb.offsetParent&&bb.scrollWidth>bb.clientWidth+1); }, L=document.getElementById('mblive'), has=hud.classList.contains('mb-has-live');
     if(L&&has){ L.hidden=false; const b=L.querySelector(':scope > b'); if(b&&b.dataset.full){ if(b.textContent===b.dataset.tight) b.textContent=b.dataset.full; delete b.dataset.full; delete b.dataset.tight; } /* (a newer event text written meanwhile wins) */ L.classList.remove('mb-tight'); }
-    if(over()) T.hidden=true;
     if(over()&&L&&has){ const b=L.querySelector(':scope > b'); if(b){ const p=b.textContent.trim().split(' '); if(p.length>2){ b.dataset.full=b.textContent; b.textContent=p[0]+' '+p[p.length-1]; b.dataset.tight=b.textContent; } } L.classList.add('mb-tight'); }
     if(over()&&L&&has) L.hidden=true;
+    if(over()) T.hidden=true; /* Bounties goes last (director, 2026-11-27: the chip was missing while an event ran; bounties are the thing to chase) */
     /* last step (2026-11-20, director's iPhone at 667×375: "BAIT Worms" cut, 44 px of text in 39, with nothing left to step aside): every
        chip gives up a little of its padding before any word is cut; the info box keeps its words (rule) */
     if(over()) hud.classList.add('mb-compact');
@@ -21870,13 +21875,14 @@ PATCHES.unshift({v:'0.4.9', name:'Work in progress', items:phoneNotes([
 const TEST_NOTES={v:'test', label:'Test build · '+(window.DL_BUILD==='ios'?'iPhone':'Android'), name:'0.4.9 test build (newest first)', items:[
   '## New in this build',
   'Bounties are the one thing to chase now (director and Cam): daily tasks and weekly quests are gone. Rewards you had not claimed on them are lost.',
-  'A bounty no longer pays coins. When you claim one you pick your reward: Scales, or a Nibble crate. Harder bounties (a legend, a shiny, a trophy, a variety hunt) pay 8 Scales or a big crate, the others 3 Scales or a small one. Every claim also gives some Tide Pass XP.',
-  'Nibble crates open straight away and show what was inside: a small one holds 6 Nibbles, a big one 10 with at least one Epic or better. These are first numbers: tell us how they feel.',
+  'A bounty no longer pays coins. When you claim one you pick your reward: Scales, or a crate of Nibbles. Every claim also gives some Tide Pass XP.',
+  'The reward follows the effort (director): a bounty for one common fish pays 2 Scales or 4 Nibbles, two rare fish 7 Scales or 7 Nibbles, a trophy 9 Scales or a big crate of 9, a shiny or a legend 12 Scales or a big crate of 10. Rarer fish, more fish, a set size and day-only or night-only fish all count for more.',
+  'Nibble crates open straight away and show what was inside. A big crate has better odds and at least one Epic or better. These are first numbers: tell us how they feel.',
   'A new kind of bounty, the variety hunt: catch several different fish at one water.',
   'The Bounty Ledger relic now pays both rewards on every bounty (it used to add coins).',
   'Claim all asks once which reward you want and pays every finished bounty that way.',
   'Aquarium: Your Nibbles lists all six kinds with how many you hold, also the ones you have none of, and every Feed button says how many are left.',
-  'The Tasks chip in the top bar is now Bounties: it shows how many are ready to claim, or how many wait at your water.',
+  'The Tasks chip in the top bar is now Bounties: it shows how many are ready to claim, or how many wait at your water. When the bar is short of room during an event, the event chip shrinks and steps aside first; Bounties stays (director: it was missing while an event ran).',
   'The feats Daily grind and Creature of habit now count claimed bounties; what you had counts on.',
   'Mystery Crates no longer come from bounties, daily tasks or weekly quests. Feats, legendary and mythic catches and the daily gift still give them.',
   '## Test build 2026.11.27-0752',
@@ -22881,19 +22887,22 @@ T('Cam 2026-11-23 (4): second winds by rarity, small hybrids fight full, spool 8
 T('page tabs: a part hidden by a page tab never stays on screen (a forced style once kept the Events calendar on every tab)',()=>{ const bad=[]; const pages=qaAllPages(); let n=0; for(const t of pages){ openMenu(t); const P=$('panel'); for(const b of [...document.querySelectorAll('#menuov .sect-nav [data-sect], #panel .sect-nav [data-sect]')]){ b.click(); n++; for(const e of P.querySelectorAll('*')){ if(e.style.display==='none'&&getComputedStyle(e).display!=='none') bad.push(t+' / '+b.dataset.sect+': '+((e.className||e.tagName)+'').slice(0,30)); } } } closeMenu(); return bad.length?{ok:false,detail:[...new Set(bad)].slice(0,8).join(' | ')}:{ok:true,detail:n+' page tabs checked'}; });
   T('bounty rewards: Scales or a Nibble crate and never coins; the crate follows its pool (a big one holds an Epic or better); the Bounty Ledger relic pays both; a variety hunt counts each kind once; daily tasks and weekly quests are gone',()=>{ const e=[], keep=snap(), sv=save, ts=toast, R=Math.random; save=()=>{}; toast=()=>{};
     try{ for(const ft of FEATS) S.feats[ft.id]=S.feats[ft.id]||1; /* no feat fires from these claims */
-      /* the pool */ for(const size of ['small','big']){ const C=NIB_CRATE[size]; if(C.odds.reduce((a,b)=>a+b,0)!==100) e.push(size+' odds add up to '+C.odds.reduce((a,b)=>a+b,0)); for(let k=0;k<200;k++){ const r=nibCrateRoll(size), n=r.reduce((a,b)=>a+b,0); if(n!==C.n){ e.push(size+' crate held '+n); break; } if(r.some((x,i)=>x&&!C.odds[i]&&i!==C.min)){ e.push(size+' crate gave a tier with no odds'); break; } if(C.min&&!r.slice(C.min).some(x=>x>0)){ e.push('a big crate without an Epic or better'); break; } } }
-      { const tot=[0,0,0,0,0,0]; for(let k=0;k<3000;k++) nibCrateRoll('small').forEach((x,i)=>tot[i]+=x); const all=tot.reduce((a,b)=>a+b,0), sh=tot.map(x=>x/all); NIB_CRATE.small.odds.forEach((o,i)=>{ if(Math.abs(sh[i]-o/100)>.03) e.push('small crates gave '+NIB_TIER[i]+' '+Math.round(sh[i]*100)+'% of the time, the pool says '+o+'%'); }); }
-      Math.random=()=>0; { const r=nibCrateRoll('big'); if(r[0]!==9||r[3]!==1) e.push('all-common big crate became '+r.join(',')); } Math.random=R;
+      /* the pool */ for(const size of ['small','big']){ const C=NIB_CRATE[size]; if(C.odds.reduce((a,b)=>a+b,0)!==100) e.push(size+' odds add up to '+C.odds.reduce((a,b)=>a+b,0)); for(let k=0;k<200;k++){ const want=4+k%7, r=nibCrateRoll(size,want), n=r.reduce((a,b)=>a+b,0); if(n!==want){ e.push(size+' crate of '+want+' held '+n); break; } if(r.some((x,i)=>x&&!C.odds[i]&&i!==C.min)){ e.push(size+' crate gave a tier with no odds'); break; } if(C.min&&!r.slice(C.min).some(x=>x>0)){ e.push('a big crate without an Epic or better'); break; } } }
+      { const tot=[0,0,0,0,0,0]; for(let k=0;k<3000;k++) nibCrateRoll('small',6).forEach((x,i)=>tot[i]+=x); const all=tot.reduce((a,b)=>a+b,0), sh=tot.map(x=>x/all); NIB_CRATE.small.odds.forEach((o,i)=>{ if(Math.abs(sh[i]-o/100)>.03) e.push('small crates gave '+NIB_TIER[i]+' '+Math.round(sh[i]*100)+'% of the time, the pool says '+o+'%'); }); }
+      Math.random=()=>0; { const r=nibCrateRoll('big',10); if(r[0]!==9||r[3]!==1) e.push('all-common big crate became '+r.join(',')); } Math.random=R;
       /* the pick */ const sp=SP.find(s=>s.loc==='pond'&&s.r===0); S.relics=(S.relics||[]).filter(r=>r!=='seasoned'); S.unlocked=['pond']; S.loc='pond';
       const mk=()=>({type:'count',sp:sp.id,loc:'pond',n:1,have:1,reward:10}), nibs=()=>NIB_RAR.reduce((a,r,i)=>a+((S.nib&&S.nib['r'+i])||0),0);
-      S.bounties=[mk()]; S.nib={}; let m0=S.money, s0=S.scales, x0=S.pass.xp+S.pass.lvl*1e6, t0=S.gstats.tasks||0; act('claim',{i:0,k:'cr'}); if(nibs()!==NIB_CRATE.small.n) e.push('small crate gave '+nibs()+' Nibbles'); if(S.scales!==s0) e.push('the crate pick also paid Scales'); if(S.money!==m0) e.push('coins paid'); if(!(S.pass.xp+S.pass.lvl*1e6>x0)) e.push('no Tide Pass XP'); if((S.gstats.tasks||0)!==t0+1) e.push('the claim was not counted for the feats');
+      S.bounties=[mk()]; S.nib={}; let m0=S.money, s0=S.scales, x0=S.pass.xp+S.pass.lvl*1e6, t0=S.gstats.tasks||0; { const p=bountyPay(S.bounties[0]); act('claim',{i:0,k:'cr'}); if(nibs()!==p.n||p.cr!=='small') e.push('the crate gave '+nibs()+' Nibbles, want '+p.n+' ('+p.cr+')'); } if(S.scales!==s0) e.push('the crate pick also paid Scales'); if(S.money!==m0) e.push('coins paid'); if(!(S.pass.xp+S.pass.lvl*1e6>x0)) e.push('no Tide Pass XP'); if((S.gstats.tasks||0)!==t0+1) e.push('the claim was not counted for the feats');
       if(bountyGot===null||!bountyGot.crates) e.push('nothing to show for the crate'); bountyShow(); if(!$('nibcrate')) e.push('the Nibble crate card did not open'); else { if(!/Nibble crate/.test($('nibcrate').textContent)) e.push('card text'); nibCrateClose(); if($('nibcrate')) e.push('card did not close'); }
-      S.bounties=[Object.assign(mk(),{legend:1})]; S.nib={}; s0=S.scales; act('claim',{i:0,k:'sc'}); if(S.scales-s0!==BOUNTY_SC[1]) e.push('a hard bounty paid '+(S.scales-s0)+' Scales'); if(nibs()) e.push('the Scales pick also gave Nibbles'); bountyGot=null;
+      S.bounties=[Object.assign(mk(),{legend:1})]; S.nib={}; s0=S.scales; act('claim',{i:0,k:'sc'}); if(S.scales-s0!==12) e.push('a legend bounty paid '+(S.scales-s0)+' Scales'); if(nibs()) e.push('the Scales pick also gave Nibbles'); bountyGot=null;
       S.bounties=[mk()]; s0=S.scales; act('claim',{i:0,k:'gold'}); if(S.bounties[0].sp!==sp.id||!bDone(S.bounties[0])||S.scales!==s0) e.push('an unknown pick was accepted');
-      /* the relic */ S.relics=[...(S.relics||[]),'seasoned']; S.bounties=[mk()]; S.nib={}; s0=S.scales; act('claim',{i:0}); if(S.scales-s0!==BOUNTY_SC[0]||nibs()!==NIB_CRATE.small.n) e.push('Bounty Ledger: Scales +'+(S.scales-s0)+', Nibbles '+nibs()); bountyGot=null;
+      /* the relic */ S.relics=[...(S.relics||[]),'seasoned']; S.bounties=[mk()]; S.nib={}; s0=S.scales; { const p=bountyPay(S.bounties[0]); act('claim',{i:0}); if(S.scales-s0!==p.sc||nibs()!==p.n) e.push('Bounty Ledger: Scales +'+(S.scales-s0)+', Nibbles '+nibs()); } bountyGot=null;
       S.tab='bounties'; S.bounties=[mk()]; renderPanel(); { const P=$('panel'), bs=[...P.querySelectorAll('[data-act="claim"]')]; if(bs.length!==1||bs[0].dataset.k!=='both') e.push('with the relic the tile shows '+bs.length+' claim buttons'); }
       S.relics=S.relics.filter(r=>r!=='seasoned'); S.bounties=[mk()]; renderPanel(); { const P=$('panel'), ks=[...P.querySelectorAll('[data-act="claim"]')].map(b=>b.dataset.k).sort().join(); if(ks!=='cr,sc') e.push('without the relic the tile offers '+ks); if(/coin/.test((P.querySelector('.tile.done')||{}).innerHTML||'')) e.push('a bounty tile still shows coins as a reward'); if(/Daily tasks|Weekly quests/.test(P.textContent)) e.push('daily tasks or weekly quests are still on the page'); }
-      /* the variety hunt */ const two=SP.filter(s=>s.loc==='pond').slice(0,2), kb={type:'kinds',loc:'pond',n:2,have:0,got:[],reward:10}; S.bounties=[kb]; const fx=s=>({sp:s,kg:s.min,shiny:0,trophy:0}); checkBounties2(fx(two[0])); checkBounties2(fx(two[0])); if(kb.have!==1) e.push('the same fish counted twice: '+kb.have); checkBounties2(fx(SP.find(s=>s.loc!=='pond'))); if(kb.have!==1) e.push('a fish from another water counted'); checkBounties2(fx(two[1])); if(!bDone(kb)||!bountyHard(kb)) e.push('variety hunt not finished or not a harder bounty'); if(!migrate(JSON.parse(JSON.stringify(S))).bounties.some(b=>b.type==='kinds')) e.push('a variety hunt does not survive loading the save');
+      /* the variety hunt */ const two=SP.filter(s=>s.loc==='pond').slice(0,2), kb={type:'kinds',loc:'pond',n:2,have:0,got:[],reward:10}; S.bounties=[kb]; const fx=s=>({sp:s,kg:s.min,shiny:0,trophy:0}); checkBounties2(fx(two[0])); checkBounties2(fx(two[0])); if(kb.have!==1) e.push('the same fish counted twice: '+kb.have); checkBounties2(fx(SP.find(s=>s.loc!=='pond'))); if(kb.have!==1) e.push('a fish from another water counted'); checkBounties2(fx(two[1])); if(!bDone(kb)) e.push('variety hunt not finished');
+      /* the reward follows the effort */ { const rare=SP.find(s=>s.r===2&&s.time==='any'), com=SP.find(s=>s.r===0&&s.time==='any'), P=b=>bountyPay(b), one=P({type:'count',sp:com.id,n:1}), four=P({type:'count',sp:com.id,n:4}), two=P({type:'count',sp:rare.id,n:2}), tr=P({type:'trophy'}), sh=P({type:'shiny'}), k8=P({type:'kinds',n:8});
+        if(!(one.sc<four.sc&&four.sc<two.sc&&two.sc<tr.sc&&tr.sc<=sh.sc)) e.push('Scales do not rise with the effort: '+[one,four,two,tr,sh].map(p=>p.sc).join(' ')); if(!(one.n<=four.n&&four.n<=two.n&&two.n<=tr.n&&tr.n<=sh.n)) e.push('crate sizes do not rise with the effort: '+[one,four,two,tr,sh].map(p=>p.n).join(' '));
+        if(one.cr!=='small'||tr.cr!=='big'||sh.cr!=='big'||k8.cr!=='big') e.push('big crates start at the wrong effort'); for(const p of [one,four,two,tr,sh,k8]) if(p.sc<2||p.sc>12||p.n<4||p.n>10) e.push('a reward outside 2 to 12 Scales or 4 to 10 Nibbles: '+p.sc+' / '+p.n); } if(!migrate(JSON.parse(JSON.stringify(S))).bounties.some(b=>b.type==='kinds')) e.push('a variety hunt does not survive loading the save');
       for(const n of ['ensureDaily','ensureWeekly','dailyHTML','weeklyHTML']) if(new RegExp('function '+n+'\\b').test(document.documentElement.innerHTML)) e.push(n+' is still in the page');
     } finally{ save=sv; toast=ts; Math.random=R; bountyGot=null; nibCrateClose(); restore(keep); }
     return e.length?{ok:false,detail:e.join('; ')}:{ok:true,detail:'pool, pick, relic, variety hunt ok'}; });
