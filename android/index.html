@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="DL Test Android">
 <script>
-window.DL_BUILD='android'; window.DL_PREVIEW=true; if(/[?&]sweep\b/.test(location.search)){ window.__bootErr=[]; addEventListener("error",function(e){ __bootErr.push(String(e.message||e)+(e.lineno?" (line "+e.lineno+")":"")); }); addEventListener("unhandledrejection",function(e){ __bootErr.push("promise: "+String(e.reason&&e.reason.message||e.reason)); }); window.requestAnimationFrame=function(f){ return setTimeout(function(){ f(performance.now()); },16); }; window.cancelAnimationFrame=function(i){ clearTimeout(i); }; } try{ window.__tOff=/[?&](test|sweep|frozen)\b/.test(location.search)?0:(+(localStorage.getItem("dl-test-toff")||0)||0); }catch(e){ window.__tOff=0; } (function(){ var rn=Date.now.bind(Date); Date.now=function(){ return rn()+window.__tOff; }; })(); if(/[?&]frozen\b/.test(location.search)){ var __fz=20261122; Math.random=function(){ __fz|=0; __fz=__fz+0x6D2B79F5|0; var t=Math.imul(__fz^__fz>>>15,1|__fz); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; var __fc=0, __pn=performance.now.bind(performance); performance.now=function(){ __fc+=0.01; return 100000+__fc; }; Date.now=function(){ return 1795300000000+Math.floor(__fc); }; window.__frozenClock=function(){ return __fc; }; window.requestAnimationFrame=function(){ return 0; }; window.cancelAnimationFrame=function(){}; } window.DL_VERSION='2026.11.27-1252';
+window.DL_BUILD='android'; window.DL_PREVIEW=true; if(/[?&]sweep\b/.test(location.search)){ window.__bootErr=[]; addEventListener("error",function(e){ __bootErr.push(String(e.message||e)+(e.lineno?" (line "+e.lineno+")":"")); }); addEventListener("unhandledrejection",function(e){ __bootErr.push("promise: "+String(e.reason&&e.reason.message||e.reason)); }); window.requestAnimationFrame=function(f){ return setTimeout(function(){ f(performance.now()); },16); }; window.cancelAnimationFrame=function(i){ clearTimeout(i); }; } try{ window.__tOff=/[?&](test|sweep|frozen)\b/.test(location.search)?0:(+(localStorage.getItem("dl-test-toff")||0)||0); }catch(e){ window.__tOff=0; } (function(){ var rn=Date.now.bind(Date); Date.now=function(){ return rn()+window.__tOff; }; })(); if(/[?&]frozen\b/.test(location.search)){ var __fz=20261122; Math.random=function(){ __fz|=0; __fz=__fz+0x6D2B79F5|0; var t=Math.imul(__fz^__fz>>>15,1|__fz); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; var __fc=0, __pn=performance.now.bind(performance); performance.now=function(){ __fc+=0.01; return 100000+__fc; }; Date.now=function(){ return 1795300000000+Math.floor(__fc); }; window.__frozenClock=function(){ return __fc; }; window.requestAnimationFrame=function(){ return 0; }; window.cancelAnimationFrame=function(){}; } window.DL_VERSION='2026.11.27-1405';
 window.addEventListener('beforeinstallprompt',function(e){ e.preventDefault(); window.__dlInstallPrompt=e; });
 </script>
 </head>
@@ -14878,20 +14878,20 @@ document.head.insertAdjacentHTML('beforeend','<style>#nibcrate{position:fixed;z-
 
 /* the Bounties page (director's layout, 2026-11-27): title band, water picker, bounty tiles with a bar and reward chips. Sizes here suit phones; PC makes them larger (pc/pages_pc.js) */
 document.head.insertAdjacentHTML('beforeend',`<style>
-.bq-head{position:relative;display:flex;align-items:center;gap:12px;min-height:60px;padding:8px 14px;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:#0e1a2c;margin:0 0 10px}
+.bq-head{position:relative;display:flex;align-items:center;gap:10px;min-height:46px;padding:6px 12px;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:#0e1a2c;margin:0 0 8px}
 .bq-art{position:absolute;inset:0 0 0 30%;background-size:cover;background-position:center 62%;-webkit-mask-image:linear-gradient(90deg,transparent,#000 40%);mask-image:linear-gradient(90deg,transparent,#000 40%);opacity:.9}
-.bq-ic{position:relative;flex:0 0 34px;width:34px;height:34px;box-sizing:border-box;border-radius:50%;border:3px solid #7fe3c4;box-shadow:inset 0 0 0 5px #0e1a2c,inset 0 0 0 8px #7fe3c4}
+.bq-ic{position:relative;flex:0 0 28px;width:28px;height:28px;box-sizing:border-box;border-radius:50%;border:3px solid #7fe3c4;box-shadow:inset 0 0 0 4px #0e1a2c,inset 0 0 0 7px #7fe3c4}
 .bq-ti{position:relative;min-width:0}
-.bq-ti h3{margin:0;font:800 22px/1.15 var(--display,system-ui);color:#fff}
-.bq-ti p{margin:0;font-size:13px;color:#e6efe8}
-.bq-row{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;margin:0 0 10px}
-.bq-pick,.bq-w{display:flex;align-items:center;gap:10px;min-height:42px;padding:0 12px 0 0;border:1px solid var(--line);border-radius:12px;background:#0e1a2c;color:#e6efe8;font:800 15px var(--display,system-ui);cursor:pointer;overflow:hidden;text-align:left}
-.bq-pick{min-width:240px}
+.bq-ti h3{margin:0;font:800 18px/1.15 var(--display,system-ui);color:#fff}
+.bq-ti p{margin:0;font-size:12px;color:#e6efe8}
+.bq-row{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;margin:0 0 8px}
+.bq-pick,.bq-w{display:flex;align-items:center;gap:10px;min-height:38px;padding:0 12px 0 0;border:1px solid var(--line);border-radius:12px;background:#0e1a2c;color:#e6efe8;font:800 14px var(--display,system-ui);cursor:pointer;overflow:hidden;text-align:left;white-space:nowrap}
+.bq-pick{min-width:220px}
 .bq-pick b,.bq-w b{flex:1;min-width:0}
-.bq-th{flex:0 0 64px;align-self:stretch;min-height:42px;background:#16324a center/cover}
+.bq-th{flex:0 0 58px;align-self:stretch;min-height:38px;background:#16324a center/cover}
 .bq-car{flex:0 0 auto;width:8px;height:8px;border-right:2px solid;border-bottom:2px solid;transform:rotate(45deg);margin:0 4px 4px}
 .bq-pick[aria-expanded="true"] .bq-car{transform:rotate(225deg);margin:4px 4px 0}
-.bq-ready{display:inline-flex;align-items:center;min-height:36px;padding:0 14px;border-radius:999px;border:1px solid var(--line);color:#9fb2c8;font:800 14px var(--display,system-ui)}
+.bq-ready{display:inline-flex;align-items:center;min-height:32px;padding:0 12px;border-radius:999px;border:1px solid var(--line);color:#9fb2c8;font:800 13px var(--display,system-ui)}
 .bq-ready.on{color:#ffd36a;border-color:#ffd36a66}
 .bq-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:6px;margin:0 0 10px;padding:8px;border:1px solid var(--line);border-radius:12px;background:#0a1424}
 .bq-w{padding-right:10px}
@@ -14899,25 +14899,25 @@ document.head.insertAdjacentHTML('beforeend',`<style>
 .bq-w .bq-th:not([style]){flex-basis:0;min-width:0;margin-right:2px} /* a water whose picture is not drawn yet shows its name alone, not an empty box */
 .bq-w.on{border-color:#ffd36a}
 .bq-n{flex:0 0 auto;font:700 12px var(--display,system-ui);color:#ffd36a}
-.bq-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:10px}
-#panel .tile.bq{display:flex;flex-direction:column;gap:6px;margin:0}
-#panel .tile.bq h4{margin:0}
+.bq-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(165px,1fr));gap:8px} /* three across on a phone held sideways, also inside the notch margins (director, 2026-11-27: "I want all the bounties to fit on this screen") */
+#panel .tile.bq{display:flex;flex-direction:column;gap:4px;margin:0;padding:9px 10px}
+#panel .tile.bq h4{margin:0;font-size:14px!important;line-height:1.2!important}
 #panel .tile.bq.done{border-color:#ffd36a;box-shadow:0 0 0 1px #ffd36a}
-.bq-meta{font-size:13px;color:#8fc7e8}
-.bq-bar{height:8px;border-radius:4px;background:#0a1220;border:1px solid var(--line);overflow:hidden}
+.bq-meta{font-size:12px;color:#8fc7e8}
+.bq-bar{height:6px;border-radius:3px;background:#0a1220;border:1px solid var(--line);overflow:hidden}
 .bq-bar i{display:block;height:100%;background:linear-gradient(90deg,#3fd0b5,#7fe3c4)}
-.bq-rew{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:auto;padding-top:2px}
+.bq-rew{display:flex;flex-wrap:wrap;align-items:center;gap:4px 5px;margin-top:auto;padding-top:2px}
 .bq-rew > .bq-chip{flex:1 1 0;justify-content:center;white-space:nowrap}
-.bq-lbl{flex:0 0 100%;font-size:12.5px;color:#9fb2c8}
-.bq-chip{display:inline-flex;align-items:center;gap:6px;min-height:32px;padding:0 8px;border-radius:999px;border:1px solid var(--line);background:#0a1424;color:#e6efe8;font:800 13.5px var(--display,system-ui)}
-button.bq-chip.go{min-height:40px;border:0;color:#1d1300;background:linear-gradient(180deg,#ffe08a,#f3b94e);cursor:pointer}
+.bq-lbl{flex:0 0 100%;font-size:11.5px;color:#9fb2c8}
+.bq-chip{display:inline-flex;align-items:center;gap:5px;min-height:28px;padding:0 6px;border-radius:999px;border:1px solid var(--line);background:#0a1424;color:#e6efe8;font:800 12.5px var(--display,system-ui)}
+button.bq-chip.go{min-height:38px;border:0;color:#1d1300;background:linear-gradient(180deg,#ffe08a,#f3b94e);cursor:pointer}
 button.bq-chip.go:focus-visible,.bq-pick:focus-visible,.bq-w:focus-visible{outline:3px solid #7fe3c4;outline-offset:2px}
-.bq-chip em{font:700 11px var(--display,system-ui);font-style:normal;opacity:.85}
 .bq-i-sc{flex:0 0 auto;width:10px;height:10px;background:#6fb3ff;transform:rotate(45deg);border-radius:2px}
 button.bq-chip.go .bq-i-sc{background:#1f5fae}
 .bq-i-cr{flex:0 0 auto;width:14px;height:11px;border-radius:2px;background:#e0a23a;box-shadow:inset 0 3px 0 #f6cf7a,inset 0 -1px 0 #8a5a12}
 button.bq-chip.go .bq-i-cr{background:#8a5a12;box-shadow:inset 0 3px 0 #b97c1e}
-#panel .bq-swap{align-self:center}
+#panel .tile.bq .bq-swap{align-self:center;min-height:30px;font-size:12.5px;padding:0 12px}
+@media (max-height:400px){ .bq-head{display:none} .bq-chip{min-height:25px} button.bq-chip.go{min-height:32px} #panel .tile.bq .bq-swap{min-height:27px} #panel .tile.bq{gap:3px;padding:7px 9px} } /* a short phone: the title band (decoration; the tab above already says Bounties) gives its room to the bounties */
 </style>`);
 // ---------- Fish Log: the completion reward says what it really gives ----------
 { const _rj=renderJournal; renderJournal=function(P){ _rj(P); try{ const m=P.querySelector('.fl-mh .meta'); if(m&&/find them all for/.test(m.innerHTML)) m.insertAdjacentHTML('beforeend',' <b class="fl-perk">+ fish from here worth 10% more, forever</b>'); else if(m&&/complete/.test(m.textContent)) m.insertAdjacentHTML('beforeend',' <b class="fl-perk got">· fish from here worth 10% more</b>'); }catch(e){ oops('bs_rules05:P.querySelector',e); } }; }
@@ -21918,6 +21918,7 @@ PATCHES.unshift({v:'0.4.9', name:'Work in progress', items:phoneNotes([
 // text changes. Released notes live in notes_release.js.
 const TEST_NOTES={v:'test', label:'Test build · '+(window.DL_BUILD==='ios'?'iPhone':'Android'), name:'0.4.9 test build (newest first)', items:[
   '## New in this build',
+  'Bounties: the cards are smaller, so all three of a water fit on one screen with nothing to scroll (director). Their titles no longer repeat the water, and a big crate is named beside Rewards.',
   'The Bounties page has a new layout (the director’s design): a title band with the water’s picture, one water picker in place of a button for every water, and each bounty with a progress bar and its two rewards as chips. On a finished bounty the two chips are the claim buttons: tap the reward you want.',
   'A board never shows the same bounty twice, and swapping a bounty now costs coins by its water and its effort (it was 15 coins beside 9,900 on one board).',
   'Bounties are the one thing to chase now (director and Cam): daily tasks and weekly quests are gone. Rewards you had not claimed on them are lost.',
@@ -23558,7 +23559,7 @@ function bountyParts(b){ const bt=bountyText(b), d=bDone(b), L=LOCS[locIdx(b.loc
   if(bt){ what=bt.what; if(b.type==='style'||b.type==='kinds'){ n=b.n; have=Math.min(b.have,b.n); } }
   else { const sp=SPI[b.sp]; n=b.type==='count'?b.n:1; have=b.type==='count'?Math.min(b.have,b.n):(d?1:0); extra=sp.time!=='any'?(sp.time==='night'?'night only':'day only'):'';
     what=b.legend&&!S.journal[sp.id]?'Catch the legend of '+L.name:b.type==='count'?`Catch ${b.n} × ${sp.name}`:`Catch ${/^[aeiou]/i.test(sp.name)?'an':'a'} ${sp.name} of ${kgStr(b.kg)} or more`; }
-  return {what, n, have, d, where:L.name, extra}; }
+  if(what.endsWith(' at '+L.name)) what=what.slice(0,-(' at '+L.name).length); /* the picker and the line below already name the water */ return {what, n, have, d, where:L.name, extra}; }
 function renderBounties(P){ fillBounties(); const cur=S.unlocked.includes(bLoc)?bLoc:S.loc, L=LOCS[locIdx(cur)], ready=S.bounties.filter(b=>bDone(b)&&(!b.loc||S.unlocked.includes(b.loc))).length, both=bountyBoth();
   const th=id=>{ const u=V3THUMB[id]; return u?` style="background-image:url(${u})"`:''; }, waters=S.unlocked.slice().sort((a,b)=>locIdx(a)-locIdx(b));
   P.innerHTML=`<div class="bq-head"><span class="bq-art"${th(cur)}></span><span class="bq-ic" aria-hidden="true"></span><div class="bq-ti"><h3>Bounties</h3><p>Complete location tasks for rewards</p></div></div>
@@ -23569,7 +23570,7 @@ function renderBounties(P){ fillBounties(); const cur=S.unlocked.includes(bLoc)?
     const chip=(k,txt)=>p.d&&!both?`<button type="button" class="bq-chip go" data-act="claim" data-i="${i}" data-k="${k}"><i class="bq-i-${k}"></i>${txt}</button>`:`<span class="bq-chip"><i class="bq-i-${k}"></i>${txt}</span>`;
     return `<div class="tile bq${p.d?' done':''}">${b.legend?'<span class="rar" style="color:var(--gold)">Legendary bounty</span>':''}<h4>${esc(p.what)}</h4>
      <div class="bq-meta">${esc(p.where)}${p.extra?' · '+p.extra:''} · ${p.have} / ${p.n}</div><div class="bq-bar"><i style="width:${Math.round(p.have/p.n*100)}%"></i></div>
-     <div class="bq-rew"><span class="bq-lbl">${p.d&&!both?'Pick one':'Rewards'}</span>${chip('sc',pay.sc+' Scales')}${chip('cr',pay.n+' Nibbles'+(pay.cr==='big'?' <em>big</em>':''))}</div>
+     <div class="bq-rew"><span class="bq-lbl">${p.d&&!both?'Pick one':'Rewards'}${pay.cr==='big'?' · big crate':''}</span>${chip('sc',pay.sc+' Scales')}${chip('cr',pay.n+' Nibbles')}</div>
      ${p.d?(both?`<button class="btn bq-claim" data-act="claim" data-i="${i}" data-k="both">Claim both</button>`:''):`<button class="btn alt sm bq-swap" data-act="reroll" data-i="${i}" ${S.money>=cost?'':'disabled'}>Swap · <span class="coin">${fmt(cost)}</span></button>`}</div>`; }).join('')+'</div>';
   if(!V3THUMB[cur]&&MENU_OPEN) setTimeout(()=>{ try{ const u=v3Thumb(cur); if(u&&S.tab==='bounties') P.querySelectorAll('.bq-art,.bq-pick .bq-th').forEach(e=>{ e.style.backgroundImage='url('+u+')'; }); }catch(e){ oops('e_ui:bounty-picture',e); } },60); /* the water's picture, drawn once when it is not ready yet */
 }
