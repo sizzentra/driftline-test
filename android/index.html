@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="DL Test Android">
 <script>
-window.DL_BUILD='android'; window.DL_PREVIEW=true; if(/[?&]sweep\b/.test(location.search)){ window.__bootErr=[]; addEventListener("error",function(e){ __bootErr.push(String(e.message||e)+(e.lineno?" (line "+e.lineno+")":"")); }); addEventListener("unhandledrejection",function(e){ __bootErr.push("promise: "+String(e.reason&&e.reason.message||e.reason)); }); window.requestAnimationFrame=function(f){ return setTimeout(function(){ f(performance.now()); },16); }; window.cancelAnimationFrame=function(i){ clearTimeout(i); }; } try{ window.__tOff=/[?&](test|sweep|frozen)\b/.test(location.search)?0:(+(localStorage.getItem("dl-test-toff")||0)||0); }catch(e){ window.__tOff=0; } (function(){ var rn=Date.now.bind(Date); Date.now=function(){ return rn()+window.__tOff; }; })(); if(/[?&]frozen\b/.test(location.search)){ var __fz=20261122; Math.random=function(){ __fz|=0; __fz=__fz+0x6D2B79F5|0; var t=Math.imul(__fz^__fz>>>15,1|__fz); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; var __fc=0, __pn=performance.now.bind(performance); performance.now=function(){ __fc+=0.01; return 100000+__fc; }; Date.now=function(){ return 1795300000000+Math.floor(__fc); }; window.__frozenClock=function(){ return __fc; }; window.requestAnimationFrame=function(){ return 0; }; window.cancelAnimationFrame=function(){}; } window.DL_VERSION='2026.11.27-0752';
+window.DL_BUILD='android'; window.DL_PREVIEW=true; if(/[?&]sweep\b/.test(location.search)){ window.__bootErr=[]; addEventListener("error",function(e){ __bootErr.push(String(e.message||e)+(e.lineno?" (line "+e.lineno+")":"")); }); addEventListener("unhandledrejection",function(e){ __bootErr.push("promise: "+String(e.reason&&e.reason.message||e.reason)); }); window.requestAnimationFrame=function(f){ return setTimeout(function(){ f(performance.now()); },16); }; window.cancelAnimationFrame=function(i){ clearTimeout(i); }; } try{ window.__tOff=/[?&](test|sweep|frozen)\b/.test(location.search)?0:(+(localStorage.getItem("dl-test-toff")||0)||0); }catch(e){ window.__tOff=0; } (function(){ var rn=Date.now.bind(Date); Date.now=function(){ return rn()+window.__tOff; }; })(); if(/[?&]frozen\b/.test(location.search)){ var __fz=20261122; Math.random=function(){ __fz|=0; __fz=__fz+0x6D2B79F5|0; var t=Math.imul(__fz^__fz>>>15,1|__fz); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; var __fc=0, __pn=performance.now.bind(performance); performance.now=function(){ __fc+=0.01; return 100000+__fc; }; Date.now=function(){ return 1795300000000+Math.floor(__fc); }; window.__frozenClock=function(){ return __fc; }; window.requestAnimationFrame=function(){ return 0; }; window.cancelAnimationFrame=function(){}; } window.DL_VERSION='2026.11.27-1019';
 window.addEventListener('beforeinstallprompt',function(e){ e.preventDefault(); window.__dlInstallPrompt=e; });
 </script>
 </head>
@@ -1712,7 +1712,7 @@ function migrate(o,coreOnly){ const d=fresh(), raw=isObj(o)?o:null, m=d; if(raw)
   const dk=Object.assign(fresh().dock,o.dock||{}); dk.owned=uniq(['oak',...(dk.owned||[])]); dk.decor=[]; /* batch 5: home decorations are gone (no refunds: director 2026-11-21) */ if(!dk.owned.includes(dk.wood)) dk.wood='oak'; m.dock=dk;
   m.pass=Object.assign(fresh().pass,o.pass||{}); m.medals=Object.assign(fresh().medals,o.medals||{}); if(m.derby && !(m.derby.until>Date.now()-3600000)) m.derby=null;
   if((o.pearlV||1)<2){ m.pearls=Math.ceil((+o.pearls||0)*.4); m.pearlV=2; }
-  m.bounties=(m.bounties||[]).filter(b=>SPI[b.sp]||['trophy','style','shiny'].includes(b.type)); if(m.tankSlots>TANK_COST.length) m.tankSlots=TANK_COST.length; m.v=3; }
+  m.bounties=(m.bounties||[]).filter(b=>SPI[b.sp]||['trophy','style','shiny','kinds'].includes(b.type)); if(m.tankSlots>TANK_COST.length) m.tankSlots=TANK_COST.length; m.v=3; }
   if(coreOnly===true) return m;
   fabricMigrate(m); /* old shirt designs refunded once (ah_fabric.js) */
   if(!Array.isArray(m.vault)) m.vault=[]; /* the Trophy vault (ax_trophy035.js) */
@@ -1984,7 +1984,7 @@ function landFishCore(){
   if(f.shiny) S.stats.shiny++; if(f.trophy) S.stats.trophies++; if(f.storm && sp.r>=3) S.stats.stormEpic++;
   const scl=Math.round(RAR[sp.r].sc*(f.shiny?3:1)*(f.trophy?(maxed('trophy')?3:1.5):1)*(relic('luckyscale')?1.2:1)); if(scl) S.scales+=scl;
   const tok = sp.r>=4 && Math.random()<(sp.r===5?1:.15) ? (sp.r===5?'big':'small') : null; if(tok) S.tokens[tok]++;
-  taskProgress('catch',1,sp); if(sp.r>=2) taskProgress('rare',1,sp); if(f.hot) taskProgress('hot',1);
+ 
   addPassXP(PASS_XP[sp.r]*(f.shiny?2:1)*(f.trophy?1.5:1)); derbyCatch(f);
   const lvUps = addXP(xp); const bdone = checkBounties(sp, f.kg).concat(checkBounties2(f)); const setNow = checkSet(sp.loc);
   const b=[]; if(f.shiny===2){ b.push(['g',PRISM[f.pv].n+' prismatic ×'+PRISM_VALUE+' value']); const T=TITLE_BUFFS[f.pv]; if(T) b.push(['g','In your aquarium: +'+T.keys.map(k=>BK[k]).join(', +')+', and every other fish’s bonuses +'+Math.round(T.aura*100)+'%']); if(titleNew) b.push(['g','New title: +'+Math.round(TITLE_COIN*100)+'% coins on every voyage'+(titleLegacy()>=TITLE_COIN_CAP?' (at the +'+Math.round(TITLE_COIN_CAP*100)+'% cap)':'')]); } else if(f.shiny) b.push(['g','Shiny ×4 value']); if(f.hy) b.push(['g','Hybrid: the weight of a '+SPI[f.hy].name+(f.hx?' and still its own size: ×'+f.hx+' value and aquarium income':'')]); if(hyNew) b.push(['g','First hybrid of this fish']); b.push(...preyB); if(f.ate) b.push(['g','Swallowed your catch: ×1.5 coins']); if(f.trophy) b.push(['g','Trophy size ×1.5']); if(f.hot) b.push(['k','Hotspot catch']);
@@ -2009,7 +2009,7 @@ function landJunk(){
     if(h && !S.owned.hats.includes(h)){ S.owned.hats.push(h); found=HATI[h].name; b.push(['g','New hat: '+HATI[h].name+'! See the Wardrobe']); } else coins += base; }
   if(e.rod){ if(!S.rods.owned.includes(e.rod)){ S.rods.owned.push(e.rod); found='A fishing rod'; b.push(['g','New rod: '+ROD_I[e.rod].name+'! See the Rods tab']); } else coins += base; }
   if(e.scales){ S.scales+=e.scales; b.push(['k','+'+e.scales+' Scales']); }
-  taskProgress('junk',1);
+ 
   if(e.special==='lottery'){ const r=Math.random(); if(r<.05){ coins=base*30; quote='WE HAVE A WINNER! All six numbers! I need to sit down.'; b.push(['g','Jackpot ×30']); } else if(r<.3){ coins=base*3; quote='A small winner. Better than a boot!'; } else { coins=0; quote='Not a winner. Not even close. Keep it as a souvenir.'; } }
   if(e.special==='fortune'){ const fo=pick(FORTUNES); quote='The paper says: "'+fo[0]+'"'; addBuff(fo[1],fo[2],5,'Fortune: '+BK[fo[1]]); b.push(['k','Boost: '+fmtB(fo[1],fo[2])+' for 5 min']); }
   if(e.special==='chest'){ coins=base*3; const bk = li<=1?'cricket':li<=3?'glow':'chum'; const n=bk==='chum'?3:5; S.bait[bk]+=n; found=n+' '+BAIT[bk].name; b.push(['k','+'+n+' '+BAIT[bk].name]); }
@@ -2057,8 +2057,8 @@ const FEATS = [
   {id:'rod10', name:'Fine-tuned',             d:'Upgrade a rod to level 10', p:()=>[Math.max(0,...Object.values(S.rods.lvl)),10], coins:100000, pt:2},
   {id:'pet50', name:'Good boy, good girl',    d:'Pet your pets 50 times',    p:()=>[S.gstats.pets,50], coins:3000, pt:1},
   {id:'bond10',name:'Best friends',           d:'Reach bond level 10 with a pet', p:()=>[Math.max(0,...PETS.map(p=>bondLevel(p.id))),10], coins:50000, pt:2},
-  {id:'tasks10',name:'Daily grind',           d:'Finish 10 daily tasks',     p:()=>[S.gstats.tasks,10], coins:20000, pt:1},
-  {id:'tasks100',name:'Creature of habit',    d:'Finish 100 daily tasks',    p:()=>[S.gstats.tasks,100], coins:500000, pt:3},
+  {id:'tasks10',name:'Daily grind',           d:'Claim 10 bounties',     p:()=>[S.gstats.tasks,10], coins:20000, pt:1},
+  {id:'tasks100',name:'Creature of habit',    d:'Claim 100 bounties',    p:()=>[S.gstats.tasks,100], coins:500000, pt:3},
   ...LOCS.map(L=>({id:'set_'+L.id, name:'Master of '+L.name, d:'Find every fish in '+L.name, p:()=>[caughtAt(L.id),spAt(L.id).length], coins:Math.round(L.bonus*.5), pt:1, pet:L.id==='frost'?'penguin':null})),
   {id:'shiny', name:'Something glittered',    d:'Land a shiny fish',         p:()=>[S.stats.shiny,1],     coins:1000, pt:1},
   {id:'shiny10',name:'Shine collector',       d:'Land 10 shiny fish',        p:()=>[S.stats.shiny,10],    coins:25000, pt:1},
@@ -2109,7 +2109,7 @@ const FEATS = [
 function checkFeats(){ for(const f of FEATS){ if(S.feats[f.id]) continue; const [a,b]=f.p(); if(a>=b){ S.feats[f.id]=true; earn(f.coins); if(f.pt) S.bonusPts+=f.pt;
   let extra='', gift=''; if(f.pet && !S.owned.pets.includes(f.pet)){ S.owned.pets.push(f.pet); gift='New pet: '+PETI[f.pet].name+'!'; }
   if(f.rod && !S.rods.owned.includes(f.rod)){ S.rods.owned.push(f.rod); gift+=(gift?' ':'')+'New rod: '+ROD_I[f.rod].name+'!'; } /* a pet or rod gets its own pop-up: with the crate, one line ran past 80 letters (2026-11-25) */
-  { const ck=f.pt?'big':'small'; S.tokens[ck]=(S.tokens[ck]||0)+1; extra+=', a '+ck+' Mystery Crate'; } /* Cam, round 5: crates come from feats (big for a feat with a skill point) */
+  { const ck=f.pt?'big':'small'; S.tokens[ck]=(S.tokens[ck]||0)+1; extra+=', a '+ck+' crate'; } /* 'crate', not 'Mystery Crate': the longest feat lines ran to 85 letters, the pop-up limit is 80 (found by the sweep, 2026-11-27) */ /* Cam, round 5: crates come from feats (big for a feat with a skill point) */
   setTimeout(()=>{ toast('Feat: '+f.name+' (+'+fmt(f.coins)+' coins'+(f.pt?', +'+f.pt+' skill point'+(f.pt>1?'s':''):'')+extra+')'); sfx.coin(); if(gift) setTimeout(()=>toast(gift),1400); }, 900); } } }
 
 // ---------- aquarium ----------
@@ -3398,11 +3398,11 @@ function extraAct(b){ const k=b.dataset.k, i=+b.dataset.i;
     case 'dist': S.settings.dist=k==='ft'?'ft':'m'; return;
     case 'hand': S.settings.hand=k==='l'?'l':'r'; return;
     case 'fullscreen': { const d=document; try{ if(d.fullscreenElement) d.exitFullscreen(); else d.documentElement.requestFullscreen(); }catch(e){ oops('d2_extra:d.exitFullscreen',e); } return 'skip'; }
-    case 'spin': { if(WH.spinning) return 'skip'; accrueSpins(); const freeSpin=k==='free' && S.freeSpins>0; if(!freeSpin){ const c=wheelCost(); if(S.money<c) return 'skip'; S.money-=c; } else { if(S.freeSpins>=SPIN_BANK) S.wheelT=Date.now(); S.freeSpins--; } b.disabled=true; taskProgress('game',1); spinWheel(!freeSpin); lastHud=''; return 'skip'; }
-    case 'crate': { if(!['small','big','legend'].includes(k)) return; if(!(S.tokens[k]>0)) return; S.tokens[k]--; /* Cam, round 5: crates are claimed, never bought with gold */ openCrate(k); addTickets({small:8,big:25,legend:80}[k]); taskProgress('game',1); return; }
-    case 'flip': { if(!['.1','.25','.5','0.1','0.25','0.5'].includes(String(k))) return; const amt=Math.min(Math.floor(S.money*(+k)), bestLoot()*60); if(amt<10) return; S.money-=amt; S.gstats.flips++; addTickets(2+(+k)*20); taskProgress('game',1); flipRes={txt:'The coin spins…'}; renderPanel(); tone(1200,.05,'square',.03);
+    case 'spin': { if(WH.spinning) return 'skip'; accrueSpins(); const freeSpin=k==='free' && S.freeSpins>0; if(!freeSpin){ const c=wheelCost(); if(S.money<c) return 'skip'; S.money-=c; } else { if(S.freeSpins>=SPIN_BANK) S.wheelT=Date.now(); S.freeSpins--; } b.disabled=true; spinWheel(!freeSpin); lastHud=''; return 'skip'; }
+    case 'crate': { if(!['small','big','legend'].includes(k)) return; if(!(S.tokens[k]>0)) return; S.tokens[k]--; /* Cam, round 5: crates are claimed, never bought with gold */ openCrate(k); addTickets({small:8,big:25,legend:80}[k]); return; }
+    case 'flip': { if(!['.1','.25','.5','0.1','0.25','0.5'].includes(String(k))) return; const amt=Math.min(Math.floor(S.money*(+k)), bestLoot()*60); if(amt<10) return; S.money-=amt; S.gstats.flips++; addTickets(2+(+k)*20); flipRes={txt:'The coin spins…'}; renderPanel(); tone(1200,.05,'square',.03);
       setTimeout(()=>{ const win=Math.random()<.5; if(win){ S.money+=amt*2; S.stats.earned+=amt; S.gstats.flipWins++; sfx.coin(); } else sfx.lost(); flipRes={win, txt: win?'Heads! You win '+fmt(amt)+' coins':'Tails. The Fishmonger pockets '+fmt(amt)+' coins'}; checkFeats(); save(); lastHud=''; if(S.tab==='games') renderPanel(); }, 900); return 'skip'; }
-    case 'buyscratch': { const c=bestLoot()*2; if(S.money<c) return; S.money-=c; newScratch(); addTickets(6); taskProgress('game',1); return; }
+    case 'buyscratch': { const c=bestLoot()*2; if(S.money<c) return; S.money-=c; newScratch(); addTickets(6); return; }
     case 'scratch': { if(!scratch||scratch.done) return; scratch.open[i]=true; tone(2000+Math.random()*500,.03,'square',.02); const opened=scratch.cells.filter((s,j)=>scratch.open[j]);
       const cnt={}; opened.forEach(s=>cnt[s]=(cnt[s]||0)+1); if(Object.values(cnt).some(n=>n>=3) || scratch.open.every(x=>x)) settleScratch(); return; }
     case 'scratchall': if(scratch){ scratch.open.fill(true); settleScratch(); } return;
@@ -4066,7 +4066,7 @@ function petHit(e){ if(!e||!PET_BOX) return false; const m=canvasXY(e); const hi
   tone(880,.08,'sine',.05); tone(1320,.12,'sine',.04,0,.08); petTap(hit); return true; }
 // one pet (on the dock or in the Pets tab). The favourite bonds twice as fast.
 function petTap(id){ const today=dayKey(); const b=S.bond[id]||(S.bond[id]={xp:0,day:today,today:0}); if(b.day!==today){ b.day=today; b.today=0; }
-  const before=bondLevel(id); if(b.today<25){ b.today++; b.xp+=id===S.pet?2:1; } S.gstats.pets++; taskProgress('pet',1);
+  const before=bondLevel(id); if(b.today<25){ b.today++; b.xp+=id===S.pet?2:1; } S.gstats.pets++;
   if(maxed('petpal') && Date.now()-(S.petGiftT||0)>3600000 && Math.random()<.35){ S.petGiftT=Date.now(); const r=Math.random(); let gift;
     if(r<.4){ gift=fmt(earn(bestLoot()*rnd(2,5)*coinMult()))+' coins'; } else if(r<.75){ const sc=rint(3,8); S.scales+=sc; gift=sc+' Scales'; } else { const opts=Object.keys(BAIT).filter(k=>k!=='worm'&&!BAIT[k].junk&&!BAIT[k].scales); const k=pick(opts); S.bait[k]+=5; renderBait(); gift='5 '+BAIT[k].name; }
     setTimeout(()=>toast(petName(id)+' brought you a gift: '+gift+'!'),600); sfx.coin(); }
@@ -4100,28 +4100,15 @@ function paintPetCustom(){ const c=$('petcv'); if(!c) return; const id=editPet()
 function refreshPetInfo(){ if(S.tab!=='pets') return; const el=$('petbond'); if(!el) return; const id=editPet(), bl=bondLevel(id);
   el.innerHTML=`<span class="meta">Bond ${'♥'.repeat(bl)}${'♡'.repeat(10-bl)}</span>`; const inf=$('petbondinfo'); if(inf) inf.innerHTML=petBondText(id); }
 
-// ---------- daily tasks & gift ----------
+// ---------- the daily gift (daily tasks went on 2026-11-27: bounties are the one thing to chase) ----------
 function dayKey(d=new Date()){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
 const rint = (a,b) => a+Math.floor(Math.random()*(b-a+1));
-function makeTasks(){ const L=pick(S.unlocked), base=bestLoot(); const pool=[
-  {t:'catch', n:rint(10,20), d:'Land {n} fish'}, {t:'catchat', loc:L, n:rint(5,10), d:'Land {n} fish at '+LOCS[locIdx(L)].name}, {t:'rare', n:rint(2,4), d:'Land {n} Rare or better fish'},
-  {t:'pet', n:rint(5,10), d:'Pet {pet} {n} times'}, {t:'hot', n:rint(2,3), d:'Land {n} catches from hotspots'}, {t:'junk', n:2, d:'Fish up {n} pieces of junk'},
-  {t:'earn', n:Math.round(base*rint(15,30)), start:S.stats.earned, d:'Earn {n} coins'}, {t:'game', n:rint(1,3), d:'Play {n} Boardwalk games'} ];
-  const out=[]; while(out.length<3){ const x=pick(pool); if(out.some(o=>o.t===x.t)) continue; out.push(Object.assign({have:0, claimed:false, coins:Math.round(base*rnd(4,8)), scales:rint(3,8)},x)); } return out; }
-function ensureDaily(){ const k=dayKey(); if(!S.daily||S.daily.day!==k) S.daily={day:k, tasks:makeTasks(), bonus:false}; return S.daily; }
-function taskHave(t){ return t.t==='earn' ? Math.max(0,S.stats.earned-t.start) : t.have; }
-function taskProgress(type,n,sp){ const d=ensureDaily(); for(const t of d.tasks){ if(t.claimed) continue; if(t.t===type || (t.t==='catchat' && type==='catch' && sp && sp.loc===t.loc)) t.have=Math.min(t.n,t.have+n); } }
 function dailyLogin(){ const k=dayKey(), y=dayKey(new Date(Date.now()-86400000)); if(S.login.last===k) return null; S.login.streak = S.login.last===y ? S.login.streak+1 : 1; S.login.last=k;
   if(!S.stats.caught && !S.savedAt) return null; const day=S.login.streak, mult=Math.min(3,1+day*.25); const coins=earn(bestLoot()*3*mult*coinMult()); const sc=Math.min(10,day); S.scales+=sc; let extra='';
   if(day%7===0){ S.tokens.big++; extra=' and a big Mystery Crate'; } S.freeSpins=Math.min(3,S.freeSpins+1);
   return 'Daily gift, day '+day+': +'+fmt(coins)+' coins, +'+sc+' Scales, a free spin'+extra+'!'; }
 /* presses one panel action as if its button were clicked (Claim all reuses each Claim exactly) */
-function actClick(a,i){ const P=document.getElementById('panel')||document.body, b=document.createElement('button'); b.type='button'; b.dataset.act=a; b.dataset.i=i; b.hidden=true; P.appendChild(b); try{ b.click(); } finally{ b.remove(); } }
-function dailyHTML(){ const d=ensureDaily(); const done=d.tasks.filter(t=>taskHave(t)>=t.n).length, ready=d.tasks.filter(t=>!t.claimed&&taskHave(t)>=t.n).length;
-  return `<div class="tile" style="margin-bottom:12px"><div class="row spread"><div><h4>Daily tasks</h4><div class="meta">New tasks every day. Finish all three for a bonus crate. Login streak: ${S.login.streak} day${S.login.streak===1?'':'s'}.</div></div><span class="meta">${done} / 3</span>${ready>1?'<button class="btn sm" data-act="taskclaimall">Claim all</button>':''}</div>
-   ${d.tasks.map((t,i)=>{ const h=Math.min(t.n,taskHave(t)), ok=h>=t.n; return `<div class="toggle"><div style="min-width:0"><b>${esc(t.d.replace('{n}',fmt(t.n)).replace('{pet}',petName()))}</b><div class="meta">${fmt(h)} / ${fmt(t.n)} · reward <span class="coin">${fmt(t.coins)}</span> + ${t.scales} Scales</div><div class="prog"><i style="width:${h/t.n*100}%"></i></div></div>
-     ${t.claimed?'<span class="badge g">Done</span>':`<button class="btn sm" data-act="taskclaim" data-i="${i}" ${ok?'':'disabled'}>Claim</button>`}</div>`; }).join('')}
-   ${d.tasks.every(t=>t.claimed)?(d.bonus?'<p class="sub">Bonus collected. See you tomorrow!</p>':'<button class="btn" data-act="taskbonus" style="margin-top:8px">Claim bonus crate</button>'):''}</div>`; }
+function actClick(a,i,k){ const P=document.getElementById('panel')||document.body, b=document.createElement('button'); b.type='button'; b.dataset.act=a; b.dataset.i=i; if(k!=null) b.dataset.k=k; b.hidden=true; P.appendChild(b); try{ b.click(); } finally{ b.remove(); } }
 
 // ---------- patch notes ----------
 function patchHTML(p){ return `<div class="rar" style="color:var(--gold)">${p.label?esc(p.label):"Update "+p.v}</div><h3>${esc(p.name)}</h3><ul style="text-align:left;margin:8px 0 0;padding-left:20px;line-height:1.55">${p.items.map(i=>i.startsWith("## ")?`<li class="pn-h">${esc(i.slice(3))}</li>`:`<li>${esc(i)}</li>`).join('')}</ul>`; }
@@ -4192,7 +4179,7 @@ let duck=null, hilo=null;
 const CARD_FISH = ['','Minnow','Perch','Trout','Bass','Carp','Pike','Salmon','Tuna','Shark','Marlin','Kraken','Leviathan','Legend'];
 
 // ---------- actions for this update ----------
-actOn('rodeq rodbuy rodup rodatt attbuy pettint petacc pethat petcol taskclaim claimall taskclaimall taskbonus patches safereset restorebk autobk autobkkept duckagain prize', function(b){ const k=b.dataset.k, i=+b.dataset.i;
+actOn('rodeq rodbuy rodup rodatt attbuy pettint petacc pethat petcol claimall patches safereset restorebk autobk autobkkept duckagain prize', function(b){ const k=b.dataset.k, i=+b.dataset.i;
   switch(b.dataset.act){
     case 'rodeq': if(S.rods.owned.includes(k)){ S.rods.eq=k; toast('You pick up the '+ROD_I[k].name+'.'); } return 'render';
     case 'rodbuy': { const r=ROD_I[k]; if(!r||r.src!=='shop'||S.rods.owned.includes(k)||S.money<r.price||S.scales<rodScales(r)||!S.unlocked.includes(r.need)) return 'skip'; S.money-=r.price; S.scales-=rodScales(r); S.rods.owned.push(k); S.rods.eq=k; sfx.coin(); toast('New rod: '+r.name+'!'); return 'render'; }
@@ -4204,10 +4191,7 @@ actOn('rodeq rodbuy rodup rodatt attbuy pettint petacc pethat petcol taskclaim c
     case 'petacc': { const a=PET_ACCS.find(x=>x[0]===k); if(!a) return 'skip'; PET_PV=null; if(!S.petAccs.includes(k)){ if(!a[2]||S.money<a[2]) return 'skip'; S.money-=a[2]; S.petAccs.push(k); sfx.coin(); } petLook().acc=k; return 'render'; }
     case 'pethat': if(S.owned.hats.includes(k)) petLook().hat=k; return 'render';
     case 'petcol': petLook()[k]=b.dataset.v; return 'render';
-    case 'taskclaim': { const t=ensureDaily().tasks[i]; if(!t||t.claimed||taskHave(t)<t.n) return 'skip'; t.claimed=true; addPassXP(40); earn(t.coins*coinMult()); S.scales+=t.scales; S.gstats.tasks++; sfx.coin(); toast('Task done: +'+fmt(t.coins*coinMult())+' coins, +'+t.scales+' Scales'); return 'render'; }
-    case 'claimall': { const is=S.bounties.map((b,j)=>[b,j]).filter(([b])=>bDone(b)&&(!b.loc||S.unlocked.includes(b.loc))).map(([,j])=>j).sort((a,b)=>b-a); if(!is.length) return 'skip'; for(const j of is) actClick('claim',j); return 'render'; } /* Cam, round 7: claim every finished bounty at once (each through its own Claim, so every bonus still applies; highest first, so the others keep their places) */
-    case 'taskclaimall': { const d=ensureDaily(), is=d.tasks.map((t,j)=>j).filter(j=>!d.tasks[j].claimed&&taskHave(d.tasks[j])>=d.tasks[j].n); if(!is.length) return 'skip'; for(const j of is) actClick('taskclaim',j); return 'render'; }
-    case 'taskbonus': { const d=ensureDaily(); if(d.bonus||!d.tasks.every(t=>t.claimed)) return 'skip'; d.bonus=true; S.tokens.small++; sfx.catch(3); toast('All tasks done! A small Mystery Crate is waiting at the Boardwalk.'); return 'render'; }
+    case 'claimall': { const is=S.bounties.map((b,j)=>[b,j]).filter(([b])=>bDone(b)&&(!b.loc||S.unlocked.includes(b.loc))).map(([,j])=>j).sort((a,b)=>b-a); if(!is.length) return 'skip'; for(const j of is) actClick('claim',j,k); return 'render'; } /* Cam, round 7: claim every finished bounty at once (each through its own Claim with the same pick, Scales or Nibble crates; highest first, so the others keep their places) */
     case 'patches': showPatchNotes(); return 'skip';
     case 'safereset': { const w=$('resetword'); if(!w||w.value.trim()!=='DELETE') return 'skip'; try{ localStorage.setItem(BACKUP_KEY, JSON.stringify(S)); }catch(e){ oops('d3_update:localStorage.setItem',e); }
       S=fresh(); S.seenPatch=GAME_VERSION; S.tab='settings'; S.savedAt=Date.now(); G.st='idle'; fillBounties(); toast('Progress erased. A backup was kept. You can restore it in Settings.'); return 'render'; }
@@ -4215,7 +4199,7 @@ actOn('rodeq rodbuy rodup rodatt attbuy pettint petacc pethat petcol taskclaim c
     case 'autobk': case 'autobkkept': { if(bkAsk!==b.dataset.act){ bkAsk=b.dataset.act; return 'render'; } bkAsk=null; const s=bkRead(b.dataset.act==='autobk'?AUTO_BK:AUTO_BK_KEEP); if(!s) return 'skip';
       try{ if(!localStorage.getItem(BACKUP_KEY)) localStorage.setItem(BACKUP_KEY, JSON.stringify(S)); }catch(e){ oops('d3_update:localStorage.getItem',e); } /* the progress being replaced becomes the backup above (when that slot is free, so a pre-reset copy is never overwritten), so a restore can be undone */
       try{ S=migrate(s); delete S.bkAt; S.savedAt=Date.now(); G.st='idle'; window.__dlUnreadable=false; save(); toast('Backup restored. Welcome back!'); }catch(e){ toast('That backup couldn’t be read.'); } return 'render'; }
-    case 'duckagain': { const c=bestLoot(); if(S.money<c) return 'skip'; S.money-=c; newDuck(); taskProgress('game',1); return 'render'; }
+    case 'duckagain': { const c=bestLoot(); if(S.money<c) return 'skip'; S.money-=c; newDuck(); return 'render'; }
     case 'prize': { const p=PRIZES.find(x=>x[0]===k); if(!p||S.tickets<p[2]||(p[4]&&p[4]())) return 'skip'; S.tickets-=p[2]; const got=p[3](); PREVIEW=null; PET_PV=null; AQ_PV=null;
       if(k==='golden'||k==='rainbow') petLook().tint=k; if(k==='balloon'||k==='partyhat') petLook().acc=k; if(['sixsevencap','carnival','fishbowl'].includes(k)) S.look.hat=k; if(k==='spacesuit') S.look.outfit='spacesuit'; sfx.shiny(); toast('Prize counter: you got '+got+'!'); return 'render'; }
   }
@@ -4446,7 +4430,7 @@ const RELICS = [
  ['tidecaller','Tide Caller',2,'+30% Tide Pass XP.'],
  ['goldhook','Golden Hook',2,'+0.15 s hook window, and perfect hooks add 10% value.'],
  ['luckypearl','Lucky Pearl',2,'+50% shiny chance.'],
- ['seasoned','Bounty Ledger',3,'Bounties pay 30% more coins.'] /* Cam, round 5: replaces Seasoned Angler (milestones give starting tackle) */,
+ ['seasoned','Bounty Ledger',3,'Bounties pay both rewards: the Scales and the Nibble crate.'] /* Cam, round 5: replaces Seasoned Angler (milestones give starting tackle); director, 2026-11-27: both rewards instead of 30% more coins (bounties pay no coins now) */,
 ].map(a=>({id:a[0],name:a[1],cost:a[2],d:a[3]}));
 const relic = id => S.relics && S.relics.includes(id);
 /* C31 (director + Cam, 2026-11-20; Feel calls): water prices start a little higher (LOC_BASE) and grow with each voyage (LOC_VOY a voyage,
@@ -4475,10 +4459,12 @@ function makeBounty2(L){ const r=Math.random(); L=L||pick(S.unlocked); const bas
   if(r<.12) return {type:'trophy', loc:L, n:1, have:0, reward:Math.round(base*6), scales:4};
   if(r<.24){ const opts=STYLE_BOUNTY.filter(k=>SP.some(s=>s.loc===L&&s.beh===k)), st=pick(opts.length?opts:STYLE_BOUNTY); return {type:'style', loc:L, beh:st, n:rint(3,6), have:0, reward:Math.round(bestLoot()*3), scales:3}; }
   if(r<.3) return {type:'shiny', loc:L, n:1, have:0, reward:Math.round(bestLoot()*12), scales:10};
+  if(r<.38){ const all=SP.filter(s=>s.loc===L).length, n=clamp(Math.round(all*.4),4,10); if(all>=n) return {type:'kinds', loc:L, n, have:0, got:[], reward:Math.round(base*8)}; } /* a harder bounty (director, 2026-11-27): many different fish of one water; Feel call: 40% of its fish, 4 to 10 */
   return null; }
 function bountyText(b){ if(b.type==='trophy') return {what:'Catch any trophy-size fish at '+LOCS[locIdx(b.loc)].name, where:LOCS[locIdx(b.loc)].name};
-  const wn=b.loc?LOCS[locIdx(b.loc)].name:'Any water'; if(b.type==='style') return {what:'Catch '+b.n+' '+BEH[b.beh].n.toLowerCase()+'s'+(b.loc?' at '+wn:''), where:wn}; if(b.type==='shiny') return {what:'Catch any shiny fish'+(b.loc?' at '+wn:''), where:wn}; return null; }
-function checkBounties2(f){ const done=[]; for(const b of S.bounties){ if(!['trophy','style','shiny'].includes(b.type)||bDone(b)) continue;
+  const wn=b.loc?LOCS[locIdx(b.loc)].name:'Any water'; if(b.type==='style') return {what:'Catch '+b.n+' '+BEH[b.beh].n.toLowerCase()+'s'+(b.loc?' at '+wn:''), where:wn}; if(b.type==='shiny') return {what:'Catch any shiny fish'+(b.loc?' at '+wn:''), where:wn}; if(b.type==='kinds') return {what:'Catch '+b.n+' different fish at '+wn, where:wn}; return null; }
+function checkBounties2(f){ const done=[]; for(const b of S.bounties){ if(!['trophy','style','shiny','kinds'].includes(b.type)||bDone(b)) continue;
+  if(b.type==='kinds' && f.sp.loc===b.loc){ if(!Array.isArray(b.got)) b.got=[]; if(!b.got.includes(f.sp.id)) b.got.push(f.sp.id); b.have=b.got.length; }
   if(b.type==='trophy' && f.trophy && f.sp.loc===b.loc) b.have=1; const here=!b.loc||f.sp.loc===b.loc; if(b.type==='style' && here && f.sp.beh===b.beh) b.have++; if(b.type==='shiny' && here && f.shiny) b.have=1; if(bDone(b)) done.push(b); } return done; }
 
 // ---------- actions ----------
@@ -4594,7 +4580,7 @@ function renderPass(P){ const pl=S.pass.lvl, need=passNeed(pl+1), unclaimed=pl-S
    ${ns?`<div class="tile pass-next"><canvas width="240" height="180" data-passbig="${nextSp}"></canvas><div><span class="bwx-cat">Next Tide reward · level ${nextSp}</span><h3 style="margin:2px 0">${esc(ns[2])}</h3><div class="meta">${esc(ns[3])}</div><div class="meta" style="margin-top:6px">${nextSp-pl} level${nextSp-pl>1?'s':''} to go.</div></div></div>`:''}
    <div class="passtrack">${shown.map(L=>{ const got=L<=S.pass.claimed, ready=!got&&L<=pl, sp=PASS_SPECIAL[L], d=sp?sp[3]:passPlain(L).d;
      return `<div class="passcell ${got?'got':''} ${ready?'ready':''} ${sp?'special':''}" title="${esc(d)}"><span class="lv">${L}</span><canvas width="120" height="90" data-pass="${L}"></canvas><b style="font-size:12.5px;line-height:1.2">${got?'✓ ':''}${esc(passReward(L))}</b><span class="meta" style="font-size:11px;line-height:1.25">${esc(d)}</span></div>`; }).join('')}</div>
-   <p class="sub" style="margin-top:8px">Fish ×${PASS_XP.join(' / ')} XP by rarity. Shiny ×2, trophy ×1.5. Daily tasks and derbies give extra.</p>`;
+   <p class="sub" style="margin-top:8px">Fish ×${PASS_XP.join(' / ')} XP by rarity. Shiny ×2, trophy ×1.5. Bounties and derbies give extra.</p>`;
   P.querySelectorAll('canvas[data-pass]').forEach(cv2=>passArt(cv2.getContext('2d'),120,90,+cv2.dataset.pass));
   P.querySelectorAll('canvas[data-passbig]').forEach(cv2=>passArt(cv2.getContext('2d'),240,180,+cv2.dataset.passbig)); }
 
@@ -4759,7 +4745,7 @@ function clawCost(){ return Math.round(bestLoot()*1.5); }
 function playClaw(){ const tot=CLAW_PRIZES.reduce((a,p)=>a+p[2],0); let x=Math.random()*tot, p=CLAW_PRIZES[0]; for(const c of CLAW_PRIZES){ x-=c[2]; if(x<=0){ p=c; break; } } let txt=p[1];
   if(p[0]==='tickets') txt+=': +'+addTickets(rint(15,40))+' tickets'; if(p[0]==='tickets2') txt+=': +'+addTickets(rint(60,120))+' tickets'; if(p[0]==='scales'){ const n=rint(6,15); S.scales+=n; txt+=': +'+n+' Scales'; }
   if(p[0]==='crate') S.tokens.small++; if(p[0]==='plush'){ if(!S.owned.hats.includes('clawplush')){ S.owned.hats.push('clawplush'); } else { txt='Another plush crab! Swapped for 150 tickets'; addTickets(150); } }
-  if(p[0]!=='nothing'){ S.gstats.claw=(S.gstats.claw||0)+1; sfx.coin(); } else sfx.lost(); claw={txt, t:performance.now(), win:p[0]!=='nothing'}; taskProgress('game',1); }
+  if(p[0]!=='nothing'){ S.gstats.claw=(S.gstats.claw||0)+1; sfx.coin(); } else sfx.lost(); claw={txt, t:performance.now(), win:p[0]!=='nothing'}; }
 function paintClaw(){ const c=$('clawcv'); if(!c) return; const x=c.getContext('2d'), w=c.width, h=c.height; x.clearRect(0,0,w,h);
   x.fillStyle='#24384a'; x.fillRect(0,0,w,h); x.fillStyle='rgba(255,255,255,.06)'; x.fillRect(16,10,8,h-20);
   const cols=['#ff9ad0','#7fc8a9','#ffd84a','#5aa9ff','#c38bff','#ff7a5a']; for(let i=0;i<16;i++){ const px=30+((i*53)%(w-60)), py=h-24-((i*29)%60); x.fillStyle=cols[i%6]; x.beginPath(); x.arc(px,py,14,0,7); x.fill(); x.fillStyle='#1a1a1a'; x.beginPath(); x.arc(px-4,py-3,1.6,0,7); x.arc(px+4,py-3,1.6,0,7); x.fill(); }
@@ -10870,7 +10856,7 @@ function restTick(dt){ if(!S.settings.rest){ G.st='idle'; return; } RST.t+=dt; p
     if(RST.k>=1){ restLand(); } } }
 function restLand(){ const f=chooseCatch(); splash(G.bob.x,G.bob.y,18); sfx.pull();
   if(f.kind==='fish'){ journalAdd(f); S.cooler.push(coolerEntry(f)); S.stats.caught++; for(const p of (f.prey||[])){ journalAdd(p); if(S.cooler.length<gv('cooler')) S.cooler.push(coolerEntry(p)); }
-    const xp=Math.round((5+Math.sqrt(f.value)*3)*RAR[f.sp.r].xp*xpMult()*(pr("dozer")>=5?1:.6)); addXP(xp); checkBounties(f.sp,f.kg); checkBounties2(f); taskProgress('catch',1,f.sp);
+    const xp=Math.round((5+Math.sqrt(f.value)*3)*RAR[f.sp.r].xp*xpMult()*(pr("dozer")>=5?1:.6)); addXP(xp); checkBounties(f.sp,f.kg); checkBounties2(f);
     toast('While resting you caught a '+(f.shiny===2?PRISM[f.pv].n+' prismatic ':f.shiny?'shiny ':'')+(f.hy?'hybrid ':'')+f.sp.name+' ('+kgStr(f.kg)+')'+(f.prey&&f.prey.length?', with a '+f.prey[0].sp.name+' inside':'')+'.'); sfx.catch(f.sp.r); }
   else if(f.kind==='junk'){ S.junk[f.item.id]=(S.junk[f.item.id]||0)+1; const c=earn(curLoc().loot*rnd(.8,1.2)*coinMult()); toast('While resting you fished up '+f.item.name+' (+'+fmt(c)+' coins).'); }
   else { S.owned.hats.push(f.hat.id); toast('While resting you fished up a hat: '+f.hat.name+'!'); }
@@ -11338,7 +11324,7 @@ function statsHTML(){ const wx=weather(), b=BAIT[S.baitSel]||BAIT.worm, dm={rare
   if(statSec==='bonuses'){ const rows=keys.map(k=>{ const parts=[buffSum(k),aqSum(k),petSum(k),rodBonus(k)], raw=parts.reduce((a,c)=>a+c,0), tot=bonus(k), cap=BONUS_CAP[k];
       const cell=v=>v?`<td>${(k==='tension'||k==='calm'?'−':'+')+Math.round(v*1000)/10}%</td>`:'<td class="z">·</td>';
       return `<tr><th>${BK[k][0].toUpperCase()+BK[k].slice(1)}</th>${parts.map(cell).join('')}<td class="t">${tot?(k==='tension'||k==='calm'?'−':'+')+Math.round(tot*1000)/10+'%':'·'}${cap&&raw>cap?' <small>(max)</small>':''}</td></tr>`; }).join('');
-    return `<p class="sub">Every bonus and where it comes from. Boosts are timed buffs from junk and tasks; Aquarium is your displayed fish; Pets are your favourite and companion; Rod includes its level and attachments.</p>
+    return `<p class="sub">Every bonus and where it comes from. Boosts are timed buffs from junk; Aquarium is your displayed fish; Pets are your favourite and companion; Rod includes its level and attachments.</p>
       <div class="st-table-wrap"><table class="st-table"><thead><tr><th></th><th>Boosts</th><th>Aquarium</th><th>Pets</th><th>Rod</th><th>Total</th></tr></thead><tbody>${rows}</tbody></table></div>`; }
   if(statSec==='gear'){ const g=k=>GEAR[k].fmt(gv(k));
     return `<div class="st-grid"><div class="tile"><h4>Tackle</h4>${statRow('Rod length',g('rod'),'Level '+S.gear.rod+' of '+(GEAR.rod.lv.length-1))}${statRow('Reel',g('reel'),'Level '+S.gear.reel+' of '+(GEAR.reel.lv.length-1))}${statRow('Line',g('line'),'Level '+S.gear.line+' of '+(GEAR.line.lv.length-1))}${statRow('Angler strength',strTxt(anglerStr()),'Line plus skills that lower tension')}
@@ -12586,7 +12572,7 @@ const SEARCH_IDX=[
  ['Waters','map','Waters','travel water unlock location pond river coast frost reef shelf deep trench ember starfall map'],
  ['Set sail again (voyages)','map','Set sail again','voyage prestige pearls wisdom legacy milestones start over retire'],
  ['Pearl relics','map','Pearl relics','relic pearls permanent bonus'],
- ['Bounties','bounties',null,'bounty harbourmaster daily tasks reward login streak weekly quests week crate'],
+ ['Bounties','bounties',null,'bounty harbourmaster reward scales nibble crate claim swap'],
  ['Events','events',null,'derby frenzy event medals challenges calendar weather forecast rain storm aurora'],
  ['Tackle: gear','shop',['tackleview','gear'],'line reel cooler upgrade rod length hook finder tackle buy'],
  ['Tackle: bait','shop',['tackleview','bait'],'bait worms lures glow chum shrimp buy'],
@@ -12896,7 +12882,7 @@ body.pc-wide.side-off .wrap > #stage{grid-column:1 / -1}
 // "Where is that?" Every page says where you are; the search opens on a map of every page with what it is for; badges
 // say what is waiting; and search knows the newer things.
 // ---------------------------------------------------------------------
-const PAGE_DESC={cooler:'Fish you are carrying: sell them or keep them', map:'Travel between waters, and set sail again', bounties:'Paid jobs for specific catches, daily tasks and weekly quests', events:'Challenges, the event calendar, the derby and the weather forecast',
+const PAGE_DESC={cooler:'Fish you are carrying: sell them or keep them', map:'Travel between waters, and set sail again', bounties:'Jobs for specific catches that pay Scales or Nibble crates', events:'Challenges, the event calendar, the derby and the weather forecast',
   shop:'Line, reel and other gear, bait and special lures', rods:'Your rods, upgrades and attachments', skills:'Spend skill points on small steady gains', paths:'Big choices that shape your style',
   aquarium:'Fish that earn coins and boosts while you play', trophy:'Fish you keep forever', journal:'Every species and oddity, found and missing', feats:'Goals with rewards',
   pets:'Your companions, new pets and their looks', style:'Your angler: body, clothes and accessories', pass:'Levels and rewards from fishing', games:'Mini-games, prizes and tickets',
@@ -13358,10 +13344,9 @@ const DW={
        <div class="dwacts"><button class="btn sm" data-act="sellall" ${sell.length?'':'disabled'}>Sell all${sell.length?' · <span class="coin">'+fmtShort(val)+'</span>':''}</button><button class="btn alt sm" data-tabgo="cooler">Open</button></div>`}); },
   bounty(){ fillBounties(); const here=S.bounties.map((b,i)=>[b,i]).filter(([b])=>b.loc===S.loc), ready=S.bounties.filter(b=>bDone(b)&&(!b.loc||S.unlocked.includes(b.loc))).length, readyHere=here.filter(([b])=>bDone(b)).length, away=ready-readyHere;
     const row=([b,i])=>{ const d=bDone(b), bt=bountyText(b); let what, p=d?1:0, pt;
-      if(bt){ what=bt.what; if(b.type==='style'){ p=Math.min(1,b.have/b.n); pt=Math.min(b.have,b.n)+' / '+b.n; } }
+      if(bt){ what=bt.what; if(b.type==='style'||b.type==='kinds'){ p=Math.min(1,b.have/b.n); pt=Math.min(b.have,b.n)+' / '+b.n; } }
       else { const sp=SPI[b.sp]; if(!sp) return ''; what=b.legend&&!S.journal[sp.id]?'Catch the legend of '+LOCS[locIdx(sp.loc)].name:b.type==='count'?`Catch ${b.n} × ${sp.name}`:`Catch ${/^[aeiou]/i.test(sp.name)?"an":"a"} ${sp.name} of ${kgStr(b.kg)} or more`; if(b.type==='count'){ p=Math.min(1,b.have/b.n); pt=Math.min(b.have,b.n)+' / '+b.n; } }
-      const rw=Math.round(b.reward*coinMult()*1);
-      return `<div class="dwq${d?' done':''}"><div class="dwqt"><b>${esc(what)}</b><span class="meta"><span class="coin">${fmtShort(rw)}</span>${b.scales?' + '+b.scales+' Scales':''}${pt?' · '+pt:d?'':' · not yet'}</span>${pt&&!d?dwBar(p):''}</div>${d?`<button class="btn sm" data-act="claim" data-i="${i}">Claim</button>`:''}</div>`; };
+      return `<div class="dwq${d?' done':''}"><div class="dwqt"><b>${esc(what)}</b><span class="meta">${bountyPayText(b)}${pt?' · '+pt:d?'':' · not yet'}</span>${pt&&!d?dwBar(p):''}</div>${d?bountyClaimBtns(b,i,true):''}</div>`; };
     return dwBox('bounty',{icon:'📜', title:'Bounties', wide:true, state:ready?'ready':'', sum:ready?`${ready} ready`:`${here.length} here`, body:
       (here.length?here.slice(0,3).map(row).join(''):'<div class="meta">No bounties at this water right now.</div>')+
       `<div class="dwacts">${away?`<span class="meta">${away} ready at other waters</span>`:''}<button class="btn alt sm" data-tabgo="bounties">All bounties</button></div>`}); },
@@ -14213,22 +14198,15 @@ function openMenu(t){ if(!t||t===DASH) t=menuLastPage(); MENU_WANT=true; setTab(
 // =====================================================================
 // QC pass fixes (2026-11-17, round 2)
 // =====================================================================
-{ stepOn('menuTidy2', { after(){ try{ const P=$('panel');
-    // Bounties: the three daily tasks sit side by side when there is room
-    if(S.tab==='bounties'){ const t=[...P.querySelectorAll(':scope > .tile')].find(x=>{ const h=x.querySelector('h4'); return h&&/Daily tasks/i.test(h.textContent); }); if(t) t.classList.add('dtasks'); }
-  }catch(e){ oops('bm_ui04:P.querySelectorAll',e); } } }); menuTidy=menuTidy2; }
 document.head.insertAdjacentHTML('beforeend',`<style>
 /* a page header's number or controls sit beside the text when they fit, and start on the left when they wrap */
 #menuov #panel > .row.dl-head{justify-content:space-between!important}
 #menuov #panel > .row.dl-head > :not(:first-child){margin-left:0!important}
-/* Events calendar and daily tasks: side by side on wide enough pages */
+/* Events calendar: side by side on wide enough pages */
 @container (min-width:560px){
   #menuov #panel .tile.ev-cal{display:grid; /* no !important: it overrode the page tabs hiding the calendar (director, 2026-11-19: Events tabs showed the same things) */ grid-template-columns:repeat(auto-fill,minmax(230px,1fr));column-gap:14px}
   #menuov #panel .ev-cal > :not(.ev-cal-row){grid-column:1 / -1}
   #menuov #panel .ev-cal > .ev-cal-row{border-top:1px solid var(--line)!important}
-  #menuov #panel .tile.dtasks{display:grid; /* no !important: page tabs hide it with an inline display:none (PC Reborn) */grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:6px 12px}
-  #menuov #panel .tile.dtasks > .row{grid-column:1 / -1}
-  #menuov #panel .tile.dtasks > .toggle{flex-wrap:wrap;align-content:flex-start;border-top:1px solid var(--line);padding-top:6px}
 }
 /* sideways phones: no empty slot where the Overview button was */
 @media (orientation:landscape) and (max-height:560px){
@@ -14287,7 +14265,6 @@ document.head.insertAdjacentHTML('beforeend',`<style>
 body.v3 .toggle button.btn{color:#dfe8f2!important;border:1px solid #3a587888!important;text-shadow:none}
 body.v3 .toggle button.btn[aria-pressed="true"]{color:#ffe7a6!important;border-color:#ffd36a99!important;box-shadow:0 0 10px #ffd36a26}
 body.v3 .toggle button.btn[aria-pressed="false"]{color:#9fb2c8!important}
-body.v3 .toggle button.btn[data-act="taskclaim"]:not(:disabled){background:linear-gradient(180deg,var(--buoy2,#ff9a6a),var(--buoy,#ff6a3d) 55%,#f0683c)!important;color:#1d0d06!important;border-color:transparent!important}
 </style>`);
 document.head.insertAdjacentHTML('beforeend',`<style>
 /* one clear look for anything not possible yet: dark slate with readable muted text (was faded orange, unreadable) */
@@ -14727,46 +14704,13 @@ let weather, wxLeft, wxAmt, wxForecast; // set just below (weather that fits the
 
 // =====================================================================
 // 0.4 additions (2026-11-17):
-//  1. Weekly quests: four bigger goals every week (Monday to Sunday) under the daily tasks, plus a weekly crate for
-//     finishing them all. Progress is read from the save's own counters, so every catch, coin and task counts
-//     wherever it happens, with no extra hooks.
-//  2. Weather forecast: the weather follows a fixed schedule (weatherAt), so the Events page shows what is coming,
+//  Weather forecast (weekly quests, the other 0.4 addition here, went on 2026-11-27): the weather follows a fixed schedule (weatherAt), so the Events page shows what is coming,
 //     and a heads-up arrives just before rare weather starts.
 
 // =====================================================================
 
-// ---------- 1. weekly quests ----------
-function weekKey(d=new Date()){ const t=new Date(d); t.setHours(0,0,0,0); t.setDate(t.getDate()-((t.getDay()+6)%7)); return dayKey(t); }
-function weekLeftMs(){ const t=new Date(); t.setHours(0,0,0,0); t.setDate(t.getDate()-((t.getDay()+6)%7)+7); return Math.max(0,t-Date.now()); }
-const WQ_POOL=[
-  {t:'caught',  d:'Land {n} fish',                    n:()=>rint(120,180), stat:()=>S.stats.caught||0},
-  {t:'shiny',   d:'Catch {n} shiny fish',             n:()=>rint(3,5),     stat:()=>S.stats.shiny||0},
-  {t:'earned',  d:'Earn {n} coins',                   n:()=>Math.round(bestLoot()*rint(120,200)/100)*100, stat:()=>S.stats.earned||0},
-  {t:'tasks',   d:'Finish {n} daily tasks',           n:()=>rint(8,12),    stat:()=>S.gstats.tasks||0},
-  {t:'hot',     d:'Land {n} catches from hotspots',   n:()=>rint(20,35),   stat:()=>S.stats.hot||0},
-  {t:'chal',    d:'Win {n} challenges',               n:()=>rint(2,4),     stat:()=>S.stats.chalWins||0},
-  {t:'species', d:'Find {n} species you have not caught yet', n:()=>rint(3,6), stat:()=>Object.keys(S.journal).length, ok:n=>Object.keys(S.journal).length+n<=SP.length},
-];
-const wqDef=t=>WQ_POOL.find(p=>p.t===t);
-function wqMake(){ const pool=WQ_POOL.slice(), out=[]; while(out.length<4&&pool.length){ const p=pool.splice(Math.floor(Math.random()*pool.length),1)[0]; const n=p.n(); if(p.ok&&!p.ok(n)) continue;
-    out.push({t:p.t, n, base:p.stat(), claimed:false, coins:Math.round(bestLoot()*rnd(12,20)), scales:rint(8,15)}); } return out; }
-function wqValid(w){ return w&&typeof w==='object'&&typeof w.wk==='string'&&Array.isArray(w.quests)&&w.quests.length>0&&w.quests.every(q=>q&&wqDef(q.t)&&isFinite(q.n)&&q.n>0&&isFinite(q.base)&&isFinite(q.coins)&&isFinite(q.scales)); }
-function ensureWeekly(){ const k=weekKey(); if(!wqValid(S.weekly)||S.weekly.wk!==k) S.weekly={wk:k, quests:wqMake(), bonus:false}; return S.weekly; }
-function wqHave(q){ const d=wqDef(q.t); return d?Math.max(0,Math.min(q.n,d.stat()-q.base)):0; }
-function wqReady(){ const w=ensureWeekly(); return w.quests.filter(q=>!q.claimed&&wqHave(q)>=q.n).length+(!w.bonus&&w.quests.every(q=>q.claimed)?1:0); }
-function wqLeftTxt(){ const ms=weekLeftMs(), d=Math.floor(ms/86400000), h=Math.floor(ms%86400000/3600000), m=Math.floor(ms%3600000/60000); return d?d+'d '+h+'h':h?h+'h '+m+'m':m+'m'; }
-function weeklyHTML(){ const w=ensureWeekly(), done=w.quests.filter(q=>q.claimed).length;
-  return `<div class="tile wq dtasks" style="margin-bottom:12px"><div class="row spread"><div><h4>Weekly quests</h4><div class="meta">Bigger goals for the week. Finish all four for a big Mystery Crate. New quests in <b>${wqLeftTxt()}</b>.</div></div><span class="meta">${done} / ${w.quests.length}</span></div>
-   ${w.quests.map((q,i)=>{ const h=wqHave(q), ok=h>=q.n; return `<div class="toggle"><div style="min-width:0;flex:1"><b>${esc(wqDef(q.t).d.replace('{n}',fmt(q.n)))}</b><div class="meta">${fmt(h)} / ${fmt(q.n)} · reward <span class="coin">${fmt(q.coins*coinMult())}</span> + ${q.scales} Scales</div><div class="prog" style="margin-top:4px"><i style="width:${Math.round(h/q.n*100)}%"></i></div></div>
-     ${q.claimed?'<span class="badge g">Done</span>':`<button class="btn sm" data-act="wqclaim" data-i="${i}" ${ok?'':'disabled'}>Claim</button>`}</div>`; }).join('')}
-   ${w.quests.every(q=>q.claimed)?(w.bonus?'<p class="sub">Weekly crate collected. New quests on Monday.</p>':'<button class="btn" data-act="wqbonus" style="margin-top:8px">Claim the weekly crate</button>'):''}</div>`; }
-{ const _rb=renderBounties; renderBounties=function(P){ _rb(P); try{ const d=[...P.children].find(c=>c.classList&&c.classList.contains('tile')&&/Daily tasks/.test(c.textContent)); const html=weeklyHTML(); if(d) d.insertAdjacentHTML('afterend',html); else P.insertAdjacentHTML('afterbegin',html); }catch(e){ oops('bq_feat04:find',e); } }; }
-actOn('wqclaim wqbonus', function(b){ const a=b.dataset.act;
-  if(a==='wqclaim'){ const w=ensureWeekly(), q=w.quests[+b.dataset.i]; if(!q||q.claimed||wqHave(q)<q.n) return 'skip'; q.claimed=true; const c=earn(q.coins*coinMult()); S.scales+=q.scales; try{ addPassXP(60); }catch(e){ oops('bq_feat04:addPassXP',e); } try{ sfx.coin(); }catch(e){ oops('bq_feat04:sfx.coin',e); } toast('Weekly quest done: +'+fmt(c)+' coins, +'+q.scales+' Scales'); save(); return 'render'; }
-  if(a==='wqbonus'){ const w=ensureWeekly(); if(w.bonus||!w.quests.every(q=>q.claimed)) return 'skip'; w.bonus=true; S.tokens.big=(S.tokens.big||0)+1; S.scales+=25; try{ sfx.catch(3); }catch(e){ oops('bq_feat04:sfx.catch',e); } toast('Weekly quests done! +25 Scales and a big Mystery Crate (Boardwalk).'); save(); return 'render'; } });
-if(typeof ACT_OK==='object'){ ACT_OK.wqclaim=(k,i)=>Number.isInteger(i)&&i>=0&&i<ensureWeekly().quests.length; ACT_OK.wqbonus=()=>true; }
-/* the Bounties badge: one count, in e_ui's hud (Cam's list #6: it used to add a second writer here and count yesterday's daily tasks) */
-function bountyReady(){ const u=new Set(S.unlocked); const d=ensureDaily(); return S.bounties.filter(b=>bDone(b)&&(!b.loc||u.has(b.loc))).length+d.tasks.filter(t=>!t.claimed&&taskHave(t)>=t.n).length+wqReady(); }
+/* the Bounties badge: one count, in e_ui's hud: finished bounties at waters you have open (weekly quests and daily tasks went on 2026-11-27) */
+function bountyReady(){ const u=new Set(S.unlocked); return S.bounties.filter(b=>bDone(b)&&(!b.loc||u.has(b.loc))).length; }
 
 // ---------- 2. weather forecast ----------
 const WX_SPECIAL=new Set(['Rainbow','Gilded','Aurora','Blood Moon','Spawning Run']);
@@ -14863,7 +14807,7 @@ function settleScratch(){ if(!scratch||scratch.done) return; scratch.done=true; 
 // higher or lower: the pot is tickets now; a right guess grows it by half, eight in a row pays it out
 const HILO_POT=12;
 actOn('hilostart hilo hilocash duckpick', function(b){ const a=b.dataset.act, k=b.dataset.k, i=+b.dataset.i;
-  if(a==='hilostart'){ const c=bestLoot()*2; if(S.money<c) return 'skip'; S.money-=c; hilo={card:rint(1,13), streak:0, pot:HILO_POT, done:false}; taskProgress('game',1); return 'render'; }
+  if(a==='hilostart'){ const c=bestLoot()*2; if(S.money<c) return 'skip'; S.money-=c; hilo={card:rint(1,13), streak:0, pot:HILO_POT, done:false}; return 'render'; }
   if(a==='hilo'){ if(!hilo||hilo.done) return 'skip'; let n; do{ n=rint(1,13); }while(n===hilo.card); const ok=(k==='hi')===(n>hilo.card), prev=hilo.card; hilo.card=n;
     if(ok){ hilo.streak++; hilo.pot=Math.round(hilo.pot*1.5); try{ tone(900+hilo.streak*100,.1,'triangle',.06); }catch(e){ oops('bq_feat04:tone',e); } if(hilo.streak>=8){ addTickets(hilo.pot); hilo.done=true; hilo.msg='Eight in a row! The pot pays out: +'+fmt(hilo.pot)+' tickets.'; try{ sfx.catch(4); }catch(e){ oops('bq_feat04:sfx.catch#4',e); } } }
     else { hilo.done=true; hilo.msg=prev+' → '+n+'. Wrong way! The pot sinks, but you keep '+addTickets(2)+' tickets for trying.'; try{ sfx.lost(); }catch(e){ oops('bq_feat04:sfx.lost#2',e); } } return 'render'; }
@@ -14876,9 +14820,8 @@ actOn('hilostart hilo hilocash duckpick', function(b){ const a=b.dataset.act, k=
 // (2026-11-17 balance check: Wild Berries, Ice Flies and Live Shrimp were too weak to be the best bait at their own
 //  water, so their base odds were raised in b_data.js; Lava Worms and Stardust already were.)
 
-if(/[?&]test\b/.test(location.search)) window.__feat={ensureWeekly, wqHave, wqReady, weeklyHTML, wxForecast, forecastHTML, weekKey, bwWearPool, bwWearPrize, bwDrawWear, wheel:()=>WHEEL.map(w=>w.slice(0,2))};
+if(/[?&]test\b/.test(location.search)) window.__feat={wxForecast, forecastHTML, bwWearPool, bwWearPrize, bwDrawWear, wheel:()=>WHEEL.map(w=>w.slice(0,2))};
 document.head.insertAdjacentHTML('beforeend','<style>#panel .badge.n{background:#ffffff0d;color:#c9d7e8;border-color:#ffffff24}</style>');
-document.head.insertAdjacentHTML('beforeend','<style>@container (min-width:560px){ #menuov #panel .tile.dtasks > :not(.toggle){grid-column:1 / -1} #menuov #panel .tile.dtasks > .btn{justify-self:start} }</style>');
 // Shared game rules (every platform's build): bounty bonuses, Feats category boosts, Fish Log completion bonus.
 // One save works on every device, so the rules that touch it live in the shared core, not in a platform layer.
 // =====================================================================
@@ -14897,28 +14840,35 @@ function featBonusText(cat){ const b=FEAT_CAT_BONUS[cat]; if(!b) return ''; cons
 stepOn('bonus', function(v,k){ return v+featCatBonus(k); });
 { const _v=specLocValue; specLocValue=function(loc){ return _v(loc)*(S.setDone&&S.setDone[loc]?1.1:1); }; }
 
-// ---------- bounty bonuses ----------
-function bountyBx(b){ const ox=b.x; if(ox&&typeof ox==='object'&&Number.isInteger(ox.n)&&ox.n>0&&((ox.k==='bait'&&BAIT[ox.id]&&ox.n<=12)||(ox.k==='scales'&&ox.n<=12)||(ox.k==='pass'&&ox.n<=400)||(ox.k==='nib'&&ox.n<=20&&Number.isInteger(ox.r)&&ox.r>=0&&ox.r<=5)||(ox.k==='crate'&&(ox.id==='small'||ox.id==='big')&&ox.n<=2))) return ox; /* a saved bonus is used only if it is one the game could have rolled */ const r=Math.random(), here=Object.entries(BAIT).filter(([k,x])=>x.loc===b.loc&&!x.junk&&!x.scales), shop=Object.entries(BAIT).filter(([k,x])=>k!=='worm'&&!x.junk&&!x.scales), lure=Object.entries(BAIT).filter(([k,x])=>x.junk);
-  let x; if(b.legend||r<.12) x={k:'bait', id:pick(lure)[0], n:b.legend?2:1};
-  else if(r<.35){ const e=pick(here.length?here:shop); x={k:'bait', id:e[0], n:rint(5,10)}; }
-  else if(r<.52) x={k:'scales', n:rint(3,8)+(b.scales?2:0)};
-  else if(r<.68) x={k:'pass', n:rint(12,30)*10};
-  else if(r<.88){ const sr=b.sp&&SPI[b.sp]?Math.min(5,SPI[b.sp].r):b.type==='shiny'||b.type==='trophy'?rint(1,3):rint(0,2); x={k:'nib', r:sr, n:sr>=4?rint(1,2):sr>=2?rint(2,4):rint(3,6)}; } /* Cam, round 5: Nibbles can be bounty rewards */
-  else x={k:'crate', id:b.legend||Math.random()<.2?'big':'small', n:1}; /* Cam, round 5: crates come from bounties (and feats), not from gold */
-  b.x=x; return x; }
-function bountyBxText(x){ if(!x) return ''; if(x.k==='bait'){ const B=BAIT[x.id]; return B?x.n+' × '+B.name:''; } if(x.k==='scales') return x.n+' Scales'; if(x.k==='pass') return x.n+' Tide Pass XP'; if(x.k==='nib') return x.n+' '+NIB_TIER[x.r]+' Nibble'+(x.n===1?'':'s'); if(x.k==='crate') return 'a '+(x.id==='big'?'big':'small')+' Mystery Crate'; return ''; }
-function bountyBxGive(x){ if(!x) return ''; try{ if(x.k==='bait'&&BAIT[x.id]){ S.bait[x.id]=(S.bait[x.id]||0)+x.n; try{ renderBait(); }catch(e){ oops('bs_rules05:renderBait',e); } } else if(x.k==='scales') S.scales+=x.n; else if(x.k==='pass') addPassXP(x.n); else if(x.k==='nib') nibAdd('r'+x.r,x.n); else if(x.k==='crate') S.tokens[x.id]=(S.tokens[x.id]||0)+x.n; }catch(e){ oops('bs_rules05:renderBait#2',e); } return bountyBxText(x); }
-{ const _fb=fillBounties; fillBounties=function(){ const r=_fb.apply(this,arguments); try{ for(const b of S.bounties) bountyBx(b); }catch(e){ oops('bs_rules05:bountyBx',e); } return r; }; }
-document.addEventListener('click',e=>{ const btn=e.target.closest&&e.target.closest('[data-act="claim"]'); if(!btn) return; const b=S.bounties[+btn.dataset.i]; if(!b) return; const x=bountyBx(b);
-  setTimeout(()=>{ if(S.bounties.includes(b)) return; const t=bountyBxGive(x); if(t){ save(); setTimeout(()=>{ try{ toast('Bounty bonus: '+t+'!'); }catch(er){ oops('bs_rules05:toast',er); } },1100); } },0); },true);
-{ const _rb=renderBounties; renderBounties=function(P){ try{ for(const b of S.bounties) bountyBx(b); }catch(e){ oops('bs_rules05:bountyBx#2',e); } _rb(P); try{
-      P.querySelectorAll('[data-act="reroll"][data-i],[data-act="claim"][data-i]').forEach(btn=>{ const b=S.bounties[+btn.dataset.i], card=btn.closest('.tile'); if(!b||!card||card.querySelector('.bx')) return; const t=bountyBxText(b.x); if(!t) return;
-        const ic=b.x.k==='bait'?(BAIT[b.x.id]&&BAIT[b.x.id].junk?'✨':'🎣'):b.x.k==='scales'?'🔷':b.x.k==='nib'?'🍬':b.x.k==='crate'?'🎁':'🌊'; const row=btn.closest('.row'); (row||btn).insertAdjacentHTML('beforebegin',`<div class="bx${b.x.k==='bait'&&BAIT[b.x.id]&&BAIT[b.x.id].junk?' sp':''}"><span>${ic}</span>+ ${esc(t)}</div>`); });
-    }catch(e){ console.error(e); } }; }
-document.head.insertAdjacentHTML('beforeend',`<style>
-#panel .bx{display:flex;align-items:center;gap:6px;margin:2px 0 4px;padding:4px 10px;border-radius:999px;background:#7fe3c41a;border:1px solid #7fe3c455;color:#bff3e2;font:700 12px var(--display,system-ui);width:max-content;max-width:100%}
-#panel .bx.sp{background:#ffd36a1f;border-color:#ffd36a77;color:#ffe9b0}
-</style>`);
+// ---------- bounty rewards (director, 2026-11-27: "Just scales and nibble crates"; no coins; daily tasks and weekly quests are gone) ----------
+//  An ordinary bounty pays 3 Scales or a small Nibble crate; a harder one (a legend, a shiny, a trophy, many kinds of fish) pays 8 Scales or a
+//  big crate. The player picks on claim; with the Bounty Ledger relic a bounty pays both. Every claim also gives Tide Pass XP (daily tasks did).
+//  A Nibble crate opens straight away: each Nibble rolls its own tier from the pool; a big crate holds at least one Epic or better.
+//  Feel calls (first versions, the director and Cam tune them): the Scales, the crate sizes and odds, the Tide Pass XP.
+const BOUNTY_SC=[3,8], BOUNTY_PASS=40, NIB_CRATE={small:{n:6, odds:[50,30,14,5,1,0], min:0}, big:{n:10, odds:[30,30,22,12,5,1], min:3}};
+const bountyHard = b => !!(b.legend||b.type==='shiny'||b.type==='trophy'||b.type==='kinds');
+const bountyPay = b => bountyHard(b) ? {sc:BOUNTY_SC[1], cr:'big'} : {sc:BOUNTY_SC[0], cr:'small'};
+const bountyBoth = () => !!relic('seasoned');
+const bountyPayText = b => { const p=bountyPay(b); return p.sc+' Scales '+(bountyBoth()?'and':'or')+' a '+p.cr+' Nibble crate'; };
+function bountyClaimBtns(b,i,sm){ const p=bountyPay(b), c='btn'+(sm?' sm':''); if(bountyBoth()) return `<button class="${c}" data-act="claim" data-i="${i}" data-k="both">Claim</button>`;
+  return `<span class="bpick"><button class="${c}" data-act="claim" data-i="${i}" data-k="sc" title="Take ${p.sc} Scales">${p.sc} Scales</button><button class="${c}" data-act="claim" data-i="${i}" data-k="cr" title="Take a ${p.cr} Nibble crate: it opens straight away">Nibble crate</button></span>`; }
+function nibCrateRoll(size){ const C=NIB_CRATE[size]||NIB_CRATE.small, out=[0,0,0,0,0,0];
+  for(let j=0;j<C.n;j++){ let x=Math.random()*100, t=0; for(let i=0;i<6;i++){ if(x<C.odds[i]){ t=i; break; } x-=C.odds[i]; } out[t]++; }
+  if(C.min&&!out.slice(C.min).some(n=>n>0)){ out[out.findIndex(n=>n>0)]--; out[C.min]++; } return out; }
+let bountyGot=null; /* what the claims of one press paid, shown once (Claim all pays many) */
+function bountyGive(b,pick){ const p=bountyPay(b), g=bountyGot||(bountyGot={sc:0, nib:[0,0,0,0,0,0], crates:0, n:0}); g.n++;
+  if(pick!=='cr'){ S.scales+=p.sc; g.sc+=p.sc; }
+  if(pick!=='sc'){ nibCrateRoll(p.cr).forEach((n,i)=>{ if(n){ nibAdd('r'+i,n); g.nib[i]+=n; } }); g.crates++; }
+  addPassXP(BOUNTY_PASS); S.gstats.tasks=(S.gstats.tasks||0)+1; /* the counter daily tasks used; its two feats count bounties now */
+  setTimeout(bountyShow,0); }
+function nibCrateClose(){ const o=$('nibcrate'); if(o) o.remove(); }
+function bountyShow(){ const g=bountyGot; bountyGot=null; if(!g) return; const head=g.n>1?g.n+' bounties paid':'Bounty paid';
+  if(!g.crates){ toast(head+': +'+g.sc+' Scales'); return; }
+  nibCrateClose(); const chips=g.nib.map((n,i)=>n?`<span class="nibs-r" style="--rc:${RAR[i].c}">${NIB_TIER[i]} <b>+${n}</b></span>`:'').join('');
+  document.body.insertAdjacentHTML('beforeend',`<div class="card nibcrate" id="nibcrate" role="dialog" aria-modal="true" aria-label="Nibble crate"><div class="in"><div class="rar" style="color:var(--gold)">${esc(head)}</div><h3>${g.crates>1?g.crates+' Nibble crates':'Nibble crate'}</h3><div class="nc-row">${chips}</div>${g.sc?`<div class="nc-sc">and +${g.sc} Scales</div>`:''}<div class="sub">Feed Nibbles to your fish in the Aquarium.</div><div class="tap">${PLAT.touch()?'Tap to close':'Click or press Esc to close'}</div></div></div>`);
+  $('nibcrate').addEventListener('pointerup',e=>{ e.stopPropagation(); nibCrateClose(); }); try{ sfx.shiny(); }catch(e){ oops('bs_rules05:sfx.shiny',e); } }
+document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&$('nibcrate')){ nibCrateClose(); e.preventDefault(); e.stopPropagation(); } },true);
+document.head.insertAdjacentHTML('beforeend','<style>#nibcrate{position:fixed;z-index:70;padding:12px calc(12px + env(safe-area-inset-right)) calc(12px + env(safe-area-inset-bottom)) calc(12px + env(safe-area-inset-left))}#nibcrate .nc-row{display:flex;flex-wrap:wrap;justify-content:center;gap:6px;margin:10px 0}#nibcrate .nc-row .nibs-r{font-size:14px;padding:5px 12px}#nibcrate .nc-sc{font:700 14px var(--display,system-ui);color:var(--gold);margin:0 0 8px}.bpick{display:inline-flex;flex-wrap:wrap;gap:6px;justify-content:flex-end}.brew{font-size:12.5px;color:var(--muted)}</style>');
 
 // ---------- Fish Log: the completion reward says what it really gives ----------
 { const _rj=renderJournal; renderJournal=function(P){ _rj(P); try{ const m=P.querySelector('.fl-mh .meta'); if(m&&/find them all for/.test(m.innerHTML)) m.insertAdjacentHTML('beforeend',' <b class="fl-perk">+ fish from here worth 10% more, forever</b>'); else if(m&&/complete/.test(m.textContent)) m.insertAdjacentHTML('beforeend',' <b class="fl-perk got">· fish from here worth 10% more</b>'); }catch(e){ oops('bs_rules05:P.querySelector',e); } }; }
@@ -15415,9 +15365,9 @@ function nibPatch(){ const P=$('panel'); if(!P||S.tab!=='aquarium') return false
 actOn('scrap scrapall nibfeed nibamt', function(b){ const i=+b.dataset.i; if(b.dataset.act==='scrap') return nibScrap(i); if(b.dataset.act==='scrapall') return nibScrapAll(); if(b.dataset.act==='nibfeed') return nibFeed(i); if(b.dataset.act==='nibamt'){ const n=+b.dataset.k; if(!NIB_AMTS.includes(n)) return 'skip'; S.nibAmt=n; return 'render'; } });
 if(typeof ACT_OK==='object') ACT_OK.nibamt=k=>NIB_AMTS.includes(+k);
 /* Cam, round 5: the feed amount and your Nibbles of every rarity, in a strip above the tank */
-function nibStripHTML(){ const a=nibAmt(), has=NIB_RAR.map((r,i)=>[i,(S.nib&&S.nib['r'+i])||0]).filter(x=>x[1]>0);
-  return `<div class="nibstrip"><div class="nibs-amt" role="group" aria-label="Nibbles per feed"><span class="meta">Feed</span>${NIB_AMTS.map(n=>`<button type="button" class="chip${n===a?' on':''}" data-act="nibamt" data-k="${n}" aria-pressed="${n===a}">${n}x</button>`).join('')}</div><div class="nibs-have">${has.length?has.map(([i,n])=>`<span class="nibs-r" style="--rc:${RAR[i].c}" title="${NIB_TIER[i]} Nibbles">${NIB_TIER[i]} <b>${fmtShort(n)}</b></span>`).join(''):'<span class="meta">No Nibbles yet: scrap fish in the Cooler.</span>'}</div></div>`; }
-document.head.insertAdjacentHTML('beforeend',`<style>.nibstrip{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:6px 12px;margin:6px 0 8px}.nibs-amt,.nibs-have{display:flex;flex-wrap:wrap;align-items:center;gap:4px}.nibs-amt .chip{min-width:40px}.nibs-r{font:700 12px var(--display,system-ui);padding:3px 8px;border-radius:999px;border:1px solid color-mix(in srgb,var(--rc) 60%,transparent);color:var(--rc);background:color-mix(in srgb,var(--rc) 12%,transparent)}.nibs-r b{color:#fff}</style>`);
+function nibStripHTML(){ nibFold(); const a=nibAmt(), all=NIB_RAR.map((r,i)=>[i,(S.nib&&S.nib['r'+i])||0]), none=all.every(x=>!x[1]); /* director, 2026-11-27: every tier is always listed with its count, so the row is an inventory */
+  return `<div class="nibstrip"><div class="nibs-amt" role="group" aria-label="Nibbles per feed"><span class="meta">Feed</span>${NIB_AMTS.map(n=>`<button type="button" class="chip${n===a?' on':''}" data-act="nibamt" data-k="${n}" aria-pressed="${n===a}">${n}x</button>`).join('')}</div><div class="nibs-have" role="group" aria-label="Your Nibbles"><span class="meta">Your Nibbles</span>${all.map(([i,n])=>`<span class="nibs-r${n?'':' zero'}" style="--rc:${RAR[i].c}" title="${NIB_TIER[i]} Nibbles: for ${NIB_TIER[i].toLowerCase()} fish">${NIB_TIER[i]} <b>${fmtShort(n)}</b></span>`).join('')}</div>${none?'<div class="meta nibs-none">No Nibbles yet: scrap fish in the Cooler or take a Nibble crate from a bounty.</div>':''}</div>`; }
+document.head.insertAdjacentHTML('beforeend',`<style>.nibstrip{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:6px 12px;margin:6px 0 8px}.nibs-amt,.nibs-have{display:flex;flex-wrap:wrap;align-items:center;gap:4px}.nibs-amt .chip{min-width:40px}.nibs-r{font:700 12px var(--display,system-ui);padding:3px 8px;border-radius:999px;border:1px solid color-mix(in srgb,var(--rc) 60%,transparent);color:var(--rc);background:color-mix(in srgb,var(--rc) 12%,transparent)}.nibs-r b{color:#fff}.nibs-r.zero{opacity:.5}.nibs-none{flex:1 0 100%}</style>`);
 
 // ---- C28 (director + Cam, 2026-11-20): feeding the aquarium. Every fish swims up to the falling food (each at its own moment and spot),
 // eats, and goes back. Each feed: FEED_SMALL chance one fish's bonuses grow a little (not its income); FEED_BIG chance one fish earns
@@ -15442,7 +15392,7 @@ function nibDraw(c,t,w,h){ const A=NIB_ANIM; if(!A) return; const k=(performance
 
 // page parts: Scrap in the Cooler, Feed in the Aquarium, Nibbles in the Fish Log details, what a trophy ate
 function nibScrapBtn(f,i){ const p=Math.round(nibOdds(f)*100), n=nibAmount(f), sp=SPI[f.id]; return `<button class="btn alt sm" data-act="scrap" data-i="${i}" title="Scrap: ${p}% chance of ${n} ${nibRarName(sp.id)} Nibble${n===1?'':'s'}. Feed them to any ${nibRarName(sp.id)} fish in the Aquarium to make it earn more.">Scrap</button>`; }
-function nibFeedBtn(f,i){ const n=nibOf(f.id); if(!n&&!f.fed) return ''; return `<button class="btn ${n?'':'alt '}sm nibbtn" data-act="nibfeed" data-i="${i}" ${n?'':'disabled'} title="${n?'Feed it '+NIB_WORD(Math.min(nibAmt(),n))+' ('+n+' on hand): more coins per hour. Every '+NIB_STEP+' Nibbles its bonuses grow.':'Scrap '+nibRarName(f.id)+' fish in the Cooler to get Nibbles'}">${n?'Feed '+Math.min(nibAmt(),n):'Feed · 0'}</button>`; }
+function nibFeedBtn(f,i){ const n=nibOf(f.id); if(!n&&!f.fed) return ''; return `<button class="btn ${n?'':'alt '}sm nibbtn" data-act="nibfeed" data-i="${i}" ${n?'':'disabled'} title="${n?'Feed it '+NIB_WORD(Math.min(nibAmt(),n))+' ('+n+' on hand): more coins per hour. Every '+NIB_STEP+' Nibbles its bonuses grow.':'Scrap '+nibRarName(f.id)+' fish in the Cooler to get Nibbles'}">${n?'Feed '+Math.min(nibAmt(),n)+' · '+fmtShort(n)+' left':'Feed · 0 left'}</button>`; }
 const nibFedTxt = f => f&&f.fed ? ' · ate '+NIB_WORD(f.fed) : '';
 document.head.insertAdjacentHTML('beforeend','<style>#panel .nibbtn{white-space:nowrap}</style>');
 // =====================================================================
@@ -19200,12 +19150,11 @@ const Q8_LESSONS=[
  ['rods','Getting stronger','Rods, Scales and attachments','Collect rods, upgrade them, fit parts','Your rod shapes every cast. Collect rods in the Rod rack, upgrade them with coins and <b>Scales</b> (Scales come from Rare and better fish) and fit <b>attachments</b>: each has five tiers and fits any rod once you own it. Save a rod and its parts as a <b>preset</b> to switch in one tap.',['rods','Your rods']],
  ['skills','Getting stronger','Skills','Small steady gains with a big finish','Levels give <b>skill points</b>. Skills are small steady gains in five groups, and every skill unlocks a <b>special effect</b> when fully learned. The XP bar next to your level shows how close the next point is. Skills can be reset for coins. When you set sail, your level starts again at 1 and your skills are handed back; the points from feats and the Fish Log stay.',['skills',null]],
  ['paths','Getting stronger','Paths','One big specialty per tier','Paths are big specialties: forks open from level 5 to 75, you pick one specialty per fork, and each ranks up from I to V as you fish with it. A chosen Path stays through voyages and works again once you reach its level.',['paths',null]],
- ['tasks','Things to do','Daily tasks and weekly quests','Fresh goals every day and week','<b>Tasks</b> (top bar) has three daily tasks (finish all three for a bonus crate; your login streak counts too) and four weekly quests (finish all four for a big Mystery Crate). A number on Tasks means a reward is ready.',['bounties','Daily tasks']],
- ['bounties','Things to do','Bounties','The harbourmaster pays extra','The harbourmaster pays extra for specific catches. Every water has its own board, and its bounties wait there until you finish them. Fish still go in your cooler. Most bounties add a bonus: bait, Scales, Tide Pass XP, Nibbles or a Mystery Crate. Swap a bounty you do not want for a few coins.',['bounties','Bounties']],
+ ['bounties','Things to do','Bounties','Scales or a Nibble crate, your pick','The harbourmaster pays for specific catches. Every water has its own board, and its bounties wait there until you finish them. Fish still go in your cooler. When you claim, pick <b>Scales</b> or a <b>Nibble crate</b>; harder bounties pay more Scales or a big crate. A Nibble crate opens straight away and its Nibbles go to the Aquarium. <b>Bounties</b> (top bar) shows a number when one is ready. Swap a bounty you do not want for a few coins.',['bounties',null]],
  ['events','Things to do','Events','Derbies, frenzies and the forecast','Events bring derbies, frenzies and special weather. When one is on, <b>Live</b> shows in the top bar. In a frenzy, tap the leaping fish.',['events',null]],
  ['feats','Things to do','Feats','Achievements that pay','Feats are achievements for things you do as you play. Each pays coins and a Mystery Crate; some also give a skill point (and a big crate).',['feats',null]],
  ['pass','Things to do','Tide Pass','Levels with rewards','The Tide Pass levels up as you play and each level has a reward to claim. It lives under Challenges.',['pass',null]],
- ['boardwalk','Things to do','The Boardwalk','Games, tickets and prizes','On the old pier: a free <b>Lucky wheel</b> spin every hour (up to 3 saved), plus scratch cards, the duck pond and higher-or-lower. Games pay tickets and prizes, and the Prize counter trades tickets for things you cannot get anywhere else. Open your <b>Mystery crates</b> here: they are not sold for coins; earn them from feats, bounties, tasks and the Tide Pass.',['games',['bwview','games']]],
+ ['boardwalk','Things to do','The Boardwalk','Games, tickets and prizes','On the old pier: a free <b>Lucky wheel</b> spin every hour (up to 3 saved), plus scratch cards, the duck pond and higher-or-lower. Games pay tickets and prizes, and the Prize counter trades tickets for things you cannot get anywhere else. Open your <b>Mystery crates</b> here: they are not sold for coins; earn them from feats, the Tide Pass, your daily gift and legendary catches.',['games',['bwview','games']]],
  ['pets','Pets and style','Pets','Company on the water','Pets keep you company on the water. Find more in Pets, then name and dress them up.',['pets','Your pets']],
  ['style','Pets and style','Wardrobe','Dress your angler','Change your angler’s body, clothes, hats, glasses, shoes and more in the Wardrobe. Tap anything to try it on first.',['style',null]],
  ['sail','Prestige','Set sail again','Start over, stronger every time','Once you reach <b>Hollow Trench</b> you can start over from Willow Pond for <b>Wisdom Pearls</b>: spend them in the Pearl shop (+1% coins or +1% XP a level) or on relics. You also earn Boon points to upgrade lasting voyage Boons, your Legacy grows with every voyage, and 32 milestones up to voyage 100 unlock perks. Your level goes back to 1 and your skills are handed back; you keep the skill points from feats and the Fish Log, your Paths, Fish Log, feats, Trophy Room, pets and clothes.',['prestige','Set sail again']],
@@ -19216,7 +19165,7 @@ const Q8_LESSONS=[
 /* each device's own words, written once: Tap or Click; PC has one header row where phones have a top bar and a side panel */
 const q8dev = s => { if(typeof s!=='string') return s; const T=PLAT.touch(); s=s.replace(/\bTap\b/g,T?'Tap':'Click').replace(/\btap\b/g,T?'tap':'click'); if(onPC()) s=s.replace(/top bar/g,'header').replace(/side panel/gi,'header').replace(/the ring around (it|the fish)/g,'the line bar').replace(/keep the ring inside/g,'keep the line inside').replace(/The ring is your line/g,'The line bar shows the strain'); return s; };
 const Q8_FIND=()=>{ const TB=onPC()?'Header':'Top bar', SPN=onPC()?'Header · ':'Side panel · ', out=[], lbl=t=>{ try{ return menuTabLabel(t)[1]; }catch(e){ oops('cw_pages08:find-label',e); return t; } };
-  out.push([TB,'Cooler','cooler',null],[TB,'Aquarium','aquarium',null],[TB,'Fish Log','journal',null],[TB,'Bait: switch, buy, special lures','bait',null],[TB,'Tasks (daily, weekly, bounties)','bounties',null],[(onPC()?'Header · settings button':'Top bar · settings button'),'Settings','settings',null],[(onPC()?'Header · settings button':'Top bar · settings button'),'Save and save codes','save',null]);
+  out.push([TB,'Cooler','cooler',null],[TB,'Aquarium','aquarium',null],[TB,'Fish Log','journal',null],[TB,'Bait: switch, buy, special lures','bait',null],[TB,'Bounties','bounties',null],[(onPC()?'Header · settings button':'Top bar · settings button'),'Settings','settings',null],[(onPC()?'Header · settings button':'Top bar · settings button'),'Save and save codes','save',null]);
   for(const s of MENU_SECS){ if(s.id==='quests') continue; for(const t of s.tabs) out.push([SPN+s.short,lbl(t),t,null]); }
   out.push([SPN+'Prestige','Set sail again','prestige','Set sail again'],[SPN+'Prestige','Pearl relics','prestige','Pearl relics']);
   return out; };
@@ -19224,8 +19173,8 @@ const Q8_HELP=[
  ['My line keeps snapping','Reel in short pulls while the fish runs or shakes its head, let go when it jumps away, and watch the ring around it: red means let go now. A fish stronger than your <b>Line</b> pulls harder, so a stronger Line in Tackle helps.',['shop',['tackleview','gear']],'Tackle'],
  ['How do I catch rarer fish?','Better bait, far casts, hotspots, Storm weather and the rare-odds skills all help. Your Wisdom Pearls raise rare odds too.',['bait','Buy bait'],'Bait'],
  ['My cooler is full','Open the Cooler and Sell all (with a filter if you want to keep some), put fish in the Aquarium, or Keep the best ones in the Trophy Room. A bigger Cooler is in Tackle.',['cooler',null],'Cooler'],
- ['How do I earn more coins?','Sell bigger and rarer fish, fill the fishmonger’s wish (double pay), keep the Aquarium full, finish bounties and tasks, and raise your sale bonus with skills and mastery stars.',['bounties','Bounties'],'Bounties'],
- ['Where do Scales come from?','Rare and better fish. You spend them on rod upgrades.',['rods','Your rods'],'Rods'],
+ ['How do I earn more coins?','Sell bigger and rarer fish, fill the fishmonger’s wish (double pay), keep the Aquarium full, and raise your sale bonus with skills and mastery stars.',['aquarium',null],'Aquarium'],
+ ['Where do Scales come from?','Rare and better fish, and bounties. You spend them on rod upgrades.',['rods','Your rods'],'Rods'],
  ['What are Fish Nibbles?','Scrap a fish in the Cooler (next to Sell) for Nibbles of its rarity: always for common fish, less often for rarer ones, more for shiny, hybrid and titled fish. Feed them to any fish of the same rarity in your Aquarium: it earns more, and every 10 Nibbles its bonuses grow. Half of your Nibbles expire when you set sail again.',['cooler',null]],
  ['How do I open the next water?','Catch 10 fish at the water before it this voyage (10 more each voyage, up to 50), then pay its price on the Map. Your goal shows both.',['map',null],'Map'],
  ['What do I keep when I set sail again?','Your Fish Log, feats, Paths, Trophy Room, pets, clothes, relics, Boons and Wisdom Pearls, and the skill points from feats and the Fish Log. Your level starts again at 1 and your skills are handed back. Coins, tackle, bait, cooler fish, bounties and waters reset; aquarium fish are mounted in the Trophy Room.',['prestige','Set sail again'],'Prestige'],
@@ -19240,7 +19189,7 @@ function q8go(tab,sect){ try{ startAudio(); }catch(e){ oops('cw_pages08:startAud
   try{ if(!MENU_OPEN) openMenu(tab); else if(S.tab!==tab){ setTab(tab); save(); } }catch(e){ try{ openMenu(tab); }catch(e2){ oops('cw_pages08:openMenu',e2); } }
   if(sect) setTimeout(()=>{ try{ const P=$('panel'); if(Array.isArray(sect)){ const b=P.querySelector(`[data-act="${sect[0]}"][data-k="${sect[1]}"]`); if(b) b.click(); } else { const b=[...P.querySelectorAll('[data-sect]')].find(x=>x.dataset.sect===sect||x.dataset.sect.startsWith(sect)); if(b) b.click(); } }catch(e){ oops('cw_pages08:Array.isArray#2',e); } },40); }
 function q8goal(){ const gl=Q8.goal(); try{ if(gl.tab==='journal'){ encLoc=gl.loc&&LOCS[locIdx(gl.loc)]?gl.loc:S.loc; encSel=null; } if(gl.tab==='map') SECT.map='Waters'; }catch(e){ oops('cw_pages08:locIdx',e); } if(gl.tab) q8go(gl.tab,null); else { try{ closeMenu(); }catch(e){ oops('cw_pages08:closeMenu',e); } } }
-function q8ready(){ const r=[]; try{ const d=ensureDaily(); const n=d.tasks.filter(t=>!t.claimed&&taskHave(t)>=t.n).length+(typeof wqReady==='function'?wqReady():0); if(n) r.push([n+' task reward'+(n>1?'s':'')+' ready','bounties','Daily tasks']); }catch(e){ oops('cw_pages08:ensureDaily',e); }
+function q8ready(){ const r=[]; try{ const n=bountyReady(); if(n) r.push([n+' bount'+(n>1?'ies':'y')+' ready to claim','bounties',null]); }catch(e){ oops('cw_pages08:bountyReady',e); }
   try{ const un=(S.pass.lvl|0)-(S.pass.claimed|0); if(un>0) r.push([un+' Tide Pass reward'+(un>1?'s':'')+' ready','pass',null]); }catch(e){ oops('cw_pages08:r.push',e); }
   try{ if(S.tankBank>=1) r.push([fmt(Math.floor(S.tankBank))+' coins waiting in the Aquarium','aquarium',null]); }catch(e){ oops('cw_pages08:r.push#2',e); }
   try{ if(typeof ptsFree==='function'&&ptsFree()>0) r.push([ptsFree()+' skill point'+(ptsFree()>1?'s':'')+' to spend','skills',null]); }catch(e){ oops('cw_pages08:ptsFree',e); }
@@ -19399,7 +19348,6 @@ function pageDoneRun(){ const P=$('panel'), L=PAGE_DONE[S.tab]; if(P&&L) for(con
 { const h=(tag,cls,html)=>{ const e=document.createElement(tag); if(cls) e.className=cls; if(html!=null) e.innerHTML=html; return e; };
   const num=(t,re,i=1)=>{ const m=String(t||'').match(re); return m?m[i]:null; };
   const txt=e=>e?(e.textContent||'').replace(/\s+/g,' ').trim():'';
-  const enabled=P=>sel=>[...P.querySelectorAll(sel)].filter(b=>!b.disabled).length;
   const locName=()=>{ try{ return LOCS[locIdx(S.loc)].name; }catch(e){ oops('cx_pages:locName',e); return ''; } };
   // per page: summary cells [label, value], the main actions (moved into the strip), and sections for long pages without any
   const CFG={
@@ -19414,10 +19362,7 @@ function pageDoneRun(){ const P=$('panel'), L=PAGE_DONE[S.tab]; if(P&&L) for(con
     rods:{ cells:(P,hd)=>[['Rod in use',txt(P.querySelector('.rp-card.on b'))||'—'],['Scales',txt(hd&&hd.querySelector('.pts'))||'0']] },
     skills:{ cells:(P,hd)=>[['Skill points',txt(hd&&hd.querySelector('.pts'))||'0'],['Level',String(S.lvl)]], acts:P=>[P.querySelector('[data-act="respec"]')] },
     paths:{ cells:P=>[['Level',String(S.lvl)],['Paths chosen',P.querySelectorAll('.spec.on, .spec[aria-pressed="true"]').length+' / '+SPEC_TIERS.length]] },
-    bounties:{ cells:P=>[['Ready to claim',String(enabled(P)('[data-act="taskclaim"],[data-act="wqclaim"],[data-act="bclaim"],[data-act="bounty"]'))],['Board',locName()]],
-      groups:K=>{ const w=K.find(c=>c.classList.contains('wq')), d=K.find(c=>c!==w&&c.classList.contains('tile')&&/Daily tasks/i.test((c.querySelector('h4')||{}).textContent||'')); /* the weekly card also wears .dtasks (its grid style), so the daily card is found by its title (director, 2026-11-19: a weekly reward badged the Daily tab) */ const rest=K.filter(c=>c!==d&&c!==w);
-        const ready=ns=>ns.reduce((n,e)=>n+[...e.querySelectorAll('button[data-act$="claim"]')].filter(b=>!b.disabled).length,0)||0; /* a badge shows where a reward is waiting */
-        return [{name:'Daily tasks',nodes:d?[d]:[],badge:d?ready([d]):0},{name:'Weekly quests',nodes:w?[w]:[],badge:w?ready([w]):0},{name:'Bounties',nodes:rest,badge:ready(rest)}]; } },
+    bounties:{ cells:P=>[['Ready to claim',String(bountyReady())],['Board',locName()]] }, /* one list now: daily tasks and weekly quests, and their page tabs, went on 2026-11-27 */
     pass:{ cells:(P,hd)=>{ const t=hd&&hd.querySelector('.tile'); return [['Tide Pass',txt(t&&t.querySelector('.rar'))||'—'],['Progress',(txt(t&&t.querySelector('.meta'))||'').replace(/\s*to level.*$/,'')||'—']]; }, acts:P=>[P.querySelector('[data-act="passclaim"]')] }, /* Cam, 2026-11-20: the claim button went with the header box, so Tide Pass rewards could not be claimed on phones */
     feats:{ cells:(P,hd,sub)=>{ const t=txt(sub); return [['Feats done',(num(t,/(\d+) of (\d+) done/)||'0')+' / '+(num(t,/(\d+) of (\d+) done/,2)||'?')]]; } },
     events:{ cells:P=>{ const w=txt(P.querySelector('.wxf b, .wxf h4'))||''; return [['Weather now',(typeof wx3k==='function'?(()=>{ try{ return wx3k(); }catch(e){ oops('cx_pages:wx3k',e); return ''; } })():'')||w||'—'],['Challenges',String(P.querySelectorAll('.ev-grid > *').length)]]; },
@@ -19498,7 +19443,7 @@ if(/[?&]test\b/.test(location.search)) window.__menuMap=async()=>{ const w=ms=>n
       /* shown and hidden with Your rods: synced when a tab is picked (it was a new watcher on every redraw, never released) */
       const sync=()=>{ box.style.display=first.style.display; }; sync(); const nv=P.querySelector('.sect-nav'); if(nv) nv.addEventListener('click',()=>setTimeout(sync,0)); });
 /* the Nibbles strip above the tank (Cam, round 5; ce_nibbles.js builds it) */
-pageDone('aquarium',P=>{ if(P.querySelector('.nibstrip')||!S.tank.length) return; const bank=P.querySelector('.bank'), body=P.querySelector('.pg08-body'); if(bank) bank.insertAdjacentHTML('afterend',nibStripHTML()); else if(body) body.insertAdjacentHTML('afterbegin',nibStripHTML()); });
+pageDone('aquarium',P=>{ if(P.querySelector('.nibstrip')||(!S.tank.length&&!Object.keys(S.nib||{}).length)) return; /* also with an empty tank once you hold Nibbles: the row is your Nibble inventory (director, 2026-11-27) */ const bank=P.querySelector('.bank'), body=P.querySelector('.pg08-body'); if(bank) bank.insertAdjacentHTML('afterend',nibStripHTML()); else if(body) body.insertAdjacentHTML('afterbegin',nibStripHTML()); });
 // =====================================================================
 // Install welcome (batch 6; director 2026-11-21, option B of three: "players can't find how to install"; changed 2026-11-22: "should always
 // open on the versions not installed in their own way", so every visit in a browser, not once per device; Install stays one tap away in
@@ -20925,13 +20870,13 @@ html body.phone-app .hud > #mbgoal.ready .lbl,html body.phone-land .hud > #mbgoa
 html body.phone-app .hud > #mblive .lbl,html body.phone-land .hud > #mblive .lbl{color:#ffd36a!important}
 </style>`);
 /* the room the goal gave back: two shortcuts players check all the time, sideways only (upright the bar has no room):
-   Tasks (daily tasks + weekly quests: how many rewards are ready) and Tide Pass (level; gold when a reward waits).
+   Bounties (how many are ready to claim; it was Tasks until daily tasks and weekly quests went, 2026-11-27) and Tide Pass (level; gold when a reward waits).
    If a narrow phone runs out of room, Tide Pass goes first, then Tasks: Goal, Live and the core chips always stay. */
 { const h=(tag,cls,html)=>{ const e=document.createElement(tag); if(cls) e.className=cls; if(html!=null) e.innerHTML=html; return e; };
   let T=null, Pz=null, last='';
   const mk=(id,go,lbl)=>{ const b=h('button','stat hudx mb-x'); b.type='button'; b.id=id; b.innerHTML=`<span class="lbl">${lbl}</span><b></b>`;
     b.addEventListener('pointerdown',e=>e.stopPropagation()); b.addEventListener('click',e=>{ e.stopPropagation(); e.preventDefault(); try{ startAudio(); }catch(er){ oops('mobile/header08:startAudio#3',er); } openMenu(go); }); return b; };
-  const tasks=()=>{ try{ const d=ensureDaily(); const ready=d.tasks.filter(t=>!t.claimed&&taskHave(t)>=t.n).length+(typeof wqReady==='function'?wqReady():0); const done=d.tasks.filter(t=>t.claimed).length; return {ready, txt:ready?ready+' ready':done+'/'+d.tasks.length+' done'}; }catch(e){ oops('mobile/header08:quests-chip',e); return {ready:0,txt:'—'}; } };
+  const tasks=()=>{ try{ const ready=bountyReady(); return {ready, txt:ready?ready+' ready':S.bounties.filter(b=>b.loc===S.loc).length+' here'}; }catch(e){ oops('mobile/header08:quests-chip',e); return {ready:0,txt:'—'}; } };
   const pass=()=>{ try{ const pl=S.pass.lvl|0, un=pl-(S.pass.claimed|0); return {ready:un>0, txt:'Lv '+pl+(un>0?' · claim':'')}; }catch(e){ oops('mobile/header08:pass-chip',e); return {ready:false,txt:'—'}; } };
   const fit=()=>{ const hud=document.querySelector('.hud'); if(!hud||!T) return; const land=document.body.classList.contains('phone-land');
     T.hidden=!land; Pz.hidden=true; hud.classList.remove('mb-compact'); if(!land) return;
@@ -20951,10 +20896,10 @@ html body.phone-app .hud > #mblive .lbl,html body.phone-land .hud > #mblive .lbl
   if(/[?&]test\b/.test(location.search)) window.__hudFit=()=>fit(); /* QA: run the step-aside check now (the 500 ms tick is too slow for a test) */
   let ro=null, busy=false; const seen=new WeakSet(); /* round 8 (director: "settings cut off sometimes on top right"): the bar is re-checked whenever it or any chip changes size (the Live timer text, opening or closing the side panel), not only when Tasks or Tide Pass change */
   const tick=()=>{ if(!MOB()) return; const hud=document.querySelector('.hud'), lv=document.getElementById('mblive'); if(!hud||!lv) return;
-    if(!T||!T.isConnected){ T=mk('mbtasks','bounties','Tasks'); Pz=mk('mbpass','pass','Tide Pass'); lv.after(T); T.after(Pz); last=''; }
+    if(!T||!T.isConnected){ T=mk('mbtasks','bounties','Bounties'); Pz=mk('mbpass','pass','Tide Pass'); lv.after(T); T.after(Pz); last=''; }
     const a=tasks(), b=pass(), live=!lv.hidden, key=a.txt+'|'+a.ready+'|'+b.txt+'|'+live+'|'+document.body.classList.contains('phone-land');
     if(key===last){ fit(); return; } last=key; T.querySelector('b').textContent=a.txt; T.classList.toggle('ready',a.ready>0); Pz.querySelector('b').textContent=b.txt; Pz.classList.toggle('ready',b.ready);
-    T.title=a.ready?a.ready+' task reward'+(a.ready===1?'':'s')+' ready. Tap for Bounties.':'Daily tasks and weekly quests. Tap for Bounties.'; Pz.title='Tide Pass. Tap to open it.'; fit(); };
+    T.title=a.ready?a.ready+' bount'+(a.ready===1?'y':'ies')+' ready to claim. Tap for Bounties.':'Bounties at this water. Tap to open them.'; Pz.title='Tide Pass. Tap to open it.'; fit(); };
   setInterval(tick,500); setTimeout(tick,50); addEventListener('resize',()=>{ last=''; setTimeout(tick,200); }); }
 document.head.insertAdjacentHTML('beforeend',`<style>
 html body.phone-land .hud > #mbgoal,html body.phone-land .hud > #mblive,html body.phone-land .hud > .mb-x{flex:0 1 auto!important}
@@ -21137,16 +21082,6 @@ document.head.insertAdjacentHTML('beforeend',`<style>
   html body.phone-land #menuov #panel.pg08 .pg08-bank{flex-wrap:wrap!important;row-gap:2px!important}
   html body.phone-land #menuov #panel.pg08 .pg08-bank > div{max-width:none!important}
 }
-</style>`);
-/* Tasks page (Bounties; director: "Daily tasks, weekly quests, and bounties ... right now they all have a ton of duplicate
-   information"): an old rule (bm_ui04: .tile.dtasks{display:grid!important}) kept the daily and weekly cards on screen in every tab,
-   so each tab showed everything. Now each tab shows only its own part; the harbourmaster's intro (it is about the bounty board) shows
-   on Bounties only; the cards drop their big "Daily tasks" / "Weekly quests" titles (the tab above names them) and keep their line
-   about streaks, resets and progress */
-document.head.insertAdjacentHTML('beforeend',`<style>
-html body.phone-land #menuov #panel.pg08 .tile.dtasks[style*="display: none"],html body.phone-app #menuov #panel.pg08 .tile.dtasks[style*="display: none"]{display:none!important}
-html body.phone-land #menuov #panel.pg08[data-pg-tab="bounties"]:not([data-pg-sec="Bounties"]) .pg08-body > .pg08-note,html body.phone-app #menuov #panel.pg08[data-pg-tab="bounties"]:not([data-pg-sec="Bounties"]) .pg08-body > .pg08-note{display:none!important}
-html body.phone-land #menuov #panel.pg08[data-pg-tab="bounties"] .tile.dtasks > .row h4,html body.phone-app #menuov #panel.pg08[data-pg-tab="bounties"] .tile.dtasks > .row h4{display:none!important}
 </style>`);
 /* eight side-panel sections now (Quests first): on short phones each button is a little shorter again so all of them and Collapse
    panel still fit without scrolling (measured at 667x375) */
@@ -21934,6 +21869,17 @@ PATCHES.unshift({v:'0.4.9', name:'Work in progress', items:phoneNotes([
 // text changes. Released notes live in notes_release.js.
 const TEST_NOTES={v:'test', label:'Test build · '+(window.DL_BUILD==='ios'?'iPhone':'Android'), name:'0.4.9 test build (newest first)', items:[
   '## New in this build',
+  'Bounties are the one thing to chase now (director and Cam): daily tasks and weekly quests are gone. Rewards you had not claimed on them are lost.',
+  'A bounty no longer pays coins. When you claim one you pick your reward: Scales, or a Nibble crate. Harder bounties (a legend, a shiny, a trophy, a variety hunt) pay 8 Scales or a big crate, the others 3 Scales or a small one. Every claim also gives some Tide Pass XP.',
+  'Nibble crates open straight away and show what was inside: a small one holds 6 Nibbles, a big one 10 with at least one Epic or better. These are first numbers: tell us how they feel.',
+  'A new kind of bounty, the variety hunt: catch several different fish at one water.',
+  'The Bounty Ledger relic now pays both rewards on every bounty (it used to add coins).',
+  'Claim all asks once which reward you want and pays every finished bounty that way.',
+  'Aquarium: Your Nibbles lists all six kinds with how many you hold, also the ones you have none of, and every Feed button says how many are left.',
+  'The Tasks chip in the top bar is now Bounties: it shows how many are ready to claim, or how many wait at your water.',
+  'The feats Daily grind and Creature of habit now count claimed bounties; what you had counts on.',
+  'Mystery Crates no longer come from bounties, daily tasks or weekly quests. Feats, legendary and mythic catches and the daily gift still give them.',
+  '## Test build 2026.11.27-0752',
   'Fixed: a damaged or very old save that had lost its list of hats could not be loaded (the game started a new one instead, and a save code like it was refused). It now loads and gets the starter hats back. Every other save loads exactly as before.',
   '## Test build 2026.11.27-0405',
   'Behind the scenes, nothing should look or act differently: the code under the buttons and pages was tidied (one list of button actions, one page drawer, fewer leftover layers). If a button does nothing or does the wrong thing, if a page looks different from yesterday, or if the box Errors the game passed over appears in Stats › Tester tools, tell us which button or page and send the box.',
@@ -22442,8 +22388,8 @@ economy(){ QA.sys='Economy';
   T('buy gear: refused one coin short, exact deduction when affordable, refused at max',()=>{ const k='reel'; S.gear[k]=0; const c=GEAR[k].cost[1]; S.money=c-1; act('buygear',{k}); if(S.gear[k]!==0||S.money!==c-1) return {ok:false,detail:'bought while short'}; S.money=c; act('buygear',{k}); if(S.gear[k]!==1||S.money!==0) return {ok:false,detail:'lvl '+S.gear[k]+' money '+S.money};
       S.gear[k]=GEAR[k].lv.length-1; S.money=1e15; act('buygear',{k}); if(S.money!==1e15) return {ok:false,detail:'charged at max'}; return okInv(); });
   T('buy bait: refused when short, pack added when bought, invalid id ignored',()=>{ const k=Object.keys(BAIT).find(x=>x!=='worm'&&!BAIT[x].junk&&BAIT[x].price>0); const p=BAIT[k].price; S.bait[k]=0; S.money=p-1; act('buybait',{k}); if(S.bait[k]!==0) return {ok:false,detail:'got bait while short'}; S.money=p; act('buybait',{k}); if(S.bait[k]!==BAIT[k].pack||S.money!==0) return {ok:false,detail:'bait '+S.bait[k]+' money '+S.money}; const m=S.money; act('buybait',{k:'__nope'}); return S.money===m?okInv():{ok:false,detail:'charged for invalid bait'}; });
-  T('bounty claim: unfinished refused, finished paid once, repeated clicks pay nothing more',()=>{ fillBounties(); const i=S.bounties.findIndex(b=>!bDone(b)); if(i<0) return {ok:true,detail:'no open bounty (skipped)'}; const m0=S.money; act('claim',{i}); if(S.money!==m0) return {ok:false,detail:'unfinished bounty paid'};
-      const b=S.bounties[i]; b.have=b.n||1; const n0=S.bounties.length; act('claim',{i}); const paid=S.money-m0; if(!(paid>0)) return {ok:false,detail:'not paid'}; const m1=S.money; for(let k=0;k<5;k++) act('claim',{i}); const extra=S.money-m1; if(extra>0&&!S.bounties.some((x,j)=>j===i&&bDone(x))) return {ok:false,detail:'paid again '+extra}; return extra===0?okInv():{ok:false,detail:'extra '+extra}; });
+  T('bounty claim: unfinished refused, finished paid once, repeated clicks pay nothing more',()=>{ fillBounties(); const i=S.bounties.findIndex(b=>!bDone(b)); if(i<0) return {ok:true,detail:'no open bounty (skipped)'}; const m0=S.money, keepR=S.relics; S.relics=(S.relics||[]).filter(r=>r!=='seasoned'); try{ const s0=S.scales; act('claim',{i,k:'sc'}); if(S.scales!==s0) return {ok:false,detail:'unfinished bounty paid'};
+      const b=S.bounties[i]; b.have=b.n||1; const want=bountyPay(b).sc; act('claim',{i}); if(S.scales!==s0||S.bounties[i]!==b) return {ok:false,detail:'claimed without a pick'}; act('claim',{i,k:'sc'}); const paid=S.scales-s0; if(paid!==want) return {ok:false,detail:'paid '+paid+' Scales, want '+want}; if(S.money!==m0) return {ok:false,detail:'a bounty paid coins'}; const s1=S.scales; for(let k=0;k<5;k++) act('claim',{i,k:'sc'}); const extra=S.scales-s1; if(extra>0&&!S.bounties.some((x,j)=>j===i&&bDone(x))) return {ok:false,detail:'paid again '+extra}; return extra===0?okInv():{ok:false,detail:'extra '+extra}; } finally{ S.relics=keepR; bountyGot=null; } });
   T('aquarium: collect pays the whole coins once; under 1 coin does nothing',()=>{ S.tankT=Date.now(); S.tankBank=.7; const m0=S.money; act('collect'); if(S.money!==m0) return {ok:false,detail:'paid under 1'}; S.tankBank=1234.6; act('collect'); const p=S.money-m0; act('collect'); act('collect'); return (p===1234&&S.money===m0+1234)?okInv():{ok:false,detail:'paid '+(S.money-m0)}; });
   T('aquarium income: 60 minutes away earns 60 minutes of income, capped when away for days',()=>{ if(!S.tank.length) return {ok:true,detail:'empty tank (skipped)'}; const r=tankRate(); S.tankBank=0; S.tankT=Date.now()-60*60000; accrue(); const one=S.tankBank; S.tankBank=0; S.tankT=Date.now()-1000*3600000; accrue(); const cap=S.tankBank;
       if(!eq(one,r*60,1e-3)) return {ok:false,detail:'1h '+one+' vs '+(r*60)}; if(!eq(cap,r*offlineCap(),1e-3)) return {ok:false,detail:'cap '+cap+' vs '+(r*offlineCap())}; return {ok:true,detail:'1h = '+Math.round(one)+', cap '+Math.round(offlineCap()/60)+' h'}; });
@@ -22594,7 +22540,7 @@ T('Cam 2026-11-25 (7): weaker fish hold less (floor 35%), species differ, harder
   const top=id=>Math.max(...SP.filter(s=>s.loc===id).map(s=>fishPull(s)))*2.20462; const ts=top('starfall'), to=top('olympus'), tf=top('farm'); if(Math.abs(ts-200)>1.5||Math.abs(to-300)>1.5||Math.abs(tf-200)>1.5) e.push('top pull lb starfall '+ts.toFixed(0)+' farm '+tf.toFixed(0)+' olympus '+to.toFixed(0)); if(!(top('river')>top('pond'))) e.push('climb lost');
   const keepU=S.unlocked.slice(), ps=SP.find(s=>s.loc==='pond'&&s.r===2), fish={id:ps.id,kg:(ps.min+ps.max)/2,value:ps.base*3,sh:0}; S.unlocked=['pond']; const a1=aqFishBase(fish); S.unlocked=LOCS.slice(0,8).map(l=>l.id); const a8=aqFishBase(fish); S.unlocked=keepU; if(!(a8>a1)) e.push('aquarium catch-up '+[a1,a8].map(v=>v.toFixed(2)));
   if(/flashT/.test(String(feelDraw))) e.push('hook flash still drawn');
-  { const keep=snap(), sv=save, ts=toast; save=()=>{}; toast=()=>{}; try{ for(const ft of FEATS) S.feats[ft.id]=S.feats[ft.id]||1; /* no feat can fire from these claims */ const m0=S.money; fillBounties(); let n=0; for(const b of S.bounties) if(b.loc===S.loc&&n<2&&b.type==='count'){ b.have=b.n; n++; } const ready=S.bounties.filter(b=>bDone(b)&&(!b.loc||S.unlocked.includes(b.loc))).length; act('claimall'); const left=S.bounties.filter(b=>bDone(b)&&(!b.loc||S.unlocked.includes(b.loc))).length; if(ready>=2&&!(left===0&&S.money>m0)) e.push('claim all left '+left+' of '+ready); } finally{ save=sv; toast=ts; restore(keep); } } /* the whole save comes back: a real claim can finish feats (it unlocked one and broke later tests, 2026-11-25) */
+  { const keep=snap(), sv=save, ts=toast; save=()=>{}; toast=()=>{}; try{ for(const ft of FEATS) S.feats[ft.id]=S.feats[ft.id]||1; /* no feat can fire from these claims */ const m0=S.money, s0=S.scales; S.relics=(S.relics||[]).filter(r=>r!=='seasoned'); fillBounties(); let n=0; for(const b of S.bounties) if(b.loc===S.loc&&n<2&&b.type==='count'){ b.have=b.n; n++; } const ready=S.bounties.filter(b=>bDone(b)&&(!b.loc||S.unlocked.includes(b.loc))).length; act('claimall',{k:'sc'}); const left=S.bounties.filter(b=>bDone(b)&&(!b.loc||S.unlocked.includes(b.loc))).length; if(ready>=2&&!(left===0&&S.scales>s0&&S.money===m0)) e.push('claim all left '+left+' of '+ready+', Scales +'+(S.scales-s0)+', coins +'+(S.money-m0)); } finally{ save=sv; toast=ts; bountyGot=null; restore(keep); } } /* the whole save comes back: a real claim can finish feats (it unlocked one and broke later tests, 2026-11-25) */
   return e.length?{ok:false,detail:e.join('; ')}:{ok:true,detail:'starfall '+ts.toFixed(0)+' lb, olympus '+to.toFixed(0)+' lb, aquarium x'+(a8/a1).toFixed(2)+' with 8 waters'}; });
 T('Cam 2026-11-24 (6): tired fish keep half their hold and a slower cap, stronger-than-you extras scale with rarity, voyages to 100, earlier waters pay more, no swim arrows',()=>{ const e=[];
   if(FF.TIRED_RES!==.5) e.push('tired hold '+FF.TIRED_RES); if(!(FF.TIRED_T[0]<=3&&FF.TIRED_T[5]>=8)) e.push('tired cap '+FF.TIRED_T);
@@ -22881,17 +22827,17 @@ T('Cam 2026-11-23 (4): second winds by rarity, small hybrids fight full, spool 8
       const hm=land(5,'holder'); if(hm.p>.2) e.push('holding the reel through moves lands mythics '+Math.round(hm.p*100)+'%');
       return e.length?{ok:false,detail:e.join(' | ')}:{ok:true,detail:Object.keys(out).map(r=>'r'+r+' '+out[r].t.toFixed(1)+'s').join(', ')+', holder mythic '+Math.round(hm.p*100)+'%'};
     } finally{ Math.random=R; reelInput=rf; save=sv; toast=ts; FISH_OLD=keepOld; S.loc=keepLoc; S.perks=keepPerks; S.gear=keepGear; G.st='idle'; G.fish=null; G.hold=false; } });
-  T('Cam’s fix list: scrap messages name the Nibble tier; the Bounties badge ignores yesterday’s tasks and locked waters; Scrap all sits beside Sell all; the cooler sorts by rarity; distances and depths switch to feet; pet color rows never vanish',()=>{ const e=[], ts=toast, R=Math.random, keep={daily:S.daily, b:S.bounties, u:S.unlocked.slice(), cool:S.cooler.slice(), dist:S.settings.dist, tab:S.tab}; let last=''; toast=m=>{ last=String(m); };
+  T('Cam’s fix list: scrap messages name the Nibble tier; the Bounties badge ignores yesterday’s tasks and locked waters; Scrap all sits beside Sell all; the cooler sorts by rarity; distances and depths switch to feet; pet color rows never vanish',()=>{ const e=[], ts=toast, R=Math.random, keep={b:S.bounties, u:S.unlocked.slice(), cool:S.cooler.slice(), dist:S.settings.dist, tab:S.tab}; let last=''; toast=m=>{ last=String(m); };
     try{ const sp=SP.find(s=>s.r===2&&!s.meme); S.cooler=[{id:sp.id,kg:sp.min,value:100,sh:0,tr:0}]; Math.random=()=>0; nibScrap(0); if(!/Rare Nibble/.test(last)||new RegExp(sp.name).test(last)) e.push('scrap message: '+last);
       S.cooler=[{id:sp.id,kg:sp.min,value:100,sh:0,tr:0},{id:SP.find(s=>s.r===0).id,kg:.1,value:5,sh:0,tr:0}]; nibScrapAll(); if(!/Common/.test(last)||!/Rare/.test(last)) e.push('scrap all message: '+last); Math.random=R;
-      /* #6: yesterday's finished task and a bounty at a water you no longer have open never count */ const d=ensureDaily(); S.daily=JSON.parse(JSON.stringify(d)); S.daily.day='1999-01-01'; S.daily.tasks.forEach(t=>{ t.have=t.n; t.claimed=false; if(t.t==='earn') t.start=-1e12; });
-      S.bounties=[{type:'count',sp:SP.find(s=>s.loc==='deep').id,loc:'deep',n:1,have:1,reward:10}]; S.unlocked=['pond']; const n=bountyReady(); if(n!==wqReady()) e.push('badge counts '+n+' (want only the weekly quests, '+wqReady()+')');
+      /* #6: a bounty at a water you no longer have open never counts (daily tasks and weekly quests, which this also covered, went on 2026-11-27) */
+      S.bounties=[{type:'count',sp:SP.find(s=>s.loc==='deep').id,loc:'deep',n:1,have:1,reward:10}]; S.unlocked=['pond']; const n=bountyReady(); if(n!==0) e.push('badge counts '+n+' (want 0)');
       /* #7 and #8 */ S.cooler=[{id:SP.find(s=>s.r===0).id,kg:.1,value:5,sh:0,tr:0},{id:sp.id,kg:sp.min,value:100,sh:0,tr:0}]; S.tab='cooler'; renderPanel(); const P=$('panel'), sa=P.querySelector('[data-act="sellall"]'), sc=P.querySelector('[data-act="scrapall"]');
       if(!sa||!sc) e.push('Sell all or Scrap all missing'); else { if(sc.closest('.sellf')) e.push('Scrap all still in the filter row'); if(!sc.classList.contains('btn')||sc.classList.contains('sm')!==sa.classList.contains('sm')) e.push('Scrap all is not the same size as Sell all'); const a=sa.getBoundingClientRect(), b=sc.getBoundingClientRect(); if(a.width&&Math.abs(a.height-b.height)>3) e.push('Sell all '+Math.round(a.height)+' px tall, Scrap all '+Math.round(b.height)+' px'); }
       act('coolsort',{k:'rarity'}); const ord=coolOrder(); if(!ord.length||SPI[ord[0].f.id].r!==2) e.push('rarity sort does not put the rarest first'); act('coolsort',{k:'recent'});
       /* #11 */ S.settings.dist='ft'; if(depthStr('3,000 m +')!=='about 10,000 ft +') e.push('depth in feet: '+depthStr('3,000 m +')); if(dStr(10)!=='33 ft') e.push('distance in feet: '+dStr(10)); S.settings.dist='m'; if(depthStr('1–3 m')!=='1–3 m'||dStr(10)!=='10.0 m') e.push('metres changed');
       /* pet color rows stay in place */ const h=petCustomHTML(); if(!/Hat color/.test(h)||!/Accessory color/.test(h)) e.push('a pet color row is missing');
-    } finally{ toast=ts; Math.random=R; S.daily=keep.daily; S.bounties=keep.b; S.unlocked=keep.u; S.cooler=keep.cool; S.settings.dist=keep.dist; S.tab=keep.tab; }
+    } finally{ toast=ts; Math.random=R; S.bounties=keep.b; S.unlocked=keep.u; S.cooler=keep.cool; S.settings.dist=keep.dist; S.tab=keep.tab; }
     return e.length?{ok:false,detail:e.join(' | ')}:true; });
   T('aquarium sizes are real (cube root of weight: 8× the weight = 2× the length, capped to fit), deeper fish smaller, big fish slower; hair system: every style has volume above the skull and draws without errors; builds change the silhouette',()=>{ const e=[];
     const L=kg=>tankLen({kg},300,800); if(Math.abs(L(.8)/L(.1)-2)>.05) e.push('0.1→0.8 kg ×'+(L(.8)/L(.1)).toFixed(2)); if(!(L(10000)<=Math.min(300*.46,800*.34)+.01)) e.push('giant not capped'); if(!(L(1000)>L(10)*1.8)) e.push('big range too small'); if(!(tankPace({kg:500})<tankPace({kg:.2}))) e.push('big fish not slower');
@@ -22933,7 +22879,25 @@ T('Cam 2026-11-23 (4): second winds by rarity, small hybrids fight full, spool 8
     closeMenu(); check('fishing'); for(const t of qaAllPages()){ openMenu(t); check(t); } closeMenu(); check('fishing again');
     return bad.length?{ok:false,detail:[...new Set(bad)].slice(0,6).join(' | ')}:{ok:true,detail:'no badge cut'}; });
 T('page tabs: a part hidden by a page tab never stays on screen (a forced style once kept the Events calendar on every tab)',()=>{ const bad=[]; const pages=qaAllPages(); let n=0; for(const t of pages){ openMenu(t); const P=$('panel'); for(const b of [...document.querySelectorAll('#menuov .sect-nav [data-sect], #panel .sect-nav [data-sect]')]){ b.click(); n++; for(const e of P.querySelectorAll('*')){ if(e.style.display==='none'&&getComputedStyle(e).display!=='none') bad.push(t+' / '+b.dataset.sect+': '+((e.className||e.tagName)+'').slice(0,30)); } } } closeMenu(); return bad.length?{ok:false,detail:[...new Set(bad)].slice(0,8).join(' | ')}:{ok:true,detail:n+' page tabs checked'}; });
-  T('weekly quests: progress from counters, each pays once, crate once, week rollover and damaged saves rebuild',()=>{ const e=[]; S.weekly=null; const w=ensureWeekly(); if(w.quests.length!==4) e.push('quests '+w.quests.length); for(const q of w.quests){ const m={caught:()=>S.stats.caught+=q.n,shiny:()=>S.stats.shiny+=q.n,earned:()=>S.stats.earned+=q.n,tasks:()=>S.gstats.tasks+=q.n,hot:()=>S.stats.hot+=q.n,chal:()=>S.stats.chalWins=(S.stats.chalWins||0)+q.n,species:()=>{}}; m[q.t](); } const sc0=S.scales; w.quests.forEach((q,i)=>{ if(q.t==='species') q.base-=q.n; act('wqclaim',{i}); act('wqclaim',{i}); }); const want=w.quests.reduce((a,q)=>a+q.scales,0); if(S.scales-sc0!==want) e.push('scales '+(S.scales-sc0)+' want '+want); const big=S.tokens.big; act('wqbonus',{}); act('wqbonus',{}); if(S.tokens.big-big!==1) e.push('crate '+(S.tokens.big-big)); S.weekly.wk='2000-01-03'; if(ensureWeekly().wk!==weekKey()) e.push('rollover'); S.weekly={wk:1,quests:[null]}; if(!Array.isArray(ensureWeekly().quests)||ensureWeekly().quests.length!==4) e.push('rebuild'); return e.length?{ok:false,detail:e.join('; ')}:{ok:true,detail:'claims, crate, rollover and rebuild ok'}; });
+  T('bounty rewards: Scales or a Nibble crate and never coins; the crate follows its pool (a big one holds an Epic or better); the Bounty Ledger relic pays both; a variety hunt counts each kind once; daily tasks and weekly quests are gone',()=>{ const e=[], keep=snap(), sv=save, ts=toast, R=Math.random; save=()=>{}; toast=()=>{};
+    try{ for(const ft of FEATS) S.feats[ft.id]=S.feats[ft.id]||1; /* no feat fires from these claims */
+      /* the pool */ for(const size of ['small','big']){ const C=NIB_CRATE[size]; if(C.odds.reduce((a,b)=>a+b,0)!==100) e.push(size+' odds add up to '+C.odds.reduce((a,b)=>a+b,0)); for(let k=0;k<200;k++){ const r=nibCrateRoll(size), n=r.reduce((a,b)=>a+b,0); if(n!==C.n){ e.push(size+' crate held '+n); break; } if(r.some((x,i)=>x&&!C.odds[i]&&i!==C.min)){ e.push(size+' crate gave a tier with no odds'); break; } if(C.min&&!r.slice(C.min).some(x=>x>0)){ e.push('a big crate without an Epic or better'); break; } } }
+      { const tot=[0,0,0,0,0,0]; for(let k=0;k<3000;k++) nibCrateRoll('small').forEach((x,i)=>tot[i]+=x); const all=tot.reduce((a,b)=>a+b,0), sh=tot.map(x=>x/all); NIB_CRATE.small.odds.forEach((o,i)=>{ if(Math.abs(sh[i]-o/100)>.03) e.push('small crates gave '+NIB_TIER[i]+' '+Math.round(sh[i]*100)+'% of the time, the pool says '+o+'%'); }); }
+      Math.random=()=>0; { const r=nibCrateRoll('big'); if(r[0]!==9||r[3]!==1) e.push('all-common big crate became '+r.join(',')); } Math.random=R;
+      /* the pick */ const sp=SP.find(s=>s.loc==='pond'&&s.r===0); S.relics=(S.relics||[]).filter(r=>r!=='seasoned'); S.unlocked=['pond']; S.loc='pond';
+      const mk=()=>({type:'count',sp:sp.id,loc:'pond',n:1,have:1,reward:10}), nibs=()=>NIB_RAR.reduce((a,r,i)=>a+((S.nib&&S.nib['r'+i])||0),0);
+      S.bounties=[mk()]; S.nib={}; let m0=S.money, s0=S.scales, x0=S.pass.xp+S.pass.lvl*1e6, t0=S.gstats.tasks||0; act('claim',{i:0,k:'cr'}); if(nibs()!==NIB_CRATE.small.n) e.push('small crate gave '+nibs()+' Nibbles'); if(S.scales!==s0) e.push('the crate pick also paid Scales'); if(S.money!==m0) e.push('coins paid'); if(!(S.pass.xp+S.pass.lvl*1e6>x0)) e.push('no Tide Pass XP'); if((S.gstats.tasks||0)!==t0+1) e.push('the claim was not counted for the feats');
+      if(bountyGot===null||!bountyGot.crates) e.push('nothing to show for the crate'); bountyShow(); if(!$('nibcrate')) e.push('the Nibble crate card did not open'); else { if(!/Nibble crate/.test($('nibcrate').textContent)) e.push('card text'); nibCrateClose(); if($('nibcrate')) e.push('card did not close'); }
+      S.bounties=[Object.assign(mk(),{legend:1})]; S.nib={}; s0=S.scales; act('claim',{i:0,k:'sc'}); if(S.scales-s0!==BOUNTY_SC[1]) e.push('a hard bounty paid '+(S.scales-s0)+' Scales'); if(nibs()) e.push('the Scales pick also gave Nibbles'); bountyGot=null;
+      S.bounties=[mk()]; s0=S.scales; act('claim',{i:0,k:'gold'}); if(S.bounties[0].sp!==sp.id||!bDone(S.bounties[0])||S.scales!==s0) e.push('an unknown pick was accepted');
+      /* the relic */ S.relics=[...(S.relics||[]),'seasoned']; S.bounties=[mk()]; S.nib={}; s0=S.scales; act('claim',{i:0}); if(S.scales-s0!==BOUNTY_SC[0]||nibs()!==NIB_CRATE.small.n) e.push('Bounty Ledger: Scales +'+(S.scales-s0)+', Nibbles '+nibs()); bountyGot=null;
+      S.tab='bounties'; S.bounties=[mk()]; renderPanel(); { const P=$('panel'), bs=[...P.querySelectorAll('[data-act="claim"]')]; if(bs.length!==1||bs[0].dataset.k!=='both') e.push('with the relic the tile shows '+bs.length+' claim buttons'); }
+      S.relics=S.relics.filter(r=>r!=='seasoned'); S.bounties=[mk()]; renderPanel(); { const P=$('panel'), ks=[...P.querySelectorAll('[data-act="claim"]')].map(b=>b.dataset.k).sort().join(); if(ks!=='cr,sc') e.push('without the relic the tile offers '+ks); if(/coin/.test((P.querySelector('.tile.done')||{}).innerHTML||'')) e.push('a bounty tile still shows coins as a reward'); if(/Daily tasks|Weekly quests/.test(P.textContent)) e.push('daily tasks or weekly quests are still on the page'); }
+      /* the variety hunt */ const two=SP.filter(s=>s.loc==='pond').slice(0,2), kb={type:'kinds',loc:'pond',n:2,have:0,got:[],reward:10}; S.bounties=[kb]; const fx=s=>({sp:s,kg:s.min,shiny:0,trophy:0}); checkBounties2(fx(two[0])); checkBounties2(fx(two[0])); if(kb.have!==1) e.push('the same fish counted twice: '+kb.have); checkBounties2(fx(SP.find(s=>s.loc!=='pond'))); if(kb.have!==1) e.push('a fish from another water counted'); checkBounties2(fx(two[1])); if(!bDone(kb)||!bountyHard(kb)) e.push('variety hunt not finished or not a harder bounty'); if(!migrate(JSON.parse(JSON.stringify(S))).bounties.some(b=>b.type==='kinds')) e.push('a variety hunt does not survive loading the save');
+      for(const n of ['ensureDaily','ensureWeekly','dailyHTML','weeklyHTML']) if(new RegExp('function '+n+'\\b').test(document.documentElement.innerHTML)) e.push(n+' is still in the page');
+    } finally{ save=sv; toast=ts; Math.random=R; bountyGot=null; nibCrateClose(); restore(keep); }
+    return e.length?{ok:false,detail:e.join('; ')}:{ok:true,detail:'pool, pick, relic, variety hunt ok'}; });
+  T('every feat’s pop-up fits the pop-up length (it only showed when a random test happened to earn one)',()=>{ const bad=[]; for(const f of FEATS){ const t='Feat: '+f.name+' (+'+fmt(f.coins)+' coins'+(f.pt?', +'+f.pt+' skill point'+(f.pt>1?'s':''):'')+', a '+(f.pt?'big':'small')+' crate)'; if(t.length>TEXT_LIMITS.popup) bad.push(t.length+': '+t); } return bad.length?{ok:false,detail:bad.slice(0,5).join(' | ')}:{ok:true,detail:FEATS.length+' feats'}; });
   T('weather forecast matches the real weather schedule, in order and in the future',()=>{ const e=[]; const f=wxForecast(6), now=Date.now()/1000; let last=0; for(const x of f){ const t=x.at+now+1, real=(window.__wxTime?__wxTime.kindAt(t):weatherAt(Math.floor(t/WX_LEN))).k; if(real!==x.k) e.push(x.k+' forecast, '+real+' real at +'+Math.round(x.at)+' s'); if(window.__wxTime){ const R=__wxTime.RULE[x.k]; if(R&&(R==='night')!==__wxTime.night(t)) e.push(x.k+' at the wrong time of day'); } if(x.at<=0||x.at<last) e.push('order '+x.at); last=x.at; } if(!f.length) e.push('empty'); return e.length?{ok:false,detail:e.join('; ')}:{ok:true,detail:f.map(x=>x.k).join(', ')}; });
   T('no Menu button: the category bar opens the pages; "Collapse panel" shrinks both side panels and is remembered',()=>{ const e=[]; if($('menubtn')&&$('menubtn').isConnected) e.push('Menu button still on screen'); if(!$('catdock')||!$('catdock').querySelector('.cdb[data-cd]')) e.push('no category bar');
     const tg=document.querySelectorAll('.cdmini'); if(tg.length!==2) e.push(tg.length+' collapse buttons'); if(!matchMedia('(orientation:landscape) and (max-height:560px)').matches){ openMenu('rods'); tg.forEach(b=>{ if(getComputedStyle(b).display!=='none') e.push('collapse button shown outside landscape phones'); }); closeMenu(); } const was=!!(S.settings&&S.settings.dockMini);
@@ -23016,7 +22980,7 @@ T('page tabs: a part hidden by a page tab never stays on screen (a forced style 
 fuzz(){ QA.sys='Adversarial';
   T('3,000 random actions (spam, bad ids, bad indexes): no errors, rules always hold',()=>{ const errs=[]; const h=e=>errs.push(String(e.message||e.reason)+(e.error&&e.error.stack?' @ '+e.error.stack.split(String.fromCharCode(10)).slice(1,4).join(' <- '):'')); addEventListener('error',h); addEventListener('unhandledrejection',h); const os=window.toast;
       const pick=a=>a[Math.floor(Math.random()*a.length)], ks={buygear:Object.keys(GEAR), buybait:Object.keys(BAIT), perk:Object.keys(PERKS), unlock:LOCS.map(l=>l.id), goto:LOCS.map(l=>l.id), buypet:Object.keys(PETI), pet:Object.keys(PETI), rodbuy:RODS.map(r=>r.id), rodeq:RODS.map(r=>r.id), rodup:RODS.map(r=>r.id), usebait:Object.keys(BAIT), chalgo:Object.keys(CHAL), dcol:DW_ORDER, crate:['small','big','legend'], spec:typeof SPECS!=='undefined'?Object.keys(SPECS):[], relic:typeof RELICS!=='undefined'?RELICS.map(r=>r.id||r[0]):[], aqtheme:THEMES.map(t=>t[0]), aqsand:SANDS.map(t=>t[0]), decor:DECOR.map(d=>d.id), encloc:LOCS.map(l=>l.id), bloc:LOCS.map(l=>l.id), enc:SP.map(s=>s.id)};
-      const acts=['buygear','buybait','perk','respec','unlock','goto','claim','reroll','collect','sellall','sell','totank','untank','buytank','feed','passclaim','buypet','pet','rodbuy','rodeq','rodup','usebait','chalgo','chalquit','dcol','retire','cancel','spin','crate','scratch','taskclaim','taskbonus','dhunts','buyoffer','bwbuy','prize','attbuy','rodatt','spec','relic','aqtheme','aqsand','decor','petacc','pettint','look','flip','hilostart','hilo','claw','buyscratch','scratchall','frenzy','duckpick','statsec','tackleview','bwview','encloc','bloc','enc','petedit','pet2','pet2off','tryon','tryoff','aqpv','aqpvoff','petpv','petpvoff','autobait','duckagain','hilocash','wqclaim','wqbonus'];
+      const acts=['buygear','buybait','perk','respec','unlock','goto','claim','reroll','collect','sellall','sell','totank','untank','buytank','feed','passclaim','buypet','pet','rodbuy','rodeq','rodup','usebait','chalgo','chalquit','dcol','retire','cancel','spin','crate','scratch','dhunts','buyoffer','bwbuy','prize','attbuy','rodatt','spec','relic','aqtheme','aqsand','decor','petacc','pettint','look','flip','hilostart','hilo','claw','buyscratch','scratchall','frenzy','duckpick','statsec','tackleview','bwview','encloc','bloc','enc','petedit','pet2','pet2off','tryon','tryoff','aqpv','aqpvoff','petpv','petpvoff','autobait','duckagain','hilocash','wqclaim','wqbonus'];
       let stepFail=null; try{ S.money=Math.max(S.money,5e6); S.scales=Math.max(S.scales,500); for(let n=0;n<(window.__qaN||3000);n++){ const a=pick(acts), k=ks[a]?(Math.random()<.9?pick(ks[a]):pick(['__bad','',undefined])):undefined, i=String(Math.floor(Math.random()*12)-2);
         G.st=Math.random()<.15?'waiting':'idle'; try{ act(a,{k,i}); }catch(e){ errs.push(a+': '+e.message); } if(S.tab!==DASH&&Math.random()<.5) setTab(DASH);
         if(n%50===0){ const p=inv(); if(p.length){ stepFail='after '+n+' ('+a+' '+k+'): '+p.slice(0,4).join('; '); break; } } } }
@@ -23468,7 +23432,7 @@ function makeBounty(L){ L=L||S.loc;
 function bountyLoc(b){ if(b.loc) return b.loc; if(b.sp&&SPI[b.sp]) return SPI[b.sp].loc; return null; }
 function fillBounties(){ for(const b of S.bounties){ if(!b.loc){ const l=bountyLoc(b); b.loc=l||S.loc; } }
   for(const L of S.unlocked){ let n=S.bounties.filter(b=>b.loc===L).length; while(n<BOUNTIES_PER_WATER){ S.bounties.push(makeBounty2(L)||makeBounty(L)); n++; } } }
-function bDone(b){ return (b.type==='count'||b.type==='style') ? b.have>=b.n : b.have>=1; }
+function bDone(b){ return (b.type==='count'||b.type==='style'||b.type==='kinds') ? b.have>=b.n : b.have>=1; }
 function checkBounties(sp,kg){ const done=[]; for(const b of S.bounties){ if(b.sp!==sp.id || bDone(b)) continue; if(b.type==='count'){ b.have++; } else if(kg>=b.kg){ b.have=1; } if(bDone(b)) done.push(b); } return done; }
 
 // ---------- panels ----------
@@ -23531,18 +23495,18 @@ function renderAquarium(P){ accrue(); const rate=tankRate(); let AQS=null; const
   paintFish(P); paintDecor(P);
 }
 function renderBounties(P){ fillBounties(); const ready=S.bounties.filter(b=>bDone(b)&&(!b.loc||S.unlocked.includes(b.loc))).length;
-  P.innerHTML=dailyHTML()+`<h2>Bounties</h2><p class="sub">The harbourmaster pays extra for specific catches. Every water has its own board, and its bounties wait there until you finish them. Fish still go in your cooler.</p>
-  <div class="chips" style="margin:6px 0 10px">${S.unlocked.slice().sort((a,b)=>locIdx(a)-locIdx(b)).map(L=>{ const n=S.bounties.filter(b=>b.loc===L&&bDone(b)).length; return `<button class="chipb" data-act="bloc" data-k="${L}" aria-pressed="${(bLoc||S.loc)===L}">${esc(LOCS[locIdx(L)].name)}${n?' · '+n+' ready':''}</button>`; }).join('')}</div>${ready>1?`<button class="btn" data-act="claimall" style="margin:0 0 10px">Claim all · ${ready} ready</button>`:''}<div class="grid">`+
-  S.bounties.map((b,i)=>{ if(b.loc!==(S.unlocked.includes(bLoc)?bLoc:S.loc)) return ''; const bt=bountyText(b); if(bt){ const d=bDone(b), rw=Math.round(b.reward*coinMult()*1);
-      return `<div class="tile ${d?'done':''}"><span class="rar" style="color:var(--kelp)">${b.type==='shiny'?'Shiny hunt':b.type==='trophy'?'Trophy hunt':'Style hunt'}</span><h4>${esc(bt.what)}</h4><div class="meta">${bt.where} · ${b.type==='style'?Math.min(b.have,b.n)+' / '+b.n:(d?'Done':'Not yet')}</div>
-       <div class="row spread"><span class="val"><span class="coin">${fmt(rw)}</span> + ${b.scales} Scales</span>${d?`<button class="btn" data-act="claim" data-i="${i}">Claim</button>`:`<button class="btn alt" data-act="reroll" data-i="${i}" ${S.money>=Math.ceil(b.reward*.1)?'':'disabled'}>Swap · <span class="coin">${fmt(Math.ceil(b.reward*.1))}</span></button>`}</div></div>`; }
+  P.innerHTML=`<h2>Bounties</h2><p class="sub">The harbourmaster pays for specific catches: ${bountyBoth()?'Scales and a Nibble crate (your Bounty Ledger pays both)':'Scales or a Nibble crate, your pick'}. Every water has its own board, and its bounties wait there until you finish them. Fish still go in your cooler.</p>
+  <div class="chips" style="margin:6px 0 10px">${S.unlocked.slice().sort((a,b)=>locIdx(a)-locIdx(b)).map(L=>{ const n=S.bounties.filter(b=>b.loc===L&&bDone(b)).length; return `<button class="chipb" data-act="bloc" data-k="${L}" aria-pressed="${(bLoc||S.loc)===L}">${esc(LOCS[locIdx(L)].name)}${n?' · '+n+' ready':''}</button>`; }).join('')}</div>${ready>1?`<div class="bpick" style="margin:0 0 10px;justify-content:flex-start">${bountyBoth()?`<button class="btn" data-act="claimall" data-k="both">Claim all · ${ready} ready</button>`:`<button class="btn" data-act="claimall" data-k="sc">Claim all ${ready} · Scales</button><button class="btn" data-act="claimall" data-k="cr">Claim all ${ready} · Nibble crates</button>`}</div>`:''}<div class="grid">`+
+  S.bounties.map((b,i)=>{ if(b.loc!==(S.unlocked.includes(bLoc)?bLoc:S.loc)) return ''; const bt=bountyText(b); if(bt){ const d=bDone(b);
+      return `<div class="tile ${d?'done':''}"><span class="rar" style="color:var(--kelp)">${b.type==='shiny'?'Shiny hunt':b.type==='trophy'?'Trophy hunt':b.type==='kinds'?'Variety hunt':'Style hunt'}</span><h4>${esc(bt.what)}</h4><div class="meta">${bt.where} · ${b.type==='style'||b.type==='kinds'?Math.min(b.have,b.n)+' / '+b.n:(d?'Done':'Not yet')}</div>
+       <div class="row spread"><span class="val brew">${bountyPayText(b)}</span>${d?bountyClaimBtns(b,i):`<button class="btn alt" data-act="reroll" data-i="${i}" ${S.money>=Math.ceil(b.reward*.1)?'':'disabled'}>Swap · <span class="coin">${fmt(Math.ceil(b.reward*.1))}</span></button>`}</div></div>`; }
     const sp=SPI[b.sp], d=bDone(b), L=LOCS[locIdx(sp.loc)];
     const what = b.type==='count' ? `Catch ${b.n} × ${sp.name}` : `Catch ${/^[aeiou]/i.test(sp.name)?"an":"a"} ${sp.name} of ${kgStr(b.kg)} or more`;
     const prog = b.type==='count' ? `${Math.min(b.have,b.n)} / ${b.n}` : (d?'Done':'Not yet');
     return `<div class="tile ${d||b.legend?'done':''}">${b.legend?'<span class="rar" style="color:var(--gold)">Legendary bounty</span>':''}<canvas width="220" height="90" data-fish="${sp.id}" data-known="${S.journal[sp.id]?1:0}" style="width:110px;height:45px"></canvas><h4>${S.journal[sp.id]||!b.legend?what:'Catch the legend of '+L.name}</h4>
     <div class="meta">${L.name}${sp.time!=='any'?' · '+(sp.time==='night'?'night only':'day only'):''} · ${RAR[sp.r].k} · ${prog}</div>
-    <div class="row spread"><span class="val coin">${fmt(b.reward*coinMult())}</span>
-    ${d?`<button class="btn" data-act="claim" data-i="${i}">Claim</button>`:`<button class="btn alt" data-act="reroll" data-i="${i}" ${S.money>=Math.ceil(b.reward*.1)?'':'disabled'}>Swap · <span class="coin">${fmt(Math.ceil(b.reward*.1))}</span></button>`}</div></div>`; }).join('')+'</div>';
+    <div class="row spread"><span class="val brew">${bountyPayText(b)}</span>
+    ${d?bountyClaimBtns(b,i):`<button class="btn alt" data-act="reroll" data-i="${i}" ${S.money>=Math.ceil(b.reward*.1)?'':'disabled'}>Swap · <span class="coin">${fmt(Math.ceil(b.reward*.1))}</span></button>`}</div></div>`; }).join('')+'</div>';
   paintFish(P);
 }
 function renderFeats(P){ const done=FEATS.filter(f=>S.feats[f.id]).length;
@@ -23670,7 +23634,7 @@ $('panel').addEventListener('click',e=>{ const b=e.target.closest('[data-act]');
     case 'buygear': { const lv=S.gear[k], c=GEAR[k].cost[lv+1]; if(c==null||S.money<c) return; S.money-=c; S.gear[k]++; sfx.coin(); toast(GEAR[k].name+' upgraded to level '+S.gear[k]); break; }
     case 'buybait': { const bt=BAIT[k]; if(!bt||bt.junk||!(bt.pack>0)||!(bt.scales>0||bt.price>0)) return; if(bt.scales){ if(S.scales<bt.scales) return; S.scales-=bt.scales; S.bait[k]+=bt.pack; } else { const n=+b.dataset.n||1, cost=n>1?bt.price*4.5:bt.price; if(S.money<cost) return; S.money-=cost; S.bait[k]+=bt.pack*n; } if(S.baitSel==='worm') S.baitSel=k; sfx.coin(); toast('Bought '+bt.name); break; }
     case 'usebait': S.baitSel=k; break;
-    case 'claim': { const bo=S.bounties[i]; if(!bo||!bDone(bo)) return; const paid=earn(bo.reward*coinMult()*(relic('seasoned')?1.3:1)); /* Bounty Ledger relic (Cam, round 5) */ if(bo.scales) S.scales+=bo.scales; S.bounties.splice(i,1); fillBounties(); sfx.coin(); toast('Bounty paid: '+fmt(paid)+' coins'+(bo.scales?' and '+bo.scales+' Scales':'')); break; }
+    case 'claim': { const bo=S.bounties[i]; if(!bo||!bDone(bo)) return; const pk=bountyBoth()?'both':k; if(pk!=='both'&&pk!=='sc'&&pk!=='cr') return; /* the pick: Scales or the Nibble crate; the Bounty Ledger relic pays both (bs_rules05.js) */ bountyGive(bo,pk); S.bounties.splice(i,1); fillBounties(); sfx.coin(); break; }
     case 'retire': { if(!canRetire()) return; confirmBox='retire'; break; }
     case 'reset': confirmBox='reset'; break;
     case 'cancel': confirmBox=null; pendingLoad=null; break;
@@ -23700,7 +23664,7 @@ $('settingsbtn').addEventListener('click',e=>{ e.currentTarget.blur(); startAudi
 function refreshAll(){ lastHud=''; renderBait(); setTab(S.tab||'cooler'); hud(); }
 
 // ---------- boot ----------
-offlineIncome(); fillBounties(); ensureDaily(); accrueSpins(); checkFeats(); refreshAll(); requestAnimationFrame(frame); resize.live=true; initCloud();
+offlineIncome(); fillBounties(); accrueSpins(); checkFeats(); refreshAll(); requestAnimationFrame(frame); resize.live=true; initCloud();
 { const gift=dailyLogin(); const veteran=S.stats.caught>0||S.savedAt; if(S.seenPatch!==GAME_VERSION){ const seen0=S.seenPatch; S.seenPatch=GAME_VERSION; if(veteran) setTimeout(()=>showWhatsNew(seen0,gift),700); else if(gift) setTimeout(()=>toast(gift),1200); } else if(gift) setTimeout(()=>toast(gift),1200); save(); }
 if(!S.stats.caught && !S.savedAt) setTimeout(()=>toast('Hold on the water to cast your first line'),600);
 })();
