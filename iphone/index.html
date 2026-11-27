@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="DL Test iPhone">
 <script>
-window.DL_BUILD='ios'; window.DL_PREVIEW=true; if(/[?&]sweep\b/.test(location.search)){ window.__bootErr=[]; addEventListener("error",function(e){ __bootErr.push(String(e.message||e)+(e.lineno?" (line "+e.lineno+")":"")); }); addEventListener("unhandledrejection",function(e){ __bootErr.push("promise: "+String(e.reason&&e.reason.message||e.reason)); }); window.requestAnimationFrame=function(f){ return setTimeout(function(){ f(performance.now()); },16); }; window.cancelAnimationFrame=function(i){ clearTimeout(i); }; } try{ window.__tOff=/[?&](test|sweep|frozen)\b/.test(location.search)?0:(+(localStorage.getItem("dl-test-toff")||0)||0); }catch(e){ window.__tOff=0; } (function(){ var rn=Date.now.bind(Date); Date.now=function(){ return rn()+window.__tOff; }; })(); if(/[?&]frozen\b/.test(location.search)){ var __fz=20261122; Math.random=function(){ __fz|=0; __fz=__fz+0x6D2B79F5|0; var t=Math.imul(__fz^__fz>>>15,1|__fz); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; var __fc=0, __pn=performance.now.bind(performance); performance.now=function(){ __fc+=0.01; return 100000+__fc; }; Date.now=function(){ return 1795300000000+Math.floor(__fc); }; window.__frozenClock=function(){ return __fc; }; window.requestAnimationFrame=function(){ return 0; }; window.cancelAnimationFrame=function(){}; } window.DL_VERSION='2026.11.27-1125';
+window.DL_BUILD='ios'; window.DL_PREVIEW=true; if(/[?&]sweep\b/.test(location.search)){ window.__bootErr=[]; addEventListener("error",function(e){ __bootErr.push(String(e.message||e)+(e.lineno?" (line "+e.lineno+")":"")); }); addEventListener("unhandledrejection",function(e){ __bootErr.push("promise: "+String(e.reason&&e.reason.message||e.reason)); }); window.requestAnimationFrame=function(f){ return setTimeout(function(){ f(performance.now()); },16); }; window.cancelAnimationFrame=function(i){ clearTimeout(i); }; } try{ window.__tOff=/[?&](test|sweep|frozen)\b/.test(location.search)?0:(+(localStorage.getItem("dl-test-toff")||0)||0); }catch(e){ window.__tOff=0; } (function(){ var rn=Date.now.bind(Date); Date.now=function(){ return rn()+window.__tOff; }; })(); if(/[?&]frozen\b/.test(location.search)){ var __fz=20261122; Math.random=function(){ __fz|=0; __fz=__fz+0x6D2B79F5|0; var t=Math.imul(__fz^__fz>>>15,1|__fz); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; var __fc=0, __pn=performance.now.bind(performance); performance.now=function(){ __fc+=0.01; return 100000+__fc; }; Date.now=function(){ return 1795300000000+Math.floor(__fc); }; window.__frozenClock=function(){ return __fc; }; window.requestAnimationFrame=function(){ return 0; }; window.cancelAnimationFrame=function(){}; } window.DL_VERSION='2026.11.27-1252';
 window.addEventListener('beforeinstallprompt',function(e){ e.preventDefault(); window.__dlInstallPrompt=e; });
 </script>
 </head>
@@ -14879,6 +14879,7 @@ function bountyEffort(b){ const sp=b.sp&&SPI[b.sp]; if(b.legend||b.type==='shiny
   if(!sp) return 1; const w=BOUNTY_W[Math.min(5,sp.r)]*(sp.time&&sp.time!=='any'?1.25:1); return b.type==='size' ? w*2 : w*(b.n||1); }
 const bountyPay = b => { const e=bountyEffort(b); return {sc:clamp(Math.round(1+e),2,12), cr:e>=BOUNTY_BIG?'big':'small', n:clamp(Math.round(3+e*.7),4,10)}; };
 const bountyBoth = () => !!relic('seasoned');
+const bountySwapCost = b => Math.max(5, Math.round(LOCS[locIdx(b.loc||S.loc)].loot*bountyEffort(b)*.5)); /* coins to swap a bounty for another: by the water and the effort (it was a tenth of the old coin reward, 15 beside 9,900 on one board); Feel call */
 const bountyPayText = b => { const p=bountyPay(b); return p.sc+' Scales '+(bountyBoth()?'and':'or')+' a '+(p.cr==='big'?'big ':'')+'crate of '+p.n+' Nibbles'; };
 function bountyClaimBtns(b,i,sm){ const p=bountyPay(b), c='btn'+(sm?' sm':''); if(bountyBoth()) return `<button class="${c}" data-act="claim" data-i="${i}" data-k="both">Claim</button>`;
   return `<span class="bpick"><button class="${c}" data-act="claim" data-i="${i}" data-k="sc" title="Take ${p.sc} Scales">${p.sc} Scales</button><button class="${c}" data-act="claim" data-i="${i}" data-k="cr" title="Take the crate of ${p.n} Nibbles: it opens straight away">${p.n} Nibbles</button></span>`; }
@@ -14900,6 +14901,49 @@ function bountyShow(){ const g=bountyGot; bountyGot=null; if(!g) return; const h
 document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&$('nibcrate')){ nibCrateClose(); e.preventDefault(); e.stopPropagation(); } },true);
 document.head.insertAdjacentHTML('beforeend','<style>#nibcrate{position:fixed;z-index:70;padding:12px calc(12px + env(safe-area-inset-right)) calc(12px + env(safe-area-inset-bottom)) calc(12px + env(safe-area-inset-left))}#nibcrate .nc-row{display:flex;flex-wrap:wrap;justify-content:center;gap:6px;margin:10px 0}#nibcrate .nc-row .nibs-r{font-size:14px;padding:5px 12px}#nibcrate .nc-sc{font:700 14px var(--display,system-ui);color:var(--gold);margin:0 0 8px}.bpick{display:inline-flex;flex-wrap:wrap;gap:6px;justify-content:flex-end}.brew{font-size:12.5px;color:var(--muted)}</style>');
 
+/* the Bounties page (director's layout, 2026-11-27): title band, water picker, bounty tiles with a bar and reward chips. Sizes here suit phones; PC makes them larger (pc/pages_pc.js) */
+document.head.insertAdjacentHTML('beforeend',`<style>
+.bq-head{position:relative;display:flex;align-items:center;gap:12px;min-height:60px;padding:8px 14px;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:#0e1a2c;margin:0 0 10px}
+.bq-art{position:absolute;inset:0 0 0 30%;background-size:cover;background-position:center 62%;-webkit-mask-image:linear-gradient(90deg,transparent,#000 40%);mask-image:linear-gradient(90deg,transparent,#000 40%);opacity:.9}
+.bq-ic{position:relative;flex:0 0 34px;width:34px;height:34px;box-sizing:border-box;border-radius:50%;border:3px solid #7fe3c4;box-shadow:inset 0 0 0 5px #0e1a2c,inset 0 0 0 8px #7fe3c4}
+.bq-ti{position:relative;min-width:0}
+.bq-ti h3{margin:0;font:800 22px/1.15 var(--display,system-ui);color:#fff}
+.bq-ti p{margin:0;font-size:13px;color:#e6efe8}
+.bq-row{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;margin:0 0 10px}
+.bq-pick,.bq-w{display:flex;align-items:center;gap:10px;min-height:42px;padding:0 12px 0 0;border:1px solid var(--line);border-radius:12px;background:#0e1a2c;color:#e6efe8;font:800 15px var(--display,system-ui);cursor:pointer;overflow:hidden;text-align:left}
+.bq-pick{min-width:240px}
+.bq-pick b,.bq-w b{flex:1;min-width:0}
+.bq-th{flex:0 0 64px;align-self:stretch;min-height:42px;background:#16324a center/cover}
+.bq-car{flex:0 0 auto;width:8px;height:8px;border-right:2px solid;border-bottom:2px solid;transform:rotate(45deg);margin:0 4px 4px}
+.bq-pick[aria-expanded="true"] .bq-car{transform:rotate(225deg);margin:4px 4px 0}
+.bq-ready{display:inline-flex;align-items:center;min-height:36px;padding:0 14px;border-radius:999px;border:1px solid var(--line);color:#9fb2c8;font:800 14px var(--display,system-ui)}
+.bq-ready.on{color:#ffd36a;border-color:#ffd36a66}
+.bq-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:6px;margin:0 0 10px;padding:8px;border:1px solid var(--line);border-radius:12px;background:#0a1424}
+.bq-w{padding-right:10px}
+.bq-w .bq-th{flex-basis:48px}
+.bq-w .bq-th:not([style]){flex-basis:0;min-width:0;margin-right:2px} /* a water whose picture is not drawn yet shows its name alone, not an empty box */
+.bq-w.on{border-color:#ffd36a}
+.bq-n{flex:0 0 auto;font:700 12px var(--display,system-ui);color:#ffd36a}
+.bq-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:10px}
+#panel .tile.bq{display:flex;flex-direction:column;gap:6px;margin:0}
+#panel .tile.bq h4{margin:0}
+#panel .tile.bq.done{border-color:#ffd36a;box-shadow:0 0 0 1px #ffd36a}
+.bq-meta{font-size:13px;color:#8fc7e8}
+.bq-bar{height:8px;border-radius:4px;background:#0a1220;border:1px solid var(--line);overflow:hidden}
+.bq-bar i{display:block;height:100%;background:linear-gradient(90deg,#3fd0b5,#7fe3c4)}
+.bq-rew{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:auto;padding-top:2px}
+.bq-rew > .bq-chip{flex:1 1 0;justify-content:center;white-space:nowrap}
+.bq-lbl{flex:0 0 100%;font-size:12.5px;color:#9fb2c8}
+.bq-chip{display:inline-flex;align-items:center;gap:6px;min-height:32px;padding:0 8px;border-radius:999px;border:1px solid var(--line);background:#0a1424;color:#e6efe8;font:800 13.5px var(--display,system-ui)}
+button.bq-chip.go{min-height:40px;border:0;color:#1d1300;background:linear-gradient(180deg,#ffe08a,#f3b94e);cursor:pointer}
+button.bq-chip.go:focus-visible,.bq-pick:focus-visible,.bq-w:focus-visible{outline:3px solid #7fe3c4;outline-offset:2px}
+.bq-chip em{font:700 11px var(--display,system-ui);font-style:normal;opacity:.85}
+.bq-i-sc{flex:0 0 auto;width:10px;height:10px;background:#6fb3ff;transform:rotate(45deg);border-radius:2px}
+button.bq-chip.go .bq-i-sc{background:#1f5fae}
+.bq-i-cr{flex:0 0 auto;width:14px;height:11px;border-radius:2px;background:#e0a23a;box-shadow:inset 0 3px 0 #f6cf7a,inset 0 -1px 0 #8a5a12}
+button.bq-chip.go .bq-i-cr{background:#8a5a12;box-shadow:inset 0 3px 0 #b97c1e}
+#panel .bq-swap{align-self:center}
+</style>`);
 // ---------- Fish Log: the completion reward says what it really gives ----------
 { const _rj=renderJournal; renderJournal=function(P){ _rj(P); try{ const m=P.querySelector('.fl-mh .meta'); if(m&&/find them all for/.test(m.innerHTML)) m.insertAdjacentHTML('beforeend',' <b class="fl-perk">+ fish from here worth 10% more, forever</b>'); else if(m&&/complete/.test(m.textContent)) m.insertAdjacentHTML('beforeend',' <b class="fl-perk got">· fish from here worth 10% more</b>'); }catch(e){ oops('bs_rules05:P.querySelector',e); } }; }
 document.head.insertAdjacentHTML('beforeend',`<style>#panel .fl-perk{color:#ffd36a;font-weight:800} #panel .fl-perk.got{color:#7fe3c4}</style>`);
@@ -19392,7 +19436,7 @@ function pageDoneRun(){ const P=$('panel'), L=PAGE_DONE[S.tab]; if(P&&L) for(con
     rods:{ cells:(P,hd)=>[['Rod in use',txt(P.querySelector('.rp-card.on b'))||'—'],['Scales',txt(hd&&hd.querySelector('.pts'))||'0']] },
     skills:{ cells:(P,hd)=>[['Skill points',txt(hd&&hd.querySelector('.pts'))||'0'],['Level',String(S.lvl)]], acts:P=>[P.querySelector('[data-act="respec"]')] },
     paths:{ cells:P=>[['Level',String(S.lvl)],['Paths chosen',P.querySelectorAll('.spec.on, .spec[aria-pressed="true"]').length+' / '+SPEC_TIERS.length]] },
-    bounties:{ cells:P=>[['Ready to claim',String(bountyReady())],['Board',locName()]] }, /* one list now: daily tasks and weekly quests, and their page tabs, went on 2026-11-27 */
+    bounties:{ note:()=>'', cells:()=>[] }, /* the page draws its own title band, water picker and ready count (e_ui.js renderBounties, the director's layout of 2026-11-27), so the strip has nothing to show and is left out */
     pass:{ cells:(P,hd)=>{ const t=hd&&hd.querySelector('.tile'); return [['Tide Pass',txt(t&&t.querySelector('.rar'))||'—'],['Progress',(txt(t&&t.querySelector('.meta'))||'').replace(/\s*to level.*$/,'')||'—']]; }, acts:P=>[P.querySelector('[data-act="passclaim"]')] }, /* Cam, 2026-11-20: the claim button went with the header box, so Tide Pass rewards could not be claimed on phones */
     feats:{ cells:(P,hd,sub)=>{ const t=txt(sub); return [['Feats done',(num(t,/(\d+) of (\d+) done/)||'0')+' / '+(num(t,/(\d+) of (\d+) done/,2)||'?')]]; } },
     events:{ cells:P=>{ const w=txt(P.querySelector('.wxf b, .wxf h4'))||''; return [['Weather now',(typeof wx3k==='function'?(()=>{ try{ return wx3k(); }catch(e){ oops('cx_pages:wx3k',e); return ''; } })():'')||w||'—'],['Challenges',String(P.querySelectorAll('.ev-grid > *').length)]]; },
@@ -19415,7 +19459,7 @@ function pageDoneRun(){ const P=$('panel'), L=PAGE_DONE[S.tab]; if(P&&L) for(con
   PAGES.before=function(){ const P0=$('panel'); const ob=P0&&P0.classList.contains('pg08')&&P0.dataset.pgTab===S.tab?P0.querySelector('.aq07-body'):null; prev=ob?{tab:S.tab, top:ob.scrollTop, sec:P0.dataset.pgSec||''}:null;
     };
   PAGES.after=function(){
-    try{ const P=$('panel'), tab=S.tab, cfg=CFG[tab]; if(!P) return;
+    try{ const P=$('panel'), tab=S.tab, cfg=CFG[tab]; if(!P) return; P.classList.remove('pg08-nobar');
       if(!cfg||PAGES_SKIP.has(tab)){ P.classList.remove('pg08','pg08-nostage'); delete P.dataset.pgTab; if(S.tab!=='aquarium'&&!P.classList.contains('dk08')) P.classList.remove('aq07','aq07-open'); pageDoneRun(); return; }
       const kids=[...P.children].filter(c=>!c.classList.contains('crumb'));
       /* the page's own header: marked dl-dup when a side-panel tab names the page; pages opened only from the top bar (Cooler, Fish Log)
@@ -19444,7 +19488,7 @@ function pageDoneRun(){ const P=$('panel'), L=PAGE_DONE[S.tab]; if(P&&L) for(con
       rest.forEach(c=>body.appendChild(c));
       let nv=nav;
       if(!nv&&cfg.groups){ try{ const K=[...body.children].filter(c=>!c.classList.contains('pg08-note')); const gs=cfg.groups(K).filter(g=>g.nodes.length); if(gs.length>1){ sectionize(body,tab,gs); nv=body.querySelector(':scope > .bwx-nav'); } }catch(e){ console.error(e); } }
-      [...P.children].forEach(c=>{ if(!c.classList.contains('crumb')) c.remove(); }); P.appendChild(bar); P.appendChild(sheet); if(nv){ sheet.appendChild(nv); } /* tab columns are set once below, after the page's final layout classes */ /* up to 4 tabs in one row; 5-6 in balanced rows of 3 */ sheet.appendChild(body);
+      [...P.children].forEach(c=>{ if(!c.classList.contains('crumb')) c.remove(); }); if(bank.children.length||bar.children.length>1) P.appendChild(bar); else P.classList.add('pg08-nobar'); /* a page with nothing for the strip (Bounties) has none */ P.appendChild(sheet); if(nv){ sheet.appendChild(nv); } /* tab columns are set once below, after the page's final layout classes */ /* up to 4 tabs in one row; 5-6 in balanced rows of 3 */ sheet.appendChild(body);
       P.classList.add('aq07','aq07-open','pg08','pg08-nostage'); P.classList.remove('dk08'); P.dataset.pgTab=tab;
       if(nv){ const n2=nv.querySelectorAll(':scope > button').length; nv.style.setProperty('grid-template-columns',`repeat(${PG_COLS(nv,n2)},minmax(0,1fr))`,'important'); } /* measured again with the page's final layout */
       // keep the scroll place on a refresh of the same page and section; a new section starts at the top
@@ -21899,6 +21943,8 @@ PATCHES.unshift({v:'0.4.9', name:'Work in progress', items:phoneNotes([
 // text changes. Released notes live in notes_release.js.
 const TEST_NOTES={v:'test', label:'Test build · '+(window.DL_BUILD==='ios'?'iPhone':'Android'), name:'0.4.9 test build (newest first)', items:[
   '## New in this build',
+  'The Bounties page has a new layout (the director’s design): a title band with the water’s picture, one water picker in place of a button for every water, and each bounty with a progress bar and its two rewards as chips. On a finished bounty the two chips are the claim buttons: tap the reward you want.',
+  'A board never shows the same bounty twice, and swapping a bounty now costs coins by its water and its effort (it was 15 coins beside 9,900 on one board).',
   'Bounties are the one thing to chase now (director and Cam): daily tasks and weekly quests are gone. Rewards you had not claimed on them are lost.',
   'A bounty no longer pays coins. When you claim one you pick your reward: Scales, or a crate of Nibbles. Every claim also gives some Tide Pass XP.',
   'The reward follows the effort (director): a bounty for one common fish pays 2 Scales or 4 Nibbles, two rare fish 7 Scales or 7 Nibbles, a trophy 9 Scales or a big crate of 9, a shiny or a legend 12 Scales or a big crate of 10. Rarer fish, more fish, a set size and day-only or night-only fish all count for more.',
@@ -23455,7 +23501,7 @@ $('card').addEventListener('pointerdown',e=>{ e.stopPropagation(); hideCard(); }
 // ---------- bounties ----------
 // 0.3: every water keeps its own board of bounties, so progress (and rare bounties) stay with that water
 const BOUNTIES_PER_WATER = 3;
-let bLoc=null;
+let bLoc=null, bPick=false; /* the water whose board is shown, and whether the water picker is open */
 function makeBounty(L){ L=L||S.loc;
   if(Math.random()<.08){ const lp=SP.filter(s=>s.loc===L&&s.r===4); if(lp.length){ const sp=pick(lp); return {sp:sp.id, loc:L, type:'count', n:1, have:0, reward:Math.round(sp.base*3), legend:1}; } }
   const cap = Math.random()<.12 ? 3 : Math.random()<.3 ? 2 : 1;
@@ -23465,7 +23511,9 @@ function makeBounty(L){ L=L||S.loc;
 }
 function bountyLoc(b){ if(b.loc) return b.loc; if(b.sp&&SPI[b.sp]) return SPI[b.sp].loc; return null; }
 function fillBounties(){ for(const b of S.bounties){ if(!b.loc){ const l=bountyLoc(b); b.loc=l||S.loc; } }
-  for(const L of S.unlocked){ let n=S.bounties.filter(b=>b.loc===L).length; while(n<BOUNTIES_PER_WATER){ S.bounties.push(makeBounty2(L)||makeBounty(L)); n++; } } }
+  for(const L of S.unlocked){ let n=S.bounties.filter(b=>b.loc===L).length; while(n<BOUNTIES_PER_WATER){ S.bounties.push(newBounty(L)); n++; } } }
+/* a new bounty for a water, never one its board already shows (two "Catch 2 x Bluegill" sat side by side, 2026-11-27) */
+function newBounty(L){ const sig=b=>[b.type,b.sp||'',b.beh||''].join('|'), have=new Set(S.bounties.filter(b=>b.loc===L).map(sig)); let b; for(let k=0;k<8;k++){ b=makeBounty2(L)||makeBounty(L); if(!have.has(sig(b))) break; } return b; }
 function bDone(b){ return (b.type==='count'||b.type==='style'||b.type==='kinds') ? b.have>=b.n : b.have>=1; }
 function checkBounties(sp,kg){ const done=[]; for(const b of S.bounties){ if(b.sp!==sp.id || bDone(b)) continue; if(b.type==='count'){ b.have++; } else if(kg>=b.kg){ b.have=1; } if(bDone(b)) done.push(b); } return done; }
 
@@ -23528,20 +23576,27 @@ function renderAquarium(P){ accrue(); const rate=tankRate(); let AQS=null; const
    : '<div class="empty">No fish on display yet. In the Cooler, press <b>To aquarium</b> on a fish you want to keep.</div>') + aqCustomHTML();
   paintFish(P); paintDecor(P);
 }
-function renderBounties(P){ fillBounties(); const ready=S.bounties.filter(b=>bDone(b)&&(!b.loc||S.unlocked.includes(b.loc))).length;
-  P.innerHTML=`<h2>Bounties</h2><p class="sub">The harbourmaster pays for specific catches: ${bountyBoth()?'Scales and a Nibble crate (your Bounty Ledger pays both)':'Scales or a Nibble crate, your pick'}. Every water has its own board, and its bounties wait there until you finish them. Fish still go in your cooler.</p>
-  <div class="chips" style="margin:6px 0 10px">${S.unlocked.slice().sort((a,b)=>locIdx(a)-locIdx(b)).map(L=>{ const n=S.bounties.filter(b=>b.loc===L&&bDone(b)).length; return `<button class="chipb" data-act="bloc" data-k="${L}" aria-pressed="${(bLoc||S.loc)===L}">${esc(LOCS[locIdx(L)].name)}${n?' · '+n+' ready':''}</button>`; }).join('')}</div>${ready>1?`<div class="bpick" style="margin:0 0 10px;justify-content:flex-start">${bountyBoth()?`<button class="btn" data-act="claimall" data-k="both">Claim all · ${ready} ready</button>`:`<button class="btn" data-act="claimall" data-k="sc">Claim all ${ready} · Scales</button><button class="btn" data-act="claimall" data-k="cr">Claim all ${ready} · Nibble crates</button>`}</div>`:''}<div class="grid">`+
-  S.bounties.map((b,i)=>{ if(b.loc!==(S.unlocked.includes(bLoc)?bLoc:S.loc)) return ''; const bt=bountyText(b); if(bt){ const d=bDone(b);
-      return `<div class="tile ${d?'done':''}"><span class="rar" style="color:var(--kelp)">${b.type==='shiny'?'Shiny hunt':b.type==='trophy'?'Trophy hunt':b.type==='kinds'?'Variety hunt':'Style hunt'}</span><h4>${esc(bt.what)}</h4><div class="meta">${bt.where} · ${b.type==='style'||b.type==='kinds'?Math.min(b.have,b.n)+' / '+b.n:(d?'Done':'Not yet')}</div>
-       <div class="row spread"><span class="val brew">${bountyPayText(b)}</span>${d?bountyClaimBtns(b,i):`<button class="btn alt" data-act="reroll" data-i="${i}" ${S.money>=Math.ceil(b.reward*.1)?'':'disabled'}>Swap · <span class="coin">${fmt(Math.ceil(b.reward*.1))}</span></button>`}</div></div>`; }
-    const sp=SPI[b.sp], d=bDone(b), L=LOCS[locIdx(sp.loc)];
-    const what = b.type==='count' ? `Catch ${b.n} × ${sp.name}` : `Catch ${/^[aeiou]/i.test(sp.name)?"an":"a"} ${sp.name} of ${kgStr(b.kg)} or more`;
-    const prog = b.type==='count' ? `${Math.min(b.have,b.n)} / ${b.n}` : (d?'Done':'Not yet');
-    return `<div class="tile ${d||b.legend?'done':''}">${b.legend?'<span class="rar" style="color:var(--gold)">Legendary bounty</span>':''}<canvas width="220" height="90" data-fish="${sp.id}" data-known="${S.journal[sp.id]?1:0}" style="width:110px;height:45px"></canvas><h4>${S.journal[sp.id]||!b.legend?what:'Catch the legend of '+L.name}</h4>
-    <div class="meta">${L.name}${sp.time!=='any'?' · '+(sp.time==='night'?'night only':'day only'):''} · ${RAR[sp.r].k} · ${prog}</div>
-    <div class="row spread"><span class="val brew">${bountyPayText(b)}</span>
-    ${d?bountyClaimBtns(b,i):`<button class="btn alt" data-act="reroll" data-i="${i}" ${S.money>=Math.ceil(b.reward*.1)?'':'disabled'}>Swap · <span class="coin">${fmt(Math.ceil(b.reward*.1))}</span></button>`}</div></div>`; }).join('')+'</div>';
-  paintFish(P);
+/* The Bounties page (director's layout, 2026-11-27): a title band with the water's own picture, one water picker in place of a button per
+   water, how many are ready, then the water's bounties. Every bounty: what to do, where and how far (with a bar), its two rewards as chips;
+   on a finished bounty the chips are the claim buttons ("the reward chips themselves becoming the buttons"). */
+function bountyParts(b){ const bt=bountyText(b), d=bDone(b), L=LOCS[locIdx(b.loc||S.loc)]; let what, n=1, have=d?1:0, extra='';
+  if(bt){ what=bt.what; if(b.type==='style'||b.type==='kinds'){ n=b.n; have=Math.min(b.have,b.n); } }
+  else { const sp=SPI[b.sp]; n=b.type==='count'?b.n:1; have=b.type==='count'?Math.min(b.have,b.n):(d?1:0); extra=sp.time!=='any'?(sp.time==='night'?'night only':'day only'):'';
+    what=b.legend&&!S.journal[sp.id]?'Catch the legend of '+L.name:b.type==='count'?`Catch ${b.n} × ${sp.name}`:`Catch ${/^[aeiou]/i.test(sp.name)?'an':'a'} ${sp.name} of ${kgStr(b.kg)} or more`; }
+  return {what, n, have, d, where:L.name, extra}; }
+function renderBounties(P){ fillBounties(); const cur=S.unlocked.includes(bLoc)?bLoc:S.loc, L=LOCS[locIdx(cur)], ready=S.bounties.filter(b=>bDone(b)&&(!b.loc||S.unlocked.includes(b.loc))).length, both=bountyBoth();
+  const th=id=>{ const u=V3THUMB[id]; return u?` style="background-image:url(${u})"`:''; }, waters=S.unlocked.slice().sort((a,b)=>locIdx(a)-locIdx(b));
+  P.innerHTML=`<div class="bq-head"><span class="bq-art"${th(cur)}></span><span class="bq-ic" aria-hidden="true"></span><div class="bq-ti"><h3>Bounties</h3><p>Complete location tasks for rewards</p></div></div>
+  <div class="bq-row"><button type="button" class="bq-pick" data-act="bpick" aria-expanded="${bPick}" aria-label="Water: ${esc(L.name)}. Choose another water"><span class="bq-th"${th(cur)}></span><b>${esc(L.name)}</b><span class="bq-car" aria-hidden="true"></span></button>
+   <span class="bq-ready${ready?' on':''}">${ready} Ready to Claim</span>${ready>1?(both?`<button class="btn sm" data-act="claimall" data-k="both">Claim all</button>`:`<button class="btn sm" data-act="claimall" data-k="sc">Claim all · Scales</button><button class="btn sm" data-act="claimall" data-k="cr">Claim all · Nibbles</button>`):''}</div>
+  ${bPick?`<div class="bq-list" role="listbox" aria-label="Waters">${waters.map(W=>{ const n=S.bounties.filter(b=>b.loc===W&&bDone(b)).length; return `<button type="button" class="bq-w${W===cur?' on':''}" role="option" aria-selected="${W===cur}" data-act="bloc" data-k="${W}"><span class="bq-th"${th(W)}></span><b>${esc(LOCS[locIdx(W)].name)}</b>${n?`<span class="bq-n">${n} ready</span>`:''}</button>`; }).join('')}</div>`:''}
+  <div class="bq-grid">`+S.bounties.map((b,i)=>{ if(b.loc!==cur) return ''; const p=bountyParts(b), pay=bountyPay(b), cost=bountySwapCost(b);
+    const chip=(k,txt)=>p.d&&!both?`<button type="button" class="bq-chip go" data-act="claim" data-i="${i}" data-k="${k}"><i class="bq-i-${k}"></i>${txt}</button>`:`<span class="bq-chip"><i class="bq-i-${k}"></i>${txt}</span>`;
+    return `<div class="tile bq${p.d?' done':''}">${b.legend?'<span class="rar" style="color:var(--gold)">Legendary bounty</span>':''}<h4>${esc(p.what)}</h4>
+     <div class="bq-meta">${esc(p.where)}${p.extra?' · '+p.extra:''} · ${p.have} / ${p.n}</div><div class="bq-bar"><i style="width:${Math.round(p.have/p.n*100)}%"></i></div>
+     <div class="bq-rew"><span class="bq-lbl">${p.d&&!both?'Pick one':'Rewards'}</span>${chip('sc',pay.sc+' Scales')}${chip('cr',pay.n+' Nibbles'+(pay.cr==='big'?' <em>big</em>':''))}</div>
+     ${p.d?(both?`<button class="btn bq-claim" data-act="claim" data-i="${i}" data-k="both">Claim both</button>`:''):`<button class="btn alt sm bq-swap" data-act="reroll" data-i="${i}" ${S.money>=cost?'':'disabled'}>Swap · <span class="coin">${fmt(cost)}</span></button>`}</div>`; }).join('')+'</div>';
+  if(!V3THUMB[cur]&&MENU_OPEN) setTimeout(()=>{ try{ const u=v3Thumb(cur); if(u&&S.tab==='bounties') P.querySelectorAll('.bq-art,.bq-pick .bq-th').forEach(e=>{ e.style.backgroundImage='url('+u+')'; }); }catch(e){ oops('e_ui:bounty-picture',e); } },60); /* the water's picture, drawn once when it is not ready yet */
 }
 function renderFeats(P){ const done=FEATS.filter(f=>S.feats[f.id]).length;
   P.innerHTML=`<h2>Feats</h2><p class="sub">${done} of ${FEATS.length} done. Each pays coins, the bigger ones give bonus skill points, and two bring a new pet.</p><div class="grid">`+
@@ -23676,11 +23731,12 @@ $('panel').addEventListener('click',e=>{ const b=e.target.closest('[data-act]');
       Object.assign(S,{money:0, gear:fresh().gear, bait:relic('tacklebox')?S.bait:baitZero(), baitSel:relic('tacklebox')?S.baitSel:'worm', unlocked:['pond'], loc:'pond', cooler:[], bounties:[], setDone:{}, streak:0, voyCatch:{}, lvl:1, xp:0, perks:{}}); /* Cam, round 5: a new voyage starts at level 1; skills are handed back and only the points from feats and the Fish Log stay to spend */
       S.nib=nibHalve(); /* [19] half of every species' Nibbles expire on a new voyage */ S.stats.runEarned=0; S.stats.runBw=0; confirmBox=null; fillBounties(); sfx.catch(4); toast('You set sail again: +'+n+' Wisdom Pearl'+(n===1?'':'s')+' to spend ('+S.pearls+' in all) in the Pearl shop or on relics.'); break; }
     case 'resetok': { S=fresh(); S.savedAt=Date.now(); confirmBox=null; G.st='idle'; encLoc=null; encSel=null; fillBounties(); toast('Progress reset. A fresh start at Willow Pond.'); break; }
-    case 'reroll': { const bo=S.bounties[i]; const c=Math.ceil(bo.reward*.1); if(S.money<c) return; S.money-=c; const L=bo.loc||S.loc; S.bounties[i]=makeBounty2(L)||makeBounty(L); break; }
+    case 'reroll': { const bo=S.bounties[i]; const c=bountySwapCost(bo); if(S.money<c) return; S.money-=c; S.bounties[i]=newBounty(bo.loc||S.loc); break; }
     case 'unlock': { const i=locIdx(k), L=LOCS[i]; if(!L||S.unlocked.includes(k)||S.money<locCost(L)||!unlockMet(i)||!locPrevOk(i)) return; /* the requirement is checked here too, not only on the button */ S.money-=locCost(L); S.unlocked.push(k); if(L.eg){ if(!Array.isArray(S.egPaid)) S.egPaid=[]; if(!S.egPaid.includes(k)) S.egPaid.push(k); } S.loc=k; G.hot=null; fillBounties(); sfx.catch(2); toast('Welcome to '+L.name); break; }
     case 'goto': if(G.st==='rest'){ S.loc=k; G.hot=null; restCast(); toast('Travelled to '+LOCS[locIdx(k)].name+'. Still resting.'); break; } /* resting travels too and keeps resting (director, 2026-11-22: Travel did nothing while resting) */ if(G.st!=='idle'){ toast('Reel in your line first, then travel.'); return; } S.loc=k; G.hot=null; toast('Travelled to '+LOCS[locIdx(k)].name); break;
     case 'encloc': if(k==='junk'||LOCS[locIdx(k)]) encLoc=k; encSel=null; break;
-    case 'bloc': bLoc=k; break;
+    case 'bloc': bLoc=k; bPick=false; break;
+    case 'bpick': bPick=!bPick; break;
     case 'enc': encSel = encSel===k ? null : k; break;
     case 'look': { const v=b.dataset.v; if(k==='skin'||k==='hair'||k==='eye') S.look[k]=+v; else if(k==='shoes'){ if(S.owned.shoes.includes(v)) S.look.shoes=v; } else if(k==='neck'){ if(S.owned.necks.includes(v)) S.look.neck=v; } else if(k==='back'){ if(S.owned.backs.includes(v)) S.look.back=v; } else if(k==='build'){ if(BUILDI[v]) S.look.build=v; } else if(k==='hat'){ if(S.owned.hats.includes(v)) S.look.hat=v; } else if(k==='pat'){ if(S.owned.pats.includes(v)) S.look.pat=v; }
       else if(k==='glasses'){ if(S.owned.glasses.includes(v)) S.look.glasses=v; } else if(k==='outfit'){ if(S.owned.outfits.includes(v)) S.look.outfit=v; } else S.look[k]=v; break; }
