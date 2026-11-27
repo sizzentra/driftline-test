@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="DL Test iPhone">
 <script>
-window.DL_BUILD='ios'; window.DL_PREVIEW=true; if(/[?&]sweep\b/.test(location.search)){ window.__bootErr=[]; addEventListener("error",function(e){ __bootErr.push(String(e.message||e)+(e.lineno?" (line "+e.lineno+")":"")); }); addEventListener("unhandledrejection",function(e){ __bootErr.push("promise: "+String(e.reason&&e.reason.message||e.reason)); }); window.requestAnimationFrame=function(f){ return setTimeout(function(){ f(performance.now()); },16); }; window.cancelAnimationFrame=function(i){ clearTimeout(i); }; } try{ window.__tOff=/[?&](test|sweep|frozen)\b/.test(location.search)?0:(+(localStorage.getItem("dl-test-toff")||0)||0); }catch(e){ window.__tOff=0; } (function(){ var rn=Date.now.bind(Date); Date.now=function(){ return rn()+window.__tOff; }; })(); if(/[?&]frozen\b/.test(location.search)){ var __fz=20261122; Math.random=function(){ __fz|=0; __fz=__fz+0x6D2B79F5|0; var t=Math.imul(__fz^__fz>>>15,1|__fz); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; var __fc=0, __pn=performance.now.bind(performance); performance.now=function(){ __fc+=0.01; return 100000+__fc; }; Date.now=function(){ return 1795300000000+Math.floor(__fc); }; window.__frozenClock=function(){ return __fc; }; window.requestAnimationFrame=function(){ return 0; }; window.cancelAnimationFrame=function(){}; } window.DL_VERSION='2026.11.26-2126';
+window.DL_BUILD='ios'; window.DL_PREVIEW=true; if(/[?&]sweep\b/.test(location.search)){ window.__bootErr=[]; addEventListener("error",function(e){ __bootErr.push(String(e.message||e)+(e.lineno?" (line "+e.lineno+")":"")); }); addEventListener("unhandledrejection",function(e){ __bootErr.push("promise: "+String(e.reason&&e.reason.message||e.reason)); }); window.requestAnimationFrame=function(f){ return setTimeout(function(){ f(performance.now()); },16); }; window.cancelAnimationFrame=function(i){ clearTimeout(i); }; } try{ window.__tOff=/[?&](test|sweep|frozen)\b/.test(location.search)?0:(+(localStorage.getItem("dl-test-toff")||0)||0); }catch(e){ window.__tOff=0; } (function(){ var rn=Date.now.bind(Date); Date.now=function(){ return rn()+window.__tOff; }; })(); if(/[?&]frozen\b/.test(location.search)){ var __fz=20261122; Math.random=function(){ __fz|=0; __fz=__fz+0x6D2B79F5|0; var t=Math.imul(__fz^__fz>>>15,1|__fz); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; var __fc=0, __pn=performance.now.bind(performance); performance.now=function(){ __fc+=0.01; return 100000+__fc; }; Date.now=function(){ return 1795300000000+Math.floor(__fc); }; window.__frozenClock=function(){ return __fc; }; window.requestAnimationFrame=function(){ return 0; }; window.cancelAnimationFrame=function(){}; } window.DL_VERSION='2026.11.26-2236';
 window.addEventListener('beforeinstallprompt',function(e){ e.preventDefault(); window.__dlInstallPrompt=e; });
 </script>
 </head>
@@ -1636,7 +1636,13 @@ function saveClean(o,d){ const out={}; for(const k of Object.keys(o)){ const v=o
     if(isObj(dv)){ if(isObj(v)) out[k]=saveClean(v,dv); continue; }
     out[k]=v; }
   return out; }
-function migrate(o){ const d=fresh(); if(!isObj(o)) return d; o=saveClean(o,d);
+/* Loading a save: the ONE function every load goes through (start-up, save code, link, transfer, cloud, backup). F6 slice 1, 2026-11-26:
+   the eleven layers later files used to stack on it are steps here now, in the order those files load; each step's code stays in its
+   owner's file. coreOnly = the very first read at start-up, further down: the later files' lists do not exist yet at that moment, so
+   only the core checks run there and ck_bootfix.js runs the whole function once they do. A new save rule is a new step here, never a wrapper:
+   above the coreOnly line it may use only plain values and b_data constants; below it, a field it sets also goes into BOOTFIX_KEYS
+   (ck_bootfix.js), unless its owner file runs the step on S itself when it loads. */
+function migrate(o,coreOnly){ const d=fresh(), raw=isObj(o)?o:null, m=d; if(raw){ o=saveClean(o,d);
   for(const k of ['cooler','tank','bounties']) if(o[k]) o[k]=o[k].filter(isObj);
   if(o.journal!==undefined&&!isObj(o.journal)) delete o.journal; else if(o.journal) for(const k in o.journal) if(!isObj(o.journal[k])) delete o.journal[k];
   for(const k of ['money','scales','tickets','pearls','xp','tankBank','freeSpins','tides']) if(typeof o[k]==='number') o[k]=Math.max(0,o[k]);
@@ -1644,7 +1650,7 @@ function migrate(o){ const d=fresh(); if(!isObj(o)) return d; o=saveClean(o,d);
   if(o.rods){ if(o.rods.owned) o.rods.owned=o.rods.owned.filter(x=>typeof x==='string'); /* unknown rods are dropped later, once the rod list exists (bm_ui04) */ if(typeof o.rods.eq!=='string') delete o.rods.eq; }
   if(o.pass){ for(const k of ['xp','lvl','claimed']) if(typeof o.pass[k]==='number') o.pass[k]=Math.max(0,Math.floor(o.pass[k])); if(o.pass.claimed>o.pass.lvl) o.pass.claimed=o.pass.lvl||0; }
   if(o.bait&&isObj(o.bait)) for(const k in o.bait){ const n=+o.bait[k]; o.bait[k]=isFinite(n)&&n>0?Math.floor(n):0; }
-  const m=Object.assign(d,o);
+  Object.assign(d,o);
   m.gear=Object.assign(fresh().gear,o.gear||{}); if(!(o.gearV>=2)){ m.gear.hook=Math.ceil((m.gear.hook|0)*5/3-1e-9); m.gear.finder=(m.gear.finder|0)*2; } m.gearV=2; /* Cam, 2026-11-23: Hook (7 steps) and Fish Finder (6) now have 11; old saves keep at least the window and finder they had */ for(const k in GEAR) m.gear[k]=clamp(m.gear[k]|0,0,GEAR[k].lv.length-1);
   m.bait=Object.assign(baitZero(),o.bait||{}); if(!BAIT[m.baitSel]) m.baitSel='worm';
   m.stats=Object.assign(fresh().stats,o.stats||{}); m.perks=Object.assign({},o.perks||{}); for(const k in m.perks){ if(!PERKS[k]) delete m.perks[k]; else m.perks[k]=Math.min(m.perks[k],PERKS[k].max); }
@@ -1670,11 +1676,28 @@ function migrate(o){ const d=fresh(); if(!isObj(o)) return d; o=saveClean(o,d);
   const dk=Object.assign(fresh().dock,o.dock||{}); dk.owned=uniq(['oak',...(dk.owned||[])]); dk.decor=[]; /* batch 5: home decorations are gone (no refunds: director 2026-11-21) */ if(!dk.owned.includes(dk.wood)) dk.wood='oak'; m.dock=dk;
   m.pass=Object.assign(fresh().pass,o.pass||{}); m.medals=Object.assign(fresh().medals,o.medals||{}); if(m.derby && !(m.derby.until>Date.now()-3600000)) m.derby=null;
   if((o.pearlV||1)<2){ m.pearls=Math.ceil((+o.pearls||0)*.4); m.pearlV=2; }
-  m.bounties=(m.bounties||[]).filter(b=>SPI[b.sp]||['trophy','style','shiny'].includes(b.type)); if(m.tankSlots>TANK_COST.length) m.tankSlots=TANK_COST.length; m.v=3; return m; }
-try { const raw = localStorage.getItem(LS_KEY); if (raw) { try { S = migrate(JSON.parse(raw)); } catch(e) { try{ localStorage.setItem(LS_KEY+'-unreadable', raw); window.__dlUnreadable=true; }catch(e2){} } } } catch(e) {} // 0.4: a save that cannot be read is kept aside, never overwritten
+  m.bounties=(m.bounties||[]).filter(b=>SPI[b.sp]||['trophy','style','shiny'].includes(b.type)); if(m.tankSlots>TANK_COST.length) m.tankSlots=TANK_COST.length; m.v=3; }
+  if(coreOnly===true) return m;
+  fabricMigrate(m); /* old shirt designs refunded once (ah_fabric.js) */
+  if(!Array.isArray(m.vault)) m.vault=[]; /* the Trophy vault (ax_trophy035.js) */
+  try{ m.hunts=cleanHunts(m); }catch(e){ m.hunts={}; } /* hunts (bl_hunts04.js) */
+  rodsClean(m); perksClean(m); docksClean(m); /* unknown rods, more perk ranks than points, old home choices (bm_ui04.js) */
+  try{ rpClean(m); }catch(e){ m.rodPresets=[null,null,null]; m.rodPreset=-1; } /* rod presets (bz_rods06.js) */
+  pathsClean(m); /* Paths and their fish counts (cg_paths.js) */
+  voyClean(m,raw); /* old pearls, the pearl shop, Boons (ch_voyage.js) */
+  passOwnedClean(m,raw); passCatchUp(m,raw); /* Tide Pass exclusives owned, and the ones an old save is already past (cj_tidepass.js) */
+  facesClean(m,raw); /* face and eye shape (cl_faces.js) */
+  try{ egOpenAdd(m); }catch(e){} /* end-game waters open for enough voyages (cn_waterart.js) */
+  deviceLoad(m); /* this device's own last step */
+  return m; }
+let deviceLoad=()=>{}, deviceSave=()=>{}; /* a platform's own step at the end of every load and at the start of every save; nothing until the platform layer that needs one has loaded and set it. One file owns each; it combines its steps inside, nothing else reassigns them */
+try { const raw = localStorage.getItem(LS_KEY); if (raw) { try { S = migrate(JSON.parse(raw), true); } catch(e) { try{ localStorage.setItem(LS_KEY+'-unreadable', raw); window.__dlUnreadable=true; }catch(e2){} } } } catch(e) {} // 0.4: a save that cannot be read is kept aside, never overwritten
 
 let cloudDoc = null, saveTimer = null, saving = false, pendingSave = false;
-function save(){ S.savedAt = Date.now(); try{ localStorage.setItem(LS_KEY, JSON.stringify(S)); }catch(e){} try{ autoBackup(); }catch(e){} /* at most every 5 minutes (d3_update.js) */
+let rpLive=false; /* bz_rods06.js switches this on once the rod presets exist; saves before that leave them alone */
+/* Saving: the ONE function (F6 slice 1): this device's own step, the rod preset in use kept in step, then the save itself. A new step
+   whose owner file loads later gets an on-switch like rpLive (declared here, set by the owner), so saves made while the page loads stay as they were. */
+function save(){ deviceSave(); if(rpLive) rpSync(); S.savedAt = Date.now(); try{ localStorage.setItem(LS_KEY, JSON.stringify(S)); }catch(e){} try{ autoBackup(); }catch(e){} /* at most every 5 minutes (d3_update.js) */
   if (cloudDoc){ clearTimeout(saveTimer); saveTimer = setTimeout(pushCloud, 2500); } }
 async function pushCloud(){ if(!cloudDoc) return; if(saving){ pendingSave=true; return; } saving=true;
   try{ await cloudDoc.set({state: JSON.parse(JSON.stringify(S))}); }catch(e){ if(e && (e.code==='invalid_argument'||e.code==='revoked'||e.code==='not_granted')) cloudDoc=null; }
@@ -9904,8 +9927,7 @@ function fabricMigrate(m){ if(!m||m.fabV) return 0; m.fabV=1; let back=0; const 
   if(OLD_PAT_PRICE[lk.pat]) lk.pat='none';
   if(lk.patOn==='outfit'){ if(lk.pat!=='none' && outfitFabrics(lk.outfit).includes(lk.pat)) lk.outFab=lk.pat; lk.pat='none'; } delete lk.patOn;
   if(back){ m.money=(m.money||0)+back; m.fabRefund=back; } return back; }
-const _migrate_fab = migrate;
-migrate = function(o){ const m=_migrate_fab(o); fabricMigrate(m); return m; };
+/* every load runs fabricMigrate: a step of migrate() in c_logic.js */
 if(typeof S!=='undefined' && S) fabricMigrate(S);
 
 // ---------- drawing: alpha overlays only, so a fabric works on any color and on both halves of a two-tone shirt
@@ -11842,7 +11864,7 @@ document.head.insertAdjacentHTML('beforeend',`<style>
 const VAULT_MAX=500; // generous; keeps saves and transfer codes a sensible size
 function vaultList(){ if(!Array.isArray(S.vault)) S.vault=[]; return S.vault; }
 vaultList();
-{ const _migrate_035=migrate; migrate=function(o){ const m=_migrate_035(o); if(!Array.isArray(m.vault)) m.vault=[]; return m; }; }
+/* a load makes sure the vault is a list: a step of migrate() in c_logic.js */
 
 // the page button (hidden like the others; the Collection section shows it as a pill)
 { const T=$('tabs'), after=T&&T.querySelector(':scope > [data-tab="aquarium"]'); if(after&&!T.querySelector(':scope > [data-tab="trophy"]')) after.insertAdjacentHTML('afterend','<button role="tab" data-tab="trophy" aria-selected="false" data-label="🏛️ Trophy Room">🏛️ Trophy Room</button>'); }
@@ -13088,7 +13110,7 @@ function cleanHunts(st){ const out={}; const src=st&&st.hunts&&typeof st.hunts==
   for(const L of LOCS){ const a=Array.isArray(src[L.id])?src[L.id]:[]; const seen=[]; for(const id of a){ const s=typeof id==='string'&&SPI[id]; if(!s||s.loc!==L.id||seen.includes(id)) continue; seen.push(id); if(seen.length>=HUNT_MAX) break; } if(seen.length) out[L.id]=seen; }
   return out; }
 S.hunts=cleanHunts(S);
-{ const _mig=migrate; migrate=function(o){ const m=_mig(o); try{ m.hunts=cleanHunts(m); }catch(e){ m.hunts={}; } return m; }; }
+/* every load runs cleanHunts: a step of migrate() in c_logic.js */
 // the weight: one multiplier, in the shared function
 const _catchW_04=catchW;
 catchW=function(s,pool,rare,b){ const w=_catchW_04(s,pool,rare,b); return isHunted(s)?w*huntMult(s):w; };
@@ -13247,9 +13269,10 @@ KEYS.forEach((k,i)=>{ if(k[0]==='Esc') KEYS[i]=['Esc','Close the menu, a card or
 function rodsClean(st){ try{ const r=st.rods; if(!r) return; r.owned=uniq(['bamboo',...(r.owned||[]).filter(x=>ROD_I[x])]); if(!r.owned.includes(r.eq)) r.eq='bamboo'; }catch(e){} }
 function perksClean(st){ const keep=S; try{ S=st; if(ptsFree()<0) st.perks={}; }catch(e){} finally{ S=keep; } } // more ranks than points (a damaged save): refund them
 rodsClean(S); perksClean(S);
-{ const _mig04=migrate; migrate=function(o){ const st=_mig04(o); rodsClean(st); perksClean(st); try{ if(!st.docks||typeof st.docks!=='object'||Array.isArray(st.docks)) st.docks={};
+/* every load runs these three: steps of migrate() in c_logic.js */
+function docksClean(st){ try{ if(!isObj(st.docks)) st.docks={};
     for(const k of Object.keys(st.docks)){ if(!LOCS.some(L=>L.id===k)) delete st.docks[k]; else { const el=hfClean(st.docks[k]&&st.docks[k].el); st.docks[k]=Object.keys(el).length?{el}:{}; } } /* old home choices stay valid in the save, unread (homes are fixed) */
-    if(st.dockAt&&!LOCS.some(L=>L.id===st.dockAt)) st.dockAt=null; }catch(e){} return st; }; }
+    if(st.dockAt&&!LOCS.some(L=>L.id===st.dockAt)) st.dockAt=null; }catch(e){} }
 
 // ---------- menu mode ----------
 let MENU_OPEN=false, menuHist=false, dashPress=false;
@@ -14987,13 +15010,13 @@ function rpClean(st){ const src=Array.isArray(st.rodPresets)?st.rodPresets:[];
   st.rodPresets=out; st.rodPreset=(Number.isInteger(st.rodPreset)&&st.rodPreset>=0&&st.rodPreset<3&&out[st.rodPreset])?st.rodPreset:-1; return st; }
 function rpInit(){ rpClean(S); if(!S.rodPresets.some(Boolean)&&S.rods&&ROD_I[S.rods.eq]){ S.rodPresets[0]={rod:S.rods.eq, att:(S.rods.att[S.rods.eq]||[]).slice(0,rod().slots)}; S.rodPreset=0; } }
 rpInit();
-{ const _mig=migrate; migrate=function(o){ const m=_mig(o); try{ rpClean(m); }catch(e){ m.rodPresets=[null,null,null]; m.rodPreset=-1; } return m; }; }
+/* every load runs rpClean: a step of migrate() in c_logic.js */
 // keep the preset in use matching what you hold
 function rpSync(){ try{ const i=S.rodPreset; if(i<0||!S.rodPresets[i]||!S.rods.owned.includes(S.rods.eq)) return; S.rodPresets[i]={rod:S.rods.eq, att:(S.rods.att[S.rods.eq]||[]).slice(0,rod().slots)}; }catch(e){} }
 function rpUse(i){ const p=S.rodPresets[i]; if(!p||!S.rods.owned.includes(p.rod)) return false; S.rods.eq=p.rod; S.rods.att[p.rod]=p.att.filter(a=>!a||S.atts[a]).slice(0,ROD_I[p.rod].slots); S.rodPreset=i; save(); return true; }
 function rpSave(i){ if(!S.rods.owned.includes(S.rods.eq)) return false; S.rodPresets[i]={rod:S.rods.eq, att:(S.rods.att[S.rods.eq]||[]).slice(0,rod().slots)}; S.rodPreset=i; save(); return true; }
 function rpClear(i){ S.rodPresets[i]=null; if(S.rodPreset===i) S.rodPreset=-1; save(); }
-{ const _sv=save; save=function(){ rpSync(); return _sv.apply(this,arguments); }; }
+rpLive=true; /* from here on every save() runs rpSync first (c_logic.js) */
 { const _rp=renderPanel; renderPanel=function(){ if(S.tab==='rods') rpSync(); return _rp.apply(this,arguments); }; }
 function rodPresetsHTML(){ return `<div class="rp-box"><div class="rp-head"><b>Presets</b><span>Three presets: a rod and its attachments. The one in use updates as you change it.</span></div><div class="rp-list">${[0,1,2].map(i=>{ const p=S.rodPresets[i], on=S.rodPreset===i, R=p&&ROD_I[p.rod];
     if(!R) return `<div class="rp-card empty"><span class="rp-n">Preset ${i+1}</span><em>Empty</em><button type="button" class="btn alt sm" data-rp="save:${i}">Save the rod in your hands here</button></div>`;
@@ -15595,8 +15618,8 @@ const spinEvery = () => SPIN_EVERY/pathMul('spin');
     try{ if(was&&S.specs){ S.pathXP=S.pathXP||{}; for(const id of pathChosen()){ const r0=pathRank(id); S.pathXP[id]=(S.pathXP[id]||0)+1; const r1=pathRank(id);
       if(r1>r0){ const T=SPEC_TIERS.find(T=>T.opts.some(o=>o[0]===id)), o=T&&T.opts.find(o=>o[0]===id); if(o) setTimeout(()=>toast('Path rank up: '+o[1]+' is now rank '+PATH_RN[r1]+'.'),600); } } } }catch(e){} return r; }; }
 // saves: pathXP is a plain map of path id → fish landed
-{ const _m=migrate; migrate=function(s){ const o=_m.apply(this,arguments); const t=o||s; try{ if(t&&typeof t==='object'){ const px={}; if(t.pathXP&&typeof t.pathXP==='object') for(const k in t.pathXP){ const n=+t.pathXP[k]; if(PATH_FX[k]!==undefined||SPEC_TIERS.some(T=>T.opts.some(op=>op[0]===k))) if(isFinite(n)&&n>0) px[k]=Math.floor(n); } t.pathXP=px;
-    if(t.specs&&typeof t.specs==='object') for(const k of Object.keys(t.specs)){ const T=SPEC_TIERS[+k]; if(!T||!T.opts.some(op=>op[0]===t.specs[k])) delete t.specs[k]; } } }catch(e){} return o; }; }
+function pathsClean(t){ try{ const px={}; if(t.pathXP&&typeof t.pathXP==='object') for(const k in t.pathXP){ const n=+t.pathXP[k]; if(PATH_FX[k]!==undefined||SPEC_TIERS.some(T=>T.opts.some(op=>op[0]===k))) if(isFinite(n)&&n>0) px[k]=Math.floor(n); } t.pathXP=px;
+    if(t.specs&&typeof t.specs==='object') for(const k of Object.keys(t.specs)){ const T=SPEC_TIERS[+k]; if(!T||!T.opts.some(op=>op[0]===t.specs[k])) delete t.specs[k]; } }catch(e){} } /* a step of migrate() in c_logic.js */
 
 // the page
 function pathCard(ti){ const T=SPEC_TIERS[ti], cur=S.specs[ti], locked=S.lvl<T.lvl, fee=specFee(ti), poor=S.money<fee;
@@ -15720,13 +15743,14 @@ document.addEventListener('click',e=>{ const b=e.target.closest&&e.target.closes
     voyApplyCooler(); save(); try{ renderPanel(); }catch(er){}
     setTimeout(()=>toast('+'+pts+' Boon points to spend in Prestige, Boons.'+(nest?' Nest Egg: +'+fmt(nest)+' coins.':'')),2400); },0); },true);
 // ---------- saves ----------
-{ const _m=migrate; migrate=function(o){ const raw=isObj(o)?o:null; const m=_m(o);
+/* a step of migrate() in c_logic.js; raw = the save as it arrived (null when it was not a save at all) */
+function voyClean(m,raw){
     try{ if(raw&&raw.pearlMig!==1){ m.pearlOld=Math.max(0,Math.floor(+raw.pearls||0)); m.pearlMig=1; }
       if(!isFinite(+m.pearlOld)||m.pearlOld<0) m.pearlOld=0; m.pearlOld=Math.floor(m.pearlOld);
       const ps={}; if(isObj(m.pshop)) for(const k of ['gold','xp']){ const n=Math.floor(+m.pshop[k]); if(isFinite(n)&&n>0) ps[k]=Math.min(PSHOP_MAX,n); } m.pshop=ps;
       const bo={}; if(isObj(m.boons)) for(const k in m.boons){ const n=Math.floor(+m.boons[k]); if(BOONI[k]&&isFinite(n)&&n>0) bo[k]=Math.min(5,n); } m.boons=bo;
       if(raw&&raw.boonMig!==1){ let p=0; const T=Math.max(0,Math.floor(+m.tides||0)); for(let t=1;t<=T;t++){ p+=3+Math.floor(t/4); const ms=VOYAGE_MS.find(x=>x.n===t); if(ms&&ms.fx&&ms.fx.pts) p+=ms.fx.pts; } m.boonPts=Math.max(+m.boonPts||0,p); }
-      m.boonMig=1; m.boonPts=Math.max(0,Math.floor(+m.boonPts||0)); if(!isFinite(m.boonPts)) m.boonPts=0; }catch(e){} return m; }; }
+      m.boonMig=1; m.boonPts=Math.max(0,Math.floor(+m.boonPts||0)); if(!isFinite(m.boonPts)) m.boonPts=0; }catch(e){} }
 // ---------- actions ----------
 let voyAll=false;
 { const _ea=extraAct7; extraAct7=function(b){ const a=b.dataset.act, k=b.dataset.k;
@@ -15934,8 +15958,9 @@ document.head.insertAdjacentHTML('beforeend','<style>#panel .wd-th canvas[data-p
 { const _ea=extraAct7; extraAct7=function(b){ if(b.dataset.act==='passwear'){ const [k,id]=String(b.dataset.k||'').split(':'); if(!PASS_NEW_KINDS[k]) return 'skip'; if(id!=='none'&&!passOwnList(k).includes(id)) return 'skip';
     S.look[k]=id==='none'?'none':id; save(); return 'render'; } return _ea(b); }; }
 if(typeof ACT_OK==='object') ACT_OK.passwear=k=>/^(aura|bob|line):[a-z]+$/.test(String(k));
-{ const _m=migrate; migrate=function(o){ const raw=isObj(o)&&isObj(o.owned)?o.owned:{}; const m=_m(o); try{ m.owned=m.owned||{}; for(const k in PASS_NEW_KINDS){ const key=PASS_NEW_KINDS[k], I=k==='aura'?AURAI:k==='bob'?BOBI:LINEI, src=Array.isArray(raw[key])?raw[key]:m.owned[key]; m.owned[key]=Array.isArray(src)?[...new Set(src.filter(x=>I[x]))]:[];
-      if(m.look&&m.look[k]!=null&&m.look[k]!=='none'&&!m.owned[key].includes(m.look[k])) m.look[k]='none'; } }catch(e){} return m; }; }
+/* a step of migrate() in c_logic.js; saved = the save as it arrived (null when it was not a save at all) */
+function passOwnedClean(m,saved){ const raw=saved&&isObj(saved.owned)?saved.owned:{}; try{ m.owned=m.owned||{}; for(const k in PASS_NEW_KINDS){ const key=PASS_NEW_KINDS[k], I=k==='aura'?AURAI:k==='bob'?BOBI:LINEI, src=Array.isArray(raw[key])?raw[key]:m.owned[key]; m.owned[key]=Array.isArray(src)?[...new Set(src.filter(x=>I[x]))]:[];
+      if(m.look&&m.look[k]!=null&&m.look[k]!=='none'&&!m.owned[key].includes(m.look[k])) m.look[k]='none'; } }catch(e){} }
 document.head.insertAdjacentHTML('beforeend',`<style>
 #panel .pass-ch{margin:10px 0}
 #panel .pass-show{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:6px;margin-top:8px}
@@ -15947,11 +15972,12 @@ document.head.insertAdjacentHTML('beforeend',`<style>
 </style>`);
 // players already past a new exclusive's level get it once (their old claim there was a plain reward)
 const PASS_NEW_L=[22,24,28,33,38,42,48,52,55,58,60,63,66,70,73,76,80,84,88,90,93,96,100];
-{ const _m=migrate; migrate=function(o){ const raw=isObj(o)?o:null; const m=_m(o); try{ if(raw&&raw.passMig!==1&&m.pass&&m.pass.claimed>=22){ m.pass.got=isObj(m.pass.got)?m.pass.got:{};
+/* the next step of migrate() */
+function passCatchUp(m,raw){ try{ if(raw&&raw.passMig!==1&&m.pass&&m.pass.claimed>=22){ m.pass.got=isObj(m.pass.got)?m.pass.got:{};
       for(const L of PASS_NEW_L){ if(L>m.pass.claimed) break; const [k,id,name]=PASS_SPECIAL[L];
         if(PASS_NEW_KINDS[k]){ const key=PASS_NEW_KINDS[k]; if(!m.owned[key].includes(id)) m.owned[key].push(id); } else if(k==='tint'){ if(Array.isArray(m.petTints)&&!m.petTints.includes(id)) m.petTints.push(id); }
         else if(k==='pearl') m.pearls=(m.pearls||0)+id; else if(k==='boon') m.boonPts=(m.boonPts||0)+id; m.pass.got[L]=name; } }
-    m.passMig=1; }catch(e){} return m; }; }
+    m.passMig=1; }catch(e){} }
 // =====================================================================
 // 0.4.9 [59] Character looks (director, 2026-11-19: "We don't need the character models overly stylized ... As some people may like these
 // styles, keep them available. Try to create restylized models that ... fit the world ... Expand greatly into hair choices, facial
@@ -15996,8 +16022,9 @@ HAIRSTYLES.push(['sidepart','Side part'],['bob','Bob'],['pixie','Pixie'],['wavy'
     const html=`<h5>Face style</h5>${chips('face',FACES,lk.face||'classic')}<h5>Eye shape</h5>${chips('eyeShape',EYESHAPES,lk.eyeShape||'round')}`;
     if(h&&!pn.querySelector('[data-k="face"]')) h.insertAdjacentHTML('beforebegin',html); }catch(e){} return r; }; }
 // saves: unknown values fall back; an angler made before 0.4.9 keeps the Classic face
-{ const _m=migrate; migrate=function(o){ const raw=isObj(o)&&isObj(o.look)?o.look:null; const m=_m(o); try{ if(raw&&raw.face===undefined) m.look.face='classic';
-    if(!FACES.some(x=>x[0]===m.look.face)) m.look.face='natural'; if(!A3_EYESH[m.look.eyeShape]) m.look.eyeShape='round'; }catch(e){} return m; }; }
+/* a step of migrate() in c_logic.js; saved = the save as it arrived (null when it was not a save at all) */
+function facesClean(m,saved){ const raw=saved&&isObj(saved.look)?saved.look:null; try{ if(raw&&raw.face===undefined) m.look.face='classic';
+    if(!FACES.some(x=>x[0]===m.look.face)) m.look.face='natural'; if(!A3_EYESH[m.look.eyeShape]) m.look.eyeShape='round'; }catch(e){} }
 // =====================================================================
 // 0.4.9 [3]-[7] [69] scenes for the ten new waters (data in cm_waters.js). Each water: a palette for day, dusk and night, still land
 // (cached like every other water), a live layer (kept light: a few dozen shapes a frame) and a foreground corner.
@@ -16168,7 +16195,7 @@ try{ Object.assign(MUS_AREA,{blossom:null /* Maplewood Hollow plays the cozy hom
 try{ Object.assign(DEPTH_MOTE,{blossom:'255,220,170', rockies:'255,255,255', keys:'255,255,240', amazon:'220,240,200', farm:'255,250,230', buffet:'255,240,200', corporate:'220,230,255', nile:'255,240,210', circuit:'120,240,255', olympus:'255,240,200'}); }catch(e){}
 try{ const s=SEARCH_IDX.find(e=>e[0]==='Waters'); if(s) s[3]+=' maplewood hollow autumn fall leaves rockies canada keys florida amazon farm buffet corporate nile egypt circuit cyber olympus'; }catch(e){}
 // end-game waters: open them for anyone with enough voyages (start-up, any load, and after setting sail)
-{ const _m=migrate; migrate=function(o){ const m=_m(o); try{ egOpenAdd(m); }catch(e){} return m; }; }
+/* every load runs egOpenAdd: a step of migrate() in c_logic.js */
 try{ egOpenAdd(S); }catch(e){}
 document.addEventListener('click',e=>{ const b=e.target.closest&&e.target.closest('[data-act="retireok"]'); if(!b) return; setTimeout(()=>{ try{ egOpenAdd(S); }catch(er){} },30); },true);
 // end-game fish pay 25% more than your best normal water and fight like it
@@ -19527,11 +19554,11 @@ document.head.insertAdjacentHTML('beforeend',`<style>
 #dl-install .dli-note{font-size:12.5px;margin:10px 0 0}
 </style>`);
 // =====================================================================
-// 0.4.9 start-up pass: the save is read in c_logic.js before later files add their own save rules (wrappers around migrate), so those
-// rules never ran on the save loaded at start-up, and the defaults from fresh() (pearlMig:1, boonMig, passMig) hid that the old save
-// still needed them. Here, once every core file has loaded, the stored save is run through the full migrate chain again and the parts
-// those later rules own are copied into S, before anything can be saved. Later loads (import, link, cloud, backup) already use the
-// full chain.
+// 0.4.9 start-up pass: the save is first read in c_logic.js, before the later files' lists exist, so only the core checks of migrate()
+// can run there (its coreOnly read), and the defaults from fresh() (pearlMig:1, boonMig, passMig) hid that an old save still needed the
+// later steps. Here, once every core file has loaded, the stored save goes through the whole of migrate() and the parts those later
+// steps own are copied into S, before anything can be saved. Later loads (import, link, cloud, backup) always run the whole function.
+// A save field that a later step of migrate() sets belongs in BOOTFIX_KEYS, unless its owner file also sets it on S when it loads.
 // =====================================================================
 const BOOTFIX_KEYS=['egPaid','pearls','pearlV','pearlOld','pearlMig','pshop','boons','boonPts','boonMig','pathXP','specs','pass','passMig','owned','look','petTints'];
 function bootFixFrom(raw){ try{ if(raw){ const o=JSON.parse(raw); if(o&&typeof o==='object'){ const m=migrate(o); for(const k of BOOTFIX_KEYS) if(m[k]!==undefined) S[k]=m[k]; try{ voyApplyCooler(); }catch(e){} return true; } } }catch(e){ try{ console.error("boot fix",e); }catch(_){} } return false; }
@@ -20356,7 +20383,7 @@ const DEV_KEYS=['fightUi','master','music','sfx','amb','musicOn','ambient','styl
 const DEV_STORE='dl-device-settings-v1';
 var DEV_GUARD=null;
 const IS_IPHONE=()=>/iPhone|iPod/.test(navigator.userAgent)||(/[?&]test\b/.test(location.search)&&/[?&]iphone\b/.test(location.search));
-{ let dev=null, cur=null; const done=new WeakSet(), _mig=migrate, DEF=fresh().settings||{};
+{ let dev=null, cur=null; const done=new WeakSet(), DEF=fresh().settings||{};
   const read=()=>{ try{ const r=localStorage.getItem(DEV_STORE); return r?JSON.parse(r):null; }catch(e){ return null; } };
   const pick=st=>{ const o={}; if(st) for(const k of DEV_KEYS) if(st[k]!==undefined) o[k]=st[k]; return o; };
   let lastJ=null; const write=()=>{ try{ const j=JSON.stringify(dev); if(j===lastJ) return; localStorage.setItem(DEV_STORE,j); lastJ=j; }catch(e){} }; /* only when the settings changed (redundancies list B10: every save rewrote them) */
@@ -20364,10 +20391,10 @@ const IS_IPHONE=()=>/iPhone|iPod/.test(navigator.userAgent)||(/[?&]test\b/.test(
   /* first run after this update: this device keeps the settings it has now */
   dev=read(); if(!dev||typeof dev!=="object"){ dev=pick(S.settings); write(); } apply(S); cur=S;
   /* a fresh start or a save arriving from anywhere (code, transfer, cloud, backup) keeps this device's settings */
-  migrate=function(){ const s=apply(_mig.apply(this,arguments)); if(s&&typeof s==="object") done.add(s); return s; };
+  deviceLoad=s=>{ apply(s); done.add(s); seenPatchFix(s); }; /* the last step of migrate() (c_logic.js) */
   /* any replaced save (progress reset, code, transfer, cloud, backup) gets this device's settings back before it is used or saved */
   const guard=()=>{ if(S!==cur){ if(!done.has(S)) apply(S); cur=S; } }; DEV_GUARD=guard;
-  const _save=save; save=function(){ guard(); if(S&&S.settings){ dev=pick(S.settings); write(); } return _save.apply(this,arguments); };
+  deviceSave=()=>{ seenPatchKeep(); guard(); if(S&&S.settings){ dev=pick(S.settings); write(); } }; /* the first step of save() (c_logic.js) */
   if(/[?&]test\b/.test(location.search)) window.__devSettings=()=>({store:read(), keys:DEV_KEYS.slice()}); }
 
 // ---------- frame rate: the game's work runs only as often as the chosen rate (the display keeps its own timing) ----------
@@ -20415,11 +20442,11 @@ if(window.DL_PREVIEW){
 // ---------- patch notes a phone has already shown stay shown (director, 2026-11-18: after moving progress from PC "my first relaunch
 // brought up the patch notes for the patch previous"): the save carries the last notes seen on the device it came from (PC 0.4.8.2),
 // so the phone showed its own older updates again. Phones remember the newest notes they showed; an arriving save never lowers it.
-{ const K='dl-seen-patch'; const get=()=>{ try{ return localStorage.getItem(K)||''; }catch(e){ return ''; } }, put=v=>{ try{ localStorage.setItem(K,v); }catch(e){} };
-  const fix=s=>{ try{ if(!MOB()||!s||typeof s!=='object') return; const d=get(); if(d&&(!s.seenPatch||verNewer(d,s.seenPatch))) s.seenPatch=d; }catch(e){} };
-  const _mg=migrate; migrate=function(){ const s=_mg.apply(this,arguments); fix(s); return s; };
-  const _sv=save; save=function(){ try{ if(MOB()&&S&&S.seenPatch){ const d=get(); if(!d||verNewer(S.seenPatch,d)) put(S.seenPatch); } }catch(e){} return _sv.apply(this,arguments); };
-  try{ fix(S); }catch(e){} }
+/* both run from this file's device steps above: seenPatchFix at the end of every load, seenPatchKeep at the start of every save */
+function seenPatchGet(){ try{ return localStorage.getItem('dl-seen-patch')||''; }catch(e){ return ''; } }
+function seenPatchFix(s){ try{ if(!MOB()||!s||typeof s!=='object') return; const d=seenPatchGet(); if(d&&(!s.seenPatch||verNewer(d,s.seenPatch))) s.seenPatch=d; }catch(e){} }
+function seenPatchKeep(){ try{ if(MOB()&&S&&S.seenPatch){ const d=seenPatchGet(); if(!d||verNewer(S.seenPatch,d)) localStorage.setItem('dl-seen-patch',S.seenPatch); } }catch(e){} }
+seenPatchFix(S);
 
 // ---------- Settings, Patch notes on phones (director, 2026-11-19, iPhone: "patch notes are hard to open on your own, and are so
 // cluttered compared to the first initial opening. Reading patch notes again sucks and scrolling through is really hard and glitchy"):
@@ -23361,6 +23388,19 @@ if(/[?&]test\b/.test(location.search)) window.__baseline=async(o={})=>{ const wa
       try{ closeMenu(); }catch(e){} }
   } finally { window.Date=RealDate; delete S.stats.playS; S.stats.playS=played0; const st2=document.getElementById('__still'); if(st2) st2.remove(); performance.now=keep.pn; Math.random=keep.mr; window.__realNow=keep.rn; S.tab=keep.tab; S.loc=keep.loc; S.unlocked=keep.un; window.__off=keep.off; G.st=keep.st; }
   return {build:window.DL_BUILD||'', size:innerWidth+'x'+innerHeight, dpr:window.devicePixelRatio, scenes, pages}; };
+// Foundation F6 slice 1 (2026-11-26): what loading and saving make of a save, as text, so a change to migrate() or save() can be proven
+// to alter nothing. On a ?test&frozen page: the save as it stood once every file had loaded, then for each given save text what
+// migrate() returns and what save() writes for it (the save, the backup, this device's own stores). The page's own save and stores are
+// put back after each one. tools/saveprobe.html runs it per build and start-up save; tools/saveprobe.ps1 makes and checks the set.
+const QA_PROBE_START=/[?&]frozen\b/.test(location.search)&&/[?&]test\b/.test(location.search)?JSON.stringify(S):null;
+if(/[?&]test\b/.test(location.search)) window.__saveProbe=inputs=>{ const text={}, mine=k=>/^(driftline|dl-)/.test(k);
+  const ls=()=>{ const o={}; for(const k of Object.keys(localStorage).sort()) if(mine(k)) o[k]=localStorage.getItem(k); return o; };
+  const put=o=>{ for(const k of Object.keys(localStorage)) if(mine(k)) localStorage.removeItem(k); for(const k in o) localStorage.setItem(k,o[k]); };
+  text['start-up']=String(QA_PROBE_START); text['start-up stores']=JSON.stringify(ls()); const keepS=S, keepLs=ls(), realNow=Date.now; Date.now=()=>1795300005000; /* one fixed moment, however long the page has been open */ try{
+  for(const [name,txt] of inputs||[]){ let m; try{ m=migrate(JSON.parse(txt)); text['load '+name]=JSON.stringify(m); }catch(e){ text['load '+name]='throws: '+(e&&e.message); continue; }
+    try{ S=m; save(); text['save '+name]=JSON.stringify(ls()); }catch(e){ text['save '+name]='throws: '+(e&&e.message); } finally{ S=keepS; put(keepLs); } }
+  try{ save(); text['save own']=JSON.stringify(ls()); }catch(e){ text['save own']='throws: '+(e&&e.message); } finally{ put(keepLs); }
+  }finally{ Date.now=realNow; } return text; };
 
 // ---------- loop ----------
 let last=performance.now();
