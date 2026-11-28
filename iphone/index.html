@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="DL Test iPhone">
 <script>
-window.DL_BUILD='ios'; window.DL_PREVIEW=true; if(/[?&]sweep\b/.test(location.search)){ window.__bootErr=[]; addEventListener("error",function(e){ __bootErr.push(String(e.message||e)+(e.lineno?" (line "+e.lineno+")":"")); }); addEventListener("unhandledrejection",function(e){ __bootErr.push("promise: "+String(e.reason&&e.reason.message||e.reason)); }); window.requestAnimationFrame=function(f){ return setTimeout(function(){ f(performance.now()); },16); }; window.cancelAnimationFrame=function(i){ clearTimeout(i); }; } try{ window.__tOff=/[?&](test|sweep|frozen)\b/.test(location.search)?0:(+(localStorage.getItem("dl-test-toff")||0)||0); }catch(e){ window.__tOff=0; } (function(){ var rn=Date.now.bind(Date); Date.now=function(){ return rn()+window.__tOff; }; })(); if(/[?&]frozen\b/.test(location.search)){ var __fz=20261122; Math.random=function(){ __fz|=0; __fz=__fz+0x6D2B79F5|0; var t=Math.imul(__fz^__fz>>>15,1|__fz); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; var __fc=0, __pn=performance.now.bind(performance); performance.now=function(){ __fc+=0.01; return 100000+__fc; }; Date.now=function(){ return 1795300000000+Math.floor(__fc); }; window.__frozenClock=function(){ return __fc; }; window.requestAnimationFrame=function(){ return 0; }; window.cancelAnimationFrame=function(){}; } window.DL_VERSION='2026.11.28-0123';
+window.DL_BUILD='ios'; window.DL_PREVIEW=true; if(/[?&]sweep\b/.test(location.search)){ window.__bootErr=[]; addEventListener("error",function(e){ __bootErr.push(String(e.message||e)+(e.lineno?" (line "+e.lineno+")":"")); }); addEventListener("unhandledrejection",function(e){ __bootErr.push("promise: "+String(e.reason&&e.reason.message||e.reason)); }); window.requestAnimationFrame=function(f){ return setTimeout(function(){ f(performance.now()); },16); }; window.cancelAnimationFrame=function(i){ clearTimeout(i); }; } try{ window.__tOff=/[?&](test|sweep|frozen)\b/.test(location.search)?0:(+(localStorage.getItem("dl-test-toff")||0)||0); }catch(e){ window.__tOff=0; } (function(){ var rn=Date.now.bind(Date); Date.now=function(){ return rn()+window.__tOff; }; })(); if(/[?&]frozen\b/.test(location.search)){ var __fz=20261122; Math.random=function(){ __fz|=0; __fz=__fz+0x6D2B79F5|0; var t=Math.imul(__fz^__fz>>>15,1|__fz); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; var __fc=0, __pn=performance.now.bind(performance); performance.now=function(){ __fc+=0.01; return 100000+__fc; }; Date.now=function(){ return 1795300000000+Math.floor(__fc); }; window.__frozenClock=function(){ return __fc; }; window.requestAnimationFrame=function(){ return 0; }; window.cancelAnimationFrame=function(){}; } window.DL_VERSION='2026.11.28-0158';
 window.addEventListener('beforeinstallprompt',function(e){ e.preventDefault(); window.__dlInstallPrompt=e; });
 </script>
 </head>
@@ -11593,11 +11593,18 @@ function sellHybridOn(){ const s=S.settings; return s.sellHybrid!=null ? !!s.sel
 /* what Sell all keeps (bug fix, director 2026-11-23: "filters just don't work, same with the sell toggles"): the cooler's own choices win.
    A rarity picked in the dropdown sells up to that rarity even with Protect rare fish on; "Sell shinies too" and "Sell hybrids too" sell
    them whatever their rarity; Protect rare fish keeps Epic and up only while the dropdown says Any rarity */
-function sellKeep(f){ const s=S.settings, sp=SPI[f.id]; if(!sp) return true; if(f.lk) return true; /* a locked fish: Sell all and Scrap all pass it by (director, 2026-11-28: "I think a lock is good") */
-  if(f.hy && !sellHybridOn()) return true; if(f.sh && !sellShinyOn()) return true;
+/* why Sell all and Scrap all pass a fish by ('' = they take it): the one rule, and its reason in a word, so the page can say what is kept and not only how many
+   (director, 2026-11-28: "cooler shows sell all keeping 1 but i dont have anything locked?"; it was a shiny, kept because "Sell shinies too" was off) */
+function sellKeepWhy(f){ const s=S.settings, sp=SPI[f.id]; if(!sp) return 'unknown'; if(f.lk) return 'locked'; /* a locked fish (director, 2026-11-28: "I think a lock is good") */
+  if(f.hy && !sellHybridOn()) return 'hybrid'; if(f.sh && !sellShinyOn()) return 'shiny';
   const pick=s.sellR&&s.sellR!=='all', chosen=(f.sh&&sellShinyOn())||(f.hy&&sellHybridOn());
-  if(pick){ if(sp.r>+s.sellR) return true; } else if(s.protectRare && sp.r>=3 && !chosen) return true;
-  if(+s.sellP>0&&salePrice(f)>=+s.sellP) return true; return false; }
+  if(pick){ if(sp.r>+s.sellR) return 'rarer'; } else if(s.protectRare && sp.r>=3 && !chosen) return 'rare';
+  if(+s.sellP>0&&salePrice(f)>=+s.sellP) return 'pricier'; return ''; }
+function sellKeep(f){ return !!sellKeepWhy(f); }
+const SELL_WHY={locked:['locked','locked'], hybrid:['hybrid','hybrids'], shiny:['shiny','shinies'], rarer:['rarer fish','rarer fish'], rare:['Epic or better','Epic or better'], pricier:['pricier fish','pricier fish'], unknown:['other','other']};
+/* " (keeping 1 shiny)" when everything kept is kept for one reason, " (keeping 5)" when the reasons differ; the second value is the whole list, for the button's tooltip */
+function sellKeptText(){ const by={}; let n=0; for(const f of S.cooler){ const w=sellKeepWhy(f); if(w){ by[w]=(by[w]||0)+1; n++; } } if(!n) return ['','']; const ks=Object.keys(by), say=k=>by[k]+' '+SELL_WHY[k][by[k]===1?0:1];
+  return [' (keeping '+(ks.length===1?say(ks[0]):n)+')', 'Sell all and Scrap all leave these alone: '+ks.map(say).join(', ')+'.']; }
 stepOn('renderCooler', { after(t,P){ const btn=P.querySelector('[data-act="sellall"]'); if(!btn) return; const s=S.settings;
   const sel=(k,list,cur)=>`<select data-sf="${k}">${list.map(([v,n])=>`<option value="${v}" ${String(cur)===String(v)?'selected':''}>${n}</option>`).join('')}</select>`;
   // 0.3.4.3: the price is typed in (plain numbers or 50k / 1.2m); empty means any price
@@ -21971,6 +21978,7 @@ PATCHES.unshift({v:'0.4.9', name:'Work in progress', items:phoneNotes([
 // text changes. Released notes live in notes_release.js.
 const TEST_NOTES={v:'test', label:'Test build · '+(window.DL_BUILD==='ios'?'iPhone':'Android'), name:'0.4.9 test build (newest first)', items:[
   '## New in this build',
+  'Sell all now says what it is keeping (“keeping 1 shiny”, “keeping 2 locked”). Before, the button only gave a number (found by the director).',
   'Fixed on the Cooler page (found by the director on the iPhone): on a large phone two fish cards sat side by side, their buttons ran over each other and the page scrolled sideways. Cards are one to a row there now, with every button inside its card.',
   'The fish card (Inspect) now lists every aquarium bonus in its own block, one chip a stat. With many bonuses the old single line was cut off at both ends (found by the director).',
   'The Cooler upgrade moved to the Cooler page (director): its button sits beside your fish count and shows what the next level holds and its price. Tackle keeps Rod length, Reel, Line, Hook and Fish Finder.',
@@ -23043,7 +23051,8 @@ T('page tabs: a part hidden by a page tab never stays on screen (a forced style 
       if(document.body.classList.contains('pch-on')&&P.clientHeight>100){ const rows=[...P.querySelectorAll('.fishrow')], hs=rows.map(r=>r.offsetHeight); if(rows.length!==4) e.push(rows.length+' rows'); if(Math.max(...hs)-Math.min(...hs)>1) e.push('the fish cards differ in height: '+hs.join(' '));
         const lk=rows.map(r=>r.querySelector('.ck-lock')); if(lk.some(b=>!b)) e.push('a card has no lock'); else if(lk.filter(b=>b.getAttribute('aria-pressed')==='true').length!==1) e.push('the locked fish does not show as locked'); if(rows.some(r=>!r.querySelector('.ck-bs'))) e.push('a card has no bonus line');
         for(const r of rows){ const bs=r.querySelector('.ck-bs'); if(bs&&bs.scrollWidth>bs.clientWidth+1&&!bs.querySelector('.more')) e.push('bonuses run past the card with no "more"'); } }
-      act('coollock',{i:1}); if(S.cooler[1].lk) e.push('the lock did not come off');
+      { const [t,why]=sellKeptText(); if(!/keeping 1 locked/.test(t)&&S.cooler.filter(sellKeep).length===1) e.push('Sell all does not say what it keeps: '+t); if(S.cooler.filter(sellKeep).length&&!why) e.push('no list of what is kept'); const btn=P.querySelector('[data-act="sellall"]'); if(btn&&t&&!btn.textContent.includes(t.trim())) e.push('the Sell all button does not carry it'); }
+      act('coollock',{i:1}); if(S.cooler[1].lk) e.push('the lock did not come off'); { const sh=Object.assign(mk(),{sh:1}), on=sellShinyOn(); S.cooler=[mk(),sh]; if(!on&&sellKeepWhy(sh)!=='shiny') e.push('a kept shiny gives the reason '+sellKeepWhy(sh)); if(!on&&!/keeping 1 shiny/.test(sellKeptText()[0])&&S.cooler.filter(sellKeep).length===1) e.push('a kept shiny reads: '+sellKeptText()[0]); }
     } finally{ save=sv; toast=ts; restore(keep); }
     return e.length?{ok:false,detail:e.join('; ')}:{ok:true,detail:'lock ok'}; });
   T('Cooler cards: every button stays inside its own card and the page has nothing to scroll sideways (qc 270: on the director’s iPhone two cards sat side by side and their buttons ran over each other)',()=>{ const e=[], keep=snap(), sv=save; save=()=>{};
@@ -23637,7 +23646,7 @@ function coolerUpHTML(){ const G2=GEAR.cooler, lv=S.gear.cooler, max=G2.lv.lengt
 function renderCoolerCore(P){
   const total=S.cooler.filter(f=>!sellKeep(f)).reduce((a,f)=>a+salePrice(f),0); const tankFree = S.tank.length < aqCap(); const dm=demandSp();
   P.innerHTML=`<div class="row spread"><div><h2>Cooler</h2><p class="sub">${S.cooler.length} of ${gv('cooler')} slots. Your bonuses add +${Math.round((sellMult()-1)*100)}% to every sale. Every catch lands here: sell it, scrap it for Nibbles, put it on display or keep it.</p></div>
-  <button class="btn" data-act="sellall" ${total?'':'disabled'}>Sell ${sellFilterOn()?"matching":"all"}${S.cooler.some(sellKeep)?" (keeping "+S.cooler.filter(sellKeep).length+")":""} for <span class="coin">${fmt(total)}</span></button></div>${coolerUpHTML()}
+  <button class="btn" data-act="sellall" ${total?'':'disabled'}${sellKeptText()[1]?` title="${sellKeptText()[1]}"`:''}>Sell ${sellFilterOn()?"matching":"all"}${sellKeptText()[0]} for <span class="coin">${fmt(total)}</span></button></div>${coolerUpHTML()}
   <div class="tile" style="margin-top:10px;flex-direction:row;align-items:center;gap:12px"><canvas width="128" height="64" data-fish="${dm.id}" style="width:64px;height:32px"></canvas>
   <div style="min-width:0"><b>The fishmonger wants ${dm.name}</b> <span class="meta">(${LOCS[locIdx(dm.loc)].name})</span><div class="meta">Pays double for it until the weather changes (<span id="dmleft" style="font-variant-numeric:tabular-nums;display:inline-block;min-width:2.6em">${mmss(wxLeft())}</span>).</div></div></div>`+
   (S.cooler.length ? coolSortBar()+'<div class="list">'+coolOrder().map(({f,i})=>{ const sp=SPI[f.id]; return `<div class="fishrow"><canvas width="128" height="64" data-fish="${f.id}" data-sh="${f.sh||0}" data-pv="${f.pv||''}"></canvas>
